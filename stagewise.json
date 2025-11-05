@@ -1,0 +1,9 @@
+{
+  "preferredAgent": "cursor",
+  "bridgeMode": true,
+  "telemetry": true,
+  "port": 3100,
+  "appPort": 3000,
+  "autoPlugins": true,
+  "plugins": []
+}
