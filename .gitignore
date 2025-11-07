@@ -18,5 +18,9 @@ Thumbs.db
 *.tmp
 *.swp
 
+# 忽略环境变量文件
+.env.local
+.env*.local
+
 # 忽略大图片或资源（如果你希望不上传）
 public/assets/

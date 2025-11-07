@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Script from 'next/script';
 
+// 完整的78张塔罗牌数据
 const tarotCards = [
+  // ========== 大阿尔卡那 22张 ==========
   {
     id: 0,
     name: '0. The Fool',
@@ -29,6 +31,30 @@ const tarotCards = [
   },
   {
     id: 3,
+    name: 'III. The Empress',
+    image: '/assets/tatorcard/major_arcana_empress.png',
+    upright: '丰盛富足、创造力、母性关怀',
+    reversed: '过度依赖、创造力受阻、缺乏滋养',
+    keywords: ['丰盛', '创造', '滋养'],
+  },
+  {
+    id: 4,
+    name: 'IV. The Emperor',
+    image: '/assets/tatorcard/major_arcana_emperor.png',
+    upright: '权威、秩序、稳定结构',
+    reversed: '专制、僵化、缺乏灵活性',
+    keywords: ['权威', '秩序', '稳定'],
+  },
+  {
+    id: 5,
+    name: 'V. The Hierophant',
+    image: '/assets/tatorcard/major_arcana_hierophant.png',
+    upright: '传统智慧、精神指引、遵循规范',
+    reversed: '教条主义、反叛、脱离传统',
+    keywords: ['传统', '指引', '规范'],
+  },
+  {
+    id: 6,
     name: 'VI. The Lovers',
     image: '/assets/tatorcard/major_arcana_lovers.png',
     upright: '真诚连接、重要抉择、价值一致',
@@ -36,7 +62,87 @@ const tarotCards = [
     keywords: ['关系', '信任', '选择'],
   },
   {
-    id: 4,
+    id: 7,
+    name: 'VII. The Chariot',
+    image: '/assets/tatorcard/major_arcana_chariot.png',
+    upright: '意志坚定、目标导向、克服障碍',
+    reversed: '缺乏方向、失控、内在冲突',
+    keywords: ['意志', '目标', '胜利'],
+  },
+  {
+    id: 8,
+    name: 'VIII. Strength',
+    image: '/assets/tatorcard/major_arcana_strength.png',
+    upright: '内在力量、耐心、温柔控制',
+    reversed: '软弱、缺乏自信、情绪失控',
+    keywords: ['力量', '耐心', '控制'],
+  },
+  {
+    id: 9,
+    name: 'IX. The Hermit',
+    image: '/assets/tatorcard/major_arcana_hermit.png',
+    upright: '内省、寻求真理、独处思考',
+    reversed: '孤立、逃避、迷失方向',
+    keywords: ['内省', '真理', '指引'],
+  },
+  {
+    id: 10,
+    name: 'X. Wheel of Fortune',
+    image: '/assets/tatorcard/major_arcana_fortune.png',
+    upright: '命运转折、周期循环、新的机遇',
+    reversed: '坏运气、抗拒变化、停滞不前',
+    keywords: ['命运', '循环', '变化'],
+  },
+  {
+    id: 11,
+    name: 'XI. Justice',
+    image: '/assets/tatorcard/major_arcana_justice.png',
+    upright: '公平正义、平衡、承担责任',
+    reversed: '不公、偏见、逃避责任',
+    keywords: ['正义', '平衡', '责任'],
+  },
+  {
+    id: 12,
+    name: 'XII. The Hanged Man',
+    image: '/assets/tatorcard/major_arcana_hanged.png',
+    upright: '等待、牺牲、新的视角',
+    reversed: '拖延、抗拒牺牲、停滞',
+    keywords: ['等待', '牺牲', '视角'],
+  },
+  {
+    id: 13,
+    name: 'XIII. Death',
+    image: '/assets/tatorcard/major_arcana_death.png',
+    upright: '结束与重生、转变、放下过去',
+    reversed: '抗拒改变、停滞、恐惧转变',
+    keywords: ['转变', '结束', '重生'],
+  },
+  {
+    id: 14,
+    name: 'XIV. Temperance',
+    image: '/assets/tatorcard/major_arcana_temperance.png',
+    upright: '平衡调和、耐心、适度',
+    reversed: '失衡、过度、缺乏耐心',
+    keywords: ['平衡', '调和', '耐心'],
+  },
+  {
+    id: 15,
+    name: 'XV. The Devil',
+    image: '/assets/tatorcard/major_arcana_devil.png',
+    upright: '束缚、欲望、物质依赖',
+    reversed: '解脱、打破束缚、重获自由',
+    keywords: ['束缚', '欲望', '依赖'],
+  },
+  {
+    id: 16,
+    name: 'XVI. The Tower',
+    image: '/assets/tatorcard/major_arcana_tower.png',
+    upright: '突发变化、觉醒、旧结构崩塌',
+    reversed: '抗拒改变、延迟崩解、局部冲击',
+    keywords: ['变革', '释放', '突破'],
+  },
+  {
+    id: 17,
     name: 'XVII. The Star',
     image: '/assets/tatorcard/major_arcana_star.png',
     upright: '希望重燃、疗愈、灵感源泉',
@@ -44,15 +150,7 @@ const tarotCards = [
     keywords: ['希望', '指引', '灵性'],
   },
   {
-    id: 5,
-    name: 'XIX. The Sun',
-    image: '/assets/tatorcard/major_arcana_sun.png',
-    upright: '乐观、成功、清晰洞见',
-    reversed: '延迟、自满、暂时挫折',
-    keywords: ['活力', '喜悦', '成长'],
-  },
-  {
-    id: 6,
+    id: 18,
     name: 'XVIII. The Moon',
     image: '/assets/tatorcard/major_arcana_moon.png',
     upright: '潜意识、梦境、面对不安',
@@ -60,12 +158,480 @@ const tarotCards = [
     keywords: ['直觉', '感受', '阴影'],
   },
   {
-    id: 7,
-    name: 'XVI. The Tower',
-    image: '/assets/tatorcard/major_arcana_tower.png',
-    upright: '突发变化、觉醒、旧结构崩塌',
-    reversed: '抗拒改变、延迟崩解、局部冲击',
-    keywords: ['变革', '释放', '突破'],
+    id: 19,
+    name: 'XIX. The Sun',
+    image: '/assets/tatorcard/major_arcana_sun.png',
+    upright: '乐观、成功、清晰洞见',
+    reversed: '延迟、自满、暂时挫折',
+    keywords: ['活力', '喜悦', '成长'],
+  },
+  {
+    id: 20,
+    name: 'XX. Judgement',
+    image: '/assets/tatorcard/major_arcana_judgement.png',
+    upright: '觉醒、自我评估、新的开始',
+    reversed: '自我怀疑、缺乏判断、错过机会',
+    keywords: ['觉醒', '评估', '重生'],
+  },
+  {
+    id: 21,
+    name: 'XXI. The World',
+    image: '/assets/tatorcard/major_arcana_world.png',
+    upright: '完成、成就、圆满',
+    reversed: '未完成、缺乏成就感、停滞',
+    keywords: ['完成', '成就', '圆满'],
+  },
+  // ========== 小阿尔卡那 - 权杖（Wands）14张 ==========
+  {
+    id: 22,
+    name: 'Ace of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_ace.png',
+    upright: '新计划、灵感、创造力',
+    reversed: '缺乏动力、创意受阻、延迟',
+    keywords: ['灵感', '创造', '开始'],
+  },
+  {
+    id: 23,
+    name: 'Two of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_2.png',
+    upright: '规划未来、个人力量、探索',
+    reversed: '缺乏规划、恐惧未知、停滞',
+    keywords: ['规划', '探索', '力量'],
+  },
+  {
+    id: 24,
+    name: 'Three of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_3.png',
+    upright: '远见、探索、扩张',
+    reversed: '缺乏远见、延迟、挫折',
+    keywords: ['远见', '探索', '扩张'],
+  },
+  {
+    id: 25,
+    name: 'Four of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_4.png',
+    upright: '庆祝、和谐、稳定',
+    reversed: '缺乏庆祝、不稳定、过渡期',
+    keywords: ['庆祝', '和谐', '稳定'],
+  },
+  {
+    id: 26,
+    name: 'Five of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_5.png',
+    upright: '竞争、冲突、挑战',
+    reversed: '避免冲突、内部斗争、妥协',
+    keywords: ['竞争', '冲突', '挑战'],
+  },
+  {
+    id: 27,
+    name: 'Six of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_6.png',
+    upright: '胜利、成功、认可',
+    reversed: '失败、缺乏认可、骄傲',
+    keywords: ['胜利', '成功', '认可'],
+  },
+  {
+    id: 28,
+    name: 'Seven of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_7.png',
+    upright: '坚持立场、挑战、防御',
+    reversed: '放弃、屈服、缺乏自信',
+    keywords: ['坚持', '挑战', '防御'],
+  },
+  {
+    id: 29,
+    name: 'Eight of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_8.png',
+    upright: '快速行动、进展、消息',
+    reversed: '延迟、匆忙、缺乏方向',
+    keywords: ['速度', '进展', '消息'],
+  },
+  {
+    id: 30,
+    name: 'Nine of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_9.png',
+    upright: '韧性、坚持、最后努力',
+    reversed: '疲惫、放弃、缺乏韧性',
+    keywords: ['韧性', '坚持', '努力'],
+  },
+  {
+    id: 31,
+    name: 'Ten of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_10.png',
+    upright: '负担、责任、过度工作',
+    reversed: '放下负担、委派、解脱',
+    keywords: ['负担', '责任', '工作'],
+  },
+  {
+    id: 32,
+    name: 'Page of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_page.png',
+    upright: '探索、热情、新想法',
+    reversed: '缺乏方向、拖延、不成熟',
+    keywords: ['探索', '热情', '想法'],
+  },
+  {
+    id: 33,
+    name: 'Knight of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_knight.png',
+    upright: '行动、冒险、冲动',
+    reversed: '鲁莽、缺乏方向、延迟',
+    keywords: ['行动', '冒险', '冲动'],
+  },
+  {
+    id: 34,
+    name: 'Queen of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_queen.png',
+    upright: '自信、热情、独立',
+    reversed: '缺乏自信、嫉妒、依赖',
+    keywords: ['自信', '热情', '独立'],
+  },
+  {
+    id: 35,
+    name: 'King of Wands',
+    image: '/assets/tatorcard/minor_arcana_wands_king.png',
+    upright: '领导力、远见、创业精神',
+    reversed: '专制、缺乏远见、冲动',
+    keywords: ['领导', '远见', '创业'],
+  },
+  // ========== 小阿尔卡那 - 圣杯（Cups）14张 ==========
+  {
+    id: 36,
+    name: 'Ace of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_ace.png',
+    upright: '新感情、情感开始、直觉',
+    reversed: '情感空虚、失去连接、拒绝爱',
+    keywords: ['情感', '直觉', '开始'],
+  },
+  {
+    id: 37,
+    name: 'Two of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_2.png',
+    upright: '伙伴关系、结合、相互吸引',
+    reversed: '关系破裂、不平衡、分离',
+    keywords: ['伙伴', '结合', '吸引'],
+  },
+  {
+    id: 38,
+    name: 'Three of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_3.png',
+    upright: '友谊、庆祝、社交',
+    reversed: '孤立、过度社交、冲突',
+    keywords: ['友谊', '庆祝', '社交'],
+  },
+  {
+    id: 39,
+    name: 'Four of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_4.png',
+    upright: '沉思、内省、错过机会',
+    reversed: '觉醒、新机会、接受',
+    keywords: ['沉思', '内省', '机会'],
+  },
+  {
+    id: 40,
+    name: 'Five of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_5.png',
+    upright: '失落、悲伤、遗憾',
+    reversed: '接受、宽恕、前进',
+    keywords: ['失落', '悲伤', '遗憾'],
+  },
+  {
+    id: 41,
+    name: 'Six of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_6.png',
+    upright: '怀旧、回忆、纯真',
+    reversed: '困在过去、拒绝成长、不成熟',
+    keywords: ['怀旧', '回忆', '纯真'],
+  },
+  {
+    id: 42,
+    name: 'Seven of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_7.png',
+    upright: '选择、幻想、可能性',
+    reversed: '缺乏焦点、混乱、错误选择',
+    keywords: ['选择', '幻想', '可能'],
+  },
+  {
+    id: 43,
+    name: 'Eight of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_8.png',
+    upright: '放弃、寻找更深意义、离开',
+    reversed: '停滞、恐惧改变、逃避',
+    keywords: ['放弃', '寻找', '离开'],
+  },
+  {
+    id: 44,
+    name: 'Nine of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_9.png',
+    upright: '满足、情感满足、愿望实现',
+    reversed: '缺乏满足、物质主义、过度',
+    keywords: ['满足', '实现', '愿望'],
+  },
+  {
+    id: 45,
+    name: 'Ten of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_10.png',
+    upright: '和谐、家庭幸福、圆满',
+    reversed: '不和谐、家庭冲突、缺乏支持',
+    keywords: ['和谐', '幸福', '圆满'],
+  },
+  {
+    id: 46,
+    name: 'Page of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_page.png',
+    upright: '创意灵感、直觉、新感情',
+    reversed: '情感不成熟、缺乏创意、拒绝直觉',
+    keywords: ['创意', '直觉', '感情'],
+  },
+  {
+    id: 47,
+    name: 'Knight of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_knight.png',
+    upright: '浪漫、魅力、追求理想',
+    reversed: '情绪化、不切实际、逃避',
+    keywords: ['浪漫', '魅力', '理想'],
+  },
+  {
+    id: 48,
+    name: 'Queen of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_queen.png',
+    upright: '同情、直觉、情感支持',
+    reversed: '情绪不稳定、缺乏同情、依赖',
+    keywords: ['同情', '直觉', '支持'],
+  },
+  {
+    id: 49,
+    name: 'King of Cups',
+    image: '/assets/tatorcard/minor_arcana_cups_king.png',
+    upright: '情感平衡、同情、控制',
+    reversed: '情绪失控、冷漠、缺乏平衡',
+    keywords: ['平衡', '同情', '控制'],
+  },
+  // ========== 小阿尔卡那 - 宝剑（Swords）14张 ==========
+  {
+    id: 50,
+    name: 'Ace of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_ace.png',
+    upright: '新想法、清晰、突破',
+    reversed: '混乱、缺乏清晰、错误想法',
+    keywords: ['清晰', '突破', '想法'],
+  },
+  {
+    id: 51,
+    name: 'Two of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_2.png',
+    upright: '困难选择、僵局、平衡',
+    reversed: '优柔寡断、逃避选择、不平衡',
+    keywords: ['选择', '僵局', '平衡'],
+  },
+  {
+    id: 52,
+    name: 'Three of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_3.png',
+    upright: '心碎、悲伤、分离',
+    reversed: '恢复、宽恕、情感愈合',
+    keywords: ['心碎', '悲伤', '分离'],
+  },
+  {
+    id: 53,
+    name: 'Four of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_4.png',
+    upright: '休息、恢复、冥想',
+    reversed: '疲惫、缺乏休息、过度工作',
+    keywords: ['休息', '恢复', '冥想'],
+  },
+  {
+    id: 54,
+    name: 'Five of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_5.png',
+    upright: '冲突、背叛、不公',
+    reversed: '和解、宽恕、解决冲突',
+    keywords: ['冲突', '背叛', '不公'],
+  },
+  {
+    id: 55,
+    name: 'Six of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_6.png',
+    upright: '过渡、离开、前进',
+    reversed: '无法前进、困在过去、延迟',
+    keywords: ['过渡', '离开', '前进'],
+  },
+  {
+    id: 56,
+    name: 'Seven of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_7.png',
+    upright: '欺骗、策略、逃避',
+    reversed: '诚实、面对后果、承担责任',
+    keywords: ['欺骗', '策略', '逃避'],
+  },
+  {
+    id: 57,
+    name: 'Eight of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_8.png',
+    upright: '限制、自我怀疑、被困',
+    reversed: '自由、自我接受、新视角',
+    keywords: ['限制', '怀疑', '被困'],
+  },
+  {
+    id: 58,
+    name: 'Nine of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_9.png',
+    upright: '焦虑、噩梦、恐惧',
+    reversed: '希望、恢复、面对恐惧',
+    keywords: ['焦虑', '噩梦', '恐惧'],
+  },
+  {
+    id: 59,
+    name: 'Ten of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_10.png',
+    upright: '背叛、结束、痛苦',
+    reversed: '恢复、新开始、释放',
+    keywords: ['背叛', '结束', '痛苦'],
+  },
+  {
+    id: 60,
+    name: 'Page of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_page.png',
+    upright: '好奇心、新想法、沟通',
+    reversed: '缺乏焦点、八卦、错误信息',
+    keywords: ['好奇', '想法', '沟通'],
+  },
+  {
+    id: 61,
+    name: 'Knight of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_knight.png',
+    upright: '行动、冲动、直接',
+    reversed: '鲁莽、缺乏方向、延迟',
+    keywords: ['行动', '冲动', '直接'],
+  },
+  {
+    id: 62,
+    name: 'Queen of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_queen.png',
+    upright: '清晰思考、独立、诚实',
+    reversed: '冷酷、缺乏同情、偏见',
+    keywords: ['清晰', '独立', '诚实'],
+  },
+  {
+    id: 63,
+    name: 'King of Swords',
+    image: '/assets/tatorcard/minor_arcana_swords_king.png',
+    upright: '真理、公正、权威',
+    reversed: '操纵、不公、滥用权力',
+    keywords: ['真理', '公正', '权威'],
+  },
+  // ========== 小阿尔卡那 - 星币（Pentacles）14张 ==========
+  {
+    id: 64,
+    name: 'Ace of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_ace.png',
+    upright: '新机会、物质开始、潜力',
+    reversed: '错失机会、缺乏规划、不稳定',
+    keywords: ['机会', '物质', '潜力'],
+  },
+  {
+    id: 65,
+    name: 'Two of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_2.png',
+    upright: '平衡优先、时间管理、适应',
+    reversed: '不平衡、缺乏优先、过度承诺',
+    keywords: ['平衡', '管理', '适应'],
+  },
+  {
+    id: 66,
+    name: 'Three of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_3.png',
+    upright: '团队合作、协作、技能',
+    reversed: '缺乏合作、不专业、孤立',
+    keywords: ['合作', '协作', '技能'],
+  },
+  {
+    id: 67,
+    name: 'Four of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_4.png',
+    upright: '控制、安全、节俭',
+    reversed: '贪婪、物质主义、缺乏控制',
+    keywords: ['控制', '安全', '节俭'],
+  },
+  {
+    id: 68,
+    name: 'Five of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_5.png',
+    upright: '物质困难、孤立、贫困',
+    reversed: '恢复、寻求帮助、新开始',
+    keywords: ['困难', '孤立', '贫困'],
+  },
+  {
+    id: 69,
+    name: 'Six of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_6.png',
+    upright: '慷慨、分享、给予',
+    reversed: '自私、不平衡、债务',
+    keywords: ['慷慨', '分享', '给予'],
+  },
+  {
+    id: 70,
+    name: 'Seven of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_7.png',
+    upright: '长期观点、评估、耐心',
+    reversed: '缺乏进展、挫折、不耐烦',
+    keywords: ['长期', '评估', '耐心'],
+  },
+  {
+    id: 71,
+    name: 'Eight of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_8.png',
+    upright: '技能发展、质量、专注',
+    reversed: '缺乏质量、匆忙、缺乏技能',
+    keywords: ['技能', '质量', '专注'],
+  },
+  {
+    id: 72,
+    name: 'Nine of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_9.png',
+    upright: '财务独立、自给自足、享受',
+    reversed: '缺乏独立、过度依赖、财务困难',
+    keywords: ['独立', '自给', '享受'],
+  },
+  {
+    id: 73,
+    name: 'Ten of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_10.png',
+    upright: '财富、家庭安全、长期成功',
+    reversed: '财务损失、缺乏安全、家庭冲突',
+    keywords: ['财富', '安全', '成功'],
+  },
+  {
+    id: 74,
+    name: 'Page of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_page.png',
+    upright: '新机会、学习、务实',
+    reversed: '缺乏机会、不切实际、拖延',
+    keywords: ['机会', '学习', '务实'],
+  },
+  {
+    id: 75,
+    name: 'Knight of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_knight.png',
+    upright: '效率、责任、方法',
+    reversed: '懒惰、缺乏责任、拖延',
+    keywords: ['效率', '责任', '方法'],
+  },
+  {
+    id: 76,
+    name: 'Queen of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_queen.png',
+    upright: '实用、关怀、财务安全',
+    reversed: '自我中心、物质主义、缺乏关怀',
+    keywords: ['实用', '关怀', '安全'],
+  },
+  {
+    id: 77,
+    name: 'King of Pentacles',
+    image: '/assets/tatorcard/minor_arcana_pentacles_king.png',
+    upright: '财务安全、实用、慷慨',
+    reversed: '财务不稳定、贪婪、缺乏慷慨',
+    keywords: ['安全', '实用', '慷慨'],
   },
 ];
 
@@ -126,6 +692,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   const [question, setQuestion] = useState('');
   const [error, setError] = useState(null);
   const [drawResult, setDrawResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const closeTimerRef = useRef(null);
   const questionInputRef = useRef(null);
   const wasOpenRef = useRef(false);
@@ -197,22 +764,64 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
     onRequestClose();
   };
 
-  const handleDrawCard = () => {
+  const handleDrawCard = async () => {
     if (!question.trim()) {
       setError('请先输入你的问题，再开始抽牌。');
       return;
     }
 
     setError(null);
-    const card = pickRandom(tarotCards);
-    const orientation = Math.random() > 0.5 ? 'upright' : 'reversed';
-    const interpretation = generateInterpretation(card, orientation, question);
+    setIsLoading(true);
 
-    setDrawResult({
-      card,
-      orientation,
-      interpretation,
-    });
+    try {
+      // 随机抽取塔罗牌和正逆位
+      const card = pickRandom(tarotCards);
+      const orientation = Math.random() > 0.5 ? 'upright' : 'reversed';
+
+      // 调用 API 获取 AI 解读
+      const response = await fetch('/api/tarot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: question.trim(),
+          cardName: card.name,
+          orientation,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // 显示详细的错误信息
+        const errorMessage = data.message || data.error || '获取解读失败，请稍后重试';
+        console.error('API 错误:', {
+          status: response.status,
+          error: data.error,
+          message: data.message,
+          details: data.details,
+        });
+        throw new Error(errorMessage);
+      }
+
+      // 检查返回数据是否有效
+      if (!data.answer && !data.interpretation) {
+        throw new Error('未能获取有效解读，请重试');
+      }
+
+      setDrawResult({
+        card,
+        orientation,
+        answer: data.answer,
+        interpretation: data.interpretation,
+      });
+    } catch (err) {
+      console.error('抽牌错误:', err);
+      setError(err.message || '抽牌失败，请稍后重试');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDrawAgain = () => {
@@ -224,7 +833,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
     }
   };
 
-  const isDrawDisabled = question.trim().length === 0;
+  const isDrawDisabled = question.trim().length === 0 || isLoading;
 
   return (
     <div
@@ -287,8 +896,17 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
                 disabled={isDrawDisabled}
                 className={`flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold transition ${isDrawDisabled ? 'cursor-not-allowed bg-white/10 text-white/30' : 'bg-primary text-white shadow-glow hover:bg-primary/90 hover:scale-105'}`}
               >
-                <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                抽牌
+                {isLoading ? (
+                  <>
+                    <span className="material-symbols-outlined text-xl animate-spin">refresh</span>
+                    解读中...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                    抽牌
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -344,6 +962,17 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
                     </span>
                   ))}
                 </div>
+                {/* AI 生成的答案 */}
+                {drawResult.answer && (
+                  <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="material-symbols-outlined text-primary text-xl">check_circle</span>
+                      <span className="text-sm font-semibold text-primary uppercase tracking-wider">答案</span>
+                    </div>
+                    <p className="text-2xl font-bold text-white">{drawResult.answer}</p>
+                  </div>
+                )}
+                {/* AI 生成的解析 */}
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-base leading-relaxed text-white/80">
                   {drawResult.interpretation}
                 </div>
