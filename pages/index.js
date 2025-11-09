@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Script from 'next/script';
+import { useRouter } from 'next/router';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -997,6 +998,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
 };
 
 export default function Home() {
+  const router = useRouter();
   const [isTarotOpen, setIsTarotOpen] = useState(false);
   const [toast, setToast] = useState({ title: '', message: '' });
   const [isToastVisible, setIsToastVisible] = useState(false);
@@ -1342,7 +1344,7 @@ export default function Home() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleFeatureComingSoon('掷筊占卜 即将上线')}
+                            onClick={() => router.push('/divination/jiaobei')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="truncate">掷筊占卜 (Moon Blocks)</span>
