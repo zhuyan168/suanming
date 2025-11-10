@@ -817,6 +817,11 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
         answer: data.answer,
         interpretation: data.interpretation,
       });
+      
+      // 移除输入框焦点，防止光标闪烁
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
     } catch (err) {
       console.error('抽牌错误:', err);
       setError(err.message || '抽牌失败，请稍后重试');
@@ -828,6 +833,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   const handleDrawAgain = () => {
     setError(null);
     setDrawResult(null);
+    setQuestion(''); // 清空问题
     // 移除任何元素的焦点，防止光标闪烁
     if (document.activeElement && document.activeElement.blur) {
       document.activeElement.blur();
@@ -839,17 +845,16 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   return (
     <div
       aria-hidden={!isOpen}
-      className={`fixed inset-0 z-[60] flex items-start justify-center px-4 sm:px-6 lg:px-8 transition-all duration-300 overflow-y-auto ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+      className={`fixed inset-0 z-[60] flex items-start justify-center px-4 sm:px-6 lg:px-8 py-8 transition-all duration-300 overflow-y-auto bg-gradient-to-br from-background-dark/95 via-background-dark/90 to-black/90 backdrop-blur-md ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+      style={{ paddingBottom: '10rem' }}
+      onClick={handleClose}
     >
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-background-dark/95 via-background-dark/90 to-black/90 backdrop-blur-md"
-        onClick={handleClose}
-      ></div>
       
       {/* 未抽牌时：垂直水平居中显示输入框和按钮 */}
       {!drawResult ? (
         <section
           className={`relative z-10 w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-auto ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+          onClick={(e) => e.stopPropagation()}
         >
           <button
             aria-label="关闭塔罗占卜面板"
@@ -922,7 +927,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
       ) : (
         /* 抽牌后：显示结果 */
         <section
-          className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-4 sm:my-8 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+          className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -935,6 +940,14 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
           </button>
 
           <div className="animate-fade-in flex flex-col">
+            {/* 用户问题显示区域 */}
+            {question && (
+              <div className="mb-6 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 text-center">
+                <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">Your Question</p>
+                <p className="text-lg text-white/95 leading-relaxed font-medium">{question}</p>
+              </div>
+            )}
+            
             <div className="grid gap-8 md:grid-cols-[minmax(0,240px)_1fr] w-full">
               <div className="flex flex-col gap-4">
                 {/* 卡片图片区域 */}
