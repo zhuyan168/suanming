@@ -7,6 +7,7 @@ type ResultType = 'sheng' | 'yin' | 'xiao';
 export default function JiaoBeiPage() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [question, setQuestion] = useState('');
 
   useEffect(() => {
     // 确保 Tailwind 配置已加载
@@ -21,9 +22,10 @@ export default function JiaoBeiPage() {
 
     setIsProcessing(true);
 
-    // 随机生成结果
-    const firstFaceUp = Math.random() > 0.5;
-    const secondFaceUp = Math.random() > 0.5;
+    // 模拟真实筊杯的物理偏向（凸面较不稳定）
+    // 概率分布：圣筊 49.92%、笑筊 27.04%、阴筊 23.04%
+    const firstFaceUp = Math.random() > 0.48;
+    const secondFaceUp = Math.random() > 0.48;
 
     let result: ResultType;
     if (firstFaceUp !== secondFaceUp) {
@@ -34,9 +36,13 @@ export default function JiaoBeiPage() {
       result = 'yin'; // 两正 - 阴筊
     }
 
-    // 延迟 1.5 秒后跳转到结果页
+    // 延迟 1.5 秒后跳转到结果页，携带问题参数
     setTimeout(() => {
-      router.push(`/divination/jiaobei/result?type=${result}`);
+      const params = new URLSearchParams({ type: result });
+      if (question.trim()) {
+        params.append('question', question.trim());
+      }
+      router.push(`/divination/jiaobei/result?${params.toString()}`);
     }, 1500);
   };
 
@@ -163,7 +169,7 @@ export default function JiaoBeiPage() {
                     <span className="text-primary text-sm font-semibold uppercase tracking-wider">掷筊占卜</span>
                   </div>
                   <h1 className="text-white text-4xl sm:text-5xl font-black leading-tight tracking-[-0.033em] mb-6">
-                    问筊 · 问神明
+                    掷筊 · 问神明
                   </h1>
                   <div className="max-w-2xl mx-auto space-y-4 text-white/70 text-base leading-relaxed">
                     <p>
@@ -192,6 +198,30 @@ export default function JiaoBeiPage() {
                   </div>
                 </div>
 
+                {/* 问题输入区域 */}
+                {!isProcessing && (
+                  <div className="mb-12 max-w-2xl mx-auto">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                      <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="jiaobei-question">
+                        你的问题（可选）
+                      </label>
+                      <textarea
+                        id="jiaobei-question"
+                        className="w-full rounded-xl border border-white/10 bg-black/30 p-4 text-base text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        rows={3}
+                        maxLength={100}
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        placeholder="在心中默念问题后开始掷筊，也可以在此输入问题获得更详细的解读..."
+                      />
+                      <div className="mt-2 flex items-center justify-between text-xs text-white/50">
+                        <span>输入问题可获得 AI 个性化解读</span>
+                        <span>{question.length}/100</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* 等待提示区域 */}
                 {isProcessing && (
                   <div 
@@ -213,15 +243,6 @@ export default function JiaoBeiPage() {
                         神明正在回应……
                       </p>
                     </div>
-                  </div>
-                )}
-
-                {/* 默认提示 */}
-                {!isProcessing && (
-                  <div className="text-center mb-12 min-h-[200px] flex items-center justify-center">
-                    <p className="text-white/60 text-base">
-                      在心中默念你的问题，点击下方按钮开始
-                    </p>
                   </div>
                 )}
 

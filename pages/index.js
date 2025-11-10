@@ -839,7 +839,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   return (
     <div
       aria-hidden={!isOpen}
-      className={`fixed inset-0 z-[60] flex items-center justify-center px-4 sm:px-6 lg:px-8 transition-all duration-300 ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+      className={`fixed inset-0 z-[60] flex items-start justify-center px-4 sm:px-6 lg:px-8 transition-all duration-300 overflow-y-auto ${isOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
     >
       <div
         className="absolute inset-0 bg-gradient-to-br from-background-dark/95 via-background-dark/90 to-black/90 backdrop-blur-md"
@@ -849,7 +849,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
       {/* 未抽牌时：垂直水平居中显示输入框和按钮 */}
       {!drawResult ? (
         <section
-          className={`relative z-10 w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+          className={`relative z-10 w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-auto ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
         >
           <button
             aria-label="关闭塔罗占卜面板"
@@ -869,6 +869,13 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
           </header>
 
           <div className="flex flex-col gap-6">
+            {/* 占卜引导提示 */}
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+              <p className="text-sm text-white/90 leading-relaxed">
+                <span className="font-semibold text-primary">占卜建议：</span>为获得最准确的指引，同一个问题建议只问一次。重复占卜可能会让能量混乱，影响结果的准确性。
+              </p>
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="tarot-question">
                 你的问题
@@ -881,7 +888,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
                 maxLength={160}
                 value={question}
                 onChange={(event) => setQuestion(event.target.value)}
-                placeholder="例如：我应该接受新的工作机会吗？"
+                placeholder="提问技巧：请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？"
               ></textarea>
               <div className="mt-2 flex items-center justify-between text-xs text-white/50">
                 <span>最多 160 字</span>
@@ -915,7 +922,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
       ) : (
         /* 抽牌后：显示结果 */
         <section
-          className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+          className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-4 sm:my-8 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -927,7 +934,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
 
-          <div className="animate-fade-in flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="animate-fade-in flex flex-col">
             <div className="grid gap-8 md:grid-cols-[minmax(0,240px)_1fr] w-full">
               <div className="flex flex-col gap-4">
                 {/* 卡片图片区域 */}

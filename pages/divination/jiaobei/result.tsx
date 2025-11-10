@@ -42,9 +42,11 @@ const resultData: Record<ResultType, ResultInfo> = {
 
 export default function ResultPage() {
   const router = useRouter();
-  const { type } = router.query;
+  const { type, question } = router.query;
   const [isVisible, setIsVisible] = useState(false);
   const [result, setResult] = useState<ResultInfo | null>(null);
+  const [aiInterpretation, setAiInterpretation] = useState<string>('');
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -59,12 +61,45 @@ export default function ResultPage() {
         setResult(resultData[resultType]);
         // 延迟显示以触发动画
         setTimeout(() => setIsVisible(true), 100);
+        
+        // 如果有问题，调用 AI 解读
+        if (question && typeof question === 'string' && question.trim()) {
+          fetchAIInterpretation(resultType, question.trim());
+        }
       } else {
         // 无效的结果类型，返回首页
         router.push('/');
       }
     }
-  }, [type, router]);
+  }, [type, question, router]);
+
+  const fetchAIInterpretation = async (resultType: ResultType, userQuestion: string) => {
+    setIsLoadingAI(true);
+    try {
+      const response = await fetch('/api/jiaobei', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: userQuestion,
+          result: resultType,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.interpretation) {
+        setAiInterpretation(data.interpretation);
+      } else {
+        console.error('AI 解读失败:', data);
+      }
+    } catch (error) {
+      console.error('调用 AI 解读出错:', error);
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   const handleTryAgain = () => {
     router.push('/divination/jiaobei');
@@ -239,6 +274,31 @@ export default function ResultPage() {
                         {result.description}
                       </p>
                     </div>
+
+                    {/* AI 解读区域 */}
+                    {(question && typeof question === 'string' && question.trim()) && (
+                      <div className="max-w-xl mx-auto mb-8">
+                        <div className="rounded-2xl border border-primary/30 bg-primary/10 p-6">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
+                            <span className="text-sm font-semibold text-primary uppercase tracking-wider">AI 解读</span>
+                          </div>
+                          <div className="mb-3 text-white/70 text-sm">
+                            <span className="font-medium">你的问题：</span>{question}
+                          </div>
+                          {isLoadingAI ? (
+                            <div className="flex items-center gap-2 text-white/60">
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                              <span className="text-sm">正在解读中...</span>
+                            </div>
+                          ) : aiInterpretation ? (
+                            <p className="text-white/90 text-base leading-relaxed">
+                              {aiInterpretation}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    )}
 
                     {/* 分隔线 */}
                     <div className="w-24 h-px bg-white/20 mx-auto mb-8" />
