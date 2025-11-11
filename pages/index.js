@@ -1392,7 +1392,7 @@ export default function Home() {
                         <div className="grid grid-cols-2 gap-4 mt-auto">
                           <button
                             type="button"
-                            onClick={() => handleFortuneMessage('每日运势 请求已记录')}
+                            onClick={() => router.push('/fortune/daily')}
                             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="truncate">每日运势</span>
