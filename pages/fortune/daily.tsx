@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import CardStrip from './components/CardStrip';
-import ScrollBar from './components/ScrollBar';
-import SelectedCardSlot from './components/SelectedCardSlot';
-import { TarotCard } from './components/CardItem';
+import CardStrip from '../../components/fortune/CardStrip';
+import ScrollBar from '../../components/fortune/ScrollBar';
+import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
+import { TarotCard } from '../../components/fortune/CardItem';
+
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
