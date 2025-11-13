@@ -2,6 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import CardStrip from './components/CardStrip';
+import ScrollBar from './components/ScrollBar';
+import SelectedCardSlot from './components/SelectedCardSlot';
+import { TarotCard } from './components/CardItem';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -671,9 +675,12 @@ export default function DailyFortune() {
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [randomCards, setRandomCards] = useState<typeof tarotCards>([]);
+  const [selectedCard, setSelectedCard] = useState<TarotCard | null>(null);
+  const [scrollValue, setScrollValue] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [cardOrientation, setCardOrientation] = useState<'upright' | 'reversed'>('upright');
 
-  // 初始化：检查今日是否已经抽过牌 & 随机抽取16张牌
+  // 初始化：检查今日是否已经抽过牌
   useEffect(() => {
     const todayDate = getTodayDateString();
     const stored = localStorage.getItem('dailyFortuneResult');
@@ -685,7 +692,7 @@ export default function DailyFortune() {
           setHasDrawnToday(true);
           setTodayResult(result);
           setShowCards(false);
-          return; // 已经抽过牌，不需要初始化随机牌组
+          return; // 已经抽过牌
         } else {
           // 清除过期数据
           localStorage.removeItem('dailyFortuneResult');
@@ -695,24 +702,29 @@ export default function DailyFortune() {
         localStorage.removeItem('dailyFortuneResult');
       }
     }
-    
-    // 从78张牌中随机抽取12张
-    const shuffled = [...tarotCards].sort(() => Math.random() - 0.5);
-    const selected = shuffled.slice(0, 12);
-    setRandomCards(selected);
   }, []);
 
   const handleCardClick = async (index: number) => {
-    if (isLoading || hasDrawnToday || randomCards.length === 0) return;
+    if (isLoading || hasDrawnToday) return;
 
+    const card = tarotCards[index];
     setSelectedCardIndex(index);
+    setSelectedCard(card);
+    setIsAnimating(true);
     setIsLoading(true);
     setError(null);
 
+    // 等待动画完成（上浮 → 缩放 → 移动 → 翻牌）
+    // 第一阶段：从上方进入并上浮 0.3秒
+    await new Promise(resolve => setTimeout(resolve, 300));
+    // 第二阶段：移动到目标位置并弹跳 0.8秒
+    setIsAnimating(false);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    // 第三阶段：翻牌动画已在组件中处理，等待完成
+
     try {
-      // 使用随机抽取的12张牌中的一张
-      const card = randomCards[index];
       const orientation = Math.random() > 0.5 ? 'upright' : 'reversed';
+      setCardOrientation(orientation);
       const baseMeaning = orientation === 'upright' ? card.upright : card.reversed;
 
       if (process.env.NODE_ENV === 'development') {
@@ -764,16 +776,19 @@ export default function DailyFortune() {
       
       setTodayResult(result);
       setHasDrawnToday(true);
+      setIsAnimating(false);
       
       // 延迟后隐藏卡片展示结果
       setTimeout(() => {
         setShowCards(false);
-      }, 1500);
+      }, 500);
     } catch (err: any) {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);
       setError(err.message || '抽牌失败，请稍后重试');
       setSelectedCardIndex(null);
+      setSelectedCard(null);
+      setIsAnimating(false);
     } finally {
       setIsLoading(false);
     }
@@ -934,35 +949,31 @@ export default function DailyFortune() {
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mb-8">
-                      {Array.from({ length: 12 }).map((_, index) => (
-                        <motion.button
-                          key={index}
-                          whileHover={{ scale: 1.05, y: -10 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => handleCardClick(index)}
-                          disabled={isLoading}
-                          className={`relative aspect-[2/3] rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                            selectedCardIndex === index
-                              ? 'border-primary shadow-glow'
-                              : 'border-white/20 hover:border-primary/50'
-                          } ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-900/40">
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-4xl text-white/30">auto_awesome</span>
-                            </div>
-                          </div>
-                          {selectedCardIndex === index && isLoading && (
-                            <div className="absolute inset-0 bg-primary/50 flex items-center justify-center">
-                              <span className="material-symbols-outlined text-3xl text-white animate-spin">refresh</span>
-                            </div>
-                          )}
-                        </motion.button>
-                      ))}
-                    </div>
+                    {/* 78张卡牌横向滚动区域 */}
+                    <CardStrip
+                      cards={tarotCards}
+                      onCardClick={handleCardClick}
+                      isDisabled={isLoading}
+                      selectedCardIndex={selectedCardIndex}
+                      scrollValue={scrollValue}
+                      onScrollChange={setScrollValue}
+                    />
 
-                    <div className="text-center text-white/50 text-sm">
+                    {/* 自定义滚动条 */}
+                    <ScrollBar
+                      value={scrollValue}
+                      onChange={setScrollValue}
+                      disabled={isLoading}
+                    />
+
+                    {/* 已抽取卡牌展示区域 */}
+                    <SelectedCardSlot
+                      selectedCard={selectedCard}
+                      isAnimating={isAnimating}
+                      orientation={cardOrientation}
+                    />
+
+                    <div className="text-center text-white/50 text-sm mt-6">
                       <p>💫 每天只能抽取一次，请用心选择</p>
                     </div>
                   </motion.div>
@@ -982,10 +993,15 @@ export default function DailyFortune() {
                       {/* 左侧：卡牌展示 */}
                       <div className="flex flex-col items-center gap-4">
                         <motion.div
-                          initial={{ rotateY: 180, opacity: 0 }}
-                          animate={{ rotateY: 0, opacity: 1 }}
+                          initial={{ rotateY: 180 }}
+                          animate={{ rotateY: 0 }}
                           transition={{ duration: 0.8, delay: 0.2 }}
                           className="w-full max-w-[300px] aspect-[2/3] rounded-3xl overflow-hidden border-2 border-white/20 shadow-glow"
+                          style={{
+                            transformStyle: 'preserve-3d',
+                            backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
+                          }}
                         >
                           <img
                             src={todayResult.card.image}
