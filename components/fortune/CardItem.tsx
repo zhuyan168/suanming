@@ -44,7 +44,7 @@ export default function CardItem({ card, index, onClick, isDisabled, isSelected 
           ? 'border-primary shadow-[0_0_20px_rgba(127,19,236,0.6)]' 
           : 'border-white/20 hover:border-primary/50'
         }
-        ${isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+        ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}
       `}
       style={{
         zIndex: zIndex,

@@ -6,18 +6,20 @@ interface SelectedCardSlotProps {
   selectedCard: TarotCard | null;
   isAnimating: boolean;
   orientation?: 'upright' | 'reversed';
+  showLoadingText?: boolean;
 }
 
 export default function SelectedCardSlot({ 
   selectedCard, 
   isAnimating,
-  orientation = 'upright' 
+  orientation = 'upright',
+  showLoadingText = false
 }: SelectedCardSlotProps) {
   // 判断是否应该显示翻牌状态（当动画完成且不是动画中时）
   const isFlipped = !isAnimating && selectedCard !== null;
 
   return (
-    <div className="selected-card-slot w-full flex justify-center items-center min-h-[200px] sm:min-h-[240px] md:min-h-[300px] py-8">
+    <div className="selected-card-slot w-full flex flex-col justify-center items-center py-8">
       <AnimatePresence mode="wait">
         {selectedCard ? (
           <motion.div
@@ -34,20 +36,19 @@ export default function SelectedCardSlot({
               scale: 1.08,
               y: -20,
             } : {
-              // 第二阶段：移动到目标位置并落地弹跳
-              scale: [1.08, 1, 1.05, 1],
-              y: [-20, 0, -8, 0],
+              // 第二阶段：移动到目标位置（无弹跳）
+              scale: 1,
+              y: 0,
             }}
             exit={{ scale: 0.9 }}
             transition={isAnimating ? {
               // 第一阶段：从上方进入并上浮
-              duration: 0.3,
+              duration: 0.15,
               ease: 'easeOut',
             } : {
-              // 第二阶段：移动到目标位置并弹跳
-              duration: 0.8,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              times: [0, 0.5, 0.75, 1],
+              // 第二阶段：移动到目标位置（平滑过渡）
+              duration: 0.3,
+              ease: 'easeOut',
             }}
             className="relative w-32 h-48 sm:w-40 sm:h-60 md:w-48 md:h-72"
             style={{
@@ -122,10 +123,22 @@ export default function SelectedCardSlot({
         )}
       </AnimatePresence>
 
+      {/* 解析提示文字 */}
+      {selectedCard && !isAnimating && showLoadingText && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="text-center text-white/70 text-lg mt-8 font-medium"
+        >
+          <p>🔮 正在解析今日塔罗能量…</p>
+        </motion.div>
+      )}
+
       {/* 翻牌动画 CSS */}
       <style jsx>{`
         .card-wrapper {
-          transition: transform 0.8s ease-in-out;
+          transition: transform 0.3s ease-in-out;
         }
         
         .card-wrapper.flipped {

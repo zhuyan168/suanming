@@ -650,6 +650,52 @@ const getTodayDateString = () => {
 // 工具函数：随机选择
 const pickRandom = (items: any[]) => items[Math.floor(Math.random() * items.length)];
 
+// 扩展的卡牌类型，包含预设的正逆位
+interface ShuffledTarotCard extends TarotCard {
+  orientation: 'upright' | 'reversed';
+}
+
+// 洗牌函数：Fisher-Yates 洗牌算法
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
+const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
+  // 先为每张牌随机分配正逆位
+  // 使用更可靠的随机数生成，确保50/50分布
+  const cardsWithOrientation = cards.map(card => {
+    // 使用 crypto.getRandomValues 如果可用（浏览器环境），否则使用 Math.random
+    let randomValue: number;
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      randomValue = array[0] / (0xFFFFFFFF + 1);
+    } else {
+      // 使用 Math.random，但添加时间戳增加随机性
+      randomValue = Math.random() + (Date.now() % 1000) / 10000;
+      randomValue = randomValue % 1;
+    }
+    return {
+      ...card,
+      orientation: randomValue >= 0.5 ? 'upright' : 'reversed' as 'upright' | 'reversed',
+    };
+  });
+  
+  // 统计正逆位分布（开发环境显示）
+  const uprightCount = cardsWithOrientation.filter(c => c.orientation === 'upright').length;
+  const reversedCount = cardsWithOrientation.filter(c => c.orientation === 'reversed').length;
+  console.log(`🃏 洗牌完成 - 正位: ${uprightCount}张 (${(uprightCount/78*100).toFixed(1)}%), 逆位: ${reversedCount}张 (${(reversedCount/78*100).toFixed(1)}%)`);
+  
+  // 然后打乱顺序
+  return shuffleArray(cardsWithOrientation);
+};
+
 interface FortuneResult {
   overall: string;
   love: string;
@@ -662,7 +708,7 @@ interface FortuneResult {
 }
 
 interface DrawResult {
-  card: typeof tarotCards[0];
+  card: TarotCard;
   orientation: 'upright' | 'reversed';
   fortune: FortuneResult;
   date: string;
@@ -676,12 +722,15 @@ export default function DailyFortune() {
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [selectedCard, setSelectedCard] = useState<TarotCard | null>(null);
+  const [selectedCard, setSelectedCard] = useState<ShuffledTarotCard | null>(null);
   const [scrollValue, setScrollValue] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [cardOrientation, setCardOrientation] = useState<'upright' | 'reversed'>('upright');
+  const [removedCardIds, setRemovedCardIds] = useState<Set<number>>(new Set());
+  // 洗牌后的卡牌数组，每次进入页面时都会重新洗牌（如果还没抽过牌）
+  const [shuffledCards, setShuffledCards] = useState<ShuffledTarotCard[]>([]);
 
-  // 初始化：检查今日是否已经抽过牌
+  // 初始化：检查今日是否已经抽过牌，如果没有则重新洗牌
   useEffect(() => {
     const todayDate = getTodayDateString();
     const stored = localStorage.getItem('dailyFortuneResult');
@@ -693,7 +742,8 @@ export default function DailyFortune() {
           setHasDrawnToday(true);
           setTodayResult(result);
           setShowCards(false);
-          return; // 已经抽过牌
+          // 已经抽过牌，不需要重新洗牌
+          return;
         } else {
           // 清除过期数据
           localStorage.removeItem('dailyFortuneResult');
@@ -703,37 +753,44 @@ export default function DailyFortune() {
         localStorage.removeItem('dailyFortuneResult');
       }
     }
+    // 如果没有抽过牌或数据已过期，重新洗牌
+    setShuffledCards(shuffleCards(tarotCards));
   }, []);
+
+  // 过滤掉已移除的卡牌（使用洗牌后的数组）
+  const availableCards = shuffledCards.filter(card => !removedCardIds.has(card.id));
 
   const handleCardClick = async (index: number) => {
     if (isLoading || hasDrawnToday) return;
 
-    const card = tarotCards[index];
-    setSelectedCardIndex(index);
+    // index 是过滤后数组的索引，需要获取对应的卡牌
+    const card = availableCards[index];
+    if (!card) return;
+
+    // 立即从列表中移除这张牌
+    const [removedCardIds, setRemovedCardIds] = useState<number[]>([]);
+
+
+    // 使用洗牌时预设的正逆位
+    const orientation = card.orientation;
+    console.log(`🎴 抽到卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
+    setCardOrientation(orientation);
+    setSelectedCardIndex(null);
     setSelectedCard(card);
     setIsAnimating(true);
     setIsLoading(true);
     setError(null);
 
-    // 等待动画完成（上浮 → 缩放 → 移动 → 翻牌）
-    // 第一阶段：从上方进入并上浮 0.3秒
-    await new Promise(resolve => setTimeout(resolve, 300));
-    // 第二阶段：移动到目标位置并弹跳 0.8秒
-    setIsAnimating(false);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    // 第三阶段：翻牌动画已在组件中处理，等待完成
-
-    try {
-      const orientation = Math.random() > 0.5 ? 'upright' : 'reversed';
-      setCardOrientation(orientation);
-      const baseMeaning = orientation === 'upright' ? card.upright : card.reversed;
-
+    // 准备API调用参数
+    const baseMeaning = orientation === 'upright' ? card.upright : card.reversed;
+    
+    // 立即开始API调用，不等待动画完成
+    const apiPromise = (async () => {
       if (process.env.NODE_ENV === 'development') {
         console.log('🎴 准备调用API...');
         console.log('📝 请求参数:', { cardName: card.name, orientation, baseMeaning });
       }
 
-      // 调用 API 获取运势解读
       const response = await fetch('/api/daily-fortune', {
         method: 'POST',
         headers: {
@@ -745,6 +802,21 @@ export default function DailyFortune() {
           baseMeaning,
         }),
       });
+      return response;
+    })();
+
+    // 等待动画完成（上浮 → 缩放 → 移动 → 翻牌）
+    // 第一阶段：从上方进入并上浮 0.15秒
+    await new Promise(resolve => setTimeout(resolve, 150));
+    // 第二阶段：移动到目标位置 0.2秒
+    setIsAnimating(false);
+    await new Promise(resolve => setTimeout(resolve, 200));
+    // 第三阶段：翻牌动画已在组件中处理，等待完成（0.3秒）
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    try {
+      // 等待API响应（可能已经完成，也可能还在进行中）
+      const response = await apiPromise;
 
       if (process.env.NODE_ENV === 'development') {
         console.log('📡 API响应状态:', response.status);
@@ -760,8 +832,10 @@ export default function DailyFortune() {
         throw new Error(data.error || '获取运势失败');
       }
 
+      // 提取基本卡牌信息（不包含 orientation，因为它在 DrawResult 中单独存储）
+      const { orientation: _, ...baseCard } = card;
       const result: DrawResult = {
-        card,
+        card: baseCard,
         orientation,
         fortune: data.fortune,
         date: getTodayDateString(),
@@ -779,14 +853,17 @@ export default function DailyFortune() {
       setHasDrawnToday(true);
       setIsAnimating(false);
       
-      // 延迟后隐藏卡片展示结果
-      setTimeout(() => {
-        setShowCards(false);
-      }, 500);
+      // 立即隐藏卡片展示结果
+      setShowCards(false);
     } catch (err: any) {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);
       setError(err.message || '抽牌失败，请稍后重试');
+      // 如果出错，恢复移除的卡牌
+      if (card) {
+        setRemovedCardIds(prev => prev.filter(id => id !== card.id));
+
+      }
       setSelectedCardIndex(null);
       setSelectedCard(null);
       setIsAnimating(false);
@@ -952,10 +1029,10 @@ export default function DailyFortune() {
                     
                     {/* 78张卡牌横向滚动区域 */}
                     <CardStrip
-                      cards={tarotCards}
+                      cards={availableCards}
                       onCardClick={handleCardClick}
                       isDisabled={isLoading}
-                      selectedCardIndex={selectedCardIndex}
+                      selectedCardIndex={null}
                       scrollValue={scrollValue}
                       onScrollChange={setScrollValue}
                     />
@@ -972,11 +1049,14 @@ export default function DailyFortune() {
                       selectedCard={selectedCard}
                       isAnimating={isAnimating}
                       orientation={cardOrientation}
+                      showLoadingText={true}
                     />
 
-                    <div className="text-center text-white/50 text-sm mt-6">
-                      <p>💫 每天只能抽取一次，请用心选择</p>
-                    </div>
+                    {!selectedCard && (
+                      <div className="text-center text-white/50 text-sm mt-6">
+                        <p>💫 每天只能抽取一次，请用心选择</p>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
