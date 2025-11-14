@@ -768,9 +768,6 @@ export default function DailyFortune() {
     const card = availableCards[index];
     if (!card) return;
 
-    // 立即从列表中移除这张牌
-    const [removedCardIds, setRemovedCardIds] = useState<number[]>([]);
-
 
     // 使用洗牌时预设的正逆位
     const orientation = card.orientation;
