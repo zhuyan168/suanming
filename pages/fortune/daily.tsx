@@ -760,8 +760,6 @@ export default function DailyFortune() {
   // 过滤掉已移除的卡牌（使用洗牌后的数组）
   const availableCards = shuffledCards.filter(card => !removedCardIds.includes(card.id));
 
-  aaaaaa
-
 
   const handleCardClick = async (index: number) => {
     if (isLoading || hasDrawnToday) return;
