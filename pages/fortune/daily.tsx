@@ -726,7 +726,7 @@ export default function DailyFortune() {
   const [scrollValue, setScrollValue] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [cardOrientation, setCardOrientation] = useState<'upright' | 'reversed'>('upright');
-  const [removedCardIds, setRemovedCardIds] = useState<Set<number>>(new Set());
+  const [removedCardIds, setRemovedCardIds] = useState<number[]>([]);
   // 洗牌后的卡牌数组，每次进入页面时都会重新洗牌（如果还没抽过牌）
   const [shuffledCards, setShuffledCards] = useState<ShuffledTarotCard[]>([]);
 
@@ -758,7 +758,10 @@ export default function DailyFortune() {
   }, []);
 
   // 过滤掉已移除的卡牌（使用洗牌后的数组）
-  const availableCards = shuffledCards.filter(card => !removedCardIds.has(card.id));
+  const availableCards = shuffledCards.filter(card => !removedCardIds.includes(card.id));
+
+  aaaaaa
+
 
   const handleCardClick = async (index: number) => {
     if (isLoading || hasDrawnToday) return;
