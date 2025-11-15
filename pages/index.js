@@ -1162,14 +1162,17 @@ export default function Home() {
           }
           @keyframes pulse-glow {
             0%, 100% {
-              box-shadow: 0 0 5px 0px rgba(127, 19, 236, 0.4), 0 0 2px 0px rgba(127, 19, 236, 0.2), 0 0 0 1px rgba(127, 19, 236, 0.2);
+              box-shadow: 0 0 8px 0px rgba(127, 19, 236, 0.5), 0 0 4px 0px rgba(127, 19, 236, 0.3), 0 0 0 1px rgba(127, 19, 236, 0.3);
             }
             50% {
-              box-shadow: 0 0 10px 2px rgba(127, 19, 236, 0.6), 0 0 4px 1px rgba(127, 19, 236, 0.4), 0 0 0 1px rgba(127, 19, 236, 0.5);
+              box-shadow: 0 0 15px 3px rgba(127, 19, 236, 0.7), 0 0 8px 2px rgba(127, 19, 236, 0.5), 0 0 0 1px rgba(127, 19, 236, 0.6);
             }
           }
           .animate-pulse-glow {
             animation: pulse-glow 3s infinite ease-in-out;
+          }
+          .group:hover .animate-pulse-glow {
+            box-shadow: 0 0 20px 4px rgba(127, 19, 236, 0.8), 0 0 10px 3px rgba(127, 19, 236, 0.6), 0 0 0 1px rgba(127, 19, 236, 0.7);
           }
           @keyframes fade-in {
             from {
@@ -1336,15 +1339,7 @@ export default function Home() {
                     </div>
                   </section>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 @container">
-                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/10 animate-pulse-glow">
-                      <div
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                        style={{
-                          backgroundImage:
-                            "radial-gradient(circle at 50% 50%, rgba(127, 19, 236, 0.05), transparent 60%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBwx12TiM3tWLpLP8-D2Ly2wUsaLpZpYhUG1cpevrdbr1g6i2tFtTJnavj73O-mPOSrbwwm-Pxd7AUmNue1f-EXNzsra4ucXk9nrANoz1lI7JZMPN2goLWopj8QbrztB12_vKeJkO4KAqPS_VwR3J_Xm4WiwOJi_8EtCjQyrxfktmtM_PUK1zf5JqBNFgs_cqciCoDnYIcWw_djxqaIssq9KG0u9i-4vKyNpA0YtLiMnWXQt1jYGV5rdi1wS2dsFi5b_3CdrIzDtd8')",
-                          backgroundSize: '50px 50px, auto',
-                        }}
-                      ></div>
+                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
                           <p className="text-primary text-sm font-medium">是否占卜</p>
@@ -1372,15 +1367,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/10 animate-pulse-glow">
-                      <div
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                        style={{
-                          backgroundImage:
-                            "radial-gradient(circle at 50% 50%, rgba(127, 19, 236, 0.05), transparent 60%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBwx12TiM3tWLpLP8-D2Ly2wUsaLpZpYhUG1cpevrdbr1g6i2tFtTJnavj73O-mPOSrbwwm-Pxd7AUmNue1f-EXNzsra4ucXk9nrANoz1lI7JZMPN2goLWopj8QbrztB12_vKeJkO4KAqPS_VwR3J_Xm4WiwOJi_8EtCjQyrxfktmtM_PUK1zf5JqBNFgs_cqciCoDnYIcWw_djxqaIssq9KG0u9i-4vKyNpA0YtLiMnWXQt1jYGV5rdi1wS2dsFi5b_3CdrIzDtd8')",
-                          backgroundSize: '50px 50px, auto',
-                        }}
-                      ></div>
+                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
                           <p className="text-primary text-sm font-medium">运势测算</p>
@@ -1421,15 +1408,7 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
-                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/10 animate-pulse-glow">
-                      <div
-                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                        style={{
-                          backgroundImage:
-                            "radial-gradient(circle at 50% 50%, rgba(127, 19, 236, 0.05), transparent 60%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBwx12TiM3tWLpLP8-D2Ly2wUsaLpZpYhUG1cpevrdbr1g6i2tFtTJnavj73O-mPOSrbwwm-Pxd7AUmNue1f-EXNzsra4ucXk9nrANoz1lI7JZMPN2goLWopj8QbrztB12_vKeJkO4KAqPS_VwR3J_Xm4WiwOJi_8EtCjQyrxfktmtM_PUK1zf5JqBNFgs_cqciCoDnYIcWw_djxqaIssq9KG0u9i-4vKyNpA0YtLiMnWXQt1jYGV5rdi1wS2dsFi5b_3CdrIzDtd8')",
-                          backgroundSize: '50px 50px, auto',
-                        }}
-                      ></div>
+                    <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
                           <p className="text-primary text-sm font-medium">主题占卜</p>
