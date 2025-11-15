@@ -1,8 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import CardItem, { TarotCard } from './CardItem';
+import EmptySlot from './EmptySlot';
+
+interface ShuffledTarotCard extends TarotCard {
+  orientation: 'upright' | 'reversed';
+}
 
 interface CardStripProps {
-  cards: TarotCard[];
+  uiSlots: (ShuffledTarotCard | null)[];
   onCardClick: (index: number) => void;
   isDisabled: boolean;
   selectedCardIndex: number | null;
@@ -11,7 +16,7 @@ interface CardStripProps {
 }
 
 export default function CardStrip({
-  cards,
+  uiSlots,
   onCardClick,
   isDisabled,
   selectedCardIndex,
@@ -79,16 +84,20 @@ export default function CardStrip({
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {cards.map((card, index) => (
-          <CardItem
-            key={card.id}
-            card={card}
-            index={index}
-            onClick={onCardClick}
-            isDisabled={isDisabled}
-            isSelected={selectedCardIndex === index}
-          />
-        ))}
+        {uiSlots.map((card, index) => 
+          card ? (
+            <CardItem
+              key={card.id}
+              card={card}
+              index={index}
+              onClick={onCardClick}
+              isDisabled={isDisabled}
+              isSelected={selectedCardIndex === index}
+            />
+          ) : (
+            <EmptySlot key={`empty-${index}`} index={index} />
+          )
+        )}
       </div>
       
       {/* 隐藏默认滚动条样式 */}

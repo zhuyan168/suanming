@@ -726,9 +726,12 @@ export default function DailyFortune() {
   const [scrollValue, setScrollValue] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [cardOrientation, setCardOrientation] = useState<'upright' | 'reversed'>('upright');
-  const [removedCardIds, setRemovedCardIds] = useState<number[]>([]);
-  // 洗牌后的卡牌数组，每次进入页面时都会重新洗牌（如果还没抽过牌）
-  const [shuffledCards, setShuffledCards] = useState<ShuffledTarotCard[]>([]);
+  // deck: 实际剩余可抽的牌（抽牌逻辑使用）
+  const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
+  // uiSlots: 用于页面卡背渲染的数组（长度固定为78，抽到的位置替换为null）
+  const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
+  // 已抽取的卡牌数组
+  const [drawnCards, setDrawnCards] = useState<ShuffledTarotCard[]>([]);
 
   // 初始化：检查今日是否已经抽过牌，如果没有则重新洗牌
   useEffect(() => {
@@ -754,24 +757,36 @@ export default function DailyFortune() {
       }
     }
     // 如果没有抽过牌或数据已过期，重新洗牌
-    setShuffledCards(shuffleCards(tarotCards));
+    const shuffled = shuffleCards(tarotCards);
+    setDeck(shuffled);
+    setUiSlots(shuffled);
   }, []);
 
-  // 过滤掉已移除的卡牌（使用洗牌后的数组）
-  const availableCards = shuffledCards.filter(card => !removedCardIds.includes(card.id));
 
-
-  const handleCardClick = async (index: number) => {
+  const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawnToday) return;
 
-    // index 是过滤后数组的索引，需要获取对应的卡牌
-    const card = availableCards[index];
+    // 获取 uiSlots[slotIndex] 作为抽到的卡
+    const card = uiSlots[slotIndex];
+    
+    // 如果该位置已经是 null，则不执行任何操作
     if (!card) return;
-
 
     // 使用洗牌时预设的正逆位
     const orientation = card.orientation;
     console.log(`🎴 抽到卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
+    
+    // 将抽到的卡添加到 drawnCards 数组
+    setDrawnCards(prev => [...prev, card]);
+    
+    // 从 deck 中移除这张卡
+    setDeck(prev => prev.filter(c => c.id !== card.id));
+    
+    // 将 uiSlots[slotIndex] 设置为 null
+    setUiSlots(prev => 
+      prev.map((c, i) => (i === slotIndex ? null : c))
+    );
+
     setCardOrientation(orientation);
     setSelectedCardIndex(null);
     setSelectedCard(card);
@@ -857,10 +872,16 @@ export default function DailyFortune() {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);
       setError(err.message || '抽牌失败，请稍后重试');
-      // 如果出错，恢复移除的卡牌
+      // 如果出错，恢复卡牌状态
       if (card) {
-        setRemovedCardIds(prev => prev.filter(id => id !== card.id));
-
+        // 从 drawnCards 中移除
+        setDrawnCards(prev => prev.filter(c => c.id !== card.id));
+        // 将卡牌重新加入 deck
+        setDeck(prev => [...prev, card]);
+        // 恢复 uiSlots 中的卡牌
+        setUiSlots(prev => 
+          prev.map((c, i) => (i === slotIndex ? card : c))
+        );
       }
       setSelectedCardIndex(null);
       setSelectedCard(null);
@@ -1027,8 +1048,8 @@ export default function DailyFortune() {
                     
                     {/* 78张卡牌横向滚动区域 */}
                     <CardStrip
-                      cards={availableCards}
-                      onCardClick={handleCardClick}
+                      uiSlots={uiSlots}
+                      onCardClick={drawCard}
                       isDisabled={isLoading}
                       selectedCardIndex={null}
                       scrollValue={scrollValue}
