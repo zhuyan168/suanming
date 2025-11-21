@@ -4,6 +4,13 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { tarotImagesFlat } from '../../../../utils/tarotimages';
+
+// 工具函数：从旧 URL 中提取文件名作为 key
+const getCardKeyFromUrl = (url: string) => {
+  const match = url.match(/\/([^/]+)\.png$/);
+  return match ? match[1] : null;
+};
 
 // 工具函数：获取当前自然月（yyyy-MM格式）
 const getCurrentMonth = () => {
@@ -63,7 +70,7 @@ const tarotCards: TarotCard[] = [
   { id: 45, name: 'Ten of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_10.png', upright: '和谐、家庭幸福、圆满', reversed: '不和谐、家庭冲突、缺乏支持', keywords: ['和谐', '幸福', '圆满'] },
   { id: 46, name: 'Page of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_page.png', upright: '创意灵感、直觉、新感情', reversed: '情感不成熟、缺乏创意、拒绝直觉', keywords: ['创意', '直觉', '感情'] },
   { id: 47, name: 'Knight of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_knight.png', upright: '浪漫、魅力、追求理想', reversed: '情绪化、不切实际、逃避', keywords: ['浪漫', '魅力', '理想'] },
-  { id: 48, name: 'Queen of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_cups_queen.png', upright: '同情、直觉、情感支持', reversed: '情绪不稳定、缺乏同情、依赖', keywords: ['同情', '直觉', '支持'] },
+  { id: 48, name: 'Queen of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_queen.png', upright: '同情、直觉、情感支持', reversed: '情绪不稳定、缺乏同情、依赖', keywords: ['同情', '直觉', '支持'] },
   { id: 49, name: 'King of Cups', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_king.png', upright: '情感平衡、同情、控制', reversed: '情绪失控、冷漠、缺乏平衡', keywords: ['平衡', '同情', '控制'] },
   { id: 50, name: 'Ace of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_ace.png', upright: '新想法、清晰、突破', reversed: '混乱、缺乏清晰、错误想法', keywords: ['清晰', '突破', '想法'] },
   { id: 51, name: 'Two of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_2.png', upright: '困难选择、僵局、平衡', reversed: '优柔寡断、逃避选择、不平衡', keywords: ['选择', '僵局', '平衡'] },
@@ -146,69 +153,113 @@ export default function MonthlyBasicResult() {
   useEffect(() => {
     const storageKey = `monthly_basic_${currentMonth}`;
     const stored = localStorage.getItem(storageKey);
+    const tarotResultRaw = localStorage.getItem('tarotMonthlyResult');
     
-    if (!stored) {
-      // 没有记录，跳回抽牌页
+    let result: MonthlyBasicResult | null = null;
+
+    // 1. 尝试读取 monthly_basic
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as MonthlyBasicResult;
+        if (parsed.month === currentMonth) {
+          result = parsed;
+        }
+      } catch (e) {
+        console.error('Failed to parse stored result:', e);
+      }
+    }
+
+    // 2. 如果没有 monthly_basic，尝试从 tarotMonthlyResult 恢复
+    if (!result && tarotResultRaw) {
+      try {
+        const parsed = JSON.parse(tarotResultRaw);
+        const cardKeys = Array.isArray(parsed) ? parsed : (parsed.cards || []);
+        
+        if (Array.isArray(cardKeys) && cardKeys.length === 3) {
+          const restoredCards: ShuffledTarotCard[] = [];
+          
+          cardKeys.forEach(key => {
+            if (typeof key !== 'string') return;
+            const imageUrl = tarotImagesFlat[key as keyof typeof tarotImagesFlat];
+            const baseCard = tarotCards.find(c => {
+              const oldKey = getCardKeyFromUrl(c.image);
+              return oldKey === key;
+            });
+
+            if (baseCard && imageUrl) {
+              restoredCards.push({
+                ...baseCard,
+                image: imageUrl,
+                orientation: 'upright', 
+              });
+            }
+          });
+
+          if (restoredCards.length === 3) {
+            result = {
+              month: currentMonth,
+              cards: restoredCards,
+              createdAt: Date.now()
+            };
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse tarotMonthlyResult:', e);
+      }
+    }
+
+    // 如果两个都没有，跳回抽牌页
+    if (!result) {
       router.push('/fortune/monthly/basic');
       return;
     }
 
-    try {
-      const result = JSON.parse(stored) as MonthlyBasicResult;
-      if (result.month !== currentMonth) {
-        // 月份不匹配，跳回抽牌页
-        router.push('/fortune/monthly/basic');
-        return;
-      }
-
-      // 验证并修复卡牌数据：如果数据不完整，使用 id 去 tarotCards 匹配完整数据
-      const validatedCards = result.cards.map(card => {
-        // 检查是否缺少必要字段（旧数据格式）
-        if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
-          console.warn('检测到旧数据格式，正在修复...', card);
-          // 使用 id 去 tarotCards 数组里匹配完整卡牌对象
-          const fullCard = tarotCards.find(tc => tc.id === card.id);
-          if (fullCard) {
-            return {
-              id: fullCard.id,
-              name: fullCard.name,
-              image: fullCard.image,
-              upright: fullCard.upright,
-              reversed: fullCard.reversed,
-              keywords: fullCard.keywords,
-              orientation: card.orientation,
-            };
-          } else {
-            console.error(`未找到卡牌 id=${card.id} 的完整数据`);
-            return card; // 如果找不到，返回原数据
-          }
-        }
-        // 数据完整，直接返回
-        return card;
-      });
+    // 3. 统一修复图片 URL
+    const validatedCards = result.cards.map(card => {
+      // 尝试使用新图片路径修复
+      const key = getCardKeyFromUrl(card.image);
+      const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
       
-      // 如果数据被修复，更新 localStorage
-      if (JSON.stringify(validatedCards) !== JSON.stringify(result.cards)) {
-        const updatedResult: MonthlyBasicResult = {
-          ...result,
-          cards: validatedCards,
+      if (newImage) {
+         return { ...card, image: newImage };
+      }
+      
+      // 如果没有找到新图片，尝试用 id 找回原卡信息
+      const fullCard = tarotCards.find(tc => tc.id === card.id);
+      if (fullCard) {
+        // 这里我们再次尝试从 fullCard.image 提取 key
+        const fullCardKey = getCardKeyFromUrl(fullCard.image);
+        const fullCardNewImage = fullCardKey && tarotImagesFlat[fullCardKey as keyof typeof tarotImagesFlat];
+        
+        return {
+          ...card,
+          ...fullCard,
+          image: fullCardNewImage || card.image,
+          orientation: card.orientation,
         };
-        localStorage.setItem(storageKey, JSON.stringify(updatedResult));
-        setSavedResult(updatedResult);
-      } else {
-        setSavedResult(result);
       }
       
-      // 如果没有解析结果，调用API生成
-      if (!result.result) {
-        generateFortune(result);
-      } else {
-        setIsLoading(false);
-      }
-    } catch (e) {
-      console.error('Failed to parse stored result:', e);
-      router.push('/fortune/monthly/basic');
+      return card;
+    });
+
+    // 更新状态
+    const updatedResult = { ...result, cards: validatedCards };
+    
+    // 如果数据有变动（例如修复了图片），更新 localStorage
+    // 注意：如果是从 tarotMonthlyResult 恢复的，这一步也会将其写入 monthly_basic
+    if (JSON.stringify(updatedResult) !== JSON.stringify(result) || !stored) {
+        localStorage.setItem(storageKey, JSON.stringify(updatedResult));
     }
+    
+    setSavedResult(updatedResult);
+
+    // 如果没有解析结果，调用API生成
+    if (!updatedResult.result) {
+      generateFortune(updatedResult);
+    } else {
+      setIsLoading(false);
+    }
+
   }, [currentMonth, router]);
 
   const generateFortune = async (result: MonthlyBasicResult) => {
@@ -269,10 +320,7 @@ export default function MonthlyBasicResult() {
         </Head>
         <div className="dark">
           <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-4">🔮</div>
-              <p className="text-white/70 text-lg">加载中...</p>
-            </div>
+            <MagicalLoading />
           </div>
         </div>
       </>
@@ -289,10 +337,13 @@ export default function MonthlyBasicResult() {
     if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
       const fullCard = tarotCards.find(tc => tc.id === card.id);
       if (fullCard) {
+        const fullCardKey = getCardKeyFromUrl(fullCard.image);
+        const fullCardNewImage = fullCardKey && tarotImagesFlat[fullCardKey as keyof typeof tarotImagesFlat];
+        
         return {
           id: fullCard.id,
           name: fullCard.name,
-          image: fullCard.image,
+          image: fullCardNewImage || fullCard.image,
           upright: fullCard.upright,
           reversed: fullCard.reversed,
           keywords: fullCard.keywords,
@@ -344,9 +395,6 @@ export default function MonthlyBasicResult() {
             50% {
               box-shadow: 0 0 10px 2px rgba(127, 19, 236, 0.6), 0 0 4px 1px rgba(127, 19, 236, 0.4);
             }
-          }
-          .animate-pulse-glow {
-            animation: pulse-glow 3s infinite ease-in-out;
           }
           @keyframes breathe-glow {
             0%, 100% {
@@ -466,10 +514,7 @@ export default function MonthlyBasicResult() {
 
               {/* 解析内容 */}
               {isGenerating ? (
-                <div className="text-center py-12">
-                  <div className="text-4xl mb-4">🔮</div>
-                  <p className="text-white/70 text-lg">正在生成运势解析...</p>
-                </div>
+                <MagicalLoading text="正在解读牌面蕴含的指引..." />
               ) : savedResult.result ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -510,12 +555,14 @@ export default function MonthlyBasicResult() {
 
                   {/* 运势详情网格 */}
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <FortuneCard
-                      icon="wb_sunny"
-                      title="综合运势"
-                      content={savedResult.result.overall}
-                      delay={0.6}
-                    />
+                    <div className="sm:col-span-2">
+                      <FortuneCard
+                        icon="wb_sunny"
+                        title="综合运势"
+                        content={savedResult.result.overall}
+                        delay={0.6}
+                      />
+                    </div>
                     <FortuneCard
                       icon="favorite"
                       title="爱情运势"
@@ -540,22 +587,6 @@ export default function MonthlyBasicResult() {
                       content={savedResult.result.health}
                       delay={1.0}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                      <FortuneCard
-                        icon="palette"
-                        title="幸运色"
-                        content={savedResult.result.luckyColor}
-                        delay={1.1}
-                        compact
-                      />
-                      <FortuneCard
-                        icon="casino"
-                        title="幸运数字"
-                        content={String(savedResult.result.luckyNumber)}
-                        delay={1.2}
-                        compact
-                      />
-                    </div>
                   </div>
 
                   {/* 提示信息 */}
@@ -605,3 +636,88 @@ function FortuneCard({ icon, title, content, delay, compact = false }: FortuneCa
   );
 }
 
+// 魔幻加载动画组件
+const MagicalLoading = ({ text = "塔罗牌正在回应你的召唤..." }: { text?: string }) => {
+  return (
+    <div className="flex flex-col items-center justify-center p-8">
+      <div className="relative mb-8">
+        {/* 外层光环 */}
+        <motion.div
+          className="absolute -inset-4 rounded-full bg-primary/20 blur-xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{ 
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        
+        {/* 旋转的魔法圈 */}
+        <motion.div 
+          className="absolute inset-0 rounded-full border-2 border-primary/30 border-t-primary/80"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute -inset-2 rounded-full border border-primary/20 border-b-primary/60"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+        />
+
+        {/* 中心水晶球 */}
+        <motion.div
+          animate={{ 
+            scale: [1, 1.05, 1],
+            filter: [
+              "drop-shadow(0 0 10px rgba(127,19,236,0.4))",
+              "drop-shadow(0 0 20px rgba(127,19,236,0.8))",
+              "drop-shadow(0 0 10px rgba(127,19,236,0.4))"
+            ]
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="relative z-10 text-7xl"
+        >
+          🔮
+        </motion.div>
+
+        {/* 粒子效果 (模拟) */}
+        <motion.div 
+            className="absolute top-0 left-1/2 w-1 h-1 bg-purple-300 rounded-full"
+            animate={{ y: [-10, -20], opacity: [1, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+        />
+         <motion.div 
+            className="absolute top-2 right-0 w-1 h-1 bg-purple-300 rounded-full"
+            animate={{ y: [-10, -25], x: [0, 10], opacity: [1, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, delay: 0.5 }}
+        />
+         <motion.div 
+            className="absolute top-2 left-0 w-1 h-1 bg-purple-300 rounded-full"
+            animate={{ y: [-10, -25], x: [0, -10], opacity: [1, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, delay: 0.8 }}
+        />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="text-center space-y-2"
+      >
+        <p className="text-lg font-medium tracking-widest text-white/90 bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-white bg-[length:200%_auto] animate-flow">
+          {text}
+        </p>
+        <p className="text-xs text-white/40 uppercase tracking-[0.2em]">
+          Connecting with fate...
+        </p>
+      </motion.div>
+    </div>
+  );
+};

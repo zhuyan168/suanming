@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
+
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
 }
@@ -62,11 +63,12 @@ export default function ThreeCardSlots({
                 >
                   {/* 卡牌容器 - 使用 CSS class 控制翻牌 */}
                   <div
-                    className={`card-wrapper relative w-full h-full rounded-xl overflow-hidden border-2 border-primary shadow-[0_0_30px_rgba(127,19,236,0.6)] ${(forceFlipped || (!isAnimating[index] && card)) ? 'flipped' : ''}`}
+                    className={`card-wrapper relative w-full h-full rounded-xl overflow-hidden border-2 border-primary shadow-[0_0_30px_rgba(127,19,236,0.6)]`}
                     style={{
                       transformStyle: 'preserve-3d',
                       perspective: '1000px',
                       transform: (forceFlipped || (!isAnimating[index] && card)) ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
                     }}
                   >
                     {/* 卡背 - 初始 rotateY(0deg)，翻牌后通过父容器旋转隐藏 */}
@@ -100,7 +102,6 @@ export default function ThreeCardSlots({
                       style={{
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg)',
                       }}
                     >
                       <img

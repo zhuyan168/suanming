@@ -23,4 +23,4 @@ Thumbs.db
 .env*.local
 
 # 忽略大图片或资源（如果你希望不上传）
-public/assets/
+public/assets/tatorcard/

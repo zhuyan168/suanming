@@ -400,7 +400,7 @@ const tarotCards = [
   {
     id: 48,
     name: 'Queen of Cups',
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_cups_queen.png',
+    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_queen.png',
     upright: '同情、直觉、情感支持',
     reversed: '情绪不稳定、缺乏同情、依赖',
     keywords: ['同情', '直觉', '支持'],

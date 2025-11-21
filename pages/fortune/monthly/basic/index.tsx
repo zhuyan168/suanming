@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { tarotImagesFlat } from '../../../../utils/tarotimages';
 
 // 完整的78张塔罗牌数据（与daily.tsx保持一致）
 const tarotCards = [
@@ -400,7 +401,7 @@ const tarotCards = [
   {
     id: 48,
     name: 'Queen of Cups',
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_cups_queen.png',
+    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_queen.png',
     upright: '同情、直觉、情感支持',
     reversed: '情绪不稳定、缺乏同情、依赖',
     keywords: ['同情', '直觉', '支持'],
@@ -641,6 +642,12 @@ const tarotCards = [
   },
 ];
 
+// 工具函数：从旧 URL 中提取文件名作为 key
+const getCardKeyFromUrl = (url: string) => {
+  const match = url.match(/\/([^/]+)\.png$/);
+  return match ? match[1] : null;
+};
+
 // 工具函数：获取当前自然月（yyyy-MM格式）
 const getCurrentMonth = () => {
   const now = new Date();
@@ -781,73 +788,140 @@ export default function MonthlyBasicFortune() {
 
   // 初始化：检查本月是否已经抽过牌
   useEffect(() => {
-    if (!currentMonth || typeof window === 'undefined') return;
-    
-    const storageKey = `monthly_basic_${currentMonth}`;
-    const stored = localStorage.getItem(storageKey);
-    
-    if (stored) {
+    if (typeof window === 'undefined') return;
+
+    // 1. 优先检查 tarotMonthlyResult (新逻辑)
+    const tarotResultRaw = localStorage.getItem('tarotMonthlyResult');
+    if (tarotResultRaw) {
       try {
-        const result = JSON.parse(stored) as MonthlyBasicResult;
-        if (result.month === currentMonth) {
-          // 验证并修复卡牌数据：如果数据不完整，使用 id 去 tarotCards 匹配完整数据
-          const validatedCards = result.cards.map(card => {
-            // 检查是否缺少必要字段（旧数据格式）
-            if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
-              console.warn('检测到旧数据格式，正在修复...', card);
-              // 使用 id 去 tarotCards 数组里匹配完整卡牌对象
-              const fullCard = tarotCards.find(tc => tc.id === card.id);
-              if (fullCard) {
-                return {
-                  id: fullCard.id,
-                  name: fullCard.name,
-                  image: fullCard.image,
-                  upright: fullCard.upright,
-                  reversed: fullCard.reversed,
-                  keywords: fullCard.keywords,
-                  orientation: card.orientation,
-                };
-              }
+        // 假设存储格式为：{ cards: ["major_arcana_fool", "minor_arcana_wands_2", ...] } 
+        // 或者直接是数组 ["major_arcana_fool", ...]
+        const parsed = JSON.parse(tarotResultRaw);
+        const cardKeys = Array.isArray(parsed) ? parsed : (parsed.cards || []);
+
+        if (Array.isArray(cardKeys) && cardKeys.length === 3) {
+          // 根据 key 还原卡牌数据
+          const restoredCards: ShuffledTarotCard[] = [];
+          
+          cardKeys.forEach(key => {
+            if (typeof key !== 'string') return;
+            
+            // 从 tarotImagesFlat 获取图片
+            const imageUrl = tarotImagesFlat[key as keyof typeof tarotImagesFlat];
+            
+            // 从 tarotCards 查找元数据（通过旧图片 URL 匹配文件名）
+            // 注意：tarotCards 里的 image 是旧 URL，包含 key
+            const baseCard = tarotCards.find(c => {
+              const oldKey = getCardKeyFromUrl(c.image);
+              return oldKey === key;
+            });
+
+            if (baseCard && imageUrl) {
+              restoredCards.push({
+                ...baseCard,
+                image: imageUrl,
+                orientation: 'upright', // 默认为正位，因为只有文件名没有方向信息
+              });
             }
-            // 数据完整，直接返回
-            return card;
           });
-          
-          // 如果数据被修复，更新 localStorage
-          if (JSON.stringify(validatedCards) !== JSON.stringify(result.cards)) {
-            const updatedResult: MonthlyBasicResult = {
-              ...result,
-              cards: validatedCards,
+
+          if (restoredCards.length === 3) {
+            setSelectedCards(restoredCards);
+            setHasDrawnThisMonth(true);
+            setShowCards(false);
+            
+            // 构造临时 result 以兼容显示逻辑
+            const result: MonthlyBasicResult = {
+                month: currentMonth || getCurrentMonth(),
+                cards: restoredCards,
+                createdAt: Date.now()
             };
-            localStorage.setItem(storageKey, JSON.stringify(updatedResult));
-            setSavedResult(updatedResult);
-          } else {
             setSavedResult(result);
+            return;
           }
-          
-          setHasDrawnThisMonth(true);
-          setShowCards(false);
-          
-          // 将保存的卡牌转换为ShuffledTarotCard格式并填充到selectedCards
-          const cardsWithOrientation: ShuffledTarotCard[] = validatedCards.map(card => ({
-            ...card,
-            orientation: card.orientation,
-          }));
-          setSelectedCards(cardsWithOrientation);
-          return;
-        } else {
-          // 清除过期数据
-          localStorage.removeItem(storageKey);
         }
       } catch (e) {
-        console.error('Failed to parse stored result:', e);
-        localStorage.removeItem(storageKey);
+        console.error('Failed to parse tarotMonthlyResult:', e);
+      }
+    }
+    
+    // 2. 如果没有新数据，回退到旧逻辑 (monthly_basic_YYYY-MM)
+    if (currentMonth) {
+      const storageKey = `monthly_basic_${currentMonth}`;
+      const stored = localStorage.getItem(storageKey);
+      
+      if (stored) {
+        try {
+          const result = JSON.parse(stored) as MonthlyBasicResult;
+          if (result.month === currentMonth) {
+            // 验证并修复卡牌数据
+            const validatedCards = result.cards.map(card => {
+              // 尝试使用新图片路径修复
+              const key = getCardKeyFromUrl(card.image);
+              const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
+              
+              const baseCard = tarotCards.find(tc => tc.id === card.id);
+              
+              if (newImage && baseCard) {
+                 return {
+                   ...baseCard,
+                   image: newImage,
+                   orientation: card.orientation
+                 }
+              }
+
+              // 检查是否缺少必要字段（旧数据格式）
+              if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
+                console.warn('检测到旧数据格式，正在修复...', card);
+                if (baseCard) {
+                  return {
+                    id: baseCard.id,
+                    name: baseCard.name,
+                    image: baseCard.image, // 这里暂时用旧的，或者上面的逻辑已经覆盖了
+                    upright: baseCard.upright,
+                    reversed: baseCard.reversed,
+                    keywords: baseCard.keywords,
+                    orientation: card.orientation,
+                  };
+                }
+              }
+              // 数据完整，直接返回
+              return card;
+            });
+            
+            setSavedResult({ ...result, cards: validatedCards });
+            setHasDrawnThisMonth(true);
+            setShowCards(false);
+            
+            const cardsWithOrientation: ShuffledTarotCard[] = validatedCards.map(card => ({
+              ...card,
+              orientation: card.orientation,
+            }));
+            setSelectedCards(cardsWithOrientation);
+            return;
+          } else {
+            // 清除过期数据
+            localStorage.removeItem(storageKey);
+          }
+        } catch (e) {
+          console.error('Failed to parse stored result:', e);
+          localStorage.removeItem(storageKey);
+        }
       }
     }
     
     // 如果没有抽过牌，重新洗牌
     if (typeof window !== 'undefined') {
-      const shuffled = shuffleCards(tarotCards);
+      // 使用新图片路径初始化牌堆
+      const updatedTarotCards = tarotCards.map(c => {
+         const key = getCardKeyFromUrl(c.image);
+         if (key && tarotImagesFlat[key as keyof typeof tarotImagesFlat]) {
+             return { ...c, image: tarotImagesFlat[key as keyof typeof tarotImagesFlat] };
+         }
+         return c;
+      });
+
+      const shuffled = shuffleCards(updatedTarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
@@ -900,7 +974,7 @@ export default function MonthlyBasicFortune() {
     newIsAnimating[emptySlotIndex] = false;
     setIsAnimating([...newIsAnimating]);
     await new Promise(resolve => setTimeout(resolve, 300)); // 第二阶段和翻牌
-
+    
     setIsLoading(false);
 
     // 如果抽满3张，保存结果
@@ -909,31 +983,9 @@ export default function MonthlyBasicFortune() {
       // 准备保存的数据：使用 id 去 tarotCards 数组里匹配完整卡牌对象
       const cardsToSave = newSelectedCards.map(c => {
         if (!c) return null;
-        // 使用 id 去 tarotCards 数组里匹配完整卡牌对象
-        const fullCard = tarotCards.find(tc => tc.id === c.id);
-        if (!fullCard) {
-          console.error(`未找到卡牌 id=${c.id} 的完整数据`);
-          return null;
-        }
-        // 返回完整卡牌数据并附上 orientation
-        return {
-          id: fullCard.id,
-          name: fullCard.name,
-          image: fullCard.image,
-          upright: fullCard.upright,
-          reversed: fullCard.reversed,
-          keywords: fullCard.keywords,
-          orientation: c.orientation,
-        };
-      }).filter(c => c !== null) as Array<{
-        id: number;
-        name: string;
-        image: string;
-        upright: string;
-        reversed: string;
-        keywords: string[];
-        orientation: 'upright' | 'reversed';
-      }>;
+        // 此时 c.image 应该是新的 URL
+        return c; 
+      }).filter(c => c !== null) as ShuffledTarotCard[];
 
       const result: MonthlyBasicResult = {
         userId: null, // 后续用户系统上线后替换
@@ -942,7 +994,7 @@ export default function MonthlyBasicFortune() {
         createdAt: Date.now(),
       };
 
-      // 保存到 localStorage
+      // 保存到 localStorage (兼容旧 key)
       const storageKey = `monthly_basic_${currentMonth}`;
       localStorage.setItem(storageKey, JSON.stringify(result));
       
@@ -1224,4 +1276,3 @@ export default function MonthlyBasicFortune() {
     </>
   );
 }
-
