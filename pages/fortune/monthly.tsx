@@ -46,17 +46,13 @@ export default function MonthlyFortune() {
   };
 
   const handleCardClick = (path: string, isPremium: boolean = false) => {
-    // 如果是会员功能且用户不是会员，跳转到解锁页面
-    if (isPremium && !isMember) {
-      // TODO: 跳转到解锁会员页面或显示弹窗
-      // 选项1: 跳转到解锁页面
-      router.push('/membership/unlock');
-      // 选项2: 显示解锁弹窗（需要实现弹窗组件）
-      // setShowUnlockModal(true);
-      return;
-    }
-    
     // 会员或免费功能，正常跳转
+    // 暂时绕过会员检查，方便查看界面
+    // if (isPremium && !isMember) {
+    //   router.push('/membership/unlock');
+    //   return;
+    // }
+    
     router.push(path);
   };
 
@@ -217,7 +213,7 @@ export default function MonthlyFortune() {
                     buttonText={isMember ? '开始深度占卜' : '解锁完整占卜'}
                     cardCount={7}
                     layout="grid"
-                    onClick={() => handleCardClick('/fortune/monthly/premium', true)}
+                    onClick={() => handleCardClick('/fortune/monthly/member', true)}
                     isPremium={true}
                   />
                 </motion.div>
