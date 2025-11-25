@@ -262,11 +262,18 @@ export default function MonthlyMemberResultPage() {
     setError(null);
 
     try {
+      // 生成中文格式的月份显示
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const monthDisplay = `${year}年${month}月`;
+
       const response = await fetch('/api/monthly-member-fortune', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cards: result.cards,
+          month: monthDisplay, // 传递格式化的月份
           positions: [
             "月初状态",
             "本月感情/桃花",
@@ -451,7 +458,10 @@ export default function MonthlyMemberResultPage() {
               <div className="text-center mb-12">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">会员版月运深度解析</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {savedResult.result?.month || currentMonth} 深度指引
+                  {savedResult.result?.month || (() => {
+                    const now = new Date();
+                    return `${now.getFullYear()}年${now.getMonth() + 1}月`;
+                  })()} 深度指引
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
                   洞察本月能量流向，把握命运关键节点。

@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { cards, positions } = req.body;
+    const { cards, positions, month } = req.body;
 
     // 验证必需参数
     if (!cards || !Array.isArray(cards) || cards.length !== 7) {
@@ -22,6 +22,12 @@ export default async function handler(req, res) {
       "月末状态",
       "本月建议"
     ];
+
+    // 使用传递的月份，如果没有则生成当前月份
+    const monthDisplay = month || (() => {
+      const now = new Date();
+      return `${now.getFullYear()}年${now.getMonth() + 1}月`;
+    })();
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
     
@@ -42,7 +48,7 @@ export default async function handler(req, res) {
     }).join('\n\n');
 
     // 构建 prompt
-    const userMessage = `用户本月抽到的七张塔罗牌（会员版月运）信息如下：
+    const userMessage = `用户在 ${monthDisplay} 抽到的七张塔罗牌（会员版月运）信息如下：
 
 ${cardsInfo}
 
@@ -50,13 +56,13 @@ ${cardsInfo}
 风格要求：  
 - 内容必须更加生活化，而不是哲学式空谈。  
 - 结合真实的生活场景、日常行为、情绪体验和人际互动来解释。  
-- 让用户能联想到自己的生活，并感受到解读“贴地气”和具体可行动。  
+- 让用户能联想到自己的生活，并感受到解读"贴地气"和具体可行动。  
 - 建议必须具体，例如：沟通方式、工作习惯调整、人际处理方式、金钱管理等。  
 - 不要使用过度玄学、抽象或难以理解的表达方式。  
 - 语言保持温暖、有洞察力，但务实且贴近人心。
 
 要求输出为一个 JSON 对象，必须包含以下字段：
-1. month: 当前月份（例如 "2025年1月"）
+1. month: 必须严格使用 "${monthDisplay}"（不要自己判断月份）
 2. summary: 本月整体运势总结（250字左右）
    - 必须从用户真实生活角度出发，例如：工作节奏、情绪变化、关系主题、重点挑战、应对方式  
    - 表述要自然、明晰、有画面感，避免抽象论述  
@@ -73,7 +79,7 @@ ${cardsInfo}
 
 JSON 结构示例：
 {
-  "month": "2025年X月",
+  "month": "${monthDisplay}",
   "summary": "...",
   "cards": [
     { "position": "月初状态", "name": "...", "orientation": "...", "meaning": "..." },
@@ -81,7 +87,7 @@ JSON 结构示例：
   ]
 }
 
-请确保返回的是合法的 JSON 格式，不要包含 Markdown 代码块标记。`;
+请确保返回的是合法的 JSON 格式，不要包含 Markdown 代码块标记。月份字段必须严格使用 "${monthDisplay}"。`;
 
     // 调用 DeepSeek API
     const response = await fetch('https://api.deepseek.com/chat/completions', {
