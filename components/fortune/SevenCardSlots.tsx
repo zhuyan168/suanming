@@ -74,36 +74,73 @@ export default function SevenCardSlots({
                     animate={isAnimating[index] ? { scale: 1.08, y: -20, opacity: 1 } : { scale: 1, y: 0, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="relative w-20 h-32 sm:w-24 sm:h-36 md:w-28 md:h-44" // Smaller cards for 7-spread
-                    style={{ transformStyle: 'preserve-3d' }}
+                    className="relative w-24 h-36"
+                    style={{ 
+                      transformStyle: 'preserve-3d',
+                      backfaceVisibility: 'hidden',
+                      WebkitBackfaceVisibility: 'hidden',
+                      transform: 'translateZ(0)',
+                      WebkitTransform: 'translateZ(0)'
+                    }}
                   >
-                      <div
-                      className={`card-wrapper relative w-full h-full rounded-lg overflow-hidden border border-primary/50 shadow-[0_0_15px_rgba(127,19,236,0.4)] bg-indigo-950`}
+                    <div
+                      className="card-wrapper relative w-full h-full rounded-lg overflow-hidden border border-primary/50 shadow-[0_0_15px_rgba(127,19,236,0.4)]"
+                      style={{
+                        backfaceVisibility: 'hidden',
+                        WebkitBackfaceVisibility: 'hidden',
+                        transform: 'translateZ(0)',
+                        WebkitTransform: 'translateZ(0)'
+                      }}
                     >
                       {!isFlipped ? (
-                        <div className="card-back w-full h-full">
-                          <img src="/assets/card-back.png" alt="Back" className="w-full h-full object-cover" />
+                        <div 
+                          className="card-back w-full h-full"
+                          style={{
+                            backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
+                            transform: 'translateZ(0)',
+                            WebkitTransform: 'translateZ(0)'
+                          }}
+                        >
+                          <img 
+                            src="/assets/card-back.png" 
+                            alt="Back" 
+                            className="w-full h-full object-cover"
+                            style={{
+                              backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
+                              transform: 'translateZ(0)',
+                              WebkitTransform: 'translateZ(0)',
+                              imageRendering: '-webkit-optimize-contrast'
+                            }}
+                          />
                         </div>
                       ) : (
-                        <div className="card-front w-full h-full relative bg-gray-900 flex flex-col items-center justify-center p-2 text-center">
-                          {/* 图片层 */}
+                        <div 
+                          className="card-front w-full h-full relative"
+                          style={{
+                            backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
+                            transform: 'translateZ(0)',
+                            WebkitTransform: 'translateZ(0)'
+                          }}
+                        >
                           <img 
                             src={card.image} 
                             alt={card.name} 
-                            className={`absolute inset-0 w-full h-full object-cover z-10 ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} 
+                            className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
+                            style={{
+                              backfaceVisibility: 'hidden',
+                              WebkitBackfaceVisibility: 'hidden',
+                              transform: card.orientation === 'reversed' ? 'translateZ(0) rotate(180deg)' : 'translateZ(0)',
+                              WebkitTransform: card.orientation === 'reversed' ? 'translateZ(0) rotate(180deg)' : 'translateZ(0)',
+                              imageRendering: '-webkit-optimize-contrast'
+                            }}
                             onError={(e) => {
                               console.warn('Image failed to load:', card.image);
                               e.currentTarget.style.display = 'none';
                             }}
                           />
-                          {/* 文字层 (Fallback) */}
-                          <div className="z-0 flex flex-col items-center justify-center h-full w-full">
-                            <span className="text-3xl mb-2">🎴</span>
-                            <span className="text-sm font-bold text-white mb-1">{card.name}</span>
-                            <span className="text-xs text-white/60 px-2 py-1 rounded bg-white/10">
-                              {card.orientation === 'upright' ? '正位' : '逆位'}
-                            </span>
-                          </div>
                         </div>
                       )}
                     </div>
@@ -111,7 +148,7 @@ export default function SevenCardSlots({
                 ) : (
                   <motion.div
                     key={`empty-${index}`}
-                    className="w-20 h-32 sm:w-24 sm:h-36 md:w-28 md:h-44 rounded-lg border border-dashed border-white/20 flex items-center justify-center bg-white/5"
+                    className="w-24 h-36 rounded-lg border border-dashed border-white/20 flex items-center justify-center bg-white/5"
                   >
                     <span className="text-white/20 text-xl font-bold">{index + 1}</span>
                   </motion.div>
@@ -130,7 +167,20 @@ export default function SevenCardSlots({
       )}
 
       <style jsx>{`
-        .card-wrapper { transition: transform 0.3s ease-in-out; }
+        .card-wrapper { 
+          transition: transform 0.3s ease-in-out;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        .card-front img,
+        .card-back img {
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+        }
       `}</style>
     </div>
   );
