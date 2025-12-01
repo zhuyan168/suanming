@@ -1174,6 +1174,34 @@ export default function Home() {
           .group:hover .animate-pulse-glow {
             box-shadow: 0 0 20px 4px rgba(127, 19, 236, 0.8), 0 0 10px 3px rgba(127, 19, 236, 0.6), 0 0 0 1px rgba(127, 19, 236, 0.7);
           }
+          @keyframes breathe {
+            0%, 100% {
+              opacity: 0.4;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.8;
+              transform: scale(1.05);
+            }
+          }
+          .animate-breathe {
+            animation: breathe 4s ease-in-out infinite;
+          }
+          @keyframes text-glow {
+            0%, 100% {
+              text-shadow: 0 0 10px rgba(127, 19, 236, 0.3), 
+                           0 0 20px rgba(127, 19, 236, 0.2),
+                           0 0 30px rgba(168, 85, 247, 0.1);
+            }
+            50% {
+              text-shadow: 0 0 15px rgba(127, 19, 236, 0.5), 
+                           0 0 25px rgba(127, 19, 236, 0.3),
+                           0 0 35px rgba(168, 85, 247, 0.2);
+            }
+          }
+          .animate-text-glow {
+            animation: text-glow 4s ease-in-out infinite;
+          }
           @keyframes fade-in {
             from {
               opacity: 0;
@@ -1443,6 +1471,20 @@ export default function Home() {
                             <span className="truncate">财富 (Wealth)</span>
                           </button>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 治愈系引导文字 */}
+                  <div className="mt-20 mb-12 flex justify-center">
+                    <div className="relative inline-block">
+                      {/* 背景光晕效果 */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 blur-2xl animate-breathe"></div>
+                      {/* 文字容器 */}
+                      <div className="relative px-8 py-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
+                        <p className="text-white/90 text-base sm:text-lg font-medium text-center tracking-wide leading-relaxed animate-text-glow">
+                          占卜呈现当下能量的趋势，但未来始终掌握在你手里。
+                        </p>
                       </div>
                     </div>
                   </div>
