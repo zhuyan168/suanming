@@ -53,7 +53,6 @@ export const tarotImagesFlat = {
   "minor_arcana_cups_king": getTarotImageUrl("minor_arcana_cups_king.png"),
 
   // Pentacles — 星币 (14)
-  "minor_arcana_pentacles_1": getTarotImageUrl("minor_arcana_pentacles_1.png"),
   "minor_arcana_pentacles_2": getTarotImageUrl("minor_arcana_pentacles_2.png"),
   "minor_arcana_pentacles_3": getTarotImageUrl("minor_arcana_pentacles_3.png"),
   "minor_arcana_pentacles_4": getTarotImageUrl("minor_arcana_pentacles_4.png"),
@@ -70,7 +69,6 @@ export const tarotImagesFlat = {
   "minor_arcana_pentacles_king": getTarotImageUrl("minor_arcana_pentacles_king.png"),
 
   // Swords — 宝剑 (14)
-  "minor_arcana_swords_1": getTarotImageUrl("minor_arcana_swords_1.png"),
   "minor_arcana_swords_2": getTarotImageUrl("minor_arcana_swords_2.png"),
   "minor_arcana_swords_3": getTarotImageUrl("minor_arcana_swords_3.png"),
   "minor_arcana_swords_4": getTarotImageUrl("minor_arcana_swords_4.png"),
@@ -87,7 +85,6 @@ export const tarotImagesFlat = {
   "minor_arcana_swords_king": getTarotImageUrl("minor_arcana_swords_king.png"),
 
   // Wands — 权杖 (14)
-  "minor_arcana_wands_1": getTarotImageUrl("minor_arcana_wands_1.png"),
   "minor_arcana_wands_2": getTarotImageUrl("minor_arcana_wands_2.png"),
   "minor_arcana_wands_3": getTarotImageUrl("minor_arcana_wands_3.png"),
   "minor_arcana_wands_4": getTarotImageUrl("minor_arcana_wands_4.png"),
@@ -153,7 +150,6 @@ export const tarotImages = {
     
     
     pentacles: {
-    1: tarotImagesFlat.minor_arcana_pentacles_1,
     2: tarotImagesFlat.minor_arcana_pentacles_2,
     3: tarotImagesFlat.minor_arcana_pentacles_3,
     4: tarotImagesFlat.minor_arcana_pentacles_4,
@@ -172,7 +168,6 @@ export const tarotImages = {
     
     
     swords: {
-    1: tarotImagesFlat.minor_arcana_swords_1,
     2: tarotImagesFlat.minor_arcana_swords_2,
     3: tarotImagesFlat.minor_arcana_swords_3,
     4: tarotImagesFlat.minor_arcana_swords_4,
@@ -191,7 +186,6 @@ export const tarotImages = {
     
     
     wands: {
-    1: tarotImagesFlat.minor_arcana_wands_1,
     2: tarotImagesFlat.minor_arcana_wands_2,
     3: tarotImagesFlat.minor_arcana_wands_3,
     4: tarotImagesFlat.minor_arcana_wands_4,

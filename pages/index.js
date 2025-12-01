@@ -1477,15 +1477,20 @@ export default function Home() {
                   
                   {/* 治愈系引导文字 */}
                   <div className="mt-20 mb-12 flex justify-center">
-                    <div className="relative inline-block">
-                      {/* 背景光晕效果 */}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 blur-2xl animate-breathe"></div>
-                      {/* 文字容器 */}
-                      <div className="relative px-8 py-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
-                        <p className="text-white/90 text-base sm:text-lg font-medium text-center tracking-wide leading-relaxed animate-text-glow">
-                          占卜呈现当下能量的趋势，但未来始终掌握在你手里。
-                        </p>
-                      </div>
+                    <div className="relative flex items-center justify-center gap-3 sm:gap-4 px-4">
+                      {/* 背景光晕效果 - 更柔和的中心发光 */}
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-3xl rounded-full pointer-events-none"></div>
+                      
+                      {/* 左侧装饰星 - 带旋转动画 */}
+                      <span className="material-symbols-outlined text-primary/80 text-xl sm:text-2xl animate-pulse" style={{ animationDuration: '3s' }}>auto_awesome</span>
+                      
+                      {/* 文字 */}
+                      <p className="relative z-10 text-white/90 text-sm sm:text-lg font-medium text-center tracking-wide leading-relaxed animate-text-glow">
+                        占卜呈现当下能量的趋势，但未来始终掌握在你手里。
+                      </p>
+                      
+                      {/* 右侧装饰星 - 带旋转动画 */}
+                      <span className="material-symbols-outlined text-primary/80 text-xl sm:text-2xl animate-pulse" style={{ animationDuration: '3s', animationDelay: '1.5s' }}>auto_awesome</span>
                     </div>
                   </div>
                 </div>
