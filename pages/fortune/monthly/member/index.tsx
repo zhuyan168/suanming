@@ -511,7 +511,7 @@ export default function MonthlyMemberFortune() {
                     />
 
                     {selectedCards.filter(c => c !== null).length < 7 && (
-                      <div className="text-center text-white/50 text-sm mt-8">
+                      <div className="text-center text-white/50 text-sm mt-20">
                         <p>💫 请依次抽取七张卡牌（{selectedCards.filter(c => c !== null).length}/7）</p>
                       </div>
                     )}
