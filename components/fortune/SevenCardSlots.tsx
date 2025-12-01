@@ -161,7 +161,7 @@ export default function SevenCardSlots({
       
       {/* Loading text centered at bottom if needed */}
        {showLoadingText && cards.filter(c => c !== null).length < 7 && (
-        <div className="absolute bottom-0 left-0 right-0 text-center text-white/50 text-sm pb-4">
+        <div className="absolute -bottom-12 left-0 right-0 text-center text-white/50 text-sm">
           <p>请继续抽取卡牌...</p>
         </div>
       )}

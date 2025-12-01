@@ -33,7 +33,7 @@ const tarotCards = [
   { id: 19, name: 'XIX. The Sun', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_sun.png', upright: '乐观、成功、清晰洞见', reversed: '延迟、自满、暂时挫折', keywords: ['活力', '喜悦', '成长'] },
   { id: 20, name: 'XX. Judgement', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_judgement.png', upright: '觉醒、自我评估、新的开始', reversed: '自我怀疑、缺乏判断、错过机会', keywords: ['觉醒', '评估', '重生'] },
   { id: 21, name: 'XXI. The World', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_world.png', upright: '完成、成就、圆满', reversed: '未完成、缺乏成就感、停滞', keywords: ['完成', '成就', '圆满'] },
-  { id: 22, name: 'Ace of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_1.png', upright: '新计划、灵感、创造力', reversed: '缺乏动力、创意受阻、延迟', keywords: ['灵感', '创造', '开始'] },
+  { id: 22, name: 'Ace of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_ace.png', upright: '新计划、灵感、创造力', reversed: '缺乏动力、创意受阻、延迟', keywords: ['灵感', '创造', '开始'] },
   { id: 23, name: 'Two of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_2.png', upright: '规划未来、个人力量、探索', reversed: '缺乏规划、恐惧未知、停滞', keywords: ['规划', '探索', '力量'] },
   { id: 24, name: 'Three of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_3.png', upright: '远见、探索、扩张', reversed: '缺乏远见、延迟、挫折', keywords: ['远见', '探索', '扩张'] },
   { id: 25, name: 'Four of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_4.png', upright: '庆祝、和谐、稳定', reversed: '缺乏庆祝、不稳定、过渡期', keywords: ['庆祝', '和谐', '稳定'] },
@@ -511,7 +511,7 @@ export default function MonthlyMemberFortune() {
                     />
 
                     {selectedCards.filter(c => c !== null).length < 7 && (
-                      <div className="text-center text-white/50 text-sm mt-16">
+                      <div className="text-center text-white/50 text-sm mt-8">
                         <p>💫 请依次抽取七张卡牌（{selectedCards.filter(c => c !== null).length}/7）</p>
                       </div>
                     )}
