@@ -27,13 +27,13 @@ export default function SevenCardSlots({
   // Let's use absolute positioning percentages for responsiveness.
 
   const positions = [
-    { id: 1, top: '0%', left: '40%', x: '-50%' },       // 1. Top Center (Shifted Left)
-    { id: 2, top: '18%', left: '10%', x: '0%' },        // 2. Top Left (Adjusted for taller container)
-    { id: 3, top: '18%', right: '30%', x: '0%' },       // 3. Top Right (Inner)
-    { id: 4, top: '48%', left: '10%', x: '0%' },        // 4. Bottom Left (Adjusted)
-    { id: 5, top: '48%', right: '30%', x: '0%' },       // 5. Bottom Right (Inner)
-    { id: 6, top: '68%', left: '40%', x: '-50%' },      // 6. Bottom Center (Adjusted)
-    { id: 7, top: '34%', right: '5%', x: '0%' },        // 7. Far Right (Adjusted)
+    { id: 1, top: '0%', left: '40%', x: '-50%' },       // 1. Top Center (月初状态)
+    { id: 2, top: '22%', left: '10%', x: '0%' },        // 2. Top Left (本月爱情/桃花)
+    { id: 3, top: '22%', right: '30%', x: '0%' },       // 3. Top Right (本月事业)
+    { id: 4, top: '55%', left: '10%', x: '0%' },        // 4. Bottom Left (本月财运)
+    { id: 5, top: '55%', right: '30%', x: '0%' },       // 5. Bottom Right (本月人际关系)
+    { id: 6, top: '78%', left: '40%', x: '-50%' },      // 6. Bottom Center (月末状态)
+    { id: 7, top: '38%', right: '5%', x: '0%' },        // 7. Far Right (本月建议)
   ];
 
   // Mobile adjustments might be needed. The above is for a roughly square container.
@@ -41,7 +41,7 @@ export default function SevenCardSlots({
   // For now, let's try to make it work with a responsive container.
 
   return (
-    <div className="seven-card-slots w-full max-w-3xl mx-auto relative py-8 min-h-[700px] sm:min-h-[820px]">
+    <div className="seven-card-slots w-full max-w-3xl mx-auto relative py-8 min-h-[820px] sm:min-h-[900px]">
        {/* Background decorative element maybe? */}
        
       {cards.map((card, index) => {
