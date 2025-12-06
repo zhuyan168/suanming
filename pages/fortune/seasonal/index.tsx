@@ -721,23 +721,23 @@ const getCurrentQuarter = (): string => {
   return `${year}-Q${quarter}`;
 };
 
-// 生成唯一的用户会话ID
-const generateSessionId = (): string => {
-  // 使用时间戳 + 随机数生成唯一ID
+// 生成带季度后缀的唯一会话ID
+const generateSessionId = (quarter: string): string => {
+  // 使用时间戳 + 随机数生成唯一ID，带季度后缀
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${random}`;
+  return `session_${quarter}_${timestamp}_${random}`;
 };
 
-// 获取或创建用户的sessionId
-const getUserSessionId = (): string => {
+// 获取或创建当前季度的sessionId
+const getUserSessionId = (quarter: string): string => {
   if (typeof window === 'undefined') return '';
   
-  const storageKey = 'user_session_id';
+  const storageKey = `user_session_id_${quarter}`; // 季度独立的 key
   let sessionId = localStorage.getItem(storageKey);
   
   if (!sessionId) {
-    sessionId = generateSessionId();
+    sessionId = generateSessionId(quarter);
     localStorage.setItem(storageKey, sessionId);
   }
   
@@ -867,11 +867,17 @@ export default function SeasonalFortune() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 获取用户sessionId和当前季度
-    const userSessionId = getUserSessionId();
+    // 获取当前季度
     const quarter = getCurrentQuarter();
-    setSessionId(userSessionId);
     setCurrentQuarter(quarter);
+    
+    // 获取当前季度的sessionId
+    const userSessionId = getUserSessionId(quarter);
+    setSessionId(userSessionId);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[初始化] 当前季度: ${quarter}, sessionId: ${userSessionId}`);
+    }
 
     // 读取所有季度的历史记录
     const storageKey = 'seasonal_fortune_records';
@@ -964,12 +970,29 @@ export default function SeasonalFortune() {
     const emptySlotIndex = selectedCards.findIndex(c => c === null);
     if (emptySlotIndex === -1) return;
 
+    // 确保 sessionId 已初始化（防御性编程）
+    let currentSessionId = sessionId;
+    if (!currentSessionId) {
+      console.warn('[抽牌] sessionId 为空，重新获取');
+      const quarter = getCurrentQuarter();
+      currentSessionId = getUserSessionId(quarter);
+      setSessionId(currentSessionId);
+      setCurrentQuarter(quarter);
+    }
+
+    // 计算 pick 值：剩余要抽的牌数（方案A：5, 4, 3, 2, 1）
+    const pickValue = 5 - currentCardCount;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[抽牌请求] slot=${emptySlotIndex + 1}, pick=${pickValue}, sessionId=${currentSessionId}`);
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
       // 调用后端 API 获取真实的塔罗牌，传递sessionId
-      const response = await fetch(`/api/seasonal-draw?slot=${emptySlotIndex + 1}&pick=${slotIndex}&sessionId=${sessionId}`, {
+      const response = await fetch(`/api/seasonal-draw?slot=${emptySlotIndex + 1}&pick=${pickValue}&sessionId=${currentSessionId}`, {
         method: 'GET',
       });
 
