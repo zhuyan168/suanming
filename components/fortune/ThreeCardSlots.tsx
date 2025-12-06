@@ -98,7 +98,7 @@ export default function ThreeCardSlots({
                     
                     {/* 卡面 - 初始 rotateY(180deg)，翻牌后通过父容器旋转显示 */}
                     <div
-                      className="card-front absolute inset-0 rounded-xl overflow-hidden"
+                      className="card-front absolute inset-0 rounded-xl overflow-hidden bg-white"
                       style={{
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
@@ -110,6 +110,9 @@ export default function ThreeCardSlots({
                         className={`w-full h-full object-cover ${
                           card.orientation === 'reversed' ? 'rotate-180' : ''
                         }`}
+                        style={{
+                          backgroundColor: 'white',
+                        }}
                       />
                     </div>
                   </div>

@@ -1421,17 +1421,49 @@ export default function Home() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleFortuneMessage('四季牌阵 请求已记录')}
-                            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
+                            onClick={() => router.push('/fortune/seasonal')}
+                            className="relative flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors group"
                           >
                             <span className="truncate">四季牌阵</span>
+                            {/* 会员角标 - 镂空五角星 */}
+                            <svg 
+                              className="absolute top-1 right-1 w-4 h-4 text-primary drop-shadow-[0_0_4px_rgba(127,19,236,0.8)]" 
+                              viewBox="0 0 24 24" 
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            {/* Hover提示 */}
+                            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md bg-black/90 text-white/90 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none backdrop-blur-sm">
+                              会员专享
+                            </span>
                           </button>
                           <button
                             type="button"
                             onClick={() => handleFortuneMessage('年度运势 请求已记录')}
-                            className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
+                            className="relative flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors group"
                           >
                             <span className="truncate">年度运势</span>
+                            {/* 会员角标 - 镂空五角星 */}
+                            <svg 
+                              className="absolute top-1 right-1 w-4 h-4 text-primary drop-shadow-[0_0_4px_rgba(127,19,236,0.8)]" 
+                              viewBox="0 0 24 24" 
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            {/* Hover提示 */}
+                            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md bg-black/90 text-white/90 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none backdrop-blur-sm">
+                              会员专享
+                            </span>
                           </button>
                         </div>
                       </div>

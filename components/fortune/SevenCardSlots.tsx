@@ -117,7 +117,7 @@ export default function SevenCardSlots({
                         </div>
                       ) : (
                         <div 
-                          className="card-front w-full h-full relative"
+                          className="card-front w-full h-full relative bg-white"
                           style={{
                             backfaceVisibility: 'hidden',
                             WebkitBackfaceVisibility: 'hidden',
@@ -134,7 +134,8 @@ export default function SevenCardSlots({
                               WebkitBackfaceVisibility: 'hidden',
                               transform: card.orientation === 'reversed' ? 'translateZ(0) rotate(180deg)' : 'translateZ(0)',
                               WebkitTransform: card.orientation === 'reversed' ? 'translateZ(0) rotate(180deg)' : 'translateZ(0)',
-                              imageRendering: '-webkit-optimize-contrast'
+                              imageRendering: '-webkit-optimize-contrast',
+                              backgroundColor: 'white'
                             }}
                             onError={(e) => {
                               console.warn('Image failed to load:', card.image);
