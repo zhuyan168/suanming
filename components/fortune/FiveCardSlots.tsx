@@ -140,7 +140,10 @@ export default function FiveCardSlots({
                     }`}
                     style={{
                       backgroundColor: 'white',
+                      imageRendering: 'crisp-edges',
+                      WebkitFontSmoothing: 'antialiased',
                     }}
+                    loading="eager"
                   />
                 </div>
               </div>

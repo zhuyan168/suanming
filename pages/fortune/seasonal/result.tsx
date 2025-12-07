@@ -15,6 +15,60 @@ const getCurrentSeason = (): string => {
   return '冬季'; // 12, 1, 2月
 };
 
+// 获取下个季度的日期范围
+const getNextQuarterDateRange = (): { startMonth: number; startDay: number; endMonth: number; endDay: number; year: number } => {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentYear = now.getFullYear();
+  
+  // 春季 (3-5月) -> 下个季度是夏季 (6-8月)
+  if (currentMonth >= 3 && currentMonth <= 5) {
+    return {
+      startMonth: 6,
+      startDay: 1,
+      endMonth: 8,
+      endDay: 31,
+      year: currentYear
+    };
+  }
+  // 夏季 (6-8月) -> 下个季度是秋季 (9-11月)
+  else if (currentMonth >= 6 && currentMonth <= 8) {
+    return {
+      startMonth: 9,
+      startDay: 1,
+      endMonth: 11,
+      endDay: 30,
+      year: currentYear
+    };
+  }
+  // 秋季 (9-11月) -> 下个季度是冬季 (12-次年2月)
+  else if (currentMonth >= 9 && currentMonth <= 11) {
+    // 判断下一年是否为闰年
+    const nextYear = currentYear + 1;
+    const isLeapYear = (nextYear % 4 === 0 && nextYear % 100 !== 0) || (nextYear % 400 === 0);
+    return {
+      startMonth: 12,
+      startDay: 1,
+      endMonth: 2,
+      endDay: isLeapYear ? 29 : 28,
+      year: currentYear // 起始年份是当前年
+    };
+  }
+  // 冬季 (12, 1, 2月) -> 下个季度是春季 (3-5月)
+  else {
+    // 如果现在是12月，下个季度在下一年
+    // 如果现在是1-2月，下个季度在当前年
+    const targetYear = currentMonth === 12 ? currentYear + 1 : currentYear;
+    return {
+      startMonth: 3,
+      startDay: 1,
+      endMonth: 5,
+      endDay: 31,
+      year: targetYear
+    };
+  }
+};
+
 // 获取当前季度标识
 const getCurrentQuarter = (): string => {
   const now = new Date();
@@ -228,36 +282,6 @@ export default function SeasonalResult() {
 
   const handleBackToHome = () => {
     router.push('/');
-  };
-
-  const handleRedraw = () => {
-    if (typeof window !== 'undefined') {
-      const currentQuarter = getCurrentQuarter();
-      
-      // 提示用户：每个季度只能抽一次
-      const confirmRedraw = window.confirm(
-        `⚠️ 确定要清除 ${currentQuarter} 的抽牌记录吗？\n\n清除后可以重新抽牌，但原有的解读结果将永久丢失。\n\n每个季度只能抽取一次，请谨慎操作！`
-      );
-      
-      if (!confirmRedraw) return;
-      
-      // 清除当前季度的结果
-      const storageKey = 'seasonal_fortune_records';
-      const stored = localStorage.getItem(storageKey);
-      
-      if (stored) {
-        try {
-          const allRecords = JSON.parse(stored) as SeasonalRecords;
-          delete allRecords[currentQuarter];
-          localStorage.setItem(storageKey, JSON.stringify(allRecords));
-        } catch (e) {
-          console.error('Failed to remove current quarter record:', e);
-        }
-      }
-      
-      // 跳转回抽牌页面
-      router.push('/fortune/seasonal');
-    }
   };
 
   if (isLoading || !result) {
@@ -562,25 +586,34 @@ export default function SeasonalResult() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
-                className="mt-12 flex flex-col sm:flex-row justify-center gap-4"
+                className="mt-12 flex justify-center"
               >
                 <button
                   onClick={handleBackToHome}
-                  className="px-8 py-4 rounded-xl border-2 border-white/20 text-white font-semibold text-lg transition-all duration-300 hover:border-primary hover:bg-primary/10"
+                  className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                 >
                   返回首页
-                </button>
-                <button
-                  onClick={handleRedraw}
-                  className="px-8 py-4 rounded-xl border-2 border-white/20 text-white/50 font-semibold text-lg transition-all duration-300 hover:border-white/40 hover:text-white/70"
-                >
-                  清除本季记录
                 </button>
               </motion.div>
 
               {/* 提示文字 */}
               <div className="mt-8 text-center text-white/50 text-sm">
-                <p>💫 每个季度只能抽取一次牌阵，下个季度开始可重新抽牌</p>
+                <p>
+                  🔒 本季度牌阵已抽取，下个季度 {(() => {
+                    const nextQuarter = getNextQuarterDateRange();
+                    const { startMonth, startDay, endMonth, endDay, year } = nextQuarter;
+                    const currentYear = new Date().getFullYear();
+                    
+                    // 如果跨年，显示年份
+                    if (startMonth === 12) {
+                      return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
+                    } else if (year > currentYear) {
+                      return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+                    } else {
+                      return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+                    }
+                  })()} 可抽取新的牌阵
+                </p>
               </div>
             </div>
           </main>

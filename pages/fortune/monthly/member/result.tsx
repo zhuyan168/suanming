@@ -88,18 +88,64 @@ const tarotCards = [
   { id: 77, name: 'King of Pentacles', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_king.png', upright: '财务安全、实用、慷慨', reversed: '财务不稳定、贪婪、缺乏慷慨', keywords: ['安全', '实用', '慷慨'] },
 ];
 
-// 工具函数：从旧 URL 中提取文件名作为 key
+// ============ 工具函数 ============
+
+// 从旧 URL 中提取文件名作为 key
 const getCardKeyFromUrl = (url: string) => {
   const match = url.match(/\/([^/]+)\.png$/);
   return match ? match[1] : null;
 };
 
-// 工具函数：获取当前自然月（yyyy-MM格式）
+// 获取当前自然月（yyyy-MM格式）
 const getCurrentMonth = () => {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   return `${year}-${month}`;
+};
+
+// ============ localStorage 存取函数 ============
+
+// 获取七张牌会员月运的 key
+const getMonthlyMemberKey = (year: number, month: number): string => {
+  const monthStr = String(month).padStart(2, '0');
+  return `monthly_member_${year}-${monthStr}`;
+};
+
+// 加载七张牌会员月运数据
+const loadMonthlyMemberResult = (year: number, month: number): MonthlyMemberResult | null => {
+  if (typeof window === 'undefined') return null;
+  const key = getMonthlyMemberKey(year, month);
+  const stored = localStorage.getItem(key);
+  if (!stored) return null;
+  
+  try {
+    const result = JSON.parse(stored) as MonthlyMemberResult;
+    if (result.cards && result.cards.length === 7 && result.month) {
+      return result;
+    }
+    return null;
+  } catch (e) {
+    console.error('Failed to parse monthly member result:', e);
+    return null;
+  }
+};
+
+// 保存七张牌会员月运数据
+const saveMonthlyMemberResult = (data: MonthlyMemberResult): void => {
+  if (typeof window === 'undefined') return;
+  const [year, month] = data.month.split('-').map(Number);
+  const key = getMonthlyMemberKey(year, month);
+  
+  const validatedData = {
+    ...data,
+    cards: data.cards.map(card => ({
+      ...card,
+      orientation: card.orientation || 'upright'
+    }))
+  };
+  
+  localStorage.setItem(key, JSON.stringify(validatedData));
 };
 
 // API返回的详细解读卡片结构
@@ -152,17 +198,20 @@ export default function MonthlyMemberResultPage() {
 
   // 初始化：读取localStorage中的数据
   useEffect(() => {
+    // NOTE: Old member monthly key deprecated.
+    // `tarotMonthlyMemberResult` will not be restored anymore.
+    // Only use `monthly_member_YYYY-MM`.
+    
     const storageKey = `monthly_member_${currentMonth}`;
     const stored = localStorage.getItem(storageKey);
-    const tarotResultRaw = localStorage.getItem('tarotMonthlyMemberResult');
     
     let result: MonthlyMemberResult | null = null;
 
-    // 1. 尝试读取 monthly_member
+    // 读取新版 key (monthly_member_YYYY-MM)
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as MonthlyMemberResult;
-        if (parsed.month === currentMonth) {
+        if (parsed.month === currentMonth && parsed.cards.length === 7) {
           result = parsed;
         }
       } catch (e) {
@@ -170,46 +219,7 @@ export default function MonthlyMemberResultPage() {
       }
     }
 
-    // 2. 如果没有，尝试从 tarotMonthlyMemberResult 恢复
-    if (!result && tarotResultRaw) {
-      try {
-        const parsed = JSON.parse(tarotResultRaw);
-        const cardKeys = Array.isArray(parsed) ? parsed : (parsed.cards || []);
-        
-        if (Array.isArray(cardKeys) && cardKeys.length === 7) {
-          const restoredCards: ShuffledTarotCard[] = [];
-          
-          cardKeys.forEach(key => {
-            if (typeof key !== 'string') return;
-            const imageUrl = tarotImagesFlat[key as keyof typeof tarotImagesFlat];
-            const baseCard = tarotCards.find(c => {
-              const oldKey = getCardKeyFromUrl(c.image);
-              return oldKey === key;
-            });
-
-            if (baseCard && imageUrl) {
-              restoredCards.push({
-                ...baseCard,
-                image: imageUrl,
-                orientation: 'upright', 
-              });
-            }
-          });
-
-          if (restoredCards.length === 7) {
-            result = {
-              month: currentMonth,
-              cards: restoredCards,
-              createdAt: Date.now()
-            };
-          }
-        }
-      } catch (e) {
-        console.error('Failed to parse tarotMonthlyMemberResult:', e);
-      }
-    }
-
-    // 如果两个都没有，跳回抽牌页
+    // 如果没有数据，跳回抽牌页
     if (!result) {
       router.push('/fortune/monthly/member');
       return;
@@ -299,8 +309,8 @@ export default function MonthlyMemberResultPage() {
         result: data, // data 结构应该符合 { month, summary, cards: [...] }
       };
 
-      const storageKey = `monthly_member_${currentMonth}`;
-      localStorage.setItem(storageKey, JSON.stringify(updatedResult));
+      // 使用统一的保存函数
+      saveMonthlyMemberResult(updatedResult);
       
       setSavedResult(updatedResult);
     } catch (err: any) {

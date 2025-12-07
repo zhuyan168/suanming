@@ -775,6 +775,95 @@ const getSeasonalSolarTerm = (): { term: string; date: string; description: stri
   }
 };
 
+// 获取当前季度的日期范围（用于显示）
+const getCurrentQuarterDateRange = (): string => {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  
+  // 春季 (3-5月)
+  if (currentMonth >= 3 && currentMonth <= 5) {
+    return `${currentYear}年3月1日至5月31日`;
+  }
+  // 夏季 (6-8月)
+  else if (currentMonth >= 6 && currentMonth <= 8) {
+    return `${currentYear}年6月1日至8月31日`;
+  }
+  // 秋季 (9-11月)
+  else if (currentMonth >= 9 && currentMonth <= 11) {
+    return `${currentYear}年9月1日至11月30日`;
+  }
+  // 冬季 (12, 1, 2月)
+  else {
+    // 判断当前年份是否为闰年
+    const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
+    const febEnd = isLeapYear ? 29 : 28;
+    
+    // 如果是12月，显示当年12月到次年2月
+    if (currentMonth === 12) {
+      return `${currentYear}年12月1日至${currentYear + 1}年2月${febEnd}日`;
+    }
+    // 如果是1-2月，显示上一年12月到当年2月
+    else {
+      return `${currentYear - 1}年12月1日至${currentYear}年2月${febEnd}日`;
+    }
+  }
+};
+
+// 获取下个季度的日期范围
+const getNextQuarterDateRange = (): { startMonth: number; startDay: number; endMonth: number; endDay: number; year: number } => {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // 1-12
+  const currentYear = now.getFullYear();
+  
+  // 春季 (3-5月) -> 下个季度是夏季 (6-8月)
+  if (currentMonth >= 3 && currentMonth <= 5) {
+    return {
+      startMonth: 6,
+      startDay: 1,
+      endMonth: 8,
+      endDay: 31,
+      year: currentYear
+    };
+  }
+  // 夏季 (6-8月) -> 下个季度是秋季 (9-11月)
+  else if (currentMonth >= 6 && currentMonth <= 8) {
+    return {
+      startMonth: 9,
+      startDay: 1,
+      endMonth: 11,
+      endDay: 30,
+      year: currentYear
+    };
+  }
+  // 秋季 (9-11月) -> 下个季度是冬季 (12-次年2月)
+  else if (currentMonth >= 9 && currentMonth <= 11) {
+    // 判断下一年是否为闰年
+    const nextYear = currentYear + 1;
+    const isLeapYear = (nextYear % 4 === 0 && nextYear % 100 !== 0) || (nextYear % 400 === 0);
+    return {
+      startMonth: 12,
+      startDay: 1,
+      endMonth: 2,
+      endDay: isLeapYear ? 29 : 28,
+      year: currentYear // 起始年份是当前年
+    };
+  }
+  // 冬季 (12, 1, 2月) -> 下个季度是春季 (3-5月)
+  else {
+    // 如果现在是12月，下个季度在下一年
+    // 如果现在是1-2月，下个季度在当前年
+    const targetYear = currentMonth === 12 ? currentYear + 1 : currentYear;
+    return {
+      startMonth: 3,
+      startDay: 1,
+      endMonth: 5,
+      endDay: 31,
+      year: targetYear
+    };
+  }
+};
+
 // 四季牌阵单次结果接口
 interface SeasonalResult {
   userId?: string | null;
@@ -808,6 +897,7 @@ export default function SeasonalFortune() {
   const [scrollValue, setScrollValue] = useState(0);
   const [sessionId, setSessionId] = useState<string>(''); // 用户唯一会话ID
   const [currentQuarter, setCurrentQuarter] = useState<string>(''); // 当前季度
+  const [hasConfirmedOnce, setHasConfirmedOnce] = useState(false); // 是否已经确认过"只能抽一次"提醒
   
   // 五张卡槽的状态
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>([null, null, null, null, null]);
@@ -959,6 +1049,19 @@ export default function SeasonalFortune() {
     // 检查是否已经抽满5张
     const currentCardCount = selectedCards.filter(c => c !== null).length;
     if (currentCardCount >= 5) return;
+
+    // 🔒 如果是第一次抽牌，显示强提醒
+    if (currentCardCount === 0 && !hasConfirmedOnce) {
+      const confirmed = window.confirm(
+        `⚠️ 重要提醒 ⚠️\n\n每个季度只能抽取一次四季牌阵，一旦开始抽牌，本季度（${getCurrentQuarterDateRange()}）将无法重新抽取。\n\n请确保你已做好准备，在安静的环境中专注于你的问题。\n\n确定要开始抽牌吗？`
+      );
+      
+      if (!confirmed) {
+        return; // 用户取消，不执行抽牌
+      }
+      
+      setHasConfirmedOnce(true); // 标记已确认，后续抽牌不再提醒
+    }
 
     // 获取 uiSlots[slotIndex] 作为视觉上的卡片（但实际牌面来自API）
     const visualCard = uiSlots[slotIndex];
@@ -1214,21 +1317,50 @@ export default function SeasonalFortune() {
                     : `探索你在${getCurrentSeason()}这三个月的行动力、情感、思维、事业与整体运势走向。`}
                 </p>
                 
-                {/* 节气提示 */}
+                {/* 节气提示和重要提醒 */}
                 {!hasDrawn ? (
-                  <div className="max-w-3xl mx-auto mt-6 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
-                    <p className="text-white/60 text-sm leading-relaxed">
-                      <span className="text-primary font-semibold">✨ 占卜建议：</span>
-                      本季度内任何时间均可抽牌，但我们建议在
-                      <span className="text-white font-semibold mx-1">{getSeasonalSolarTerm().term}</span>
-                      （{getSeasonalSolarTerm().date}）抽取，
-                      {getSeasonalSolarTerm().description}。
-                    </p>
-                  </div>
+                  <>
+                    {/* 重要提醒 */}
+                    <div className="max-w-3xl mx-auto mt-6 p-5 rounded-xl bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 border-2 border-red-500/30">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">🔒</span>
+                        <div className="flex-1">
+                          <p className="text-red-200 font-bold text-base mb-2">重要提醒：本季度（{getCurrentQuarterDateRange()}）只能抽一次</p>
+                          <p className="text-white/70 text-sm leading-relaxed">
+                            四季牌阵每个季度仅能抽取一次，一旦开始抽牌即无法重来。请在安静的环境中，专注于你想要了解的问题后再开始抽牌。抽牌前系统会再次确认。
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* 节气建议 */}
+                    <div className="max-w-3xl mx-auto mt-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
+                      <p className="text-white/60 text-sm leading-relaxed">
+                        <span className="text-primary font-semibold">✨ 占卜建议：</span>
+                        本季度内任何时间均可抽牌，但我们建议在
+                        <span className="text-white font-semibold mx-1">{getSeasonalSolarTerm().term}</span>
+                        （{getSeasonalSolarTerm().date}）抽取，
+                        {getSeasonalSolarTerm().description}。
+                      </p>
+                    </div>
+                  </>
                 ) : (
                   <div className="max-w-3xl mx-auto mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
                     <p className="text-white/50 text-sm">
-                      💫 每个季度只能抽取一次牌阵，下个季度开始可重新抽牌
+                      🔒 本季度牌阵已抽取，下个季度 {(() => {
+                        const nextQuarter = getNextQuarterDateRange();
+                        const { startMonth, startDay, endMonth, endDay, year } = nextQuarter;
+                        const currentYear = new Date().getFullYear();
+                        
+                        // 如果跨年，显示年份
+                        if (startMonth === 12) {
+                          return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
+                        } else if (year > currentYear) {
+                          return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+                        } else {
+                          return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+                        }
+                      })()} 可抽取新的牌阵
                     </p>
                   </div>
                 )}
