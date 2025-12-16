@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -13,66 +13,116 @@ interface YearAheadSlotsProps {
   forceFlipped?: boolean;
 }
 
+interface CardPosition {
+  id: number;
+  x: number;
+  y: number;
+  label: string;
+}
+
 export default function YearAheadSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
   forceFlipped = false
 }: YearAheadSlotsProps) {
-  // 13个卡槽位置 - 圆环布局
-  // 1-12: 月份卡槽（围成圆环）
-  // 13: 年度主题牌（中心位置）
-  // 使用绝对定位，以百分比形式布局
+  const orbitRef = useRef<HTMLDivElement>(null);
+  const [positions, setPositions] = useState<CardPosition[]>([]);
   
   const monthLabels = [
     "一月", "二月", "三月", "四月", "五月", "六月",
     "七月", "八月", "九月", "十月", "十一月", "十二月"
   ];
 
-  const positions = [
-    // 月份卡槽 - 围成圆环（按照Year Ahead Spread的顺序：从底部开始，顺时针）
-    { id: 1, top: '78%', left: '50%', x: '-50%', label: monthLabels[0] },      // 1月 - 底部
-    { id: 2, top: '71%', left: '22%', x: '0%', label: monthLabels[1] },        // 2月 - 左下
-    { id: 3, top: '58%', left: '12%', x: '0%', label: monthLabels[2] },        // 3月 - 左下
-    { id: 4, top: '41%', left: '8%', x: '0%', label: monthLabels[3] },         // 4月 - 左侧
-    { id: 5, top: '25%', left: '12%', x: '0%', label: monthLabels[4] },        // 5月 - 左上
-    { id: 6, top: '12%', left: '22%', x: '0%', label: monthLabels[5] },        // 6月 - 左上
-    { id: 7, top: '5%', left: '50%', x: '-50%', label: monthLabels[6] },       // 7月 - 顶部
-    { id: 8, top: '12%', right: '22%', x: '0%', label: monthLabels[7] },       // 8月 - 右上
-    { id: 9, top: '25%', right: '12%', x: '0%', label: monthLabels[8] },       // 9月 - 右上
-    { id: 10, top: '41%', right: '8%', x: '0%', label: monthLabels[9] },       // 10月 - 右侧
-    { id: 11, top: '58%', right: '12%', x: '0%', label: monthLabels[10] },     // 11月 - 右下
-    { id: 12, top: '71%', right: '22%', x: '0%', label: monthLabels[11] },     // 12月 - 右下
-    { id: 13, top: '41.5%', left: '50%', x: '-50%', label: "年度主题牌" },     // 13 - 中心
-  ];
+  // 使用极坐标算法计算卡牌位置（以圆环容器为参照系，保证贴合圆弧）
+  useEffect(() => {
+    const el = orbitRef.current;
+    if (!el) return;
+
+    const calculatePositions = () => {
+      const rect = el.getBoundingClientRect();
+      const orbitWidth = rect.width;
+      const orbitHeight = rect.height;
+      if (orbitWidth <= 0 || orbitHeight <= 0) return;
+
+      // 中心点（以圆环容器为基准）
+      const centerX = orbitWidth / 2;
+      const centerY = orbitHeight / 2;
+
+      // 半径：圆环容器宽度的 35%–40%，取中值 38%
+      const radius = Math.min(orbitWidth, orbitHeight) * 0.38;
+
+      const newPositions: CardPosition[] = [];
+
+      // 月份卡牌：按你的公式 angle = -90deg + index * (360/12)
+      // 为了保持“1月在底部”的既有顺序，这里做 offset 映射（+6 等于旋转 180deg）
+      const offset = 6;
+      for (let i = 0; i < 12; i++) {
+        const angleInDegrees = -90 + (i + offset) * (360 / 12);
+        const angleInRadians = (angleInDegrees * Math.PI) / 180;
+
+        const x = centerX + radius * Math.cos(angleInRadians);
+        const y = centerY + radius * Math.sin(angleInRadians);
+
+        newPositions.push({
+          id: i + 1,
+          x,
+          y,
+          label: monthLabels[i]
+        });
+      }
+
+      // 第13张牌 - 中心位置（年度主题牌）
+      newPositions.push({
+        id: 13,
+        x: centerX,
+        y: centerY,
+        label: "年度主题牌"
+      });
+
+      setPositions(newPositions);
+    };
+
+    calculatePositions();
+
+    // 用 ResizeObserver 监听容器真实尺寸变化（比 window.resize 更可靠）
+    const ro = new ResizeObserver(() => calculatePositions());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
 
   return (
-    <div className="year-ahead-slots w-full max-w-4xl mx-auto relative py-8 min-h-[700px] sm:min-h-[800px]">
-      {/* 圆环装饰线 */}
-      <div className="absolute top-[41.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] border border-dashed border-white/10 rounded-full pointer-events-none" />
-      
-      {cards.map((card, index) => {
-        const pos = positions[index];
-        const isFlipped = forceFlipped || (card && !isAnimating[index]);
-        const isCenterCard = index === 12; // 第13张是中心牌
-        
-        return (
-          <div 
-            key={index} 
-            className="absolute"
-            style={{
-              top: pos.top,
-              left: pos.left ? pos.left : undefined,
-              right: pos.right ? pos.right : undefined,
-              transform: `translateX(${pos.x})`,
-              zIndex: isCenterCard ? 10 : 1, // 中心牌层级更高
-            }}
-          >
-            <div className="flex flex-col items-center">
-              {/* 位置标签 */}
-              <div className="mb-2 text-xs text-white/50 uppercase tracking-wider font-bold text-center">
-                {pos.label}
-              </div>
+    <div className="year-ahead-slots w-full max-w-4xl mx-auto py-8">
+      {/* 圆环区域：独立参照系，保证卡牌贴合圆弧；下面文案不再被 absolute 覆盖 */}
+      <div
+        ref={orbitRef}
+        className="relative w-full mx-auto min-h-[750px] sm:min-h-[850px]"
+      >
+        {positions.length > 0 && cards.map((card, index) => {
+          const pos = positions[index];
+          if (!pos) return null;
+
+          const isFlipped = forceFlipped || (card && !isAnimating[index]);
+          const isCenterCard = index === 12; // 第13张是中心牌
+
+          return (
+            <div 
+              key={index} 
+              className="absolute"
+              style={{
+                left: `${pos.x}px`,
+                top: `${pos.y}px`,
+                transform: 'translate(-50%, -50%)',
+                zIndex: isCenterCard ? 10 : 1, // 中心牌层级更高
+              }}
+            >
+              {/* 说明：定位点必须对齐“卡牌本体中心”，不能把标签算进来，否则会导致上下半径不一致 */}
+              <div className="relative flex items-center justify-center">
+                {/* 位置标签（绝对定位，不参与几何中心计算） */}
+                <div className="absolute -top-6 text-xs text-white/50 uppercase tracking-wider font-bold text-center whitespace-nowrap">
+                  {pos.label}
+                </div>
 
               <AnimatePresence mode="wait">
                 {card ? (
@@ -82,7 +132,11 @@ export default function YearAheadSlots({
                     animate={isAnimating[index] ? { scale: 1.08, y: -20, opacity: 1 } : { scale: 1, y: 0, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={`relative ${isCenterCard ? 'w-28 h-42' : 'w-20 h-32 sm:w-24 sm:h-36'}`}
+                    className={`relative ${
+                      isCenterCard
+                        ? 'w-28 h-40 sm:w-32 sm:h-48'
+                        : 'w-24 h-36 sm:w-28 sm:h-40'
+                    }`}
                     style={{ 
                       transformStyle: 'preserve-3d',
                       backfaceVisibility: 'hidden',
@@ -160,7 +214,9 @@ export default function YearAheadSlots({
                   <motion.div
                     key={`empty-${index}`}
                     className={`rounded-lg border border-dashed border-white/20 flex items-center justify-center bg-white/5 ${
-                      isCenterCard ? 'w-28 h-42' : 'w-20 h-32 sm:w-24 sm:h-36'
+                      isCenterCard
+                        ? 'w-28 h-40 sm:w-32 sm:h-48'
+                        : 'w-24 h-36 sm:w-28 sm:h-40'
                     }`}
                   >
                     <span className="text-white/20 text-xl font-bold">{index + 1}</span>
@@ -171,10 +227,12 @@ export default function YearAheadSlots({
           </div>
         );
       })}
-      
+
+      </div>
+
       {/* 抽牌进度提示 */}
       {showLoadingText && cards.filter(c => c !== null).length < 13 && (
-        <div className="absolute -bottom-12 left-0 right-0 text-center text-white/50 text-sm">
+        <div className="mt-6 text-center text-white/50 text-sm">
           <p>请继续抽取卡牌... ({cards.filter(c => c !== null).length}/13)</p>
         </div>
       )}

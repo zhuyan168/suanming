@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -13,46 +13,99 @@ interface ThirteenCardSlotsProps {
   forceFlipped?: boolean;
 }
 
+interface CardPosition {
+  id: number;
+  x: number;
+  y: number;
+  label: string;
+}
+
 export default function ThirteenCardSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
   forceFlipped = false
 }: ThirteenCardSlotsProps) {
-  // 13个卡槽的位置 - Year Ahead Spread 圆环布局
-  // 按照截图：从底部的1月（Querent位置）开始，顺时针排列12个月，中心为年度主题牌
-  // 使用百分比定位实现圆环效果
-  const positions = [
-    { id: 1, top: '88%', left: '50%', x: '-50%', label: 'Jan' },        // 1月 - 底部（Querent）
-    { id: 2, top: '78%', left: '28%', x: '-50%', label: 'Feb' },        // 2月 - 左下偏下
-    { id: 3, top: '64%', left: '15%', x: '-50%', label: 'Mar' },        // 3月 - 左下
-    { id: 4, top: '48%', left: '8%', x: '-50%', label: 'Apr' },         // 4月 - 左侧
-    { id: 5, top: '32%', left: '15%', x: '-50%', label: 'May' },        // 5月 - 左上
-    { id: 6, top: '18%', left: '28%', x: '-50%', label: 'Jun' },        // 6月 - 上方偏左
-    { id: 7, top: '12%', left: '50%', x: '-50%', label: 'Jul' },        // 7月 - 顶部
-    { id: 8, top: '18%', right: '28%', x: '50%', label: 'Aug' },        // 8月 - 上方偏右
-    { id: 9, top: '32%', right: '15%', x: '50%', label: 'Sep' },        // 9月 - 右上
-    { id: 10, top: '48%', right: '8%', x: '50%', label: 'Oct' },        // 10月 - 右侧
-    { id: 11, top: '64%', right: '15%', x: '50%', label: 'Nov' },       // 11月 - 右下
-    { id: 12, top: '78%', right: '28%', x: '50%', label: 'Dec' },       // 12月 - 右下偏下
-    { id: 13, top: '50%', left: '50%', x: '-50%', y: '-50%', label: 'Theme' }, // 13 - 中心年度主题牌
-  ];
+  const orbitRef = useRef<HTMLDivElement>(null);
+  const [positions, setPositions] = useState<CardPosition[]>([]);
+
+  // 13个卡槽 - Year Ahead Spread 圆形布局（极坐标，保证12张围绕中心成完整环形）
+  useEffect(() => {
+    const el = orbitRef.current;
+    if (!el) return;
+
+    const monthLabels = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+    const clamp = (min: number, value: number, max: number) => Math.max(min, Math.min(value, max));
+
+    const calculatePositions = () => {
+      const rect = el.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w <= 0 || h <= 0) return;
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      // 依据断点与容器宽度估算卡牌尺寸，用于计算“最大可用半径”
+      // 移动端：卡牌尺寸随屏幕宽度 clamp 缩放，避免 12 张在小屏幕上互相重叠
+      const isMd = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
+      const isSm = typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches;
+
+      const monthCardW = isMd ? 112 : isSm ? 112 : clamp(64, w * 0.18, 88);
+      const monthCardH = isMd ? 160 : isSm ? 160 : clamp(96, w * 0.27, 132);
+
+      // 中心牌移动端略小，给外圈留空间
+      const centerCardW = isMd ? 144 : isSm ? 128 : clamp(80, w * 0.20, 104);
+      const centerCardH = isMd ? 208 : isSm ? 192 : clamp(120, w * 0.30, 152);
+
+      const labelSpace = 24; // 标签位于 -top-6，大约占 24px
+      const padding = 10;
+
+      // 让点尽量靠外但不溢出容器（同时考虑标签高度）
+      const maxRadiusX = w / 2 - monthCardW / 2 - padding;
+      const maxRadiusY = h / 2 - monthCardH / 2 - labelSpace - padding;
+      let radius = Math.max(0, Math.min(maxRadiusX, maxRadiusY));
+
+      // 保证外圈不会压到中心牌（留一点缝隙）
+      const minRadius = centerCardH / 2 + monthCardH / 2 + 18;
+      radius = Math.max(radius, minRadius);
+
+      const next: CardPosition[] = [];
+
+      // angle = offset(-90deg) + index * (360/12)
+      // 为了让 Jan 在底部（与现有 UI 一致），整体再旋转 180deg => offset +6
+      const rotateOffset = 6;
+      for (let i = 0; i < 12; i++) {
+        const angleDeg = -90 + (i + rotateOffset) * (360 / 12);
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const x = centerX + radius * Math.cos(angleRad);
+        const y = centerY + radius * Math.sin(angleRad);
+        next.push({ id: i + 1, x, y, label: monthLabels[i] });
+      }
+
+      // Theme card at center
+      next.push({ id: 13, x: centerX, y: centerY, label: 'THEME' });
+
+      setPositions(next);
+    };
+
+    calculatePositions();
+    const ro = new ResizeObserver(() => calculatePositions());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
-    <div className="thirteen-card-slots w-full max-w-6xl mx-auto relative py-8 px-4 min-h-[700px] sm:min-h-[900px] md:min-h-[1100px]">
-      {/* 背景装饰圆环 */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[80%] h-[80%] rounded-full border border-white/10 border-dashed"></div>
-        <div className="absolute w-[60%] h-[60%] rounded-full border border-white/5 border-dashed"></div>
-      </div>
-      
-      {/* Querent 标签 */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white/40 text-sm font-semibold tracking-wider">
-        Querent
-      </div>
-      
-      {cards.map((card, index) => {
-        const pos = positions[index];
+    <div className="thirteen-card-slots w-full max-w-6xl mx-auto py-8 px-4">
+      {/* 仅保留卡牌环形布局：不再绘制任何圆环装饰线 */}
+      <div
+        ref={orbitRef}
+        className="relative w-full mx-auto min-h-[640px] sm:min-h-[780px] md:min-h-[900px]"
+      >
+        {positions.length > 0 && cards.map((card, index) => {
+          const pos = positions[index];
+          if (!pos) return null;
         const isFlipped = forceFlipped || (card && !isAnimating[index]);
         const isCenter = index === 12; // 第13张是中心牌
         
@@ -61,18 +114,17 @@ export default function ThirteenCardSlots({
             key={index} 
             className="absolute"
             style={{
-              top: pos.top,
-              left: pos.left ? pos.left : undefined,
-              right: pos.right ? pos.right : undefined,
-              transform: `translateX(${pos.x})${pos.y ? ` translateY(${pos.y})` : ''}`,
-              zIndex: isCenter ? 20 : 10,
+                left: `${pos.x}px`,
+                top: `${pos.y}px`,
+                transform: 'translate(-50%, -50%)',
+                zIndex: isCenter ? 20 : 10,
             }}
           >
-            <div className="flex flex-col items-center">
-              {/* 位置标签 */}
-              <div className={`mb-2 text-xs ${isCenter ? 'text-primary font-extrabold text-sm' : 'text-white/40 font-semibold'} uppercase tracking-wider`}>
-                {pos.label}
-              </div>
+              {/* 标签不参与几何中心计算，避免环形看起来“变形” */}
+              <div className="relative flex items-center justify-center">
+                <div className={`absolute -top-6 text-xs ${isCenter ? 'text-primary font-extrabold text-sm' : 'text-white/40 font-semibold'} uppercase tracking-wider whitespace-nowrap`}>
+                  {pos.label}
+                </div>
 
               <AnimatePresence mode="wait">
                 {card ? (
@@ -82,7 +134,11 @@ export default function ThirteenCardSlots({
                     animate={isAnimating[index] ? { scale: 1.08, y: -20, opacity: 1 } : { scale: 1, y: 0, opacity: 1 }}
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={`relative ${isCenter ? 'w-32 h-48 sm:w-36 sm:h-54' : 'w-20 h-30 sm:w-24 sm:h-36'}`}
+                    className={`relative ${
+                      isCenter
+                        ? 'w-[clamp(80px,20vw,104px)] h-[clamp(120px,30vw,152px)] sm:w-32 sm:h-48 md:w-36 md:h-52'
+                        : 'w-[clamp(64px,18vw,88px)] h-[clamp(96px,27vw,132px)] sm:w-28 sm:h-40 md:w-28 md:h-40'
+                    }`}
                     style={{ 
                       transformStyle: 'preserve-3d',
                       backfaceVisibility: 'hidden',
@@ -157,7 +213,11 @@ export default function ThirteenCardSlots({
                 ) : (
                   <motion.div
                     key={`empty-${index}`}
-                    className={`${isCenter ? 'w-32 h-48 sm:w-36 sm:h-54' : 'w-20 h-30 sm:w-24 sm:h-36'} rounded-lg border-2 border-dashed ${isCenter ? 'border-primary/30 bg-primary/5' : 'border-white/15 bg-white/5'} flex items-center justify-center backdrop-blur-sm`}
+                    className={`${
+                      isCenter
+                        ? 'w-[clamp(80px,20vw,104px)] h-[clamp(120px,30vw,152px)] sm:w-32 sm:h-48 md:w-36 md:h-52'
+                        : 'w-[clamp(64px,18vw,88px)] h-[clamp(96px,27vw,132px)] sm:w-28 sm:h-40 md:w-28 md:h-40'
+                    } rounded-lg border-2 border-dashed ${isCenter ? 'border-primary/30 bg-primary/5' : 'border-white/15 bg-white/5'} flex items-center justify-center backdrop-blur-sm`}
                   >
                     <span className={`${isCenter ? 'text-primary/40 text-2xl' : 'text-white/20 text-base'} font-bold`}>
                       {index + 1}
@@ -165,14 +225,15 @@ export default function ThirteenCardSlots({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+              </div>
           </div>
         );
       })}
+      </div>
       
       {/* Loading text */}
       {showLoadingText && cards.filter(c => c !== null).length < 13 && (
-        <div className="absolute -bottom-12 left-0 right-0 text-center text-white/50 text-sm">
+        <div className="mt-6 text-center text-white/50 text-sm">
           <p>请继续抽取卡牌...</p>
         </div>
       )}
