@@ -57,13 +57,30 @@ export default async function handler(req, res) {
     const now = new Date();
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1; // 0-11，需要+1
-    const currentSeason = Math.floor((currentMonth - 1) / 3) + 1; // 1-春, 2-夏, 3-秋, 4-冬
-    const seasonNames = ['', '春季', '夏季', '秋季', '冬季'];
-    const seasonName = seasonNames[currentSeason];
     
-    // 计算本季度的月份范围
-    const seasonStartMonth = (currentSeason - 1) * 3 + 1;
-    const seasonMonths = [seasonStartMonth, seasonStartMonth + 1, seasonStartMonth + 2];
+    // 根据实际的季节划分计算季节名称和月份
+    let seasonName;
+    let seasonMonths;
+    let seasonYear = currentYear;
+    
+    if (currentMonth >= 3 && currentMonth <= 5) {
+      seasonName = '春季';
+      seasonMonths = [3, 4, 5];
+    } else if (currentMonth >= 6 && currentMonth <= 8) {
+      seasonName = '夏季';
+      seasonMonths = [6, 7, 8];
+    } else if (currentMonth >= 9 && currentMonth <= 11) {
+      seasonName = '秋季';
+      seasonMonths = [9, 10, 11];
+    } else {
+      // 冬季：12月、1月、2月（跨年）
+      seasonName = '冬季';
+      seasonMonths = [12, 1, 2];
+      // 如果当前是12月，冬季跨到下一年
+      if (currentMonth === 12) {
+        seasonYear = currentYear; // 冬季开始年份是当前年
+      }
+    }
     
     // 构建卡牌信息字符串
     const cardsInfo = cards.map((card, index) => {
@@ -77,12 +94,22 @@ export default async function handler(req, res) {
 - 关键词：${card.keywords ? card.keywords.join('、') : ''}`;
     }).join('\n\n');
 
+    // 构建季节时间描述（处理冬季跨年的情况）
+    let seasonTimeDesc;
+    if (seasonName === '冬季' && currentMonth === 12) {
+      seasonTimeDesc = `${currentYear}年12月至${currentYear + 1}年2月`;
+    } else if (seasonName === '冬季' && currentMonth <= 2) {
+      seasonTimeDesc = `${currentYear - 1}年12月至${currentYear}年2月`;
+    } else {
+      seasonTimeDesc = `${currentYear}年${seasonMonths[0]}-${seasonMonths[2]}月`;
+    }
+    
     // 构建 prompt
-    const userMessage = `用户在${currentYear}年${seasonName}（${seasonMonths[0]}-${seasonMonths[2]}月）的"四季牌阵"中抽到的五张塔罗牌信息如下：
+    const userMessage = `用户在${seasonName}（${seasonTimeDesc}）的"四季牌阵"中抽到的五张塔罗牌信息如下：
 
 ${cardsInfo}
 
-你是一名经验丰富的塔罗师，请为用户生成本季度（${seasonMonths[0]}-${seasonMonths[2]}月）的深度运势解读。
+你是一名经验丰富的塔罗师，请为用户生成本季度（${seasonTimeDesc}）的深度运势解读。
 
 【重要要求】
 1. **生活化表达**：用真实、接地气的语言，让用户能联想到自己的日常生活
@@ -92,8 +119,9 @@ ${cardsInfo}
    - 情绪管理："感到焦虑时，可以尝试5分钟深呼吸或短暂散步"
    - 财务规划："这个月适合梳理固定开支，削减不必要的订阅服务"
 3. **时间节点提醒**：明确指出本季度各月份的重点和注意事项
-   - 比如："${seasonMonths[0]}月上旬需要特别注意..."
-   - 或："${seasonMonths[1]}月中下旬可能会遇到..."
+   - 对于冬季（12-2月），要明确区分"12月""1月""2月"的不同重点
+   - 对于其他季节，按照实际月份给出建议（如春季3-5月、夏季6-8月、秋季9-11月）
+   - 比如："12月上旬需要特别注意..."、"1月中下旬可能会遇到..."、"2月可能会出现..."
 4. **避免抽象空谈**：不要用"保持平衡""内在成长"等模糊表述，要说明具体怎么做
 5. **温暖务实**：语气温柔但不失真诚，像朋友在给建议
 

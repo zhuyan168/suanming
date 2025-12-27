@@ -1444,7 +1444,7 @@ export default function Home() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => router.push('/fortune/annual')}
+                            onClick={() => router.push('/fortune/annual/year-ahead')}
                             className="relative flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors group"
                           >
                             <span className="truncate">年度运势</span>

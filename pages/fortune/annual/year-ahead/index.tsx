@@ -353,7 +353,7 @@ export default function YearAheadFortune() {
   };
 
   const handleBackToAnnual = () => {
-    router.push('/fortune/annual');
+    router.push('/');
   };
 
   const canStartReading = selectedCards.filter(c => c !== null).length === 13;
@@ -407,7 +407,7 @@ export default function YearAheadFortune() {
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button onClick={handleBackToAnnual} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回年度运势</span>
+              <span className="text-sm font-medium">返回首页</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -415,17 +415,17 @@ export default function YearAheadFortune() {
             <div className="w-20"></div>
           </header>
 
-          <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
+          <main className="px-2 sm:px-8 md:px-16 lg:px-24 py-6 sm:py-10 md:py-16">
             <div className="mx-auto max-w-7xl">
-              <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Year Ahead Spread</p>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
+              <div className="text-center mb-8 sm:mb-12 px-2">
+                <p className="text-sm sm:text-base font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-primary mb-3 sm:mb-4">Year Ahead Spread</p>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
                   {hasDrawnThisYear ? `${currentYear}年度运势已抽取` : '抽取年度塔罗牌'}
                 </h1>
-                <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto px-2">
                   {hasDrawnThisYear 
                     ? `你已抽取${currentYear}年的年度运势，点击下方按钮查看详细月度指引。` 
-                    : '静心感受，从下方78张牌中选择13张，揭示未来一年的月历运势。'}
+                    : '静心感受，从下方78张牌中选择13张，揭示未来一年的运势。'}
                 </p>
               </div>
 
@@ -463,7 +463,7 @@ export default function YearAheadFortune() {
 
                     <ScrollBar value={scrollValue} onChange={setScrollValue} disabled={isLoading} />
 
-                    <div className="mt-8 mb-4 text-center text-white/50 text-sm">
+                    <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
                       <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 13</p>
                     </div>
 

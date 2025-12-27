@@ -49,20 +49,28 @@ export default function YearAheadSlots({
       const centerX = orbitWidth / 2;
       const centerY = orbitHeight / 2;
 
-      // 半径：圆环容器宽度的 35%–40%，取中值 38%
-      const radius = Math.min(orbitWidth, orbitHeight) * 0.38;
+      // 半径：根据屏幕尺寸动态调整，移动端使用更小半径让卡片更集中
+      const isMobile = orbitWidth < 640;
+      const radius = Math.min(orbitWidth, orbitHeight) * (isMobile ? 0.37 : 0.44);
 
       const newPositions: CardPosition[] = [];
 
       // 月份卡牌：按你的公式 angle = -90deg + index * (360/12)
-      // 为了保持“1月在底部”的既有顺序，这里做 offset 映射（+6 等于旋转 180deg）
+      // 为了保持"1月在底部"的既有顺序，这里做 offset 映射（+6 等于旋转 180deg）
       const offset = 6;
       for (let i = 0; i < 12; i++) {
         const angleInDegrees = -90 + (i + offset) * (360 / 12);
         const angleInRadians = (angleInDegrees * Math.PI) / 180;
 
-        const x = centerX + radius * Math.cos(angleInRadians);
-        const y = centerY + radius * Math.sin(angleInRadians);
+        // 为3月、4月、10月、11月添加额外的径向偏移（向外移动）
+        // 在移动端让这些位置的卡片向外扩展，增加间距
+        let radiusOffset = 0;
+        if (isMobile && (i === 2 || i === 3 || i === 9 || i === 10)) {
+          radiusOffset = radius * 0.08; // 向外偏移8%
+        }
+
+        const x = centerX + (radius + radiusOffset) * Math.cos(angleInRadians);
+        const y = centerY + (radius + radiusOffset) * Math.sin(angleInRadians);
 
         newPositions.push({
           id: i + 1,
@@ -93,11 +101,11 @@ export default function YearAheadSlots({
 
 
   return (
-    <div className="year-ahead-slots w-full max-w-4xl mx-auto py-8">
+    <div className="year-ahead-slots w-full max-w-4xl mx-auto py-4 sm:py-8 px-2 sm:px-4">
       {/* 圆环区域：独立参照系，保证卡牌贴合圆弧；下面文案不再被 absolute 覆盖 */}
       <div
         ref={orbitRef}
-        className="relative w-full mx-auto min-h-[750px] sm:min-h-[850px]"
+        className="relative w-full mx-auto min-h-[620px] max-w-[92vw] sm:max-w-full sm:min-h-[950px] md:min-h-[1000px]"
       >
         {positions.length > 0 && cards.map((card, index) => {
           const pos = positions[index];
@@ -120,7 +128,7 @@ export default function YearAheadSlots({
               {/* 说明：定位点必须对齐“卡牌本体中心”，不能把标签算进来，否则会导致上下半径不一致 */}
               <div className="relative flex items-center justify-center">
                 {/* 位置标签（绝对定位，不参与几何中心计算） */}
-                <div className="absolute -top-6 text-xs text-white/50 uppercase tracking-wider font-bold text-center whitespace-nowrap">
+                <div className="absolute -top-5 sm:-top-8 text-[9px] sm:text-sm text-white/60 uppercase tracking-wide sm:tracking-wider font-bold text-center whitespace-nowrap">
                   {pos.label}
                 </div>
 
@@ -134,8 +142,8 @@ export default function YearAheadSlots({
                     transition={{ duration: 0.3 }}
                     className={`relative ${
                       isCenterCard
-                        ? 'w-28 h-40 sm:w-32 sm:h-48'
-                        : 'w-24 h-36 sm:w-28 sm:h-40'
+                        ? 'w-[66px] h-[99px] sm:w-28 sm:h-42 md:w-32 md:h-48'
+                        : 'w-[52px] h-[78px] sm:w-24 sm:h-36 md:w-26 md:h-38'
                     }`}
                     style={{ 
                       transformStyle: 'preserve-3d',
@@ -146,7 +154,7 @@ export default function YearAheadSlots({
                     }}
                   >
                     <div
-                      className={`card-wrapper relative w-full h-full rounded-lg overflow-hidden border shadow-[0_0_15px_rgba(127,19,236,0.4)] ${
+                      className={`card-wrapper relative w-full h-full rounded-lg overflow-hidden border shadow-[0_0_10px_rgba(127,19,236,0.3)] sm:shadow-[0_0_15px_rgba(127,19,236,0.4)] ${
                         isCenterCard ? 'border-primary/70' : 'border-primary/50'
                       }`}
                       style={{
@@ -215,11 +223,11 @@ export default function YearAheadSlots({
                     key={`empty-${index}`}
                     className={`rounded-lg border border-dashed border-white/20 flex items-center justify-center bg-white/5 ${
                       isCenterCard
-                        ? 'w-28 h-40 sm:w-32 sm:h-48'
-                        : 'w-24 h-36 sm:w-28 sm:h-40'
+                        ? 'w-[66px] h-[99px] sm:w-28 sm:h-42 md:w-32 md:h-48'
+                        : 'w-[52px] h-[78px] sm:w-24 sm:h-36 md:w-26 md:h-38'
                     }`}
                   >
-                    <span className="text-white/20 text-xl font-bold">{index + 1}</span>
+                    <span className="text-white/20 text-base sm:text-xl font-bold">{index + 1}</span>
                   </motion.div>
                 )}
               </AnimatePresence>

@@ -139,11 +139,11 @@ interface SeasonalReading {
 
 // 五张卡槽的位置名称（对应API返回的顺序）
 const SLOT_NAMES = [
-  '行动（Action）',
-  '情绪与人际（Emotion）',
-  '思维（Mind）',
-  '现实事务（Material）',
-  '本季核心能量（Core）',
+  '行动力（Action）',
+  '情感与人际关系（Emotion）',
+  '思维与计划（Thinking）',
+  '事业与财运（Wealth）',
+  '整体运势（Overall）',
 ];
 
 const SLOT_DESCRIPTIONS = [
@@ -472,7 +472,7 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          本季核心能量
+                          整体运势（Overall）
                         </h3>
                         <p className="text-sm text-primary/80 font-medium mb-2">
                           {cards[4]?.name} ({cards[4]?.orientation === 'upright' ? '正位' : '逆位'})
@@ -492,7 +492,7 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          行动（Action）
+                          行动力（Action）
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
                           {cards[0]?.name} ({cards[0]?.orientation === 'upright' ? '正位' : '逆位'})
@@ -504,7 +504,7 @@ export default function SeasonalResult() {
                     </p>
                   </div>
 
-                  {/* 情绪与人际 */}
+                  {/* 情感与人际关系 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
                     <div className="flex items-start gap-3 mb-4">
                       <span className="material-symbols-outlined text-pink-500 text-3xl mt-1">
@@ -512,7 +512,7 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          情绪与人际（Emotion）
+                          情感与人际关系（Emotion）
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
                           {cards[1]?.name} ({cards[1]?.orientation === 'upright' ? '正位' : '逆位'})
@@ -524,7 +524,7 @@ export default function SeasonalResult() {
                     </p>
                   </div>
 
-                  {/* 思维 */}
+                  {/* 思维与计划 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
                     <div className="flex items-start gap-3 mb-4">
                       <span className="material-symbols-outlined text-blue-500 text-3xl mt-1">
@@ -532,7 +532,7 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          思维（Mind）
+                          思维与计划（Thinking）
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
                           {cards[2]?.name} ({cards[2]?.orientation === 'upright' ? '正位' : '逆位'})
@@ -544,7 +544,7 @@ export default function SeasonalResult() {
                     </p>
                   </div>
 
-                  {/* 现实事务 */}
+                  {/* 事业与财运 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
                     <div className="flex items-start gap-3 mb-4">
                       <span className="material-symbols-outlined text-green-500 text-3xl mt-1">
@@ -552,7 +552,7 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          现实事务（Material）
+                          事业与财运（Wealth）
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
                           {cards[3]?.name} ({cards[3]?.orientation === 'upright' ? '正位' : '逆位'})

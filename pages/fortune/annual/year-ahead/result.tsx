@@ -182,33 +182,158 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
 // Loading组件
 function MagicalLoading() {
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="relative w-24 h-24">
+    <div className="flex flex-col items-center justify-center gap-8">
+      <div className="relative w-40 h-40">
+        {/* 外层旋转星环 */}
         <motion.div
-          className="absolute inset-0 rounded-full border-4 border-primary/30"
+          className="absolute inset-0"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        >
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-primary rounded-full"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: `rotate(${i * 45}deg) translateY(-80px)`,
+              }}
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 1, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: i * 0.2,
+              }}
+            />
+          ))}
+        </motion.div>
+
+        {/* 中层神秘圆环 */}
+        <motion.div
+          className="absolute inset-4 rounded-full border-2 border-primary/40"
           animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.1, 1],
+            opacity: [0.4, 0.8, 0.4],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          style={{
+            boxShadow: '0 0 30px rgba(127, 19, 236, 0.5)',
+          }}
+        />
+
+        {/* 旋转的六芒星轮廓 */}
+        <motion.div
+          className="absolute inset-8"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <motion.path
+              d="M 50 10 L 60 40 L 90 40 L 65 60 L 75 90 L 50 70 L 25 90 L 35 60 L 10 40 L 40 40 Z"
+              fill="none"
+              stroke="url(#mystical-gradient)"
+              strokeWidth="2"
+              animate={{
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <defs>
+              <linearGradient id="mystical-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#7f13ec" />
+                <stop offset="50%" stopColor="#d97706" />
+                <stop offset="100%" stopColor="#7f13ec" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </motion.div>
+
+        {/* 中心塔罗牌图标 */}
+        <motion.div
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{
+            scale: [1, 1.05, 1],
           }}
           transition={{
             duration: 2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-        />
-        <motion.div
-          className="absolute inset-0 rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-        />
+        >
+          <motion.div
+            className="w-12 h-16 bg-gradient-to-br from-primary to-amber-600 rounded-lg shadow-lg flex items-center justify-center"
+            animate={{
+              rotateY: [0, 360],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            style={{
+              boxShadow: '0 0 20px rgba(127, 19, 236, 0.8), 0 0 40px rgba(217, 119, 6, 0.4)',
+            }}
+          >
+            <span className="text-white text-2xl">✨</span>
+          </motion.div>
+        </motion.div>
+
+        {/* 浮动粒子 */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute w-1 h-1 bg-amber-400 rounded-full"
+            style={{
+              left: '50%',
+              top: '50%',
+            }}
+            animate={{
+              x: [0, Math.cos(i * 60 * Math.PI / 180) * 60],
+              y: [0, Math.sin(i * 60 * Math.PI / 180) * 60],
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 0.3,
+              ease: "easeOut",
+            }}
+          />
+        ))}
       </div>
-      <motion.p
-        className="text-white/70 text-lg font-medium"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-      >
-        正在为你揭示命运指引...
-      </motion.p>
+
+      {/* 文字提示 */}
+      <div className="text-center space-y-2">
+        <motion.p
+          className="text-white text-xl font-bold"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          正在为你揭示命运指引...
+        </motion.p>
+        <motion.div
+          className="flex items-center justify-center gap-2"
+          animate={{ opacity: [0.3, 0.8, 0.3] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <span className="text-primary/70 text-sm">✦</span>
+          <span className="text-white/50 text-sm">连接宇宙能量</span>
+          <span className="text-primary/70 text-sm">✦</span>
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -287,7 +412,7 @@ export default function YearAheadResultPage() {
   };
 
   const handleBackToAnnual = () => {
-    router.push('/fortune/annual');
+    router.push('/');
   };
 
   if (isLoading) {
@@ -422,7 +547,7 @@ export default function YearAheadResultPage() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回年度运势</span>
+              <span className="text-sm font-medium">返回首页</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -431,12 +556,12 @@ export default function YearAheadResultPage() {
           </header>
 
           {/* 主内容 */}
-          <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
+          <main className="px-2 sm:px-8 md:px-16 lg:px-24 py-6 sm:py-10 md:py-16">
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
-              <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Year Ahead Spread</p>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
+              <div className="text-center mb-8 sm:mb-12 px-2">
+                <p className="text-sm sm:text-base font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-primary mb-3 sm:mb-4">Year Ahead Spread</p>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
                   {savedResult.result?.year || `${currentYear}年`} 年度指引
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
