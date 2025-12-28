@@ -183,150 +183,112 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
 function MagicalLoading() {
   return (
     <div className="flex flex-col items-center justify-center gap-8">
-      <div className="relative w-40 h-40">
-        {/* 外层旋转星环 */}
+      {/* 3D 翻转塔罗牌 */}
+      <div className="relative" style={{ perspective: '1000px' }}>
         <motion.div
-          className="absolute inset-0"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        >
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-primary rounded-full"
-              style={{
-                top: '50%',
-                left: '50%',
-                transform: `rotate(${i * 45}deg) translateY(-80px)`,
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 1, 0.3],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: i * 0.2,
-              }}
-            />
-          ))}
-        </motion.div>
-
-        {/* 中层神秘圆环 */}
-        <motion.div
-          className="absolute inset-4 rounded-full border-2 border-primary/40"
+          className="relative w-32 h-48 rounded-xl"
+          style={{
+            transformStyle: 'preserve-3d',
+          }}
           animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.4, 0.8, 0.4],
+            rotateY: [0, 180, 360],
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          style={{
-            boxShadow: '0 0 30px rgba(127, 19, 236, 0.5)',
-          }}
-        />
-
-        {/* 旋转的六芒星轮廓 */}
-        <motion.div
-          className="absolute inset-8"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
         >
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <motion.path
-              d="M 50 10 L 60 40 L 90 40 L 65 60 L 75 90 L 50 70 L 25 90 L 35 60 L 10 40 L 40 40 Z"
-              fill="none"
-              stroke="url(#mystical-gradient)"
-              strokeWidth="2"
+          {/* 卡牌正面 */}
+          <motion.div
+            className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary via-purple-600 to-amber-600 shadow-2xl flex items-center justify-center"
+            style={{
+              backfaceVisibility: 'hidden',
+              boxShadow: '0 0 40px rgba(127, 19, 236, 0.6), 0 10px 30px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            <motion.div
+              className="text-6xl"
               animate={{
-                opacity: [0.5, 1, 0.5],
+                scale: [1, 1.1, 1],
+                rotate: [0, 5, -5, 0],
               }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-            />
-            <defs>
-              <linearGradient id="mystical-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7f13ec" />
-                <stop offset="50%" stopColor="#d97706" />
-                <stop offset="100%" stopColor="#7f13ec" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </motion.div>
+            >
+              ✨
+            </motion.div>
+          </motion.div>
 
-        {/* 中心塔罗牌图标 */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          animate={{
-            scale: [1, 1.05, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        >
+          {/* 卡牌背面 */}
           <motion.div
-            className="w-12 h-16 bg-gradient-to-br from-primary to-amber-600 rounded-lg shadow-lg flex items-center justify-center"
-            animate={{
-              rotateY: [0, 360],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            className="absolute inset-0 rounded-xl bg-gradient-to-br from-amber-600 via-purple-600 to-primary shadow-2xl flex items-center justify-center"
             style={{
-              boxShadow: '0 0 20px rgba(127, 19, 236, 0.8), 0 0 40px rgba(217, 119, 6, 0.4)',
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              boxShadow: '0 0 40px rgba(217, 119, 6, 0.6), 0 10px 30px rgba(0, 0, 0, 0.3)',
             }}
           >
-            <span className="text-white text-2xl">✨</span>
+            <motion.div
+              className="w-20 h-28 border-4 border-white/40 rounded-lg relative overflow-hidden"
+              animate={{
+                borderColor: ['rgba(255,255,255,0.4)', 'rgba(255,255,255,0.8)', 'rgba(255,255,255,0.4)'],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+              }}
+            >
+              {/* 神秘花纹 */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <motion.div
+                  className="text-white/60 text-4xl"
+                  animate={{
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                >
+                  ☆
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
-        {/* 浮动粒子 */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute w-1 h-1 bg-amber-400 rounded-full"
-            style={{
-              left: '50%',
-              top: '50%',
-            }}
-            animate={{
-              x: [0, Math.cos(i * 60 * Math.PI / 180) * 60],
-              y: [0, Math.sin(i * 60 * Math.PI / 180) * 60],
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              delay: i * 0.3,
-              ease: "easeOut",
-            }}
-          />
-        ))}
+        {/* 卡牌下方光晕 */}
+        <motion.div
+          className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-40 h-8 bg-primary/30 rounded-full blur-xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
       </div>
 
       {/* 文字提示 */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-3">
         <motion.p
           className="text-white text-xl font-bold"
-          animate={{ opacity: [0.5, 1, 0.5] }}
+          animate={{ opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           正在为你揭示命运指引...
         </motion.p>
         <motion.div
           className="flex items-center justify-center gap-2"
-          animate={{ opacity: [0.3, 0.8, 0.3] }}
+          animate={{ opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <span className="text-primary/70 text-sm">✦</span>
