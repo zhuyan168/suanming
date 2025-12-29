@@ -72,12 +72,7 @@ export default function SpreadCard({
       </p>
 
       {/* 底部信息 */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <div className="flex items-center gap-2 text-white/50 text-sm">
-          <span className="material-symbols-outlined text-base">style</span>
-          <span>{spread.cardsCount} 张牌</span>
-        </div>
-
+      <div className="flex items-center justify-end pt-4 border-t border-white/10">
         <button
           className={`
             px-4 py-2 rounded-lg font-semibold text-sm transition-all

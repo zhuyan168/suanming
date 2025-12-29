@@ -65,7 +65,7 @@ export default function LoveThemePage() {
             <div className="mt-10 mb-6">
               <p className="text-white/70 text-base">
                 <span className="material-symbols-outlined text-primary text-sm mr-2 align-middle">info</span>
-                选择一个牌阵开始你的爱情占卜之旅
+                选择一种方式，温柔地看清你此刻的困惑
               </p>
             </div>
 
