@@ -26,7 +26,12 @@ export default function SpreadCard({
     if (isLocked) {
       onLockedClick();
     } else {
-      router.push(`/themed-readings/${theme}/${spread.id}`);
+      // 未来恋人牌阵直接进入抽牌页面
+      if (spread.id === 'future-lover') {
+        router.push(`/themed-readings/${theme}/${spread.id}/draw`);
+      } else {
+        router.push(`/themed-readings/${theme}/${spread.id}`);
+      }
     }
   };
 

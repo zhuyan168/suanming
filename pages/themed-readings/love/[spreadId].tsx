@@ -79,6 +79,12 @@ export default function SpreadDetailPage() {
     return null;
   }
 
+  // 未来恋人牌阵直接跳转到抽牌页
+  if (spreadId === 'future-lover' && router.isReady) {
+    router.replace('/themed-readings/love/future-lover/draw');
+    return null;
+  }
+
   return (
       <>
         <Head>
@@ -110,7 +116,7 @@ export default function SpreadDetailPage() {
               descEn=""
             />
 
-            {/* 占位内容区域 */}
+            {/* 内容区域 */}
             <div className="mt-12">
               {/* 牌阵信息卡片 */}
               <div className="rounded-xl bg-white/5 border border-white/10 p-8">

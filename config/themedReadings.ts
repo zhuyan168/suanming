@@ -34,13 +34,14 @@ export const LOVE_SPREADS: SpreadConfig[] = [
   // 免费牌阵 (2个)
   {
     id: 'future-lover',
-    titleZh: '未来恋人',
-    titleEn: 'Future Lover',
-    descZh: '看看你正在走向怎样的亲密关系，以及你需要准备的能量',
-    descEn: 'See what kind of intimate relationship you are heading towards',
-    cardsCount: 5,
+    titleZh: '未来恋人牌阵',
+    titleEn: 'Future Lover Spread',
+    descZh: '看看未来恋人的画像与相遇路径',
+    descEn: 'Explore your future lover and how to meet them',
+    cardsCount: 6,
     isPaid: false,
     icon: '💕',
+    badge: 'New',
   },
   {
     id: 'their-thoughts',
