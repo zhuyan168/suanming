@@ -173,7 +173,7 @@ export default function FutureLoverResult() {
   }, [router]);
 
   const handleReturnToList = () => {
-    router.push('/themed-readings/love');
+    router.back();
   };
 
   const handleDrawAgain = () => {

@@ -40,9 +40,8 @@ export default function YearAheadSlots({
     if (!el) return;
 
     const calculatePositions = () => {
-      const rect = el.getBoundingClientRect();
-      const orbitWidth = rect.width;
-      const orbitHeight = rect.height;
+      const orbitWidth = el.clientWidth;
+      const orbitHeight = el.clientHeight;
       if (orbitWidth <= 0 || orbitHeight <= 0) return;
 
       // 中心点（以圆环容器为基准）
@@ -58,19 +57,45 @@ export default function YearAheadSlots({
       // 月份卡牌：按你的公式 angle = -90deg + index * (360/12)
       // 为了保持"1月在底部"的既有顺序，这里做 offset 映射（+6 等于旋转 180deg）
       const offset = 6;
+      const globalOffsetY = isMobile ? -40 : 0;
       for (let i = 0; i < 12; i++) {
         const angleInDegrees = -90 + (i + offset) * (360 / 12);
         const angleInRadians = (angleInDegrees * Math.PI) / 180;
 
-        // 为3月、4月、10月、11月添加额外的径向偏移（向外移动）
-        // 在移动端让这些位置的卡片向外扩展，增加间距
-        let radiusOffset = 0;
-        if (isMobile && (i === 2 || i === 3 || i === 9 || i === 10)) {
-          radiusOffset = radius * 0.08; // 向外偏移8%
-        }
+        let x = centerX + radius * Math.cos(angleInRadians);
+        let y = centerY + radius * Math.sin(angleInRadians) + globalOffsetY;
 
-        const x = centerX + (radius + radiusOffset) * Math.cos(angleInRadians);
-        const y = centerY + (radius + radiusOffset) * Math.sin(angleInRadians);
+        // 移动端：对下半部分拥挤的卡片进行位置调整
+        if (isMobile) {
+          // 左侧卡片（三月、四月、五月）- 拉开距离
+          if (i === 2) { // 三月
+            x -= 8; // 向左移动较少，和五月对齐
+            y += 85; // 向下移动（再增加5px，和四月保持一点空隙）
+          } else if (i === 3) { // 四月
+            x -= 20; // 向左移动
+            y += 50; // 向下移动
+          } else if (i === 4) { // 五月
+            x -= 8; // 向左移动较少
+            y += 15; // 向下移动
+          }
+          
+          // 右侧卡片（九月、十月、十一月）- 拉开距离
+          else if (i === 8) { // 九月
+            x += 8; // 向右移动较少
+            y += 15; // 向下移动
+          } else if (i === 9) { // 十月
+            x += 20; // 向右移动
+            y += 50; // 向下移动
+          } else if (i === 10) { // 十一月
+            x += 8; // 向右移动更多
+            y += 85; // 向下移动（再增加5px，和十月保持一点空隙）
+          }
+          
+          // 底部卡片（一月、二月、十二月）
+          else if (i === 0 || i === 1 || i === 11) {
+            y += 95; // 向下移动
+          }
+        }
 
         newPositions.push({
           id: i + 1,
@@ -79,12 +104,15 @@ export default function YearAheadSlots({
           label: monthLabels[i]
         });
       }
-
+      
       // 第13张牌 - 中心位置（年度主题牌）
+      // 移动端需要调整位置，因为下半部分卡片都下移了，所以主题牌也需要往下移动来保持视觉中心
+      const themeCardY = centerY;
+
       newPositions.push({
         id: 13,
         x: centerX,
-        y: centerY,
+        y: themeCardY,
         label: "年度主题牌"
       });
 
@@ -105,7 +133,7 @@ export default function YearAheadSlots({
       {/* 圆环区域：独立参照系，保证卡牌贴合圆弧；下面文案不再被 absolute 覆盖 */}
       <div
         ref={orbitRef}
-        className="relative w-full mx-auto min-h-[620px] max-w-[92vw] sm:max-w-full sm:min-h-[950px] md:min-h-[1000px]"
+        className="relative w-full mx-auto min-h-[680px] max-w-[92vw] sm:max-w-full sm:min-h-[950px] md:min-h-[1000px]"
       >
         {positions.length > 0 && cards.map((card, index) => {
           const pos = positions[index];
