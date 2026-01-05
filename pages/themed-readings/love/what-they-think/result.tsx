@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { SpreadReading, SpreadCard } from '../../../../types/spread-reading';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -16,22 +17,9 @@ interface WhatTheyThinkResult {
   cards: ShuffledTarotCard[];
 }
 
-// 深度解读数据接口
-interface DeepReading {
-  sections: Array<{
-    position: number;
-    title: string;
-    text: string;
-  }>;
-  summary: {
-    title: string;
-    text: string;
-  };
-}
-
 // LocalStorage keys
 const STORAGE_KEY = 'what_they_think_result';
-const DEEP_READING_KEY = 'what_they_think_deep_reading';
+const READING_KEY = 'what_they_think_reading';
 
 // 牌位配置（⚠️ 不可更改）
 const SLOT_CONFIG = [
@@ -80,62 +68,48 @@ const loadWhatTheyThinkResult = (): WhatTheyThinkResult | null => {
   }
 };
 
-// 缓存深度解读到 localStorage
-const saveDeepReading = (data: DeepReading) => {
+// 缓存解读到 localStorage
+const saveReading = (data: SpreadReading) => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(DEEP_READING_KEY, JSON.stringify(data));
+  localStorage.setItem(READING_KEY, JSON.stringify(data));
 };
 
-// 从 localStorage 读取深度解读
-const loadDeepReading = (): DeepReading | null => {
+// 从 localStorage 读取解读
+const loadReading = (): SpreadReading | null => {
   if (typeof window === 'undefined') return null;
   try {
-    const data = localStorage.getItem(DEEP_READING_KEY);
+    const data = localStorage.getItem(READING_KEY);
     if (!data) return null;
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to load deep reading:', error);
+    console.error('Failed to load reading:', error);
     return null;
   }
-};
-
-// 生成基础解读（兜底方案）
-const generateBasicReading = (cards: ShuffledTarotCard[]) => {
-  return cards.map((card, index) => {
-    const config = SLOT_CONFIG[index];
-    const text = card.orientation === 'upright' ? card.upright : card.reversed;
-    return {
-      position: config.position,
-      title: config.title,
-      text: text,
-    };
-  });
 };
 
 export default function WhatTheyThinkResult() {
   const router = useRouter();
   const [savedResult, setSavedResult] = useState<WhatTheyThinkResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isGeneratingDeep, setIsGeneratingDeep] = useState(false);
-  const [deepReading, setDeepReading] = useState<DeepReading | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reading, setReading] = useState<SpreadReading | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [basicReading, setBasicReading] = useState<any[]>([]);
 
-  // 自动生成深度解读的函数
-  const generateDeepReading = async (result: WhatTheyThinkResult) => {
-    setIsGeneratingDeep(true);
+  // 自动生成解读的函数
+  const generateReading = async (result: WhatTheyThinkResult) => {
+    setIsGenerating(true);
     setError(null);
 
     try {
       // 准备发送给 API 的数据
-      const cardsData = result.cards.map((card, index) => ({
-        position: SLOT_CONFIG[index].position,
-        title: SLOT_CONFIG[index].title,
-        meaning: SLOT_CONFIG[index].meaning,
-        cardName: card.name,
-        isReversed: card.orientation === 'reversed',
+      const cardsData: SpreadCard[] = result.cards?.map((card) => ({
+        id: card.id.toString(),
+        name: card.name,
+        cnName: card.name, // 可以添加中文名映射
+        upright: card.orientation === 'upright',
+        imageUrl: card.image,
         keywords: card.keywords,
-      }));
+      })) || [];
 
       const response = await fetch('/api/what-they-think-reading', {
         method: 'POST',
@@ -144,6 +118,7 @@ export default function WhatTheyThinkResult() {
         },
         body: JSON.stringify({
           cards: cardsData,
+          locale: 'zh',
         }),
       });
 
@@ -152,15 +127,18 @@ export default function WhatTheyThinkResult() {
         throw new Error(errorData.error || '生成解读失败');
       }
 
-      const data: DeepReading = await response.json();
-      setDeepReading(data);
-      saveDeepReading(data);
+      const data = await response.json();
+      if (data.ok && data.reading) {
+        setReading(data.reading);
+        saveReading(data.reading);
+      } else {
+        throw new Error('解读数据格式错误');
+      }
     } catch (err: any) {
-      console.error('Failed to generate deep reading:', err);
-      setError(err.message || '生成深度解读失败，已显示基础解读');
-      // API 失败时，基础解读作为兜底方案
+      console.error('Failed to generate reading:', err);
+      setError(err.message || '生成解读失败，请重试');
     } finally {
-      setIsGeneratingDeep(false);
+      setIsGenerating(false);
     }
   };
 
@@ -175,25 +153,17 @@ export default function WhatTheyThinkResult() {
     }
 
     setSavedResult(result);
-    
-    // 生成基础解读（作为兜底方案）
-    try {
-      const basic = generateBasicReading(result.cards);
-      setBasicReading(basic);
-    } catch (err) {
-      console.error('Failed to generate basic reading:', err);
-    }
 
-    // 尝试加载已保存的深度解读
-    const savedDeepReading = loadDeepReading();
-    if (savedDeepReading) {
+    // 尝试加载已保存的解读
+    const savedReading = loadReading();
+    if (savedReading) {
       // 如果有缓存，直接使用
-      setDeepReading(savedDeepReading);
+      setReading(savedReading);
       setIsLoading(false);
     } else {
-      // 如果没有缓存，自动生成深度解读
-      setIsLoading(false); // 先显示页面内容
-      generateDeepReading(result); // 后台生成深度解读
+      // 如果没有缓存，自动生成解读
+      setIsLoading(false);
+      generateReading(result);
     }
   }, [router]);
 
@@ -204,8 +174,14 @@ export default function WhatTheyThinkResult() {
   const handleDrawAgain = () => {
     if (confirm('确定要重新抽牌吗？当前结果将被清空。')) {
       localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(DEEP_READING_KEY);
+      localStorage.removeItem(READING_KEY);
       router.push('/themed-readings/love/what-they-think/draw');
+    }
+  };
+
+  const handleRetry = () => {
+    if (savedResult) {
+      generateReading(savedResult);
     }
   };
 
@@ -215,7 +191,7 @@ export default function WhatTheyThinkResult() {
         <Head>
           <title>加载中... - 对方在想什么</title>
         </Head>
-        <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
+        <div className="min-h-screen bg-[#191022] flex items-center justify-center">
           <div className="text-white text-lg">加载中...</div>
         </div>
       </>
@@ -226,39 +202,45 @@ export default function WhatTheyThinkResult() {
     <>
       <Head>
         <title>对方在想什么 - 解读结果</title>
-        <meta name="description" content="探索对方此刻的真实想法与情绪" />
+        <meta name="description" content="我们不猜测，我们看证据与情绪" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
+        />
+        <link
+          rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
         />
+        <style dangerouslySetInnerHTML={{ __html: `
+          html.dark, html.dark body { background-color: #191022; }
+        ` }} />
       </Head>
 
-      <div className="min-h-screen bg-[#0f0f23] pb-20">
-        {/* 背景装饰 */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        </div>
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white pb-20" style={{ backgroundColor: '#191022' }}>
+          {/* 背景装饰 */}
+          <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+          </div>
 
-        {/* 主内容 */}
-        <div className="relative z-10">
-          {/* 顶部导航 */}
-          <div className="px-4 sm:px-8 py-6">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+          {/* 主内容 */}
+          <div className="relative z-10">
+            {/* 顶部导航 */}
+            <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm" style={{ backgroundColor: 'rgba(25, 16, 34, 0.8)' }}>
               <button
                 onClick={handleReturnToList}
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="hidden sm:inline">返回</span>
+                <span className="text-sm font-medium">返回</span>
               </button>
               
-              <div className="text-center">
-                <h1 className="text-xl sm:text-2xl font-bold text-white">对方在想什么</h1>
-                <p className="text-sm text-white/50 mt-1">解读结果</p>
+              <div className="flex items-center gap-4 text-white">
+                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">对方在想什么</h2>
               </div>
 
               <button
@@ -266,206 +248,273 @@ export default function WhatTheyThinkResult() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">refresh</span>
-                <span className="hidden sm:inline">重抽</span>
+                <span className="text-sm font-medium hidden sm:inline">重置</span>
               </button>
-            </div>
-          </div>
+            </header>
 
-          {/* 牌阵展示 */}
-          <div className="px-4 sm:px-8 mt-8">
-            <div className="max-w-7xl mx-auto">
-              <TwoRowsThreeColsSlots
-                cards={savedResult.cards}
-                isAnimating={[false, false, false, false, false, false]}
-                showLoadingText={false}
-                forceFlipped={true}
-                slotConfig={SLOT_CONFIG}
-              />
+            {/* 标题区域 */}
+            <div className="px-4 sm:px-8 md:px-16 lg:px-24 pt-10 sm:pt-16 pb-8">
+              <div className="max-w-7xl mx-auto text-center">
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Reading Result</p>
+                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
+                  {reading?.title || '对方在想什么'}
+                </h1>
+                <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                  我们不猜测，我们看证据与情绪
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* 解读内容 */}
-          <div className="px-4 sm:px-8 mt-12">
-            <div className="max-w-4xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {/* 错误提示 */}
-                <AnimatePresence>
-                  {error && (
+            {/* 牌阵展示 */}
+            {savedResult?.cards && savedResult.cards.length > 0 && (
+              <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-4">
+                <div className="max-w-7xl mx-auto">
+                  <TwoRowsThreeColsSlots
+                    cards={savedResult.cards}
+                    isAnimating={[false, false, false, false, false, false]}
+                    showLoadingText={false}
+                    forceFlipped={true}
+                    slotConfig={SLOT_CONFIG}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 解读内容 */}
+            <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-12">
+              <div className="max-w-5xl mx-auto">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {/* 错误提示 */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mb-6 rounded-2xl bg-red-500/10 border border-red-500/30 p-4"
+                      >
+                        <div className="flex items-start gap-3">
+                          <span className="material-symbols-outlined text-red-400">error</span>
+                          <div className="flex-1">
+                            <p className="text-red-300 text-sm">{error}</p>
+                            <button
+                              onClick={handleRetry}
+                              className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
+                            >
+                              点击重试
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => setError(null)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <span className="material-symbols-outlined text-sm">close</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* 正在生成解读 */}
+                  {isGenerating && !reading && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 rounded-xl bg-red-500/10 border border-red-500/30 p-4"
+                      className="mb-8 rounded-2xl bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/30 p-8 text-center"
                     >
-                      <div className="flex items-start gap-3">
-                        <span className="material-symbols-outlined text-red-400">error</span>
-                        <p className="text-red-300 text-sm flex-1">{error}</p>
-                        <button
-                          onClick={() => setError(null)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <span className="material-symbols-outlined text-sm">close</span>
-                        </button>
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" style={{ borderTopColor: '#7f13ec' }}></div>
+                        <p className="text-white text-lg font-semibold">正在为你解读这段关系里的真实状态</p>
+                        <p className="text-white/60 text-sm">
+                          这需要一点时间，请放心等待
+                        </p>
                       </div>
                     </motion.div>
                   )}
-                </AnimatePresence>
 
-                {/* 顶部加载提示 - 正在生成 AI 深度解读 */}
-                {isGeneratingDeep && !deepReading && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/30 p-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                      <div className="flex-1">
-                        <p className="text-white text-sm font-medium">✨ AI 正在为你生成深度解读...</p>
-                        <p className="text-white/60 text-xs mt-1">请稍候，解读内容生成后将自动展示</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 解读内容区域 - 只在有深度解读或不在生成中时显示 */}
-                {(!isGeneratingDeep || deepReading) && (
-                  <>
-                    {/* 一句话总结 */}
-                    {deepReading?.summary && (
-                      <div className="mb-8 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/30 p-6">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="text-2xl">✨</span>
-                          <h2 className="text-white text-lg font-bold">
-                            {deepReading.summary.title}
-                          </h2>
+                  {/* 总览 */}
+                  {reading && (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="mb-10 rounded-2xl bg-gradient-to-br from-primary/15 to-purple-500/10 border border-primary/30 p-6 sm:p-8"
+                      >
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-3xl">✨</span>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">总览</h2>
                         </div>
-                        <p className="text-white/80 text-base leading-relaxed">
-                          {deepReading.summary.text}
+                        <p className="text-white/90 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
+                          {reading.overall}
                         </p>
-                      </div>
-                    )}
+                      </motion.div>
 
-                    {/* 详细解读 */}
-                    <div className="space-y-8">
-                      <h2 className="text-white text-2xl font-bold text-center mb-8">
-                        详细解读
-                      </h2>
-
-                      {savedResult.cards.map((card, index) => {
-                        const config = SLOT_CONFIG[index];
-                        const deepSection = deepReading?.sections[index];
-                        const basicSection = basicReading[index];
-                        
-                        return (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="rounded-xl bg-white/5 border border-white/10 p-6 sm:p-8"
-                          >
-                            <div className="flex items-center gap-3 mb-6">
-                              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                <span className="text-primary font-bold">{config.position}</span>
-                              </div>
-                              <div>
-                                <h3 className="text-white text-lg font-bold">
-                                  {config.title}
-                                </h3>
-                                <p className="text-white/50 text-sm">
-                                  {config.meaning}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-6">
-                              <div className="flex-shrink-0 mx-auto sm:mx-0">
-                                <div className="relative w-28 h-42 rounded-lg overflow-hidden border-2 border-white/20">
-                                  <img
-                                    src={card.image}
-                                    alt={card.name}
-                                    className={`w-full h-full object-cover ${
-                                      card.orientation === 'reversed' ? 'rotate-180' : ''
-                                    }`}
-                                    style={{
-                                      backgroundColor: 'white',
-                                    }}
-                                  />
+                      {/* 六个位置解读 */}
+                      <div className="space-y-6 mb-10">
+                        {reading.positions?.map((pos, index) => {
+                          const card = savedResult.cards?.[index];
+                          const config = SLOT_CONFIG?.[index];
+                          
+                          // 防御性检查：如果 card 或 config 不存在，跳过此项
+                          if (!card || !config) return null;
+                          
+                          return (
+                            <motion.div
+                              key={pos.position}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
+                              className="rounded-2xl bg-white/5 border border-white/10 p-6 sm:p-8"
+                            >
+                              <div className="flex items-start gap-4 mb-6">
+                                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center" style={{ backgroundColor: 'rgba(127, 19, 236, 0.2)' }}>
+                                  <span className="text-primary font-bold text-lg" style={{ color: '#7f13ec' }}>{pos.position}</span>
                                 </div>
-                              </div>
-
-                              <div className="flex-1">
-                                <h4 className="text-white text-base font-semibold mb-2">
-                                  {card.name}
-                                </h4>
-                                <p className="text-white/60 text-sm mb-4">
-                                  {card.orientation === 'upright' ? '正位' : '逆位'}
-                                  {' · '}
-                                  {card.keywords.join('、')}
-                                </p>
-                                <div className="rounded-lg bg-white/5 p-4">
-                                  <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
-                                    {deepSection?.text || basicSection?.text || (card.orientation === 'upright' ? card.upright : card.reversed)}
+                                <div className="flex-1">
+                                  <h3 className="text-white text-lg sm:text-xl font-bold mb-1">
+                                    {pos.label}
+                                  </h3>
+                                  <p className="text-white/50 text-sm">
+                                    {config?.meaning}
                                   </p>
                                 </div>
                               </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
 
-                    {/* 加载状态 - 正在生成 AI 深度解读（底部） */}
-                    {isGeneratingDeep && !deepReading && (
-                      <div className="mt-8 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/30 p-8 text-center">
-                        <div className="flex flex-col items-center gap-4">
-                          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                          <p className="text-white text-lg font-semibold">✨ AI 正在为你生成深度解读...</p>
-                          <p className="text-white/60 text-sm">
-                            这可能需要 10-30 秒，请稍候
-                          </p>
-                        </div>
+                              <div className="flex flex-col sm:flex-row gap-6">
+                                <div className="flex-shrink-0 mx-auto sm:mx-0">
+                                  <div className="relative w-28 h-40 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+                                    <img
+                                      src={card?.image}
+                                      alt={card?.name}
+                                      className={`w-full h-full object-cover ${
+                                        card?.orientation === 'reversed' ? 'rotate-180' : ''
+                                      }`}
+                                      style={{ backgroundColor: 'white' }}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex-1">
+                                  <h4 className="text-white text-base font-semibold mb-2">
+                                    {card?.name}
+                                  </h4>
+                                  <p className="text-white/60 text-sm mb-4">
+                                    {card?.orientation === 'upright' ? '正位' : '逆位'}
+                                    {card?.keywords && card.keywords.length > 0 && (
+                                      <>
+                                        {' · '}
+                                        {card.keywords.join('、')}
+                                      </>
+                                    )}
+                                  </p>
+                                  <div className="rounded-lg bg-white/[0.03] border border-white/5 p-4">
+                                    <p className="text-white/80 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
+                                      {pos.reading}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </>
-                )}
 
-                {/* 底部提示 */}
-                <div className="mt-12 rounded-xl bg-primary/5 border border-primary/20 p-6">
-                  <div className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-primary text-2xl">info</span>
-                    <div className="flex-1">
-                      <h3 className="text-white text-lg font-bold mb-2">关于这次占卜</h3>
-                      <p className="text-white/70 text-sm leading-relaxed">
-                        塔罗牌反映的是当下的能量与趋势，而非绝对的命运。
-                        「对方在想什么」牌阵帮助你更清晰地理解对方的内在状态与外在表现，
-                        但请记住，真正的沟通需要双方的开放与真诚。
-                      </p>
-                    </div>
+                      {/* 短期走势 */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                        className="mb-8 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 p-6 sm:p-8"
+                      >
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-2xl">🔮</span>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">短期走向</h2>
+                        </div>
+                        {reading.shortTerm?.trend && (
+                          <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap mb-6">
+                            {reading.shortTerm.trend}
+                          </p>
+                        )}
+
+                        {/* 建议 */}
+                        {reading.shortTerm?.advice && reading.shortTerm.advice.length > 0 && (
+                          <div className="mb-6">
+                            <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
+                              <span className="text-xl">💡</span>
+                              建议行动
+                            </h3>
+                            <ul className="space-y-2">
+                              {reading.shortTerm.advice.map((item, idx) => (
+                                <li key={idx} className="flex items-start gap-3 text-white/80 text-sm sm:text-base">
+                                  <span className="text-primary mt-1" style={{ color: '#7f13ec' }}>•</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* 观察点 */}
+                        {reading.shortTerm?.watchFor && reading.shortTerm.watchFor.length > 0 && (
+                          <div>
+                            <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
+                              <span className="text-xl">👁️</span>
+                              观察重点
+                            </h3>
+                            <ul className="space-y-2">
+                              {reading.shortTerm.watchFor.map((item, idx) => (
+                                <li key={idx} className="flex items-start gap-3 text-white/80 text-sm sm:text-base">
+                                  <span className="text-indigo-400 mt-1">•</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </motion.div>
+
+                      {/* 免责声明 */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.6 }}
+                        className="rounded-2xl bg-white/[0.03] border border-white/10 p-6"
+                      >
+                        <div className="flex items-start gap-4">
+                          <span className="material-symbols-outlined text-white/50 text-2xl">info</span>
+                          <div className="flex-1">
+                            <p className="text-white/70 text-sm leading-relaxed">
+                              {reading.disclaimer}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+
+                  {/* 操作按钮 */}
+                  <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={handleDrawAgain}
+                      className="flex-1 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all duration-300"
+                    >
+                      重新抽牌
+                    </button>
+                    <button
+                      onClick={handleReturnToList}
+                      className="flex-1 py-4 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
+                      style={{ backgroundColor: '#7f13ec' }}
+                    >
+                      返回爱情占卜
+                    </button>
                   </div>
-                </div>
-
-                {/* 操作按钮 */}
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={handleDrawAgain}
-                    className="flex-1 py-4 rounded-lg bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-colors"
-                  >
-                    重新抽牌
-                  </button>
-                  <button
-                    onClick={handleReturnToList}
-                    className="flex-1 py-4 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
-                  >
-                    返回爱情占卜
-                  </button>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             </div>
           </div>
         </div>
