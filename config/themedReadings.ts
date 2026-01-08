@@ -53,18 +53,18 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     isPaid: false,
     icon: '💭',
   },
-  
-  // 会员牌阵 (2个)
   {
     id: 'relationship-development',
     titleZh: '这段感情的发展',
     titleEn: 'Relationship Development',
-    descZh: '梳理关系的走向与关键转折，帮你看清下一步',
-    descEn: 'Understand the direction and key turning points of this relationship',
-    cardsCount: 5,
-    isPaid: true,
-    icon: '🔮',
+    descZh: '抽取 8 张牌，看看这段关系的真实状态与自然走向',
+    descEn: 'Draw 8 cards to see the real state and natural direction of this relationship',
+    cardsCount: 8,
+    isPaid: true, // 会员功能，但暂时在路由层面绕过拦截
+    icon: '🌸',
   },
+  
+  // 会员牌阵 (1个)
   {
     id: 'reconciliation',
     titleZh: '复合的可能性',

@@ -45,7 +45,10 @@ export default function SpreadDetailPage() {
   }
 
   // 如果是付费牌阵且用户非会员
-  if (spreadConfig && spreadConfig.isPaid && !isMember) {
+  // 临时白名单：relationship-development 暂时开放（会员系统上线后移除此条件）
+  const isTemporarilyOpen = spreadId === 'relationship-development';
+  
+  if (spreadConfig && spreadConfig.isPaid && !isMember && !isTemporarilyOpen) {
     return (
       <>
         <Head>
@@ -82,6 +85,18 @@ export default function SpreadDetailPage() {
   // 未来恋人牌阵直接跳转到抽牌页
   if (spreadId === 'future-lover' && router.isReady) {
     router.replace('/themed-readings/love/future-lover/draw');
+    return null;
+  }
+
+  // 对方在想什么牌阵直接跳转到抽牌页
+  if (spreadId === 'what-they-think' && router.isReady) {
+    router.replace('/themed-readings/love/what-they-think/draw');
+    return null;
+  }
+
+  // 这段感情的发展（8张牌）直接跳转到抽牌页
+  if (spreadId === 'relationship-development' && router.isReady) {
+    router.replace('/themed-readings/love/relationship-development/draw');
     return null;
   }
 

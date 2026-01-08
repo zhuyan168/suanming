@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
-import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
+import EightCardsSpecialSlots from '../../../../components/fortune/EightCardsSpecialSlots';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -134,87 +134,97 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
 
 // 生成唯一的 session ID
 const generateSessionId = (): string => {
-  return `what-they-think-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `relationship-dev-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 // LocalStorage key
-const STORAGE_KEY = 'what_they_think_result';
+const STORAGE_KEY = 'relationship_development_result';
 
 // 结果数据接口
-interface WhatTheyThinkResult {
+interface RelationshipDev8Result {
   sessionId: string;
   timestamp: number;
   cards: ShuffledTarotCard[];
 }
 
-// 牌位配置（⚠️ 不可更改）
+// 牌位配置（8张）
 const SLOT_CONFIG = [
   {
     position: 1,
-    title: 'TA 对你说出口的态度',
-    meaning: 'TA 目前对你表达出来的想法与立场，代表你现在听到和看到的那一层。',
+    title: '真实的你',
+    meaning: '在这段关系里，你真正的状态与内心感受。不是你表现出来的样子，而是你心里真实发生的事。',
   },
   {
     position: 2,
-    title: 'TA 内心真正的想法',
-    meaning: 'TA 心里正在反复思考的真实念头，以及理性层面对这段关系的判断。',
+    title: '真实的 TA',
+    meaning: '在这段关系中，TA 真正的状态与内在动机。不是表面行为，而是更深层的真实。',
   },
   {
     position: 3,
-    title: 'TA 内心深处的真实感受',
-    meaning: 'TA 潜意识中的情绪与真实感受，可能连 TA 自己都没有完全意识到。',
+    title: 'TA 眼中的你',
+    meaning: 'TA 目前是如何看待你的。这份认知，与你真实的自己是否一致？',
   },
   {
     position: 4,
-    title: 'TA 对你的实际行动',
-    meaning: 'TA 在现实中对你采取的行为与反应，用来对照前面的说、想与感受。',
+    title: '你眼中的 TA',
+    meaning: '你现在是如何理解和看待 TA 的。这份理解，离 TA 的真实状态有多近？',
   },
   {
     position: 5,
-    title: '正在影响 TA 的外在因素',
-    meaning: '来自现实或他人的外部影响因素,正在左右 TA 的判断与选择。',
+    title: '关系的过去',
+    meaning: '这段关系曾经走过的阶段。它是如何开始的，又留下些什么影响至今。',
   },
   {
     position: 6,
-    title: '这段关系的短期走向',
-    meaning: '基于当前状态，这段关系在接下来约 2–3 个月内最可能的发展趋势。',
+    title: '关系的当下',
+    meaning: '此刻，这段关系真实所处的位置。不评价好坏，只呈现现状。',
+  },
+  {
+    position: 7,
+    title: '关系的走向',
+    meaning: '如果保持目前的互动方式，这段关系正在自然走向哪里。',
+  },
+  {
+    position: 8,
+    title: '你的下一步',
+    meaning: '为了让自己更安稳、也更诚实地面对这段关系，你可以采取的态度或行动方向。',
   },
 ];
 
 // 保存结果到 localStorage
-const saveWhatTheyThinkResult = (data: WhatTheyThinkResult) => {
+const saveResult = (data: RelationshipDev8Result) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
 // 从 localStorage 读取结果
-const loadWhatTheyThinkResult = (): WhatTheyThinkResult | null => {
+const loadResult = (): RelationshipDev8Result | null => {
   if (typeof window === 'undefined') return null;
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return null;
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to load what they think result:', error);
+    console.error('Failed to load result:', error);
     return null;
   }
 };
 
-export default function WhatTheyThinkDraw() {
+export default function RelationshipDev8Draw() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
   
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [savedResult, setSavedResult] = useState<WhatTheyThinkResult | null>(null);
+  const [savedResult, setSavedResult] = useState<RelationshipDev8Result | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [scrollValue, setScrollValue] = useState(0);
   
-  // 6张卡槽的状态
-  const initialSlots: (ShuffledTarotCard | null)[] = Array(6).fill(null);
+  // 8张卡槽的状态
+  const initialSlots: (ShuffledTarotCard | null)[] = Array(8).fill(null);
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>(initialSlots);
-  const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(6).fill(false));
+  const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(8).fill(false));
   
   // deck: 实际剩余可抽的牌
   const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
@@ -246,7 +256,7 @@ export default function WhatTheyThinkDraw() {
     if (typeof window === 'undefined') return;
 
     // 尝试加载已保存的结果
-    const saved = loadWhatTheyThinkResult();
+    const saved = loadResult();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
@@ -268,7 +278,7 @@ export default function WhatTheyThinkDraw() {
     if (isLoading || hasDrawn) return;
 
     const currentCardCount = selectedCards.filter(c => c !== null).length;
-    if (currentCardCount >= 6) return;
+    if (currentCardCount >= 8) return;
 
     const card = uiSlots[slotIndex];
     if (!card) return;
@@ -301,14 +311,14 @@ export default function WhatTheyThinkDraw() {
     setIsLoading(false);
 
     const updatedCardCount = newSelectedCards.filter(c => c !== null).length;
-    // 当抽满6张时保存
-    if (updatedCardCount === 6) {
-      const result: WhatTheyThinkResult = {
+    // 当抽满8张时保存
+    if (updatedCardCount === 8) {
+      const result: RelationshipDev8Result = {
         sessionId,
         timestamp: Date.now(),
         cards: newSelectedCards as ShuffledTarotCard[],
       };
-      saveWhatTheyThinkResult(result);
+      saveResult(result);
       setSavedResult(result);
       setHasDrawn(true);
     }
@@ -330,11 +340,11 @@ export default function WhatTheyThinkDraw() {
   };
 
   const handleViewResult = () => {
-    router.push('/themed-readings/love/what-they-think/result');
+    router.push('/themed-readings/love/relationship-development/result');
   };
 
   const handleReturnToList = () => {
-    router.back();
+    router.push('/themed-readings/love');
   };
 
   const handleReset = () => {
@@ -342,15 +352,15 @@ export default function WhatTheyThinkDraw() {
     if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
 
     localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem('what_they_think_reading'); // 同时清除解读缓存
+    localStorage.removeItem('relationship_development_reading'); // 同时清除解读缓存
     
     // 重置状态
     const newSessionId = generateSessionId();
     setSessionId(newSessionId);
     setHasDrawn(false);
     setSavedResult(null);
-    setSelectedCards(Array(6).fill(null));
-    setIsAnimating(Array(6).fill(false));
+    setSelectedCards(Array(8).fill(null));
+    setIsAnimating(Array(8).fill(false));
     
     // 重新洗牌
     const shuffled = shuffleCards(tarotCards);
@@ -361,8 +371,8 @@ export default function WhatTheyThinkDraw() {
   return (
     <>
       <Head>
-        <title>对方在想什么 - 抽牌</title>
-        <meta name="description" content="探索对方此刻的真实想法与情绪" />
+        <title>这段感情的发展 - 抽牌</title>
+        <meta name="description" content="抽取 8 张牌，看看这段关系的真实状态与自然走向" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -409,14 +419,14 @@ export default function WhatTheyThinkDraw() {
             <div className="mx-auto max-w-7xl">
               {/* 标题介绍区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">What They Think Spread</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Deep Relationship Tarot Spread</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '对方在想什么 - 已完成' : '抽取六张塔罗牌'}
+                  {hasDrawn ? '这段感情的发展 - 已完成' : '这段感情的发展'}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
                   {hasDrawn 
-                    ? '牌已经就位，现在，让我们一起看看 TA 的内心。' 
-                    : '静心感受，从下方78张牌中选择6张，探索对方的真实想法、感受与关系走向。'}
+                    ? '牌已经就位，现在，让我们一起看看这段关系的真实状态。' 
+                    : '静心感受，从下方78张牌中选择8张，看看这段关系的真实状态与自然走向。'}
                 </p>
               </div>
 
@@ -464,11 +474,11 @@ export default function WhatTheyThinkDraw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 6</p>
+                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 8</p>
                     </div>
 
                     {/* 卡槽区域 */}
-                    <TwoRowsThreeColsSlots
+                    <EightCardsSpecialSlots
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
@@ -486,9 +496,9 @@ export default function WhatTheyThinkDraw() {
                   transition={{ duration: 0.5 }}
                   className="max-w-5xl mx-auto"
                 >
-                  <TwoRowsThreeColsSlots
+                  <EightCardsSpecialSlots
                     cards={selectedCards}
-                    isAnimating={Array(6).fill(false)}
+                    isAnimating={Array(8).fill(false)}
                     showLoadingText={false}
                     forceFlipped={true}
                     slotConfig={SLOT_CONFIG}
@@ -502,7 +512,7 @@ export default function WhatTheyThinkDraw() {
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      查看解读
+                      开始解读
                     </motion.button>
                   </div>
 
@@ -512,8 +522,8 @@ export default function WhatTheyThinkDraw() {
                 </motion.div>
               )}
 
-              {/* 抽完6张后的查看按钮 */}
-              {!hasDrawn && selectedCards.filter(c => c !== null).length === 6 && (
+              {/* 抽完8张后的查看按钮 */}
+              {!hasDrawn && selectedCards.filter(c => c !== null).length === 8 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

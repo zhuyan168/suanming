@@ -1,14 +1,16 @@
-// API Route: POST /api/what-they-think-reading
-// 调用 DeepSeek Chat API 生成「对方在想什么」牌阵解读
+// API Route: POST /api/relationship-development-reading
+// 调用 DeepSeek Chat API 生成「这段感情的发展」8张牌阵解读
 
-// 牌阵固定结构（6张）
+// 牌阵固定结构（8张）
 const POSITION_LABELS = [
-  'TA 对你说出口的态度',
-  'TA 内心真正的想法',
-  'TA 内心深处的真实感受',
-  'TA 对你的实际行动',
-  '正在影响 TA 的外在因素',
-  '这段关系的短期走向',
+  '真实的你',
+  '真实的 TA',
+  'TA 眼中的你',
+  '你眼中的 TA',
+  '关系的过去',
+  '关系的当下',
+  '关系的走向',
+  '你的下一步',
 ];
 
 // 修复 JSON 的辅助函数
@@ -70,9 +72,9 @@ export default async function handler(req, res) {
   try {
     const { cards, locale = 'zh' } = req.body;
 
-    // 校验 cards.length === 6
-    if (!cards || !Array.isArray(cards) || cards.length !== 6) {
-      return res.status(400).json({ ok: false, error: '需要提供 6 张卡牌' });
+    // 校验 cards.length === 8
+    if (!cards || !Array.isArray(cards) || cards.length !== 8) {
+      return res.status(400).json({ ok: false, error: '需要提供 8 张卡牌' });
     }
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -91,10 +93,10 @@ export default async function handler(req, res) {
     }).join('\n');
 
     // 构建 system prompt
-    const systemPrompt = `你是一个擅长塔罗情绪解读的占卜师，但你不会做绝对预言。你会温柔、具体、可执行地回应用户的焦虑；不使用夸张承诺；会提醒现实边界。`;
+    const systemPrompt = `你是一个擅长塔罗关系解读的占卜师，但你不会做绝对预言。你会温柔、具体、可执行地回应用户对感情关系的疑问；不使用夸张承诺；会提醒现实边界。`;
 
     // 构建 user prompt
-    const userPrompt = `我在做一个 6 张牌阵「对方在想什么」。请基于以下 6 张牌（含正逆位）输出严格 JSON，遵循 SpreadReading 结构。
+    const userPrompt = `我在做一个 8 张牌阵「这段感情的发展」。请基于以下 8 张牌（含正逆位）输出严格 JSON，遵循 SpreadReading 结构。
 
 牌阵位置固定为：
 1 ${POSITION_LABELS[0]}
@@ -103,6 +105,8 @@ export default async function handler(req, res) {
 4 ${POSITION_LABELS[3]}
 5 ${POSITION_LABELS[4]}
 6 ${POSITION_LABELS[5]}
+7 ${POSITION_LABELS[6]}
+8 ${POSITION_LABELS[7]}
 
 卡牌数据（数组）：
 ${cardsInfo}
@@ -110,13 +114,13 @@ ${cardsInfo}
 写作要求：
 - 用中文
 - 用"你"的口吻对用户说话（温柔但直接）
-- 每个位置 reading 1-2 段，具体一点：描述"可能的心理/动机/矛盾点"，并给用户一个"怎么理解/怎么应对"
-- overall 只写 1 段，给一个清晰主线，概括整体情况
-- shortTerm.trend 写 1 段，总结短期（2-3个月内）最可能的发展趋势
-- shortTerm.advice 给 3 条短句建议（可执行、具体、贴近现实）
-- shortTerm.watchFor 给 3 个观察点（例如：TA是否主动联系、回应速度变化、是否兑现承诺等）
+- 每个位置 reading 1-2 段，具体一点：描述"可能的状态/动机/模式"，并给用户一个"怎么理解/怎么面对"
+- overall 只写 1 段，给一个清晰主线，概括整体关系状态
+- guidance.trend 写 1 段，总结如果保持当前状态，关系会往哪里走
+- guidance.advice 给 3 条短句建议（可执行、具体、贴近现实、不要过度承诺）
+- guidance.watchFor 给 3 个观察点（例如：TA的言行是否一致、你自己的真实感受变化、相处中的舒适度等）
 - disclaimer 1 句温柔提醒（非医疗/法律/绝对预言）
-- 避免：肯定式承诺（如"一定会复合/一定会联系"），避免PUA式话术
+- 避免：肯定式承诺（如"一定会在一起/一定会分手"），避免PUA式话术
 - 认真对待情绪，不油腻不套话，不做绝对断言
 - 只能输出 JSON，不能输出任何多余文本、不能 markdown、不能代码块
 
@@ -154,10 +158,20 @@ JSON 结构（严格遵循）：
       "position": 6,
       "label": "${POSITION_LABELS[5]}",
       "reading": "对应位置解读（1-2段）"
+    },
+    {
+      "position": 7,
+      "label": "${POSITION_LABELS[6]}",
+      "reading": "对应位置解读（1-2段）"
+    },
+    {
+      "position": 8,
+      "label": "${POSITION_LABELS[7]}",
+      "reading": "对应位置解读（1-2段）"
     }
   ],
-  "shortTerm": {
-    "trend": "短期走向总结（1段）",
+  "guidance": {
+    "trend": "关系走向总结（1段）",
     "advice": ["建议1", "建议2", "建议3"],
     "watchFor": ["观察点1", "观察点2", "观察点3"]
   },
