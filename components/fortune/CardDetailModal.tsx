@@ -44,7 +44,7 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
             onClick={onClose}
             className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
           >
-            <span className="material-symbols-outlined text-white text-xl">close</span>
+            <span className="material-symbols-outlined notranslate text-white text-xl">close</span>
           </button>
 
           {/* 内容区域 */}

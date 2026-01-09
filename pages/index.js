@@ -682,7 +682,7 @@ const FeatureToast = ({ visible, title, message, onClose }) => {
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white/70 transition hover:border-white/20 hover:text-white"
         >
-          <span className="material-symbols-outlined text-base">close</span>
+          <span className="material-symbols-outlined notranslate text-base">close</span>
         </button>
       </div>
     </div>
@@ -862,7 +862,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
             type="button"
             onClick={handleClose}
           >
-            <span className="material-symbols-outlined text-xl">close</span>
+            <span className="material-symbols-outlined notranslate text-xl">close</span>
           </button>
 
           <header className="mb-8 flex flex-col gap-3 text-center">
@@ -936,7 +936,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
             type="button"
             onClick={handleClose}
           >
-            <span className="material-symbols-outlined text-xl">close</span>
+            <span className="material-symbols-outlined notranslate text-xl">close</span>
           </button>
 
           <div className="animate-fade-in flex flex-col">

@@ -239,7 +239,7 @@ const TarotReading = () => {
           type="button"
           onClick={handleClose}
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined notranslate text-xl">close</span>
         </button>
 
         <header className="mb-6 flex flex-col gap-2">

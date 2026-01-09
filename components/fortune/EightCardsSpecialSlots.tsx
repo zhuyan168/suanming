@@ -154,7 +154,7 @@ export default function EightCardsSpecialSlots({
   };
   
   return (
-    <div className="eight-cards-special-slots w-full flex flex-col justify-center items-center py-4 sm:py-10 md:py-12 gap-3 sm:gap-8 md:gap-10">
+    <div className="eight-cards-special-slots w-full flex flex-col items-center py-4 sm:py-10 md:py-12 gap-3 sm:gap-8 md:gap-10">
       {/* 顶部第一排: 第8张 (居中) */}
       <div className="flex items-center justify-center">
         {renderCard(7)}

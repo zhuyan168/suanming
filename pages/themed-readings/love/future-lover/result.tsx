@@ -210,6 +210,51 @@ export default function FutureLoverResult() {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
         />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
+                window.tailwindConfigSet = true;
+                (function() {
+                  var script = document.createElement('script');
+                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
+                  script.async = true;
+                  script.onload = function() {
+                    if (window.tailwind) {
+                      window.tailwind.config = {
+                        darkMode: 'class',
+                        theme: {
+                          extend: {
+                            colors: {
+                              primary: '#7f13ec',
+                              'background-light': '#f7f6f8',
+                              'background-dark': '#191022',
+                            },
+                            fontFamily: {
+                              display: ['Spline Sans', 'sans-serif'],
+                            },
+                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+                            boxShadow: {
+                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
+                            },
+                          }
+                        }
+                      };
+                    }
+                  };
+                  document.head.appendChild(script);
+                })();
+              }
+            `,
+          }}
+        />
+        <style dangerouslySetInnerHTML={{ __html: `
+          html.dark, html.dark body { background-color: #0f0f23; }
+        ` }} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] pb-20">
@@ -283,7 +328,7 @@ export default function FutureLoverResult() {
                           onClick={() => setError(null)}
                           className="text-red-400 hover:text-red-300"
                         >
-                          <span className="material-symbols-outlined text-sm">close</span>
+                          <span className="material-symbols-outlined notranslate text-sm">close</span>
                         </button>
                       </div>
                     </motion.div>

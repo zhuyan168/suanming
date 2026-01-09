@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -119,6 +119,28 @@ const loadReading = (): RelationshipDevelopmentReading | null => {
   }
 };
 
+// 校验解读数据完整性
+const validateReading = (reading: any): boolean => {
+  if (!reading || typeof reading !== 'object') return false;
+  
+  // 校验必需字段（允许字符串为空，因为渲染时有 fallback）
+  if (!reading.spreadExplanation && reading.spreadExplanation !== '') return false;
+  if (typeof reading.spreadExplanation !== 'string') return false;
+  
+  if (!reading.cardReadings || !Array.isArray(reading.cardReadings) || reading.cardReadings.length !== 8) return false;
+  
+  if (!reading.integration || typeof reading.integration !== 'object') return false;
+  
+  if (!reading.shortTermTrend && reading.shortTermTrend !== '') return false;
+  if (typeof reading.shortTermTrend !== 'string') return false;
+  
+  // closing 字段可以为空字符串，因为有 fallback
+  if (reading.closing === undefined || reading.closing === null) return false;
+  if (typeof reading.closing !== 'string') return false;
+  
+  return true;
+};
+
 export default function RelationshipDev8Result() {
   const router = useRouter();
   const [savedResult, setSavedResult] = useState<RelationshipDev8Result | null>(null);
@@ -126,6 +148,9 @@ export default function RelationshipDev8Result() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [reading, setReading] = useState<RelationshipDevelopmentReading | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // 使用 ref 防止 useEffect 重复执行
+  const hasInitialized = useRef(false);
 
   // 自动生成解读的函数
   const generateReading = async (result: RelationshipDev8Result) => {
@@ -161,6 +186,17 @@ export default function RelationshipDev8Result() {
 
       const data = await response.json();
       if (data.ok && data.reading) {
+        // 校验数据完整性
+        if (!validateReading(data.reading)) {
+          console.error('[RelationshipDev] API 返回的解读数据不完整', data.reading);
+          throw new Error('解读数据不完整，请重试');
+        }
+        
+        // 检查 closing 字段是否缺失
+        if (!data.reading.closing || !data.reading.closing.trim()) {
+          console.warn('[RelationshipDev] closing 字段缺失或为空', data.reading);
+        }
+        
         setReading(data.reading);
         saveReading(data.reading);
       } else {
@@ -176,10 +212,16 @@ export default function RelationshipDev8Result() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
+    
+    // 防止重复执行（React 18 Strict Mode 会执行两次）
+    if (hasInitialized.current) {
+      return;
+    }
+    
+    hasInitialized.current = true;
+    
     const result = loadResult();
     if (!result) {
-      // 没有结果，返回抽牌页
       router.replace('/themed-readings/love/relationship-development/draw');
       return;
     }
@@ -189,15 +231,35 @@ export default function RelationshipDev8Result() {
     // 尝试加载已保存的解读
     const savedReading = loadReading();
     if (savedReading) {
-      // 如果有缓存，直接使用
-      setReading(savedReading);
-      setIsLoading(false);
+      // 校验数据完整性
+      if (validateReading(savedReading)) {
+        // 数据完整，直接使用
+        setReading(savedReading);
+        setIsLoading(false);
+      } else {
+        // 数据不完整，清除并重新生成
+        localStorage.removeItem(READING_KEY);
+        setIsLoading(false);
+        generateReading(result);
+      }
     } else {
       // 如果没有缓存，自动生成解读
       setIsLoading(false);
       generateReading(result);
     }
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 只在组件挂载时执行一次
+
+  // 确保页面滚动到顶部 - 延迟执行确保 DOM 完全渲染
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isLoading && savedResult && reading) {
+      // 使用 setTimeout 确保 DOM 完全渲染后再滚动
+      const timer = setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, savedResult, reading]);
 
   const handleReturnToList = () => {
     router.push('/themed-readings/love');
@@ -217,7 +279,7 @@ export default function RelationshipDev8Result() {
     }
   };
 
-  if (isLoading || !savedResult) {
+  if (isLoading) {
     return (
       <>
         <Head>
@@ -225,6 +287,19 @@ export default function RelationshipDev8Result() {
         </Head>
         <div className="min-h-screen bg-[#191022] flex items-center justify-center">
           <div className="text-white text-lg">加载中...</div>
+        </div>
+      </>
+    );
+  }
+
+  if (!savedResult) {
+    return (
+      <>
+        <Head>
+          <title>加载中... - 这段感情的发展</title>
+        </Head>
+        <div className="min-h-screen bg-[#191022] flex items-center justify-center">
+          <div className="text-white text-lg">数据加载中...</div>
         </div>
       </>
     );
@@ -245,6 +320,44 @@ export default function RelationshipDev8Result() {
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
+                window.tailwindConfigSet = true;
+                (function() {
+                  var script = document.createElement('script');
+                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
+                  script.async = true;
+                  script.onload = function() {
+                    if (window.tailwind) {
+                      window.tailwind.config = {
+                        darkMode: 'class',
+                        theme: {
+                          extend: {
+                            colors: {
+                              primary: '#7f13ec',
+                              'background-light': '#f7f6f8',
+                              'background-dark': '#191022',
+                            },
+                            fontFamily: {
+                              display: ['Spline Sans', 'sans-serif'],
+                            },
+                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+                            boxShadow: {
+                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
+                            },
+                          }
+                        }
+                      };
+                    }
+                  };
+                  document.head.appendChild(script);
+                })();
+              }
+            `,
+          }}
         />
         <style dangerouslySetInnerHTML={{ __html: `
           html.dark, html.dark body { background-color: #191022; }
@@ -285,13 +398,13 @@ export default function RelationshipDev8Result() {
             </header>
 
             {/* 标题区域 */}
-            <div className="px-4 sm:px-8 md:px-16 lg:px-24 pt-10 sm:pt-16 pb-8">
+            <div className="px-4 sm:px-8 md:px-16 lg:px-24 pt-4 pb-2">
               <div className="max-w-7xl mx-auto text-center">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Reading Result</p>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reading Result</p>
+                <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-2">
                   这段感情的发展
                 </h1>
-                <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                <p className="text-white/70 text-base max-w-2xl mx-auto">
                   理解关系的真实状态与自然走向
                 </p>
               </div>
@@ -299,7 +412,7 @@ export default function RelationshipDev8Result() {
 
             {/* 牌阵展示 */}
             {savedResult?.cards && savedResult.cards.length > 0 && (
-              <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-4">
+              <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-2">
                 <div className="max-w-7xl mx-auto">
                   <EightCardsSpecialSlots
                     cards={savedResult.cards}
@@ -313,13 +426,9 @@ export default function RelationshipDev8Result() {
             )}
 
             {/* 解读内容 */}
-            <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-12">
+            <div className="px-4 sm:px-8 md:px-16 lg:px-24 mt-6">
               <div className="max-w-5xl mx-auto">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
+                <div>
                   {/* 错误提示 */}
                   <AnimatePresence>
                     {error && (
@@ -344,7 +453,7 @@ export default function RelationshipDev8Result() {
                             onClick={() => setError(null)}
                             className="text-red-400 hover:text-red-300"
                           >
-                            <span className="material-symbols-outlined text-sm">close</span>
+                            <span className="material-symbols-outlined notranslate text-sm">close</span>
                           </button>
                         </div>
                       </motion.div>
@@ -369,7 +478,7 @@ export default function RelationshipDev8Result() {
                   )}
 
                   {/* 新版5模块结构解读 */}
-                  {reading && (
+                  {reading ? (
                     <>
                       {/* 模块1：牌阵整体说明 */}
                       <motion.div
@@ -530,13 +639,13 @@ export default function RelationshipDev8Result() {
                           <div className="flex-1">
                             <h2 className="text-white text-lg font-bold mb-3">最后的话</h2>
                             <p className="text-white/85 text-base leading-relaxed whitespace-pre-wrap">
-                              {reading.closing}
+                              {reading.closing?.trim() || '塔罗牌为你呈现了这段关系的现状，愿你在理解中找到自己的节奏。'}
                             </p>
                           </div>
                         </div>
                       </motion.div>
                     </>
-                  )}
+                  ) : null}
 
                   {/* 操作按钮 */}
                   <div className="mt-10 flex flex-col sm:flex-row gap-4">
@@ -554,7 +663,7 @@ export default function RelationshipDev8Result() {
                       返回爱情占卜
                     </button>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           </div>

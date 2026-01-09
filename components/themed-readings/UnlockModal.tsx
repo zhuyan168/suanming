@@ -11,7 +11,9 @@ interface UnlockModalProps {
 export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
   const router = useRouter();
 
-  if (!isOpen) return null;
+  // 硬防御：只有明确为 true 时才渲染
+  if (typeof window === 'undefined') return null; // SSR 阶段不渲染
+  if (!isOpen || isOpen !== true) return null;
 
   return (
     <>

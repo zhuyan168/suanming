@@ -41,18 +41,60 @@ export default function LoveThemePage() {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
         />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
+                window.tailwindConfigSet = true;
+                (function() {
+                  var script = document.createElement('script');
+                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
+                  script.async = true;
+                  script.onload = function() {
+                    if (window.tailwind) {
+                      window.tailwind.config = {
+                        darkMode: 'class',
+                        theme: {
+                          extend: {
+                            colors: {
+                              primary: '#7f13ec',
+                              'background-light': '#f7f6f8',
+                              'background-dark': '#191022',
+                            },
+                            fontFamily: {
+                              display: ['Spline Sans', 'sans-serif'],
+                            },
+                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+                            boxShadow: {
+                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
+                            },
+                          }
+                        }
+                      };
+                    }
+                  };
+                  document.head.appendChild(script);
+                })();
+              }
+            `,
+          }}
+        />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23]">
         {/* 背景装饰 */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </div>
 
         {/* 主内容 */}
-        <div className="relative z-10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-8 md:px-16 lg:px-24 py-12">
+        <div className="relative z-10 min-h-screen">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8 md:px-16 lg:px-24 py-3">
             {/* 头部 */}
             <ThemeHeader
               titleZh={themeConfig.titleZh}
@@ -62,9 +104,9 @@ export default function LoveThemePage() {
             />
 
             {/* 提示文字 */}
-            <div className="mt-10 mb-6">
-              <p className="text-white/70 text-base">
-                <span className="material-symbols-outlined text-primary text-sm mr-2 align-middle">info</span>
+            <div className="mt-3 mb-3">
+              <p className="text-white/70 text-xs">
+                <span className="material-symbols-outlined text-primary text-xs mr-1 align-middle">info</span>
                 选择一种方式，温柔地看清你此刻的困惑
               </p>
             </div>
@@ -83,7 +125,7 @@ export default function LoveThemePage() {
             </SpreadsGrid>
 
             {/* 底部提示 */}
-            <div className="mt-16 flex justify-center">
+            <div className="mt-8 flex justify-center">
               <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-2xl rounded-full pointer-events-none" />
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse">auto_awesome</span>
@@ -98,8 +140,9 @@ export default function LoveThemePage() {
       </div>
 
       {/* 解锁弹窗 */}
+      {isModalOpen && (
       <UnlockModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </>
+     ) }
+  </>
   );
 }
-

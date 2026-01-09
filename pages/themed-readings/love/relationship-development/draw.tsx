@@ -384,6 +384,44 @@ export default function RelationshipDev8Draw() {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
+                window.tailwindConfigSet = true;
+                (function() {
+                  var script = document.createElement('script');
+                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
+                  script.async = true;
+                  script.onload = function() {
+                    if (window.tailwind) {
+                      window.tailwind.config = {
+                        darkMode: 'class',
+                        theme: {
+                          extend: {
+                            colors: {
+                              primary: '#7f13ec',
+                              'background-light': '#f7f6f8',
+                              'background-dark': '#191022',
+                            },
+                            fontFamily: {
+                              display: ['Spline Sans', 'sans-serif'],
+                            },
+                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
+                            boxShadow: {
+                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
+                            },
+                          }
+                        }
+                      };
+                    }
+                  };
+                  document.head.appendChild(script);
+                })();
+              }
+            `,
+          }}
+        />
         <style dangerouslySetInnerHTML={{ __html: `
           html.dark, html.dark body { background-color: #191022; }
         ` }} />
@@ -415,15 +453,15 @@ export default function RelationshipDev8Draw() {
           </header>
 
           {/* 主内容 */}
-          <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
+          <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-4 sm:py-6">
             <div className="mx-auto max-w-7xl">
               {/* 标题介绍区域 */}
-              <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Deep Relationship Tarot Spread</p>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
+              <div className="text-center mb-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-2">Deep Relationship Tarot Spread</p>
+                <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-2">
                   {hasDrawn ? '这段感情的发展 - 已完成' : '这段感情的发展'}
                 </h1>
-                <p className="text-white/70 text-lg max-w-2xl mx-auto">
+                <p className="text-white/70 text-base max-w-2xl mx-auto">
                   {hasDrawn 
                     ? '牌已经就位，现在，让我们一起看看这段关系的真实状态。' 
                     : '静心感受，从下方78张牌中选择8张，看看这段关系的真实状态与自然走向。'}
