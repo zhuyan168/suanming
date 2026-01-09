@@ -17,21 +17,26 @@ interface RelationshipDev8Result {
   cards: ShuffledTarotCard[];
 }
 
-// 解读数据接口 (8张牌专用)
-interface SpreadReading8 {
-  title: string;
-  overall: string;
-  positions: Array<{
+// 解读数据接口 (8张牌专用 - 新版5模块结构)
+interface RelationshipDevelopmentReading {
+  // 模块1：牌阵整体说明
+  spreadExplanation: string;
+  // 模块2：单张牌解读（8张牌，每张一段完整解读）
+  cardReadings: Array<{
     position: number;
     label: string;
-    reading: string;
+    reading: string;  // 150-200字的完整解读文字
   }>;
-  guidance: {
-    trend: string;
-    advice: string[];
-    watchFor: string[];
+  // 模块3：关系动力整合总结
+  integration: {
+    theme: string;        // 当前关系的主旋律
+    drivingForce: string; // 推动关系的核心力量
+    tension: string;      // 当前最需要被看见的卡点或张力
   };
-  disclaimer: string;
+  // 模块4：短期发展趋势
+  shortTermTrend: string;
+  // 模块5：情绪收尾提醒
+  closing: string;
 }
 
 // LocalStorage keys
@@ -96,13 +101,13 @@ const loadResult = (): RelationshipDev8Result | null => {
 };
 
 // 缓存解读到 localStorage
-const saveReading = (data: SpreadReading8) => {
+const saveReading = (data: RelationshipDevelopmentReading) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(READING_KEY, JSON.stringify(data));
 };
 
 // 从 localStorage 读取解读
-const loadReading = (): SpreadReading8 | null => {
+const loadReading = (): RelationshipDevelopmentReading | null => {
   if (typeof window === 'undefined') return null;
   try {
     const data = localStorage.getItem(READING_KEY);
@@ -119,7 +124,7 @@ export default function RelationshipDev8Result() {
   const [savedResult, setSavedResult] = useState<RelationshipDev8Result | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [reading, setReading] = useState<SpreadReading8 | null>(null);
+  const [reading, setReading] = useState<RelationshipDevelopmentReading | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // 自动生成解读的函数
@@ -284,10 +289,10 @@ export default function RelationshipDev8Result() {
               <div className="max-w-7xl mx-auto text-center">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Reading Result</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {reading?.title || '这段感情的发展'}
+                  这段感情的发展
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  看清关系的真实状态，找到最适合自己的方向
+                  理解关系的真实状态与自然走向
                 </p>
               </div>
             </div>
@@ -363,160 +368,169 @@ export default function RelationshipDev8Result() {
                     </motion.div>
                   )}
 
-                  {/* 总览 */}
+                  {/* 新版5模块结构解读 */}
                   {reading && (
                     <>
+                      {/* 模块1：牌阵整体说明 */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="mb-10 rounded-2xl bg-gradient-to-br from-primary/15 to-purple-500/10 border border-primary/30 p-6 sm:p-8"
+                        className="mb-10 rounded-2xl bg-white/[0.03] border border-white/10 p-6 sm:p-8"
                       >
                         <div className="flex items-center gap-3 mb-4">
-                          <span className="text-3xl">✨</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">总览</h2>
+                          <span className="text-2xl">📖</span>
+                          <h2 className="text-white text-lg sm:text-xl font-bold">牌阵说明</h2>
                         </div>
-                        <p className="text-white/90 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
-                          {reading.overall}
+                        <p className="text-white/75 text-base leading-relaxed whitespace-pre-wrap">
+                          {reading.spreadExplanation}
                         </p>
                       </motion.div>
 
-                      {/* 八个位置解读 */}
-                      <div className="space-y-6 mb-10">
-                        {reading.positions?.map((pos, index) => {
-                          const card = savedResult.cards?.[index];
-                          const config = SLOT_CONFIG?.[index];
-                          
-                          // 防御性检查：如果 card 或 config 不存在，跳过此项
-                          if (!card || !config) return null;
-                          
-                          return (
-                            <motion.div
-                              key={pos.position}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
-                              className="rounded-2xl bg-white/5 border border-white/10 p-6 sm:p-8"
-                            >
-                              <div className="flex items-start gap-4 mb-6">
-                                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center" style={{ backgroundColor: 'rgba(127, 19, 236, 0.2)' }}>
-                                  <span className="text-primary font-bold text-lg" style={{ color: '#7f13ec' }}>{pos.position}</span>
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="text-white text-lg sm:text-xl font-bold mb-1">
-                                    {pos.label}
-                                  </h3>
-                                  <p className="text-white/50 text-sm">
-                                    {config?.meaning}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col sm:flex-row gap-6">
-                                <div className="flex-shrink-0 mx-auto sm:mx-0">
-                                  <div className="relative w-28 h-44 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
-                                    <img
-                                      src={card?.image}
-                                      alt={card?.name}
-                                      className={`w-full h-full object-cover ${
-                                        card?.orientation === 'reversed' ? 'rotate-180' : ''
-                                      }`}
-                                      style={{ backgroundColor: 'white' }}
-                                    />
+                      {/* 模块2：单张牌解读 */}
+                      <div className="mb-10">
+                        <div className="flex items-center gap-3 mb-6">
+                          <span className="text-2xl">🎴</span>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">牌面解读</h2>
+                        </div>
+                        <div className="space-y-6">
+                          {reading.cardReadings?.map((cardReading, index) => {
+                            const card = savedResult.cards?.[index];
+                            const config = SLOT_CONFIG?.[index];
+                            
+                            if (!card || !config) return null;
+                            
+                            return (
+                              <motion.div
+                                key={cardReading.position}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
+                                className="rounded-2xl bg-white/5 border border-white/10 p-6 sm:p-8"
+                              >
+                                {/* 牌位标题 */}
+                                <div className="flex items-start gap-4 mb-6">
+                                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center" style={{ backgroundColor: 'rgba(127, 19, 236, 0.2)' }}>
+                                    <span className="text-primary font-bold text-lg" style={{ color: '#7f13ec' }}>{cardReading.position}</span>
                                   </div>
-                                </div>
-
-                                <div className="flex-1">
-                                  <h4 className="text-white text-base font-semibold mb-2">
-                                    {card?.name}
-                                  </h4>
-                                  <p className="text-white/60 text-sm mb-4">
-                                    {card?.orientation === 'upright' ? '正位' : '逆位'}
-                                    {card?.keywords && card.keywords.length > 0 && (
-                                      <>
-                                        {' · '}
-                                        {card.keywords.join('、')}
-                                      </>
-                                    )}
-                                  </p>
-                                  <div className="rounded-lg bg-white/[0.03] border border-white/5 p-4">
-                                    <p className="text-white/80 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
-                                      {pos.reading}
+                                  <div className="flex-1">
+                                    <h3 className="text-white text-lg sm:text-xl font-bold mb-1">
+                                      {cardReading.label}
+                                    </h3>
+                                    <p className="text-white/50 text-sm">
+                                      {config.meaning}
                                     </p>
                                   </div>
                                 </div>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
+
+                                {/* 卡牌展示与解读 */}
+                                <div className="flex flex-col sm:flex-row gap-6">
+                                  <div className="flex-shrink-0 mx-auto sm:mx-0">
+                                    <div className="relative w-28 h-44 rounded-lg overflow-hidden border-2 border-white/20 shadow-lg">
+                                      <img
+                                        src={card.image}
+                                        alt={card.name}
+                                        className={`w-full h-full object-cover ${
+                                          card.orientation === 'reversed' ? 'rotate-180' : ''
+                                        }`}
+                                        style={{ backgroundColor: 'white' }}
+                                      />
+                                    </div>
+                                    <div className="mt-3 text-center">
+                                      <h4 className="text-white text-sm font-semibold mb-1">
+                                        {card.name}
+                                      </h4>
+                                      <p className="text-white/50 text-xs">
+                                        {card.orientation === 'upright' ? '正位' : '逆位'}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex-1">
+                                    <div className="rounded-lg bg-white/[0.03] border border-white/5 p-5">
+                                      <p className="text-white/85 text-base leading-relaxed whitespace-pre-wrap">
+                                        {cardReading.reading}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
                       </div>
 
-                      {/* 关系指引 */}
+                      {/* 模块3：关系动力整合总结 */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.5 }}
                         className="mb-8 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 p-6 sm:p-8"
                       >
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="text-2xl">🔮</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">关系走向与建议</h2>
+                        <div className="flex items-center gap-3 mb-6">
+                          <span className="text-2xl">✨</span>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">关系动力整合</h2>
                         </div>
-                        {reading.guidance?.trend && (
-                          <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap mb-6">
-                            {reading.guidance.trend}
-                          </p>
-                        )}
-
-                        {/* 建议 */}
-                        {reading.guidance?.advice && reading.guidance.advice.length > 0 && (
-                          <div className="mb-6">
-                            <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
-                              <span className="text-xl">💡</span>
-                              建议方向
-                            </h3>
-                            <ul className="space-y-2">
-                              {reading.guidance.advice.map((item, idx) => (
-                                <li key={idx} className="flex items-start gap-3 text-white/80 text-sm sm:text-base">
-                                  <span className="text-primary mt-1" style={{ color: '#7f13ec' }}>•</span>
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        {/* 观察点 */}
-                        {reading.guidance?.watchFor && reading.guidance.watchFor.length > 0 && (
+                        
+                        <div className="space-y-5">
                           <div>
-                            <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
-                              <span className="text-xl">👁️</span>
-                              观察重点
+                            <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
+                              当前关系的主旋律
                             </h3>
-                            <ul className="space-y-2">
-                              {reading.guidance.watchFor.map((item, idx) => (
-                                <li key={idx} className="flex items-start gap-3 text-white/80 text-sm sm:text-base">
-                                  <span className="text-indigo-400 mt-1">•</span>
-                                  <span>{item}</span>
-                                </li>
-                              ))}
-                            </ul>
+                            <p className="text-white/90 text-base leading-relaxed">
+                              {reading.integration.theme}
+                            </p>
                           </div>
-                        )}
+
+                          <div>
+                            <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
+                              推动关系的核心力量
+                            </h3>
+                            <p className="text-white/90 text-base leading-relaxed">
+                              {reading.integration.drivingForce}
+                            </p>
+                          </div>
+
+                          <div>
+                            <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
+                              当前最需要被看见的张力
+                            </h3>
+                            <p className="text-white/90 text-base leading-relaxed">
+                              {reading.integration.tension}
+                            </p>
+                          </div>
+                        </div>
                       </motion.div>
 
-                      {/* 免责声明 */}
+                      {/* 模块4：短期发展趋势 */}
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.6 }}
-                        className="rounded-2xl bg-white/[0.03] border border-white/10 p-6"
+                        className="mb-8 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 p-6 sm:p-8"
+                      >
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-2xl">🔮</span>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">短期发展趋势</h2>
+                        </div>
+                        <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap">
+                          {reading.shortTermTrend}
+                        </p>
+                      </motion.div>
+
+                      {/* 模块5：情绪收尾提醒 */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.7 }}
+                        className="mb-8 rounded-2xl bg-white/[0.03] border border-white/10 p-6 sm:p-8"
                       >
                         <div className="flex items-start gap-4">
-                          <span className="material-symbols-outlined text-white/50 text-2xl">info</span>
+                          <span className="text-2xl">💫</span>
                           <div className="flex-1">
-                            <p className="text-white/70 text-sm leading-relaxed">
-                              {reading.disclaimer}
+                            <h2 className="text-white text-lg font-bold mb-3">最后的话</h2>
+                            <p className="text-white/85 text-base leading-relaxed whitespace-pre-wrap">
+                              {reading.closing}
                             </p>
                           </div>
                         </div>
