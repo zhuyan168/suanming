@@ -20,8 +20,8 @@ export default function SpreadCard({
 }: SpreadCardProps) {
   const router = useRouter();
 
-  // 临时白名单：relationship-development 暂时开放（会员系统上线后移除）
-  const isTemporarilyOpen = spread.id === 'relationship-development';
+  // 临时白名单：relationship-development, reconciliation 暂时开放（会员系统上线后移除）
+  const isTemporarilyOpen = spread.id === 'relationship-development' || spread.id === 'reconciliation';
   const isLocked = spread.isPaid && !isMember && !isTemporarilyOpen;
 
   const handleClick = () => {
@@ -29,7 +29,7 @@ export default function SpreadCard({
       onLockedClick();
     } else {
       // 这些牌阵直接进入抽牌页面
-      if (spread.id === 'future-lover' || spread.id === 'what-they-think' || spread.id === 'relationship-development') {
+      if (spread.id === 'future-lover' || spread.id === 'what-they-think' || spread.id === 'relationship-development' || spread.id === 'reconciliation') {
         router.push(`/themed-readings/${theme}/${spread.id}/draw`);
       } else {
         router.push(`/themed-readings/${theme}/${spread.id}`);

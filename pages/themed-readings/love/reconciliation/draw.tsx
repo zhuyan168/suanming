@@ -2,10 +2,12 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMembership } from '../../../../hooks/useMembership';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
-import SixCardSlots from '../../../../components/fortune/SixCardSlots';
+import TenCardsReconciliationSlots from '../../../../components/fortune/TenCardsReconciliationSlots';
+import UnlockModal from '../../../../components/themed-readings/UnlockModal';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -111,130 +113,113 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return newArray;
 };
 
-// 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
+// 洗牌函数
 const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   const cardsWithOrientation = cards.map(card => {
-    let randomValue: number;
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-      const array = new Uint32Array(1);
-      window.crypto.getRandomValues(array);
-      randomValue = array[0] / (0xFFFFFFFF + 1);
-    } else {
-      randomValue = Math.random() + (Date.now() % 1000) / 10000;
-      randomValue = randomValue % 1;
-    }
+    const randomValue = Math.random();
     return {
       ...card,
       orientation: randomValue >= 0.5 ? 'upright' : 'reversed' as 'upright' | 'reversed',
     };
   });
-  
   return shuffleArray(cardsWithOrientation);
 };
 
-// 生成唯一的 session ID
 const generateSessionId = (): string => {
-  return `future-lover-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `reconciliation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-// LocalStorage key
-const STORAGE_KEY = 'future_lover_result';
+const STORAGE_KEY = 'reconciliation_result';
 
-// 结果数据接口
-interface FutureLoverResult {
+interface ReconciliationResult {
   sessionId: string;
   timestamp: number;
   cards: ShuffledTarotCard[];
 }
 
-// 保存结果到 localStorage
-const saveFutureLoverResult = (data: FutureLoverResult) => {
+const SLOT_CONFIG = [
+  { id: "p1", name: "这段关系是如何走散的", meaning: "这段关系当初真正分开的原因" },
+  { id: "p2", name: "你当前的情绪状态与纠结来源", meaning: "你当前的情绪状态与纠结来源" },
+  { id: "p3", name: "前任目前的真实状态", meaning: "TA现在对这段关系的真实立场" },
+  { id: "p4", name: "你内心对复合的感受", meaning: "你内心深处对复合的真实想法" },
+  { id: "p5", name: "前任内心对复合的感受", meaning: "TA对复合这件事的真实态度" },
+  { id: "p6", name: "你们之间最大的阻碍是什么", meaning: "当前最难跨越的核心问题" },
+  { id: "p7", name: "对你有利的帮助或转机", meaning: "可能出现的支持或转机" },
+  { id: "p8", name: "被你忽略的重要因素", meaning: "被忽略但重要的变量" },
+  { id: "p9", name: "你需要做出的选择", meaning: "这段关系对你提出的最终课题" },
+  { id: "guide", name: "指引牌", meaning: "这组牌想提醒你的核心问题" }
+];
+
+const saveResult = (data: ReconciliationResult) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
-// 从 localStorage 读取结果
-const loadFutureLoverResult = (): FutureLoverResult | null => {
+const loadResult = (): ReconciliationResult | null => {
   if (typeof window === 'undefined') return null;
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (!data) return null;
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to load future lover result:', error);
+    console.error('Failed to load result:', error);
     return null;
   }
 };
 
-export default function FutureLoverDraw() {
+export default function ReconciliationDraw() {
   const router = useRouter();
+  const { isMember } = useMembership();
   const [sessionId, setSessionId] = useState<string>('');
   
+  // 临时白名单逻辑：允许访问以便测试
+  const isTemporarilyOpen = true; 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [savedResult, setSavedResult] = useState<FutureLoverResult | null>(null);
+  const [savedResult, setSavedResult] = useState<ReconciliationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [scrollValue, setScrollValue] = useState(0);
   
-  // 6张卡槽的状态
-  const initialSlots: (ShuffledTarotCard | null)[] = Array(6).fill(null);
+  // 10张卡槽的状态
+  const initialSlots: (ShuffledTarotCard | null)[] = Array(10).fill(null);
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>(initialSlots);
-  const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(6).fill(false));
+  const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(10).fill(false));
   
-  // deck: 实际剩余可抽的牌
-  const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
-  // uiSlots: 用于页面卡背渲染的数组
   const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
-  
-  // 卡牌容器引用，用于滚动同步
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
-  const scrollValueRef = useRef(scrollValue);
-
-  // 更新 scrollValueRef
-  useEffect(() => {
-    scrollValueRef.current = scrollValue;
-  }, [scrollValue]);
-
-  // 容器滚动处理
-  const handleScroll = () => {
-    const container = containerRef.current;
-    if (!container || isScrollingRef.current) return;
-    
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    const value = maxScroll > 0 ? (container.scrollLeft / maxScroll) * 100 : 0;
-    setScrollValue(value);
-  };
 
   // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 尝试加载已保存的结果
-    const saved = loadFutureLoverResult();
+    // 会员拦截逻辑（预留接口）
+    if (!isMember && !isTemporarilyOpen) {
+      setIsModalOpen(true);
+      return;
+    }
+
+    const saved = loadResult();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSessionId(saved.sessionId);
       setSelectedCards(saved.cards);
     } else {
-      // 生成新的 session ID
       const newSessionId = generateSessionId();
       setSessionId(newSessionId);
-      
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
-      setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [isMember]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
-
     const currentCardCount = selectedCards.filter(c => c !== null).length;
-    if (currentCardCount >= 6) return;
+    if (currentCardCount >= 10) return;
 
     const card = uiSlots[slotIndex];
     if (!card) return;
@@ -242,9 +227,6 @@ export default function FutureLoverDraw() {
     const emptySlotIndex = selectedCards.findIndex(c => c === null);
     if (emptySlotIndex === -1) return;
 
-    const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
-    
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;
     setSelectedCards(newSelectedCards);
@@ -253,238 +235,151 @@ export default function FutureLoverDraw() {
     newIsAnimating[emptySlotIndex] = true;
     setIsAnimating(newIsAnimating);
     
-    setDeck(prev => prev.filter(c => c.id !== card.id));
     setUiSlots(prev => prev.map((c, i) => (i === slotIndex ? null : c)));
 
     setIsLoading(true);
-    setError(null);
-
     await new Promise(resolve => setTimeout(resolve, 150));
     newIsAnimating[emptySlotIndex] = false;
     setIsAnimating([...newIsAnimating]);
     await new Promise(resolve => setTimeout(resolve, 300));
-    
     setIsLoading(false);
 
     const updatedCardCount = newSelectedCards.filter(c => c !== null).length;
-    // 当抽满6张时保存
-    if (updatedCardCount === 6) {
-      const result: FutureLoverResult = {
+    if (updatedCardCount === 10) {
+      const result: ReconciliationResult = {
         sessionId,
         timestamp: Date.now(),
         cards: newSelectedCards as ShuffledTarotCard[],
       };
-      saveFutureLoverResult(result);
+      saveResult(result);
       setSavedResult(result);
       setHasDrawn(true);
     }
   };
 
-  // 滚动条拖动处理
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container || isScrollingRef.current) return;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    setScrollValue(maxScroll > 0 ? (container.scrollLeft / maxScroll) * 100 : 0);
+  };
+
   const handleScrollBarChange = (value: number) => {
     const container = containerRef.current;
     if (!container) return;
-
     isScrollingRef.current = true;
     const maxScroll = container.scrollWidth - container.clientWidth;
     container.scrollLeft = (value / 100) * maxScroll;
     setScrollValue(value);
-
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 100);
+    setTimeout(() => { isScrollingRef.current = false; }, 100);
   };
 
   const handleViewResult = () => {
-    router.push('/themed-readings/love/future-lover/result');
+    // 预留结果页跳转
+    console.log('Jump to result page');
   };
 
-  const handleReturnToList = () => {
-    router.back();
-  };
+  const handleReturnToList = () => { router.push('/themed-readings/love'); };
 
   const handleReset = () => {
-    if (typeof window === 'undefined') return;
     if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
-
     localStorage.removeItem(STORAGE_KEY);
-    
-    // 重置状态
     const newSessionId = generateSessionId();
     setSessionId(newSessionId);
     setHasDrawn(false);
     setSavedResult(null);
-    setSelectedCards(Array(6).fill(null));
-    setIsAnimating(Array(6).fill(false));
+    setSelectedCards(Array(10).fill(null));
+    setIsAnimating(Array(10).fill(false));
+    setUiSlots(shuffleCards(tarotCards));
     
-    // 重新洗牌
-    const shuffled = shuffleCards(tarotCards);
-    setDeck(shuffled);
-    setUiSlots(shuffled);
+    // 重置进度条位置
+    setScrollValue(0);
+    if (containerRef.current) {
+      containerRef.current.scrollLeft = 0;
+    }
   };
 
   return (
-    <>
+    <div className="dark">
       <Head>
-        <title>未来恋人牌阵 - 抽牌</title>
-        <meta name="description" content="探索你的未来恋人" />
+        <title>复合的可能性 - 抽牌</title>
+        <meta name="description" content="评估重新靠近的空间与代价，给你更稳的选择" />
       </Head>
 
-      <div className="dark">
-        <div className="font-display bg-background-dark min-h-screen text-white" style={{ backgroundColor: '#191022' }}>
-          {/* 顶部导航 */}
-          <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm" style={{ backgroundColor: 'rgba(25, 16, 34, 0.8)' }}>
-            <button
-              onClick={handleReturnToList}
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
-            </button>
-            
-            <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+      <div className="font-display bg-[#191022] min-h-screen text-white">
+        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
+          <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
+            <span className="text-sm font-medium">返回</span>
+          </button>
+          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+            <span className="material-symbols-outlined text-xl">refresh</span>
+            <span className="text-sm font-medium hidden sm:inline">重置</span>
+          </button>
+        </header>
+
+        <main className="px-4 py-6 sm:py-10">
+          <div className="mx-auto max-w-7xl">
+            <div className="text-center mb-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reconciliation Potential</p>
+              <h1 className="text-2xl sm:text-3xl font-black mb-2">
+                {hasDrawn ? '抽牌已完成' : '「这段关系，还能不能重新走一次？」'}
+              </h1>
+              <p className="text-white/60 text-sm max-w-xl mx-auto">
+                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌。'}
+              </p>
             </div>
 
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
-            </button>
-          </header>
-
-          {/* 主内容 */}
-          <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
-            <div className="mx-auto max-w-7xl">
-              {/* 标题介绍区域 */}
-              <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Future Lover Spread</p>
-                <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '未来恋人牌阵已完成' : '抽取六张塔罗牌'}
-                </h1>
-                <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {hasDrawn 
-                    ? '你已完成抽牌，点击下方按钮查看详细解读。' 
-                    : '静心感受，从下方78张牌中选择6张，探索你的未来恋人与相遇路径。'}
-                </p>
-              </div>
-
-              <AnimatePresence>
-                {showCards && !hasDrawn && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    {error && (
-                      <div className="mb-8 p-4 rounded-2xl border border-red-500/30 bg-red-500/10 text-red-300 text-center">
-                        {error}
-                      </div>
-                    )}
-                    
-                    {/* 牌堆区域 */}
-                    <div className="card-container-wrapper w-full mb-4">
-                      <div
-                        ref={containerRef}
-                        onScroll={handleScroll}
-                        className="card-container flex flex-row overflow-x-scroll overflow-y-hidden pb-2 px-2"
-                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-                      >
-                        {uiSlots.map((card, index) => 
-                          card ? (
-                            <CardItem 
-                              key={card.id} 
-                              card={card} 
-                              index={index} 
-                              onClick={drawCard} 
-                              isDisabled={isLoading} 
-                              isSelected={false} 
-                            />
-                          ) : (
-                            <EmptySlot key={`empty-${index}`} index={index} />
-                          )
-                        )}
-                      </div>
-                      <style jsx>{` .card-container::-webkit-scrollbar { display: none; } `}</style>
-                    </div>
-
-                    {/* 滚动条 */}
-                    <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
-
-                    <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 6</p>
-                    </div>
-
-                    {/* 卡槽区域 */}
-                    <SixCardSlots
-                      cards={selectedCards}
-                      isAnimating={isAnimating}
-                      showLoadingText={true}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* 已完成状态 */}
-              {hasDrawn && savedResult && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="max-w-5xl mx-auto"
-                >
-                  <SixCardSlots
-                    cards={selectedCards}
-                    isAnimating={Array(6).fill(false)}
-                    showLoadingText={false}
-                    forceFlipped={true}
-                  />
-
-                  <div className="text-center mt-8">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleViewResult}
-                      className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
-                      style={{ backgroundColor: '#7f13ec' }}
-                    >
-                      查看解读
-                    </motion.button>
+            {!hasDrawn && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="card-container-wrapper w-full mb-4">
+                  <div ref={containerRef} onScroll={handleScroll} className="card-container flex flex-row overflow-x-auto overflow-y-hidden pb-4" style={{ scrollbarWidth: 'none' }}>
+                    {uiSlots.map((card, index) => card ? (
+                      <CardItem key={card.id} card={card} index={index} onClick={drawCard} isDisabled={isLoading} isSelected={false} />
+                    ) : (
+                      <EmptySlot key={`empty-${index}`} index={index} />
+                    ))}
                   </div>
+                </div>
+                <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
+                <div className="mt-6 text-center text-white/40 text-xs">
+                  已抽牌：{selectedCards.filter(c => c !== null).length} / 10
+                </div>
+              </motion.div>
+            )}
 
-                  <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已完成抽牌，可随时重新占卜</p>
-                  </div>
-                </motion.div>
-              )}
+            <TenCardsReconciliationSlots
+              cards={selectedCards}
+              isAnimating={isAnimating}
+              showLoadingText={!hasDrawn}
+              forceFlipped={hasDrawn}
+              slotConfig={SLOT_CONFIG}
+            />
 
-              {/* 抽完6张后的查看按钮 */}
-              {!hasDrawn && selectedCards.filter(c => c !== null).length === 6 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  className="text-center mt-8"
+            {hasDrawn && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mt-10">
+                <button
+                  onClick={handleViewResult}
+                  className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
+                  style={{ backgroundColor: '#7f13ec' }}
                 >
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleViewResult}
-                    className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
-                    style={{ backgroundColor: '#7f13ec' }}
-                  >
-                    查看解读
-                  </motion.button>
-                </motion.div>
-              )}
-            </div>
-          </main>
-        </div>
+                  开始解读
+                </button>
+                <p className="text-white/40 text-xs mt-4">✨ 复合牌阵：深度透视你们的重新联结之路</p>
+              </motion.div>
+            )}
+          </div>
+        </main>
+
+        <UnlockModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); router.back(); }} />
       </div>
-    </>
+
+      <style jsx global>{`
+        .card-container::-webkit-scrollbar { display: none; }
+        .dark { --primary: #7f13ec; }
+      `}</style>
+    </div>
   );
 }
 

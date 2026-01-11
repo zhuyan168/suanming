@@ -15,6 +15,7 @@ export interface SpreadConfig {
   isPaid: boolean;
   icon?: string; // emoji or lucide icon name
   badge?: string; // e.g., "Most Popular"
+  cards?: Array<{ id: string; name: string; meaning: string }>;
 }
 
 export interface ThemeConfig {
@@ -71,9 +72,21 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     titleEn: 'Reconciliation Potential',
     descZh: '评估重新靠近的空间与代价，给你更稳的选择',
     descEn: 'Assess the space and cost of getting close again',
-    cardsCount: 5,
+    cardsCount: 10,
     isPaid: true,
     icon: '🌙',
+    cards: [
+      { id: "guide", name: "指引牌", meaning: "这组牌想提醒你的核心问题" },
+      { id: "p1", name: "这段关系是如何走散的", meaning: "这段关系当初真正分开的原因" },
+      { id: "p2", name: "你现在为什么会卡在这里", meaning: "你当前的情绪状态与纠结来源" },
+      { id: "p3", name: "TA目前的真实状态", meaning: "TA现在对这段关系的真实立场" },
+      { id: "p4", name: "你对复合的真实感受", meaning: "你内心深处对复合的真实想法" },
+      { id: "p5", name: "TA面对复合的感受", meaning: "TA对复合这件事的真实态度" },
+      { id: "p6", name: "你们之间最大的阻碍", meaning: "当前最难跨越的核心问题" },
+      { id: "p7", name: "对你有利的帮助或转机", meaning: "可能出现的支持或转机" },
+      { id: "p8", name: "你还没意识到的关键因素", meaning: "被忽略但重要的变量" },
+      { id: "p9", name: "你真正需要做出的选择", meaning: "这段关系对你提出的最终课题" }
+    ]
   },
 ];
 

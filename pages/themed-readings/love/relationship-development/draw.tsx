@@ -84,7 +84,7 @@ const tarotCards = [
   { id: 64, name: 'Ace of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_ace.png', upright: '新开始、灵感、创造', reversed: '缺乏方向、延迟、挫折', keywords: ['灵感', '创造', '开始'] },
   { id: 65, name: 'Two of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_2.png', upright: '计划、决定、发现', reversed: '犹豫、害怕未知、缺乏计划', keywords: ['计划', '决定', '发现'] },
   { id: 66, name: 'Three of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_3.png', upright: '扩展、远见、领导', reversed: '缺乏远见、延迟、障碍', keywords: ['扩展', '远见', '领导'] },
-  { id: 67, name: 'Four of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_wands_4.png', upright: '庆祝、和谐、家', reversed: '不稳定、缺乏支持、过渡', keywords: ['庆祝', '和谐', '家'] },
+  { id: 67, name: 'Four of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_4.png', upright: '庆祝、和谐、家', reversed: '不稳定、缺乏支持、过渡', keywords: ['庆祝', '和谐', '家'] },
   { id: 68, name: 'Five of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_5.png', upright: '竞争、冲突、紧张', reversed: '和解、避免冲突、内心冲突', keywords: ['竞争', '冲突', '紧张'] },
   { id: 69, name: 'Six of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_6.png', upright: '胜利、成功、认可', reversed: '失败、缺乏认可、自负', keywords: ['胜利', '成功', '认可'] },
   { id: 70, name: 'Seven of Wands', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_7.png', upright: '挑战、坚持、防御', reversed: '压倒、放弃、退缩', keywords: ['挑战', '坚持', '防御'] },
@@ -373,58 +373,6 @@ export default function RelationshipDev8Draw() {
       <Head>
         <title>这段感情的发展 - 抽牌</title>
         <meta name="description" content="抽取 8 张牌，看看这段关系的真实状态与自然走向" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          }
-                        }
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
-        <style dangerouslySetInnerHTML={{ __html: `
-          html.dark, html.dark body { background-color: #191022; }
-        ` }} />
       </Head>
 
       <div className="dark">
