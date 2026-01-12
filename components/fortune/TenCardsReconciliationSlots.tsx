@@ -72,14 +72,13 @@ export default function TenCardsReconciliationSlots({
               }}
               className={`relative ${isIndicator ? 'w-16 h-28 sm:w-28 sm:h-48 md:w-36 md:h-60' : 'w-14 h-24 sm:w-24 sm:h-40 md:w-32 md:h-52'}`}
               style={{
-                transformStyle: 'preserve-3d',
+                perspective: '1000px', // 视角放在这一层
               }}
             >
               <div
-                className={`card-wrapper relative w-full h-full rounded-lg sm:rounded-xl overflow-hidden border-2 ${isIndicator ? 'border-primary shadow-[0_0_25px_rgba(127,19,236,0.6)]' : 'border-primary/70 shadow-[0_0_15px_rgba(127,19,236,0.4)]'}`}
+                className={`card-wrapper relative w-full h-full rounded-lg sm:rounded-xl border-2 ${isIndicator ? 'border-primary shadow-[0_0_25px_rgba(127,19,236,0.6)]' : 'border-primary/70 shadow-[0_0_15px_rgba(127,19,236,0.4)]'}`}
                 style={{
                   transformStyle: 'preserve-3d',
-                  perspective: '1000px',
                   transform: (forceFlipped || (!isAnimating[index] && card)) ? 'rotateY(180deg)' : 'rotateY(0deg)',
                   transition: 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
                 }}
@@ -91,6 +90,7 @@ export default function TenCardsReconciliationSlots({
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
                     transform: 'rotateY(0deg)',
+                    zIndex: 2,
                   }}
                 >
                   <img
@@ -114,18 +114,19 @@ export default function TenCardsReconciliationSlots({
                   style={{
                     backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg) translateZ(1px)', // 增加 1px 的 Z 轴深度确保在最上层
+                    zIndex: 1,
                   }}
                 >
                   <img
                     src={card.image}
                     alt={card.name}
-                    className={`w-full h-full object-cover ${
-                      card.orientation === 'reversed' ? 'rotate-180' : ''
-                    }`}
+                    className="w-full h-full object-cover"
                     style={{
                       backgroundColor: 'white',
                       imageRendering: 'crisp-edges',
                       WebkitFontSmoothing: 'antialiased',
+                      transform: card.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                     }}
                     loading="eager"
                   />

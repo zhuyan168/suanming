@@ -275,8 +275,8 @@ export default function ReconciliationDraw() {
   };
 
   const handleViewResult = () => {
-    // 预留结果页跳转
-    console.log('Jump to result page');
+    // 跳转到结果页
+    router.push('/themed-readings/love/reconciliation/result');
   };
 
   const handleReturnToList = () => { router.push('/themed-readings/love'); };
