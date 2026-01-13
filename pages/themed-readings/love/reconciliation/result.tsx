@@ -184,7 +184,7 @@ export default function ReconciliationResultPage() {
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回列表</span>
+            <span className="text-sm font-medium">返回</span>
           </button>
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Mystic Insights</h2>
           <button onClick={handleDrawAgain} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
@@ -240,7 +240,7 @@ export default function ReconciliationResultPage() {
                   <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all"></div>
                   <h3 className="text-primary text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                    {deepReading.summary.title}
+                    {deepReading.summary.title === '姐姐的真心话' ? '治愈寄语' : deepReading.summary.title}
                   </h3>
                   <p className="text-2xl sm:text-3xl font-bold leading-tight italic">
                     「{deepReading.summary.text}」
@@ -249,12 +249,15 @@ export default function ReconciliationResultPage() {
 
                 {/* 各个牌位详细解读 */}
                 <div className="space-y-8">
-                  {deepReading.sections.map((section, idx) => {
+                  {deepReading.sections.map((section) => {
                     // 排除指引牌，因为它在下面有专门的特殊展示
                     if (section.slotKey === 'guide') return null;
 
-                    const card = savedResult.cards[idx];
-                    const config = SLOT_CONFIG[idx];
+                    // 通过 slotKey 找到对应的配置索引，确保牌、文案、位置完全对应
+                    const configIndex = SLOT_CONFIG.findIndex(s => s.id === section.slotKey);
+                    const card = savedResult.cards[configIndex];
+                    const config = SLOT_CONFIG[configIndex];
+                    
                     if (!card || !config) return null;
 
                     return (
@@ -262,13 +265,13 @@ export default function ReconciliationResultPage() {
                         key={section.slotKey}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.1 }}
+                        transition={{ delay: configIndex * 0.1 }}
                         className="p-6 sm:p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-primary/30 transition-all group"
                       >
                         {/* 牌位头部信息 */}
                         <div className="flex items-start gap-4 mb-6">
                           <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                            <span className="text-primary font-bold text-lg">{idx + 1}</span>
+                            <span className="text-primary font-bold text-lg">{configIndex + 1}</span>
                           </div>
                           <div className="flex-1">
                             <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors">
