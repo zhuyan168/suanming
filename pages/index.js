@@ -1488,7 +1488,7 @@ export default function Home() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleFortuneMessage('事业＆学业占卜 请求已记录')}
+                            onClick={() => router.push('/themed-readings/career-study')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">school</span>

@@ -16,15 +16,15 @@ export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
   if (!isOpen || isOpen !== true) return null;
 
   return (
-    <>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* 背景遮罩 */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-fade-in"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
 
       {/* 弹窗内容 */}
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md mx-4 animate-scale-in">
+      <div className="relative w-full max-w-md animate-scale-in">
         <div className="bg-[#1a1a2e] rounded-2xl border border-primary/30 shadow-2xl overflow-hidden">
           {/* 顶部装饰 */}
           <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
@@ -80,11 +80,11 @@ export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
         @keyframes scale-in {
           from {
             opacity: 0;
-            transform: translate(-50%, -50%) scale(0.9);
+            transform: scale(0.9);
           }
           to {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: scale(1);
           }
         }
 
@@ -96,7 +96,7 @@ export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
           animation: scale-in 0.3s ease-out;
         }
       `}</style>
-    </>
+    </div>
   );
 }
 

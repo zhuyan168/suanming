@@ -3,7 +3,7 @@
  * Theme-based Tarot Reading Configuration
  */
 
-export type SpreadTheme = 'love' | 'career' | 'wealth';
+export type SpreadTheme = 'love' | 'career-study' | 'wealth';
 
 export interface SpreadConfig {
   id: string;
@@ -103,14 +103,55 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
     icon: 'favorite',
     spreads: LOVE_SPREADS,
   },
-  career: {
-    id: 'career',
+  'career-study': {
+    id: 'career-study',
     titleZh: '事业 & 学业',
     titleEn: 'Career & Study',
-    descZh: '洞察职业发展与学习之路',
-    descEn: 'Gain insights into your professional and academic journey',
+    descZh: '探索方向、准备关键节点、做更清醒的选择',
+    descEn: 'Explore directions, prepare for key milestones, and make clearer choices',
     icon: 'school',
-    spreads: [], // TODO: 待实现
+    spreads: [
+      {
+        id: 'skills-direction',
+        titleZh: '我应该找什么样的工作 / 学什么技能？',
+        titleEn: 'Career Direction & Skills',
+        descZh: '理清你的优势与能量倾向，找到更适合你的方向与成长路径。',
+        descEn: 'Clarify your strengths and energy tendencies to find a suitable direction.',
+        cardsCount: 5,
+        isPaid: false,
+        icon: '🧭',
+      },
+      {
+        id: 'interview-tips',
+        titleZh: '面试 / 考试关键提醒牌阵',
+        titleEn: 'Interview & Exam Tips',
+        descZh: '看清优势、风险点与准备重点，把能掌控的部分做到最好。',
+        descEn: 'See strengths, risks, and preparation focus to do your best.',
+        cardsCount: 4,
+        isPaid: false,
+        icon: '📝',
+      },
+      {
+        id: 'offer-decision',
+        titleZh: '我已经拿到 offer / 录取 / 合作邀请了，要不要接受？',
+        titleEn: 'Offer Decision',
+        descZh: '在选择分岔口看清代价与机会，帮你做更安心的决定。',
+        descEn: 'See costs and opportunities at the crossroads to make a better decision.',
+        cardsCount: 6,
+        isPaid: true,
+        icon: '✉️',
+      },
+      {
+        id: 'stay-or-leave',
+        titleZh: '这份工作还值得我继续做下去吗？',
+        titleEn: 'Stay or Leave',
+        descZh: '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。',
+        descEn: 'Assess the meaning, exhaustion, and opportunities of staying.',
+        cardsCount: 5,
+        isPaid: true,
+        icon: '⚖️',
+      },
+    ],
   },
   wealth: {
     id: 'wealth',
