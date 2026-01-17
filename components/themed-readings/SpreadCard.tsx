@@ -29,7 +29,13 @@ export default function SpreadCard({
       onLockedClick();
     } else {
       // 这些牌阵直接进入抽牌页面
-      if (spread.id === 'future-lover' || spread.id === 'what-they-think' || spread.id === 'relationship-development' || spread.id === 'reconciliation') {
+      if (
+        spread.id === 'future-lover' || 
+        spread.id === 'what-they-think' || 
+        spread.id === 'relationship-development' || 
+        spread.id === 'reconciliation' ||
+        spread.id === 'skills-direction'
+      ) {
         router.push(`/themed-readings/${theme}/${spread.id}/draw`);
       } else {
         router.push(`/themed-readings/${theme}/${spread.id}`);

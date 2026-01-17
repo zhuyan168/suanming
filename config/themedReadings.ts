@@ -120,6 +120,13 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         cardsCount: 5,
         isPaid: false,
         icon: '🧭',
+        cards: [
+          { id: "p1", name: "内心真正渴望的状态", meaning: "我内心真正渴望的工作/发展状态是什么？" },
+          { id: "p2", name: "最适合的靠近方向", meaning: "我现在最适合往哪个方向去靠近它？" },
+          { id: "p3", name: "核心优势或潜力", meaning: "我目前最能拿得出手的优势或潜力是什么？" },
+          { id: "p4", name: "可获得的资源支持", meaning: "我可以从哪里获得支持或资源？" },
+          { id: "p5", name: "需要调整或补强", meaning: "我现在最需要调整或补强的地方是什么？" }
+        ]
       },
       {
         id: 'interview-tips',
