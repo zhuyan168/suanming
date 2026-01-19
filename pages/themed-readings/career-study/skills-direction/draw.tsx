@@ -133,6 +133,7 @@ interface SkillsDirectionResult {
   sessionId: string;
   timestamp: number;
   cards: ShuffledTarotCard[];
+  reading?: any; // 存储已生成的解读结果
 }
 
 const SLOT_CONFIG = [
@@ -166,6 +167,7 @@ export default function SkillsDirectionDraw() {
   const [sessionId, setSessionId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const [hasReading, setHasReading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
   
@@ -183,6 +185,7 @@ export default function SkillsDirectionDraw() {
     const saved = loadResult();
     if (saved) {
       setHasDrawn(true);
+      setHasReading(!!saved.reading);
       setSessionId(saved.sessionId);
       setSelectedCards(saved.cards);
     } else {
@@ -290,10 +293,10 @@ export default function SkillsDirectionDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Career & Study</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                {hasDrawn ? '抽牌已完成' : '我应该找什么样的工作 / 学什么技能？'}
+                {hasReading ? '职业方向牌阵已完成' : (hasDrawn ? '抽牌已完成' : '我应该找什么样的工作 / 学什么技能？')}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '理清你的优势与能量倾向，找到更适合你的方向与成长路径。请从下方牌堆中抽取 5 张牌。'}
+                {hasReading ? '你已完成抽牌，点击下方按钮查看详细解读。' : (hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '理清你的优势与能量倾向，找到更适合你的方向与成长路径。请从下方牌堆中抽取 5 张牌。')}
               </p>
             </div>
 
@@ -330,9 +333,11 @@ export default function SkillsDirectionDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {hasReading ? '查看解读' : '开始解读'}
                 </button>
-                <p className="text-white/40 text-xs mt-4">✨ 深度挖掘你的职业潜力与资源</p>
+                <p className="text-white/40 text-xs mt-4">
+                  {hasReading ? '✨ 已完成抽牌，可随时重新占卜' : '✨ 深度挖掘你的职业潜力与资源'}
+                </p>
               </motion.div>
             )}
           </div>

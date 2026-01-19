@@ -1,3 +1,105 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    margin: 0;
+    font-family: 'Spline Sans', sans-serif;
+  }
+  html.dark,
+  html.dark body {
+    background-color: #191022;
+  }
+}
+
+@layer utilities {
+  @keyframes flow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-flow {
+    animation: flow 20s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px 0px rgba(127, 19, 236, 0.5), 0 0 4px 0px rgba(127, 19, 236, 0.3), 0 0 0 1px rgba(127, 19, 236, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px 3px rgba(127, 19, 236, 0.7), 0 0 8px 2px rgba(127, 19, 236, 0.5), 0 0 0 1px rgba(127, 19, 236, 0.6);
+    }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 3s infinite ease-in-out;
+  }
+  .group:hover .animate-pulse-glow {
+    box-shadow: 0 0 20px 4px rgba(127, 19, 236, 0.8), 0 0 10px 3px rgba(127, 19, 236, 0.6), 0 0 0 1px rgba(127, 19, 236, 0.7);
+  }
+
+  @keyframes breathe {
+    0%, 100% {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes text-glow {
+    0%, 100% {
+      text-shadow: 0 0 10px rgba(127, 19, 236, 0.3), 
+                   0 0 20px rgba(127, 19, 236, 0.2),
+                   0 0 30px rgba(168, 85, 247, 0.1);
+    }
+    50% {
+      text-shadow: 0 0 15px rgba(127, 19, 236, 0.5), 
+                   0 0 25px rgba(127, 19, 236, 0.3),
+                   0 0 35px rgba(168, 85, 247, 0.2);
+    }
+  }
+  .animate-text-glow {
+    animation: text-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease forwards;
+  }
+
+  @keyframes flip-in {
+    from {
+      transform: rotateY(-180deg);
+      opacity: 0;
+    }
+    to {
+      transform: rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  .animate-flip-in {
+    animation: flip-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .perspective {
+    perspective: 1200px;
+  }
+}

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
-import Script from 'next/script';
 import { useRouter } from 'next/router';
 
 // 完整的78张塔罗牌数据
@@ -1023,77 +1022,12 @@ export default function Home() {
   const [toast, setToast] = useState({ title: '', message: '' });
   const [isToastVisible, setIsToastVisible] = useState(false);
   const toastTimerRef = useRef(null);
-  const [isTailwindLoaded, setIsTailwindLoaded] = useState(false);
 
-  // 在客户端动态加载 Tailwind CSS CDN 和配置
+  // 确保 HTML 根元素有 dark 类
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    // 确保 HTML 根元素有 dark 类
-    document.documentElement.classList.add('dark');
-
-    // 加载 Tailwind 配置函数
-    const loadTailwindConfig = () => {
-      if (window.tailwind) {
-        window.tailwind.config = {
-          darkMode: 'class',
-          theme: {
-            extend: {
-              colors: {
-                primary: '#7f13ec',
-                'background-light': '#f7f6f8',
-                'background-dark': '#191022',
-              },
-              fontFamily: {
-                display: ['Spline Sans', 'sans-serif'],
-              },
-              borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-              boxShadow: {
-                glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-              },
-            },
-          },
-        };
-        setIsTailwindLoaded(true);
-        return true;
-      }
-      return false;
-    };
-
-    // 检查 Tailwind 是否已经加载
-    if (window.tailwind) {
-      if (loadTailwindConfig()) {
-        return;
-      }
+    if (typeof window !== 'undefined') {
+      document.documentElement.classList.add('dark');
     }
-
-    // 检查是否已经在加载中
-    if (document.querySelector('script[src*="tailwindcss"]')) {
-      // 如果脚本已存在，等待它加载完成
-      const checkTailwind = setInterval(() => {
-        if (window.tailwind) {
-          loadTailwindConfig();
-          clearInterval(checkTailwind);
-        }
-      }, 50);
-      return () => clearInterval(checkTailwind);
-    }
-
-    // 加载 Tailwind CDN
-    const tailwindScript = document.createElement('script');
-    tailwindScript.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-    tailwindScript.async = true;
-    tailwindScript.onload = () => {
-      // 多次尝试加载配置，因为 Tailwind 可能需要一点时间初始化
-      let attempts = 0;
-      const tryLoadConfig = setInterval(() => {
-        attempts++;
-        if (loadTailwindConfig() || attempts > 20) {
-          clearInterval(tryLoadConfig);
-        }
-      }, 100);
-    };
-    document.head.appendChild(tailwindScript);
   }, []);
 
   useEffect(() => () => {
@@ -1150,137 +1084,6 @@ export default function Home() {
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-          .animate-flow {
-            animation: flow 20s ease-in-out infinite;
-          }
-          @keyframes pulse-glow {
-            0%, 100% {
-              box-shadow: 0 0 8px 0px rgba(127, 19, 236, 0.5), 0 0 4px 0px rgba(127, 19, 236, 0.3), 0 0 0 1px rgba(127, 19, 236, 0.3);
-            }
-            50% {
-              box-shadow: 0 0 15px 3px rgba(127, 19, 236, 0.7), 0 0 8px 2px rgba(127, 19, 236, 0.5), 0 0 0 1px rgba(127, 19, 236, 0.6);
-            }
-          }
-          .animate-pulse-glow {
-            animation: pulse-glow 3s infinite ease-in-out;
-          }
-          .group:hover .animate-pulse-glow {
-            box-shadow: 0 0 20px 4px rgba(127, 19, 236, 0.8), 0 0 10px 3px rgba(127, 19, 236, 0.6), 0 0 0 1px rgba(127, 19, 236, 0.7);
-          }
-          @keyframes breathe {
-            0%, 100% {
-              opacity: 0.4;
-              transform: scale(1);
-            }
-            50% {
-              opacity: 0.8;
-              transform: scale(1.05);
-            }
-          }
-          .animate-breathe {
-            animation: breathe 4s ease-in-out infinite;
-          }
-          @keyframes text-glow {
-            0%, 100% {
-              text-shadow: 0 0 10px rgba(127, 19, 236, 0.3), 
-                           0 0 20px rgba(127, 19, 236, 0.2),
-                           0 0 30px rgba(168, 85, 247, 0.1);
-            }
-            50% {
-              text-shadow: 0 0 15px rgba(127, 19, 236, 0.5), 
-                           0 0 25px rgba(127, 19, 236, 0.3),
-                           0 0 35px rgba(168, 85, 247, 0.2);
-            }
-          }
-          .animate-text-glow {
-            animation: text-glow 4s ease-in-out infinite;
-          }
-          @keyframes fade-in {
-            from {
-              opacity: 0;
-              transform: translateY(12px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-fade-in {
-            animation: fade-in 0.5s ease forwards;
-          }
-          @keyframes flip-in {
-            from {
-              transform: rotateY(-180deg);
-              opacity: 0;
-            }
-            to {
-              transform: rotateY(0deg);
-              opacity: 1;
-            }
-          }
-          .animate-flip-in {
-            animation: flip-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-          }
-          .preserve-3d {
-            transform-style: preserve-3d;
-          }
-          .perspective {
-            perspective: 1200px;
-          }
-          /* 确保基础样式在 Tailwind 加载前也能显示 */
-          body {
-            margin: 0;
-            font-family: 'Spline Sans', sans-serif;
-          }
-          html.dark,
-          html.dark body {
-            background-color: #191022;
-          }
-        ` }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          },
-                        },
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
         />
       </Head>
       <div className="dark">

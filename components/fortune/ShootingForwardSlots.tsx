@@ -77,13 +77,21 @@ export default function ShootingForwardSlots({
                     zIndex: 1,
                   }}
                 >
-                  <img
-                    src={card.image}
-                    alt={card.name}
-                    className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
-                    style={{ backgroundColor: 'white', imageRendering: 'crisp-edges' }}
-                    loading="eager"
-                  />
+                  <div 
+                    className="w-full h-full"
+                    style={{ 
+                      transform: card.orientation === 'reversed' ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)'
+                    }}
+                  >
+                    <img
+                      src={card.image}
+                      alt={card.name}
+                      className="w-full h-full object-cover"
+                      style={{ backgroundColor: 'white', imageRendering: 'crisp-edges' }}
+                      loading="eager"
+                    />
+                  </div>
                 </div>
               </div>
             </motion.div>
