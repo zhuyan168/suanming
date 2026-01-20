@@ -34,7 +34,8 @@ export default function SpreadCard({
         spread.id === 'what-they-think' || 
         spread.id === 'relationship-development' || 
         spread.id === 'reconciliation' ||
-        spread.id === 'skills-direction'
+        spread.id === 'skills-direction' ||
+        spread.id === 'interview-exam-key-reminders'
       ) {
         router.push(`/themed-readings/${theme}/${spread.id}/draw`);
       } else {

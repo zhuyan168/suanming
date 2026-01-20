@@ -129,14 +129,21 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         ]
       },
       {
-        id: 'interview-tips',
+        id: 'interview-exam-key-reminders',
         titleZh: '面试 / 考试关键提醒牌阵',
-        titleEn: 'Interview & Exam Tips',
-        descZh: '看清优势、风险点与准备重点，把能掌控的部分做到最好。',
-        descEn: 'See strengths, risks, and preparation focus to do your best.',
-        cardsCount: 4,
+        titleEn: 'Interview & Exam Key Reminders',
+        descZh: '看清重点，避开容易忽略的坑，把能掌控的部分做到最好。',
+        descEn: 'See key focus areas, avoid pitfalls, and do your best in what you can control.',
+        cardsCount: 5,
         isPaid: false,
         icon: '📝',
+        cards: [
+          { id: "p1", name: "你现在最不确定的地方", meaning: "你现在最不确定的地方" },
+          { id: "p2", name: "你现在的优势在哪里", meaning: "你现在的优势在哪里" },
+          { id: "p3", name: "事情目前的整体走向", meaning: "事情目前的整体走向" },
+          { id: "p4", name: "目前可能影响你的地方", meaning: "目前可能影响你的地方" },
+          { id: "p5", name: "接下来你可以主动做什么", meaning: "接下来你可以主动做什么" }
+        ]
       },
       {
         id: 'offer-decision',
