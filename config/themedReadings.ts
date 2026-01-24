@@ -147,13 +147,21 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'offer-decision',
-        titleZh: '我已经拿到 offer / 录取 / 合作邀请了，要不要接受？',
+        titleZh: '我已经拿到offer了，要不要接受？',
         titleEn: 'Offer Decision',
         descZh: '在选择分岔口看清代价与机会，帮你做更安心的决定。',
         descEn: 'See costs and opportunities at the crossroads to make a better decision.',
         cardsCount: 6,
         isPaid: true,
         icon: '✉️',
+        cards: [
+          { id: "p1", name: "这项机会与你的契合程度", meaning: "这项机会与你的契合程度" },
+          { id: "p2", name: "接受后可能获得的成长与发展空间", meaning: "接受这项机会后，你可能获得的成长与发展空间" },
+          { id: "p3", name: "需要面对的人际关系与协作状态", meaning: "这项机会中你需要面对的人际关系与协作状态" },
+          { id: "p4", name: "对方/环境对你的真实期待与态度", meaning: "对方 / 环境对你的真实期待与态度" },
+          { id: "p5", name: "需要特别留意的风险与代价", meaning: "接受这项机会后，你需要特别留意的风险与代价" },
+          { id: "p6", name: "除了它之外还存在的其他机会", meaning: "除了它之外，你目前还存在的其他机会" }
+        ]
       },
       {
         id: 'stay-or-leave',

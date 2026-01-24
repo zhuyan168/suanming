@@ -20,8 +20,8 @@ export default function SpreadCard({
 }: SpreadCardProps) {
   const router = useRouter();
 
-  // 临时白名单：relationship-development, reconciliation 暂时开放（会员系统上线后移除）
-  const isTemporarilyOpen = spread.id === 'relationship-development' || spread.id === 'reconciliation';
+  // 临时白名单：relationship-development, reconciliation, offer-decision 暂时开放（会员系统上线后移除）
+  const isTemporarilyOpen = spread.id === 'relationship-development' || spread.id === 'reconciliation' || spread.id === 'offer-decision';
   const isLocked = spread.isPaid && !isMember && !isTemporarilyOpen;
 
   const handleClick = () => {
@@ -35,7 +35,8 @@ export default function SpreadCard({
         spread.id === 'relationship-development' || 
         spread.id === 'reconciliation' ||
         spread.id === 'skills-direction' ||
-        spread.id === 'interview-exam-key-reminders'
+        spread.id === 'interview-exam-key-reminders' ||
+        spread.id === 'offer-decision'
       ) {
         router.push(`/themed-readings/${theme}/${spread.id}/draw`);
       } else {
@@ -96,7 +97,7 @@ export default function SpreadCard({
             }
           `}
         >
-          {isLocked ? '解锁查看' : '开始占卜'}
+          {isLocked ? '解锁查看' : (isTemporarilyOpen ? '开始占卜' : '开始占卜')}
         </button>
       </div>
     </div>

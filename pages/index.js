@@ -1023,13 +1023,6 @@ export default function Home() {
   const [isToastVisible, setIsToastVisible] = useState(false);
   const toastTimerRef = useRef(null);
 
-  // 确保 HTML 根元素有 dark 类
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
   useEffect(() => () => {
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current);

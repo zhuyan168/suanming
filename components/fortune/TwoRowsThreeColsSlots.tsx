@@ -36,7 +36,7 @@ export default function TwoRowsThreeColsSlots({
     const config = slotConfig[index];
     
     return (
-      <div key={index} className="flex flex-col items-center">
+      <div key={index} className="flex flex-col items-center gap-3">
         <AnimatePresence mode="wait">
           {card ? (
             <motion.div
@@ -132,34 +132,36 @@ export default function TwoRowsThreeColsSlots({
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="w-24 h-36 sm:w-32 sm:h-48 md:w-40 md:h-60 rounded-xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center p-2"
+              className="w-24 h-36 sm:w-32 sm:h-48 md:w-40 md:h-60 rounded-xl border-2 border-dashed border-white/20 flex items-center justify-center"
             >
-              <div className="text-center">
-                <p className="text-lg sm:text-xl font-bold text-white/50 mb-1">
-                  {config.position}
-                </p>
-                <p className="text-xs sm:text-sm text-white/60 leading-tight px-2">
-                  {config.title}
-                </p>
-              </div>
+              <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/40">
+                {config.position}
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
+        
+        {/* 卡牌位置说明文字 */}
+        <div className="text-center w-24 sm:w-32 md:w-40">
+          <p className="text-xs sm:text-sm text-white/70 leading-tight">
+            {config.title}
+          </p>
+        </div>
       </div>
     );
   };
   
   return (
-    <div className="two-rows-three-cols-slots w-full flex flex-col justify-center items-center py-8 gap-6 sm:gap-8">
+    <div className="two-rows-three-cols-slots w-full flex flex-col justify-center items-center py-8 gap-8 sm:gap-10 md:gap-12">
       {/* 第一行: 第1/2/3张 */}
-      <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8">
+      <div className="flex items-start justify-center gap-8 sm:gap-12 md:gap-16 lg:gap-20">
         {renderCard(0)}
         {renderCard(1)}
         {renderCard(2)}
       </div>
 
       {/* 第二行: 第4/5/6张 */}
-      <div className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8">
+      <div className="flex items-start justify-center gap-8 sm:gap-12 md:gap-16 lg:gap-20">
         {renderCard(3)}
         {renderCard(4)}
         {renderCard(5)}
