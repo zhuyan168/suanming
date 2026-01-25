@@ -165,13 +165,22 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'stay-or-leave',
-        titleZh: '这份工作还值得我继续做下去吗？',
+        titleZh: '这份工作是否值得继续做下去？',
         titleEn: 'Stay or Leave',
         descZh: '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。',
         descEn: 'Assess the meaning, exhaustion, and opportunities of staying.',
-        cardsCount: 5,
+        cardsCount: 7,
         isPaid: true,
         icon: '⚖️',
+        cards: [
+          { id: "p1", name: "你现在的职业状态", meaning: "你现在的职业状态" },
+          { id: "p2", name: "工作方面的优势", meaning: "工作方面的优势" },
+          { id: "p3", name: "工作方面的劣势", meaning: "工作方面的劣势" },
+          { id: "p4", name: "领导/上司对自己的看法", meaning: "领导/上司对自己的看法" },
+          { id: "p5", name: "同事/下属对自己的看法", meaning: "同事/下属对自己的看法" },
+          { id: "p6", name: "个人成长进步空间", meaning: "个人成长进步空间" },
+          { id: "p7", name: "工作未来发展趋势", meaning: "工作未来发展趋势" }
+        ]
       },
     ],
   },
