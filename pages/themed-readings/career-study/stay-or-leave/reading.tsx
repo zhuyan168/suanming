@@ -34,14 +34,43 @@ interface StayOrLeaveResult {
 }
 
 const SLOT_CONFIG = [
-  { id: "p1", name: "你目前的职业状态" },
-  { id: "p2", name: "这份工作的优势" },
-  { id: "p3", name: "这份工作的劣势" },
-  { id: "p4", name: "领导/上司对你的看法" },
-  { id: "p5", name: "同事/下属对你的看法" },
-  { id: "p6", name: "个人成长进步空间" },
-  { id: "p7", name: "工作未来发展趋势" }
+  {
+    id: "p1",
+    name: "你目前的职业状态",
+    meaning: "你现在在这份工作中的真实处境、心理状态和整体感受"
+  },
+  {
+    id: "p2",
+    name: "这份工作的优势",
+    meaning: "这份工作目前能为你带来的支持、资源或正向价值"
+  },
+  {
+    id: "p3",
+    name: "这份工作的劣势",
+    meaning: "让你感到消耗、受限，或长期可能产生压力的部分"
+  },
+  {
+    id: "p4",
+    name: "领导/上司对你的看法",
+    meaning: "上级更可能如何看待你的能力、位置与发展潜力"
+  },
+  {
+    id: "p5",
+    name: "同事/下属对你的看法",
+    meaning: "团队关系中，他人与你相处时的感受与态度"
+  },
+  {
+    id: "p6",
+    name: "个人成长进步空间",
+    meaning: "如果你愿意投入精力，这份工作能否促进你的成长"
+  },
+  {
+    id: "p7",
+    name: "工作未来发展趋势",
+    meaning: "在不做极端改变的前提下，这份工作可能的发展方向"
+  }
 ];
+
 
 export default function StayOrLeaveReading() {
   const router = useRouter();
