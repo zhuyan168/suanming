@@ -188,10 +188,31 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
     id: 'wealth',
     titleZh: '财富',
     titleEn: 'Wealth',
-    descZh: '了解财运走向，把握财富机遇',
-    descEn: 'Understand your financial fortune and opportunities',
+    descZh: '看清金钱的流动与阻碍，做更踏实的选择',
+    descEn: 'See the flow and obstacles of money, make more solid choices',
     icon: 'paid',
-    spreads: [], // TODO: 待实现
+    spreads: [
+      {
+        id: 'current-wealth-status',
+        titleZh: '我现在的财运如何？',
+        titleEn: 'Current Wealth Status',
+        descZh: '用三张牌快速看清你当前的财运状态、影响因素与近期走向。',
+        descEn: 'Quickly see your current wealth status, influences, and near-term trends with three cards.',
+        cardsCount: 3,
+        isPaid: false,
+        icon: '💰',
+      },
+      {
+        id: 'wealth-obstacles',
+        titleZh: '我现在的财富阻碍是什么？',
+        titleEn: 'Wealth Obstacles',
+        descZh: '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。',
+        descEn: 'Find the breakthrough for financial improvement from current status, external influences, attitude, and obstacles.',
+        cardsCount: 4,
+        isPaid: true,
+        icon: '🚧',
+      },
+    ],
   },
 };
 

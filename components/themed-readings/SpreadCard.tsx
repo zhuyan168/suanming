@@ -7,6 +7,7 @@ interface SpreadCardProps {
   theme: string;
   isMember: boolean;
   onLockedClick: () => void;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -17,6 +18,7 @@ export default function SpreadCard({
   theme,
   isMember,
   onLockedClick,
+  onClick,
 }: SpreadCardProps) {
   const router = useRouter();
 
@@ -24,7 +26,12 @@ export default function SpreadCard({
   const isTemporarilyOpen = spread.id === 'relationship-development' || spread.id === 'reconciliation' || spread.id === 'offer-decision' || spread.id === 'stay-or-leave';
   const isLocked = spread.isPaid && !isMember && !isTemporarilyOpen;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick(e);
+      return;
+    }
+
     if (isLocked) {
       onLockedClick();
     } else {
@@ -37,7 +44,8 @@ export default function SpreadCard({
         spread.id === 'skills-direction' ||
         spread.id === 'interview-exam-key-reminders' ||
         spread.id === 'offer-decision' ||
-        spread.id === 'stay-or-leave'
+        spread.id === 'stay-or-leave' ||
+        spread.id === 'current-wealth-status'
       ) {
         router.push(`/themed-readings/${theme}/${spread.id}/draw`);
       } else {
