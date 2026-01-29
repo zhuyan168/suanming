@@ -208,9 +208,16 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         titleEn: 'Wealth Obstacles',
         descZh: '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。',
         descEn: 'Find the breakthrough for financial improvement from current status, external influences, attitude, and obstacles.',
-        cardsCount: 4,
+        cardsCount: 5,
         isPaid: true,
         icon: '🚧',
+        cards: [
+          { id: "p1", name: "你当前的财务状况", meaning: "你当前的财务状况" },
+          { id: "p2", name: "影响你财务的外在因素", meaning: "影响你财务的外在因素" },
+          { id: "p3", name: "你对自己财务状况的态度", meaning: "你对自己财务状况的态度" },
+          { id: "p4", name: "阻碍你财务改善的原因", meaning: "阻碍你财务改善的原因" },
+          { id: "p5", name: "你可以如何突破这一财务阻碍", meaning: "你可以如何突破这一财务阻碍" }
+        ]
       },
     ],
   },

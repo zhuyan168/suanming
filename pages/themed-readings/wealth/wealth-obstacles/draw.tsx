@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
-import WealthThreeCardSlots from '../../../../components/fortune/WealthThreeCardSlots';
+import MoneyBlocksSlots from '../../../../components/fortune/MoneyBlocksSlots';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -73,7 +73,7 @@ const tarotCards = [
   { id: 57, name: 'Eight of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_8.png', upright: '限制、自我怀疑、被困', reversed: '自由、自我接受、新视角', keywords: ['限制', '怀疑', '被困'] },
   { id: 58, name: 'Nine of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_9.png', upright: '焦虑、噩梦、恐惧', reversed: '希望、恢复、面对恐惧', keywords: ['焦虑', '噩梦', '恐惧'] },
   { id: 59, name: 'Ten of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_10.png', upright: '背叛、结束、痛苦', reversed: '恢复、新开始、释放', keywords: ['背叛', '结束', '痛苦'] },
-  { id: 60, name: 'Page of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_page.png', upright: '好奇心、新想法、沟通', reversed: '缺乏焦点、八卦、错误信息', keywords: ['好奇', '想法', '沟通'] },
+  { id: 60, name: 'Page of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_page.png', upright: '好奇心、新想法、沟通', reversed: '缺乏焦点、八 gossip、错误信息', keywords: ['好奇', '想法', '沟通'] },
   { id: 61, name: 'Knight of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_knight.png', upright: '行动、冲动、直接', reversed: '鲁莽、缺乏方向、延迟', keywords: ['行动', '冲动', '直接'] },
   { id: 62, name: 'Queen of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_queen.png', upright: '清晰思考、独立、诚实', reversed: '冷酷、缺乏同情、偏见', keywords: ['清晰', '独立', '诚实'] },
   { id: 63, name: 'King of Swords', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_king.png', upright: '真理、公正、权威', reversed: '操纵、不公、滥用权力', keywords: ['真理', '公正', '权威'] },
@@ -115,41 +115,38 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   return shuffleArray(cardsWithOrientation);
 };
 
-const STORAGE_KEY = 'wealth_current_status_result';
+const STORAGE_KEY = 'wealth_obstacles_result';
 
 const SLOT_CONFIG = [
-  { id: "p1", name: "当前的财运状态", meaning: "你现在整体的金钱状况与能量基调，反映你当下与财富的关系。" },
-  { id: "p2", name: "正在影响你财运的因素", meaning: "无论是外在环境、现实条件，还是你的选择与心态，正在对财运产生作用的关键因素。" },
-  { id: "p3", name: "近期的财运走向与提醒", meaning: "接下来一段时间财运的整体趋势，以及你需要留意或调整的方向。" }
+  { id: "p1", name: "你当前的财务状况", meaning: "你当前的财务状况" },
+  { id: "p2", name: "影响你财务的外在因素", meaning: "影响你财务的外在因素" },
+  { id: "p3", name: "你对自己财务状况的态度", meaning: "你对自己财务状况的态度" },
+  { id: "p4", name: "阻碍你财务改善的原因", meaning: "阻碍你财务改善的原因" },
+  { id: "p5", name: "你可以如何突破这一财务阻碍", meaning: "你可以如何突破这一财务阻碍" }
 ];
 
-export default function CurrentWealthStatusDraw() {
+export default function WealthObstaclesDraw() {
   const router = useRouter();
   const [hasDrawn, setHasDrawn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
   const [toastVisible, setToastVisible] = useState(false);
   
-  const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>([null, null, null]);
-  const [isAnimating, setIsAnimating] = useState<boolean[]>([false, false, false]);
+  const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>([null, null, null, null, null]);
+  const [isAnimating, setIsAnimating] = useState<boolean[]>([false, false, false, false, false]);
   const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
   
   const containerRef = useRef<HTMLDivElement>(null);
-  const isScrollingRef = useRef(false);
 
   // 图片预加载逻辑
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // 分批预加载图片，避免瞬间占用过多带宽
     const preloadImages = async () => {
-      // 优先预加载可能被抽到的前 20 张
       const cardsToPreload = tarotCards.map(c => c.image);
-      
       for (let i = 0; i < cardsToPreload.length; i++) {
         const img = new Image();
         img.src = cardsToPreload[i];
-        // 每加载 5 张稍微停顿一下，不阻塞主线程
         if (i % 5 === 0) await new Promise(r => setTimeout(r, 100));
       }
     };
@@ -172,7 +169,7 @@ export default function CurrentWealthStatusDraw() {
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
     const currentCardCount = selectedCards.filter(c => c !== null).length;
-    if (currentCardCount >= 3) return;
+    if (currentCardCount >= 5) return;
 
     const card = uiSlots[slotIndex];
     if (!card) return;
@@ -197,7 +194,7 @@ export default function CurrentWealthStatusDraw() {
     await new Promise(resolve => setTimeout(resolve, 300));
     setIsLoading(false);
 
-    if (newSelectedCards.filter(c => c !== null).length === 3) {
+    if (newSelectedCards.filter(c => c !== null).length === 5) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         timestamp: Date.now(),
         cards: newSelectedCards
@@ -207,15 +204,15 @@ export default function CurrentWealthStatusDraw() {
   };
 
   const handleStartReading = () => {
-    router.push('/themed-readings/wealth/current-wealth-status/reading');
+    router.push('/themed-readings/wealth/wealth-obstacles/reading');
   };
 
   const handleReset = () => {
     if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
-    setSelectedCards([null, null, null]);
-    setIsAnimating([false, false, false]);
+    setSelectedCards([null, null, null, null, null]);
+    setIsAnimating([false, false, false, false, false]);
     setUiSlots(shuffleCards(tarotCards));
     setScrollValue(0);
   };
@@ -223,7 +220,7 @@ export default function CurrentWealthStatusDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>我现在的财运如何？ - 抽牌</title>
+        <title>我现在的财富阻碍是什么？ - 抽牌</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
@@ -245,10 +242,10 @@ export default function CurrentWealthStatusDraw() {
             <div className="text-center mb-12">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-3">Wealth Readings</p>
               <h1 className="text-3xl sm:text-5xl font-black mb-4">
-                {hasDrawn ? '财运牌阵已完成' : '我现在的财运如何？'}
+                {hasDrawn ? '财富阻碍牌阵已完成' : '我现在的财富阻碍是什么？'}
               </h1>
               <p className="text-white/60 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '用三张牌快速看清你当前的财运状态、影响因素与近期走向。请从下方牌堆中抽取 3 张牌。'}
+                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。请从下方牌堆中抽取 5 张牌。'}
               </p>
             </div>
 
@@ -278,12 +275,12 @@ export default function CurrentWealthStatusDraw() {
                   setScrollValue(val);
                 }} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-sm font-medium">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 3
+                  已抽牌：{selectedCards.filter(c => c !== null).length} / 5
                 </div>
               </motion.div>
             )}
 
-            <WealthThreeCardSlots
+            <MoneyBlocksSlots
               cards={selectedCards}
               isAnimating={isAnimating}
               showLoadingText={!hasDrawn}
@@ -301,7 +298,7 @@ export default function CurrentWealthStatusDraw() {
                   开始解读
                 </button>
                 <p className="text-white/40 text-sm mt-6">
-                  ✨ 深度洞察金钱能量，把握财富机遇
+                  ✨ 深度洞察财富阻碍，开启丰盛人生
                 </p>
               </motion.div>
             )}

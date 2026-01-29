@@ -114,7 +114,7 @@ export default function WealthCurrentStatusReadingPage() {
   const handleReset = () => {
     if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
     localStorage.removeItem(STORAGE_KEY);
-    router.push('/themed-readings/wealth/current-wealth-status/draw');
+    router.replace('/themed-readings/wealth/current-wealth-status/draw');
   };
 
   if (error) {

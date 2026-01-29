@@ -79,7 +79,6 @@ export default function WealthThemePage() {
                   theme="wealth"
                   isMember={isMember}
                   onLockedClick={() => setIsModalOpen(true)}
-                  onClick={spread.id === 'wealth-obstacles' ? showComingSoonToast : undefined}
                 />
               ))}
             </SpreadsGrid>
