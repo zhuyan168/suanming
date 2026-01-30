@@ -234,7 +234,7 @@ const TarotReading = () => {
         className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 ${isOpen ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
       >
         <button
-          aria-label="关闭塔罗占卜面板"
+          aria-label="关闭是否塔罗面板"
           className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 transition hover:border-white/20 hover:text-white"
           type="button"
           onClick={handleClose}
@@ -243,7 +243,7 @@ const TarotReading = () => {
         </button>
 
         <header className="mb-6 flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-[0.4em] text-primary">塔罗占卜</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-primary">是否塔罗</p>
           <h2 className="text-3xl font-black leading-tight tracking-tight">静心提问，抽取你的指引</h2>
           <p className="text-sm text-white/70">请在心中专注你的问题，深呼吸三次后开始抽牌。相信宇宙会为你带来最适合的讯息。</p>
         </header>

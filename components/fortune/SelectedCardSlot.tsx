@@ -7,16 +7,19 @@ interface SelectedCardSlotProps {
   isAnimating: boolean;
   orientation?: 'upright' | 'reversed';
   showLoadingText?: boolean;
+  forceFlipped?: boolean;
 }
 
 export default function SelectedCardSlot({ 
   selectedCard, 
   isAnimating,
   orientation = 'upright',
-  showLoadingText = false
+  showLoadingText = false,
+  forceFlipped = false
 }: SelectedCardSlotProps) {
-  // 判断是否应该显示翻牌状态（当动画完成且不是动画中时）
-  const isFlipped = !isAnimating && selectedCard !== null;
+  // 判断是否应该显示翻牌状态（当动画完成且不是动画中时，或强制翻牌）
+  // 如果强制翻牌，直接返回 true，否则检查动画状态
+  const isFlipped = forceFlipped ? true : (!isAnimating && selectedCard !== null);
 
   return (
     <div className="selected-card-slot w-full flex flex-col justify-center items-center py-8">
@@ -61,6 +64,8 @@ export default function SelectedCardSlot({
               style={{
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
+                transform: forceFlipped ? 'rotateY(180deg)' : (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'),
+                transition: 'transform 0.3s ease-in-out',
               }}
             >
               {/* 卡背 - 初始 rotateY(0deg)，翻牌后通过父容器旋转隐藏 */}

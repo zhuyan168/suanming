@@ -689,14 +689,13 @@ const FeatureToast = ({ visible, title, message, onClose }) => {
 };
 
 const TarotReadingModal = ({ isOpen, onRequestClose }) => {
+  const router = useRouter();
   const [question, setQuestion] = useState('');
   const [error, setError] = useState(null);
-  const [drawResult, setDrawResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const closeTimerRef = useRef(null);
   const questionInputRef = useRef(null);
   const wasOpenRef = useRef(false);
-  const cardBackIndices = useMemo(() => Array.from({ length: 12 }, (_, index) => index), []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -707,7 +706,6 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
       closeTimerRef.current = setTimeout(() => {
         setQuestion('');
         setError(null);
-        setDrawResult(null);
       }, 320);
       return () => {
         if (closeTimerRef.current) {
@@ -719,7 +717,6 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
     if (!wasOpenRef.current) {
       setQuestion('');
       setError(null);
-      setDrawResult(null);
     }
     wasOpenRef.current = true;
     if (closeTimerRef.current) {
@@ -733,12 +730,12 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
     if (!isOpen) {
       return undefined;
     }
-    // 只在未抽牌时才聚焦输入框
-    if (!drawResult && questionInputRef.current) {
+    // 聚焦输入框
+    if (questionInputRef.current) {
       questionInputRef.current.focus();
     }
     return undefined;
-  }, [isOpen, drawResult]);
+  }, [isOpen]);
 
   useEffect(() => () => {
     if (closeTimerRef.current) {
@@ -765,81 +762,18 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   };
 
   const handleDrawCard = async () => {
-    if (!question.trim()) {
-      setError('请先输入你的问题，再开始抽牌。');
-      return;
-    }
-
     setError(null);
-    setIsLoading(true);
-
-    try {
-      // 随机抽取塔罗牌和正逆位
-      const card = pickRandom(tarotCards);
-      const orientation = Math.random() > 0.5 ? 'upright' : 'reversed';
-
-      // 调用 API 获取 AI 解读
-      const response = await fetch('/api/tarot', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: question.trim(),
-          cardName: card.name,
-          orientation,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // 显示详细的错误信息
-        const errorMessage = data.message || data.error || '获取解读失败，请稍后重试';
-        console.error('API 错误:', {
-          status: response.status,
-          error: data.error,
-          message: data.message,
-          details: data.details,
-        });
-        throw new Error(errorMessage);
-      }
-
-      // 检查返回数据是否有效
-      if (!data.answer && !data.interpretation) {
-        throw new Error('未能获取有效解读，请重试');
-      }
-
-      setDrawResult({
-        card,
-        orientation,
-        answer: data.answer,
-        interpretation: data.interpretation,
-      });
-      
-      // 移除输入框焦点，防止光标闪烁
-      if (document.activeElement && document.activeElement.blur) {
-        document.activeElement.blur();
-      }
-    } catch (err) {
-      console.error('抽牌错误:', err);
-      setError(err.message || '抽牌失败，请稍后重试');
-    } finally {
-      setIsLoading(false);
+    
+    // 保存用户问题到 localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('yesno_tarot_question_v1', question.trim());
     }
+    
+    // 跳转到抽牌页
+    router.push('/fortune/yesno-tarot/draw');
   };
 
-  const handleDrawAgain = () => {
-    setError(null);
-    setDrawResult(null);
-    setQuestion(''); // 清空问题
-    // 移除任何元素的焦点，防止光标闪烁
-    if (document.activeElement && document.activeElement.blur) {
-      document.activeElement.blur();
-    }
-  };
-
-  const isDrawDisabled = question.trim().length === 0 || isLoading;
+  const isDrawDisabled = isLoading;
 
   return (
     <div
@@ -849,169 +783,80 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
       onClick={handleClose}
     >
       
-      {/* 未抽牌时：垂直水平居中显示输入框和按钮 */}
-      {!drawResult ? (
-        <section
-          className={`relative z-10 w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-auto ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
-          onClick={(e) => e.stopPropagation()}
+      <section
+        className={`relative z-10 w-full max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 my-auto ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          aria-label="关闭是否塔罗面板"
+          className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 transition hover:border-white/20 hover:text-white"
+          type="button"
+          onClick={handleClose}
         >
-          <button
-            aria-label="关闭塔罗占卜面板"
-            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 transition hover:border-white/20 hover:text-white"
-            type="button"
-            onClick={handleClose}
-          >
-            <span className="material-symbols-outlined notranslate text-xl">close</span>
-          </button>
+          <span className="material-symbols-outlined notranslate text-xl">close</span>
+        </button>
 
-          <header className="mb-8 flex flex-col gap-3 text-center">
-            <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-2">塔罗占卜</p>
-            <h2 className="text-3xl font-black leading-tight tracking-tight">静心提问，抽取你的指引</h2>
-            <p className="text-sm text-white/70 mt-1">
-              请在心中专注你的问题，深呼吸三次后开始抽牌。相信宇宙会为你带来最适合的讯息。
-            </p>
-          </header>
+        <header className="mb-8 flex flex-col gap-3 text-center">
+          <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-2">是否塔罗</p>
+          <h2 className="text-3xl font-black leading-tight tracking-tight">静心提问，抽取你的指引</h2>
+        </header>
 
-          <div className="flex flex-col gap-6">
-            {/* 占卜引导提示 */}
-            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <div className="flex flex-col gap-6">
+          {/* 占卜引导提示 */}
+          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+            <div className="flex flex-col gap-3">
               <p className="text-sm text-white/90 leading-relaxed">
                 <span className="font-semibold text-primary">占卜建议：</span>为获得最准确的指引，同一个问题建议只问一次。重复占卜可能会让能量混乱，影响结果的准确性。
               </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="tarot-question">
-                你的问题
-              </label>
-              <textarea
-                id="tarot-question"
-                ref={questionInputRef}
-                className="w-full rounded-2xl border border-white/10 bg-black/30 p-4 text-base text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                rows={4}
-                maxLength={160}
-                value={question}
-                onChange={(event) => setQuestion(event.target.value)}
-                placeholder="提问技巧：请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？"
-              ></textarea>
-              <div className="mt-2 flex items-center justify-between text-xs text-white/50">
-                <span>最多 160 字</span>
-                <span>{question.length}/160</span>
-              </div>
-              {error ? <p className="mt-2 text-sm text-orange-300">{error}</p> : null}
-            </div>
-
-            <div className="flex justify-center">
-              <button
-                type="button"
-                onClick={handleDrawCard}
-                disabled={isDrawDisabled}
-                className={`flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold transition ${isDrawDisabled ? 'cursor-not-allowed bg-white/10 text-white/30' : 'bg-primary text-white shadow-glow hover:bg-primary/90 hover:scale-105'}`}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="material-symbols-outlined text-xl animate-spin">refresh</span>
-                    解读中...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                    抽牌
-                  </>
-                )}
-              </button>
+              <p className="text-sm text-white/70 leading-relaxed">
+                <span className="font-semibold text-primary">提问技巧：</span>请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？
+              </p>
             </div>
           </div>
-        </section>
-      ) : (
-        /* 抽牌后：显示结果 */
-        <section
-          className={`relative z-10 w-full max-w-4xl rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 text-white shadow-glow transition-all duration-300 ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            aria-label="关闭塔罗占卜面板"
-            className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 transition hover:border-white/20 hover:text-white z-20"
-            type="button"
-            onClick={handleClose}
-          >
-            <span className="material-symbols-outlined notranslate text-xl">close</span>
-          </button>
 
-          <div className="animate-fade-in flex flex-col">
-            {/* 用户问题显示区域 */}
-            {question && (
-              <div className="mb-6 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 text-center">
-                <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">Your Question</p>
-                <p className="text-lg text-white/95 leading-relaxed font-medium">{question}</p>
-              </div>
-            )}
-            
-            <div className="grid gap-8 md:grid-cols-[minmax(0,240px)_1fr] w-full">
-              <div className="flex flex-col gap-4">
-                {/* 卡片图片区域 */}
-                <div className="flex flex-col items-center gap-4">
-                  <div className="perspective w-full flex justify-center">
-                    <div className="animate-flip-in h-72 w-48 overflow-hidden rounded-3xl border border-white/15 bg-black/20 shadow-glow">
-                      <img
-                        src={drawResult.card.image}
-                        alt={drawResult.card.name}
-                        className={`h-full w-full object-cover transition-transform duration-500 ${drawResult.orientation === 'reversed' ? 'rotate-180' : ''}`}
-                      />
-                    </div>
-                  </div>
-                  <p className="text-xs text-white/50">若出现逆位，牌面将倒置显示。</p>
-                </div>
-              </div>
-              {/* 右侧内容区域 */}
-              <div className="flex flex-col gap-5 justify-center">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">{drawResult.card.name}</h3>
-                  <p className="mt-1 text-sm text-white/60">
-                    {drawResult.orientation === 'upright' ? '正位' : '逆位'} ·
-                    {drawResult.orientation === 'upright' ? drawResult.card.upright : drawResult.card.reversed}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {drawResult.card.keywords.map((keyword) => (
-                    <span
-                      key={keyword}
-                      className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-                {/* AI 生成的答案 */}
-                {drawResult.answer && (
-                  <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="material-symbols-outlined text-primary text-xl">check_circle</span>
-                      <span className="text-sm font-semibold text-primary uppercase tracking-wider">答案</span>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{drawResult.answer}</p>
-                  </div>
-                )}
-                {/* AI 生成的解析 */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-base leading-relaxed text-white/80">
-                  {drawResult.interpretation}
-                </div>
-                {/* 按钮区域：稍微向左偏移，视觉上更居中 */}
-                <div className="flex justify-center mt-6 -ml-3">
-                  <button
-                    type="button"
-                    onClick={handleDrawAgain}
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-glow transition hover:bg-primary/90"
-                  >
-                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                    再问一个
-                  </button>
-                </div>
-              </div>
+          <div>
+            <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="tarot-question">
+              你的问题（可选）
+            </label>
+            <textarea
+              id="tarot-question"
+              ref={questionInputRef}
+              className="w-full rounded-2xl border border-white/10 bg-black/30 p-4 text-base text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+              rows={4}
+              maxLength={160}
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="请在心中默念你的问题，深呼吸三次后开始抽牌。也可以在此输入问题获得更详细的解读。"
+            ></textarea>
+            <div className="mt-2 flex items-center justify-between text-xs text-white/50">
+              <span>最多 160 字</span>
+              <span>{question.length}/160</span>
             </div>
+            {error ? <p className="mt-2 text-sm text-orange-300">{error}</p> : null}
           </div>
-        </section>
-      )}
+
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={handleDrawCard}
+              disabled={isDrawDisabled}
+              className={`flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold transition ${isDrawDisabled ? 'cursor-not-allowed bg-white/10 text-white/30' : 'bg-primary text-white shadow-glow hover:bg-primary/90 hover:scale-105'}`}
+            >
+              {isLoading ? (
+                <>
+                  <span className="material-symbols-outlined text-xl animate-spin">refresh</span>
+                  准备中...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                  抽牌
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
@@ -1028,6 +873,15 @@ export default function Home() {
       clearTimeout(toastTimerRef.current);
     }
   }, []);
+
+  // 检测URL参数，如果存在 tarot=true 则自动打开弹窗
+  useEffect(() => {
+    if (router.isReady && router.query.tarot === 'true') {
+      setIsTarotOpen(true);
+      // 清除URL参数，避免刷新时重复打开
+      router.replace('/', undefined, { shallow: true });
+    }
+  }, [router.isReady, router.query.tarot]);
 
   const showToast = (title, message) => {
     setToast({ title, message });
@@ -1166,27 +1020,34 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-sm font-medium">是否占卜</p>
-                          <p className="text-white text-2xl font-bold leading-tight tracking-[-0.015em]">Fortune Telling</p>
-                          <p className="text-white/60 text-base font-normal leading-normal">
-                            Choose your preferred method of divination to gain clarity and guidance on your path.
+                          <p className="text-primary text-xl font-bold">综合占卜</p>
+                          <p className="text-white/80 text-base font-normal leading-normal">
+                            适用于不限定领域的通用牌阵，帮助你在犹豫与选择中，看清当下能量。
                           </p>
                         </div>
                         <div className="flex flex-col sm:flex-row lg:flex-col gap-4 mt-auto">
+                          {/* 通用牌阵按钮 - 预留位置 */}
+                          <button
+                            type="button"
+                            onClick={() => handleFeatureComingSoon('通用牌阵开发中')}
+                            className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
+                          >
+                            <span className="truncate">通用牌阵</span>
+                          </button>
                           {/* 同样原因，绑定 onClick 以触发 React 弹窗 */}
                           <button
                             type="button"
                             onClick={handleTarotTrigger}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">塔罗占卜 (Tarot)</span>
+                            <span className="truncate">是否塔罗</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => router.push('/divination/jiaobei')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">掷筊占卜 (Moon Blocks)</span>
+                            <span className="truncate">掷筊占卜</span>
                           </button>
                         </div>
                       </div>
@@ -1194,13 +1055,12 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-sm font-medium">运势测算</p>
-                          <p className="text-white text-2xl font-bold leading-tight tracking-[-0.015em]">Fortune Calculation</p>
-                          <p className="text-white/60 text-base font-normal leading-normal">
-                            Uncover astrological insights for your day, month, season, or the entire year ahead.
+                          <p className="text-primary text-xl font-bold">运势测算</p>
+                          <p className="text-white/80 text-base font-normal leading-normal">
+                            帮你了解当下与一段时间内的运势变化，提前感知节奏，把握属于你的时机。
                           </p>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 mt-auto">
+                        <div className="grid grid-cols-2 gap-4 mt-6">
                           <button
                             type="button"
                             onClick={() => router.push('/fortune/daily')}
@@ -1267,10 +1127,9 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-sm font-medium">主题占卜</p>
-                          <p className="text-white text-2xl font-bold leading-tight tracking-[-0.015em]">Themed Readings</p>
-                          <p className="text-white/60 text-base font-normal leading-normal">
-                            Seek answers and guidance for the most important areas of your life.
+                          <p className="text-primary text-xl font-bold">主题占卜</p>
+                          <p className="text-white/80 text-base font-normal leading-normal">
+                            聚焦具体的人生主题，在重要关系与选择中，获得更清晰的指引。
                           </p>
                         </div>
                         <div className="flex flex-col gap-4 mt-auto">
@@ -1280,7 +1139,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">favorite</span>
-                            <span className="truncate">爱情 (Love)</span>
+                            <span className="truncate">爱情</span>
                           </button>
                           <button
                             type="button"
@@ -1288,7 +1147,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">school</span>
-                            <span className="truncate">事业&amp;学业 (Career &amp; Study)</span>
+                            <span className="truncate">事业&amp;学业</span>
                           </button>
                           <button
                             type="button"
@@ -1296,7 +1155,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">paid</span>
-                            <span className="truncate">财富 (Wealth)</span>
+                            <span className="truncate">财富</span>
                           </button>
                         </div>
                       </div>
