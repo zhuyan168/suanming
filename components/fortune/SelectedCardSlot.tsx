@@ -93,13 +93,12 @@ export default function SelectedCardSlot({
                 />
               </div>
               
-              {/* 卡面 - 初始 rotateY(180deg)，翻牌后通过父容器旋转显示 */}
+              {/* 卡面 - 翻牌后通过父容器旋转显示 */}
               <div
                 className="card-front absolute inset-0 rounded-xl overflow-hidden bg-white"
                 style={{
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
-                  transform: 'rotateY(180deg)',
                 }}
               >
                 <img

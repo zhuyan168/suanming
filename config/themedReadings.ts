@@ -5,6 +5,8 @@
 
 export type SpreadTheme = 'love' | 'career-study' | 'wealth';
 
+import type { ReactNode } from 'react';
+
 export interface SpreadConfig {
   id: string;
   titleZh: string;
@@ -13,8 +15,9 @@ export interface SpreadConfig {
   descEn: string;
   cardsCount: number;
   isPaid: boolean;
-  icon?: string; // emoji or lucide icon name
+  icon?: ReactNode; // emoji, text, or icon component
   badge?: string; // e.g., "Most Popular"
+  href?: string;
   cards?: Array<{ id: string; name: string; meaning: string }>;
 }
 

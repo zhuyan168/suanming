@@ -1026,10 +1026,10 @@ export default function Home() {
                           </p>
                         </div>
                         <div className="flex flex-col sm:flex-row lg:flex-col gap-4 mt-auto">
-                          {/* 通用牌阵按钮 - 预留位置 */}
+                          {/* 通用牌阵入口 */}
                           <button
                             type="button"
-                            onClick={() => handleFeatureComingSoon('通用牌阵开发中')}
+                            onClick={() => router.push('/reading/general')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="truncate">通用牌阵</span>

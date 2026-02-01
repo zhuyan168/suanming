@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
 
 interface ShuffledTarotCard {
@@ -22,6 +23,96 @@ interface YesNoTarotDraw {
 // LocalStorage keys
 const STORAGE_KEY_DRAW = 'yesno_tarot_draw_v1';
 const STORAGE_KEY_QUESTION = 'yesno_tarot_question_v1';
+const CARD_BACK_IMAGE = '/assets/card-back.png';
+
+const majorArcanaMap: Record<string, keyof typeof tarotImagesFlat> = {
+  'the fool': 'major_arcana_fool',
+  'the magician': 'major_arcana_magician',
+  'the high priestess': 'major_arcana_priestess',
+  'the empress': 'major_arcana_empress',
+  'the emperor': 'major_arcana_emperor',
+  'the hierophant': 'major_arcana_hierophant',
+  'the lovers': 'major_arcana_lovers',
+  'the chariot': 'major_arcana_chariot',
+  'strength': 'major_arcana_strength',
+  'the hermit': 'major_arcana_hermit',
+  'wheel of fortune': 'major_arcana_fortune',
+  'justice': 'major_arcana_justice',
+  'the hanged man': 'major_arcana_hanged',
+  'death': 'major_arcana_death',
+  'temperance': 'major_arcana_temperance',
+  'the devil': 'major_arcana_devil',
+  'the tower': 'major_arcana_tower',
+  'the star': 'major_arcana_star',
+  'the moon': 'major_arcana_moon',
+  'the sun': 'major_arcana_sun',
+  'judgement': 'major_arcana_judgement',
+  'the world': 'major_arcana_world',
+};
+
+const minorRankMap: Record<string, string> = {
+  ace: 'ace',
+  two: '2',
+  three: '3',
+  four: '4',
+  five: '5',
+  six: '6',
+  seven: '7',
+  eight: '8',
+  nine: '9',
+  ten: '10',
+  page: 'page',
+  knight: 'knight',
+  queen: 'queen',
+  king: 'king',
+};
+
+const minorSuitMap: Record<string, string> = {
+  cups: 'cups',
+  pentacles: 'pentacles',
+  swords: 'swords',
+  wands: 'wands',
+};
+
+const normalizeCardName = (name: string) =>
+  name
+    .replace(/^[0-9]+\.?\s*/i, '')
+    .replace(/^[ivxlcdm]+\.\s*/i, '')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const getTarotImageKey = (name: string): keyof typeof tarotImagesFlat | null => {
+  const normalized = normalizeCardName(name);
+  if (!normalized) return null;
+
+  if (majorArcanaMap[normalized]) {
+    return majorArcanaMap[normalized];
+  }
+
+  const minorMatch = normalized.match(/^(.*?) of (cups|pentacles|swords|wands)$/);
+  if (!minorMatch) return null;
+
+  const rankKey = minorRankMap[minorMatch[1].trim()];
+  const suitKey = minorSuitMap[minorMatch[2]];
+  if (!rankKey || !suitKey) return null;
+
+  const compositeKey = `minor_arcana_${suitKey}_${rankKey}` as keyof typeof tarotImagesFlat;
+  return tarotImagesFlat[compositeKey] ? compositeKey : null;
+};
+
+// Rehydrate card object so we always have a front image URL (uses global tarotImagesFlat)
+const rehydrateTarotCard = (card: ShuffledTarotCard): ShuffledTarotCard => {
+  const imageKey = getTarotImageKey(card.name);
+  if (imageKey) {
+    return {
+      ...card,
+      image: tarotImagesFlat[imageKey],
+    };
+  }
+  return card;
+};
 
 export default function YesNoTarotResult() {
   const router = useRouter();
@@ -44,7 +135,7 @@ export default function YesNoTarotResult() {
     }
 
     const draw: YesNoTarotDraw = JSON.parse(drawData);
-    setCard(draw.card);
+    setCard(rehydrateTarotCard(draw.card));
 
     // 读取用户问题
     const savedQuestion = localStorage.getItem(STORAGE_KEY_QUESTION) || '';
@@ -145,6 +236,8 @@ export default function YesNoTarotResult() {
 
   const answerColor = answer === 'YES' ? 'text-green-400' : answer === 'NO' ? 'text-red-400' : 'text-yellow-400';
   const answerBgColor = answer === 'YES' ? 'from-green-500/10' : answer === 'NO' ? 'from-red-500/10' : 'from-yellow-500/10';
+  const backImage = CARD_BACK_IMAGE; // explicit reference to the card-back asset
+  const frontImage = card?.image ?? backImage; // front image comes from rehydrated card, fallback to back if still missing
 
   return (
     <div className="dark">
@@ -209,7 +302,7 @@ export default function YesNoTarotResult() {
                 <div className="perspective w-full flex justify-center">
                   <div className="w-48 h-72 sm:w-56 sm:h-80 overflow-hidden rounded-3xl border-2 border-primary/30 bg-black/20 shadow-[0_0_30px_rgba(127,19,236,0.4)]">
                     <img
-                      src={card.image}
+                      src={frontImage}
                       alt={card.name}
                       className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
                     />
