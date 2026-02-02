@@ -12,7 +12,7 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     cardsCount: 3,
     isPaid: false,
     icon: '🔮',
-    href: '/reading/general/three-card-universal',
+    href: '/reading/general/three-card-universal/question',
   },
   {
     id: 'sacred-triangle',
@@ -23,7 +23,7 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     cardsCount: 3,
     isPaid: false,
     icon: '🔺',
-    href: '/reading/general/sacred-triangle',
+    href: '/reading/general/sacred-triangle/question',
   },
   {
     id: 'choose-between',
