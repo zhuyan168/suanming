@@ -17,6 +17,101 @@ interface SacredTriangleResult {
   cards: ShuffledTarotCard[];
 }
 
+// 塔罗牌英文名称到中文名称的映射
+const getChineseCardName = (englishName: string): string => {
+  const nameMap: { [key: string]: string } = {
+    // Major Arcana
+    '0. The Fool': '愚者',
+    'I. The Magician': '魔术师',
+    'II. The High Priestess': '女祭司',
+    'III. The Empress': '皇后',
+    'IV. The Emperor': '皇帝',
+    'V. The Hierophant': '教皇',
+    'VI. The Lovers': '恋人',
+    'VII. The Chariot': '战车',
+    'VIII. Strength': '力量',
+    'IX. The Hermit': '隐者',
+    'X. Wheel of Fortune': '命运之轮',
+    'XI. Justice': '正义',
+    'XII. The Hanged Man': '倒吊人',
+    'XIII. Death': '死神',
+    'XIV. Temperance': '节制',
+    'XV. The Devil': '恶魔',
+    'XVI. The Tower': '塔',
+    'XVII. The Star': '星星',
+    'XVIII. The Moon': '月亮',
+    'XIX. The Sun': '太阳',
+    'XX. Judgement': '审判',
+    'XXI. The World': '世界',
+    
+    // Cups - 圣杯
+    'Ace of Cups': '圣杯王牌',
+    'Two of Cups': '圣杯二',
+    'Three of Cups': '圣杯三',
+    'Four of Cups': '圣杯四',
+    'Five of Cups': '圣杯五',
+    'Six of Cups': '圣杯六',
+    'Seven of Cups': '圣杯七',
+    'Eight of Cups': '圣杯八',
+    'Nine of Cups': '圣杯九',
+    'Ten of Cups': '圣杯十',
+    'Page of Cups': '圣杯侍者',
+    'Knight of Cups': '圣杯骑士',
+    'Queen of Cups': '圣杯王后',
+    'King of Cups': '圣杯国王',
+    
+    // Pentacles - 星币
+    'Ace of Pentacles': '星币王牌',
+    'Two of Pentacles': '星币二',
+    'Three of Pentacles': '星币三',
+    'Four of Pentacles': '星币四',
+    'Five of Pentacles': '星币五',
+    'Six of Pentacles': '星币六',
+    'Seven of Pentacles': '星币七',
+    'Eight of Pentacles': '星币八',
+    'Nine of Pentacles': '星币九',
+    'Ten of Pentacles': '星币十',
+    'Page of Pentacles': '星币侍者',
+    'Knight of Pentacles': '星币骑士',
+    'Queen of Pentacles': '星币王后',
+    'King of Pentacles': '星币国王',
+    
+    // Swords - 宝剑
+    'Ace of Swords': '宝剑王牌',
+    'Two of Swords': '宝剑二',
+    'Three of Swords': '宝剑三',
+    'Four of Swords': '宝剑四',
+    'Five of Swords': '宝剑五',
+    'Six of Swords': '宝剑六',
+    'Seven of Swords': '宝剑七',
+    'Eight of Swords': '宝剑八',
+    'Nine of Swords': '宝剑九',
+    'Ten of Swords': '宝剑十',
+    'Page of Swords': '宝剑侍者',
+    'Knight of Swords': '宝剑骑士',
+    'Queen of Swords': '宝剑王后',
+    'King of Swords': '宝剑国王',
+    
+    // Wands - 权杖
+    'Ace of Wands': '权杖王牌',
+    'Two of Wands': '权杖二',
+    'Three of Wands': '权杖三',
+    'Four of Wands': '权杖四',
+    'Five of Wands': '权杖五',
+    'Six of Wands': '权杖六',
+    'Seven of Wands': '权杖七',
+    'Eight of Wands': '权杖八',
+    'Nine of Wands': '权杖九',
+    'Ten of Wands': '权杖十',
+    'Page of Wands': '权杖侍者',
+    'Knight of Wands': '权杖骑士',
+    'Queen of Wands': '权杖王后',
+    'King of Wands': '权杖国王',
+  };
+  
+  return nameMap[englishName] || englishName;
+};
+
 const STORAGE_KEY = 'general_sacred_triangle_result';
 
 const loadSacredTriangleResult = (): SacredTriangleResult | null => {
@@ -50,7 +145,7 @@ export default function SacredTriangleResult() {
   }, [router]);
 
   const handleStartInterpretation = () => {
-    alert('解读功能即将上线，敬请期待！');
+    router.push('/reading/general/sacred-triangle/reading');
   };
 
   const handleRedraw = () => {
@@ -67,9 +162,13 @@ export default function SacredTriangleResult() {
     router.push('/reading/general');
   };
 
+  const handleBackToHome = () => {
+    router.push('/');
+  };
+
   if (isLoading || !result) {
     return (
-      <div className="min-h-screen bg-[#191022] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
         <div className="text-white text-lg">加载中...</div>
       </div>
     );
@@ -86,7 +185,7 @@ export default function SacredTriangleResult() {
         <meta name="description" content="查看你的圣三角牌阵抽牌结果" />
       </Head>
 
-      <div className="min-h-screen bg-[#191022] text-white">
+      <div className="min-h-screen bg-[#0f0f23] text-white">
         {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -94,7 +193,7 @@ export default function SacredTriangleResult() {
         </div>
 
         {/* 顶部导航 */}
-        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#191022]/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
@@ -120,7 +219,7 @@ export default function SacredTriangleResult() {
 
         {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
-          <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-7xl">
             {/* 标题区域 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -141,30 +240,33 @@ export default function SacredTriangleResult() {
 
             {/* 问题显示卡片 */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm p-6"
+              transition={{ delay: 0.2 }}
+              className="mb-8 mx-auto max-w-3xl"
             >
-              <div className="flex items-start gap-3">
-                <span className="material-symbols-outlined text-primary mt-1">
-                  psychology
-                </span>
-                <div className="flex-1">
-                  <h3 className="text-white/90 font-semibold mb-2">你的问题</h3>
-                  <p className={`${result.question.trim() ? 'text-white' : 'text-white/60 italic'} text-base leading-relaxed`}>
-                    {displayQuestion}
-                  </p>
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm p-4"
+            >
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-primary text-xl mt-0.5">
+                    psychology
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/90 text-sm leading-relaxed">
+                      {displayQuestion}
+                    </p>
+                  </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* 卡牌展示 */}
+            {/* 卡牌展示区域 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mb-8"
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="max-w-5xl mx-auto"
             >
               <TriangleThreeCardSlots
                 cards={result.cards}
@@ -172,80 +274,118 @@ export default function SacredTriangleResult() {
                 showLoadingText={false}
                 forceFlipped={true}
               />
-            </motion.div>
 
-            {/* 卡牌信息展示 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4"
-            >
-              {result.cards.map((card, index) => (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-primary font-bold text-lg">卡位 {index + 1}</span>
-                  </div>
-                  <h4 className="text-white font-semibold mb-1 text-sm">{card.name}</h4>
-                  <p className="text-white/60 text-xs mb-2">
-                    {card.orientation === 'upright' ? '正位' : '逆位'}
-                  </p>
-                  <p className="text-white/70 text-xs leading-relaxed">
-                    {card.orientation === 'upright' ? card.upright : card.reversed}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* 操作按钮 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleStartInterpretation}
-                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
-                style={{ backgroundColor: '#7f13ec' }}
-              >
-                开始解读
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleRedraw}
-                className="w-full sm:w-auto px-8 py-4 rounded-xl border-2 border-white/20 text-white font-semibold text-lg transition-all duration-300 hover:border-white/40 hover:bg-white/5"
-              >
-                重新占卜
-              </motion.button>
-            </motion.div>
-
-            {/* 底部提示 */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 1 }}
-              className="mt-8 flex justify-center"
-            >
-              <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-2xl rounded-full pointer-events-none" />
-                <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse">
-                  auto_awesome
-                </span>
-                <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜结果已保存，你可以随时返回查看或重新占卜
-                </p>
-                <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
-                  auto_awesome
-                </span>
+              {/* 卡牌信息列表 */}
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                {result.cards.map((card, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                    className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary font-bold text-sm">
+                        {index + 1}
+                      </div>
+                      <h3 className="text-white font-semibold flex-1">
+                        {getChineseCardName(card.name)}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-white/90 font-medium mb-2">
+                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                    </p>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <p className="text-white/50 mb-1">关键词</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(card.orientation === 'upright' 
+                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
+                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
+                          ).map((keyword, i) => (
+                            <span
+                              key={i}
+                              className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-white/50 mb-1">含义</p>
+                        <p className="text-white/70 leading-relaxed">
+                          {card.orientation === 'upright' 
+                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
+                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
+
+              {/* 操作按钮区域 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                className="mt-12 space-y-4"
+              >
+                {/* 操作按钮 */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleStartInterpretation}
+                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
+                    style={{ backgroundColor: '#7f13ec' }}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                      开始解读
+                    </span>
+                  </motion.button>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleBackToHome}
+                    className="flex-1 px-6 py-3 rounded-xl border border-white/20 text-white font-semibold transition-all duration-300 hover:bg-white/10"
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined text-xl">home</span>
+                      返回首页
+                    </span>
+                  </motion.button>
+                </div>
+              </motion.div>
+
+              {/* 底部提示 */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.1 }}
+                className="mt-8 flex justify-center"
+              >
+                <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-2xl rounded-full pointer-events-none" />
+                  <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse">
+                    auto_awesome
+                  </span>
+                  <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
+                    占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  </p>
+                  <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
+                    auto_awesome
+                  </span>
+                </div>
+              </motion.div>
             </motion.div>
           </div>
         </main>

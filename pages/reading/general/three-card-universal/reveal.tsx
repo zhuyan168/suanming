@@ -154,18 +154,19 @@ export default function ThreeCardRevealPage() {
   }, [router]);
 
   const handleRedraw = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
+    if (!confirm('确定要重新占卜吗？当前结果将被清空。')) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
+      localStorage.removeItem(QUESTION_STORAGE_KEY);
     }
     
-    router.push('/reading/general/three-card-universal/draw');
+    router.push('/reading/general/three-card-universal/question');
   };
 
   const handleStartInterpretation = () => {
-    // 暂时不执行任何操作
-    // 未来这里会跳转到解读页面或触发AI解读功能
+    // 跳转到解读页
+    router.push('/reading/general/three-card-universal/reading');
   };
 
   const handleBackToHome = () => {
@@ -222,7 +223,7 @@ export default function ThreeCardRevealPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新抽牌</span>
+            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
           </button>
         </header>
 
@@ -240,7 +241,7 @@ export default function ThreeCardRevealPage() {
                 THREE-CARD UNIVERSAL SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                你的三张牌
+                三张牌万能牌阵
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
                 牌已就位，以下是你抽到的塔罗牌
@@ -310,7 +311,10 @@ export default function ThreeCardRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">关键词</p>
                         <div className="flex flex-wrap gap-2">
-                          {card.keywords.map((keyword, i) => (
+                          {(card.orientation === 'upright' 
+                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
+                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
+                          ).map((keyword, i) => (
                             <span
                               key={i}
                               className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
@@ -324,7 +328,10 @@ export default function ThreeCardRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">含义</p>
                         <p className="text-white/70 leading-relaxed">
-                          {card.orientation === 'upright' ? card.upright : card.reversed}
+                          {card.orientation === 'upright' 
+                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
+                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
+                          }
                         </p>
                       </div>
                     </div>
@@ -339,31 +346,12 @@ export default function ThreeCardRevealPage() {
                 transition={{ duration: 0.5, delay: 0.9 }}
                 className="mt-12 space-y-4"
               >
-                {/* 解读功能提示（灰色不可用） */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="material-symbols-outlined text-white/40 text-2xl">
-                      auto_awesome
-                    </span>
-                    <h3 className="text-white/60 font-semibold">AI 解读功能</h3>
-                  </div>
-                  <p className="text-white/40 text-sm mb-4">
-                    完整的解读功能正在开发中，敬请期待...
-                  </p>
-                  <button
-                    disabled
-                    className="w-full px-6 py-3 rounded-xl bg-white/5 text-white/40 font-semibold cursor-not-allowed"
-                  >
-                    开始解读（即将上线）
-                  </button>
-                </div>
-
-                {/* 其他操作按钮 */}
+                {/* 操作按钮 */}
                 <div className="flex flex-col sm:flex-row gap-4">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={handleRedraw}
+                    onClick={handleStartInterpretation}
                     className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >

@@ -5,9 +5,16 @@ export interface TarotCard {
   id: number;
   name: string;
   image: string;
-  upright: string;
-  reversed: string;
-  keywords: string[];
+  upright: {
+    keywords: string[];
+    meaning: string;
+  };
+  reversed: {
+    keywords: string[];
+    meaning: string;
+  };
+  // 保留旧的字段以兼容
+  keywords?: string[];
 }
 
 interface CardItemProps {

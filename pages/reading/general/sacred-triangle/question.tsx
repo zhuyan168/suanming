@@ -91,14 +91,6 @@ export default function SacredTriangleQuestionPage() {
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
                 圣三角牌阵
               </h1>
-              <div className="text-white/70 text-lg max-w-2xl mx-auto space-y-3">
-                <p className="text-xl font-medium text-white/90">
-                  经典三张牌阵，适合快速厘清问题
-                </p>
-                <p className="text-base">
-                  输入你的问题后可获得更精准的解读，也可以不输入问题直接开始
-                </p>
-              </div>
             </motion.div>
 
             {/* 输入卡片 */}
@@ -108,25 +100,6 @@ export default function SacredTriangleQuestionPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm p-8"
             >
-              {/* 提示信息 */}
-              <div className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <div className="flex items-start gap-3">
-                  <span className="material-symbols-outlined text-primary mt-0.5">
-                    lightbulb
-                  </span>
-                  <div className="flex-1 text-sm">
-                    <p className="text-white/90 font-medium mb-2">
-                      💡 提示
-                    </p>
-                    <ul className="space-y-1 text-white/70">
-                      <li>• 可选：写下你的问题（输入后可获得更精准的解读）</li>
-                      <li>• 圣三角牌阵将从过去、现在到未来，帮你梳理脉络与下一步方向</li>
-                      <li>• 不输入问题也能继续，我们将以你当下的能量趋势进行解读</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
               {/* 输入框 */}
               <div className="mb-4">
                 <label className="block text-white/90 font-semibold mb-3">
@@ -141,7 +114,7 @@ export default function SacredTriangleQuestionPage() {
                 />
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
-                    {question.trim() ? '已输入问题，将获得针对性解读' : '留空则进行通用占卜'}
+                    {question.trim() ? '已输入问题' : '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌'}
                   </span>
                   <span className={`text-xs ${charCount > maxChars * 0.9 ? 'text-primary' : 'text-white/50'}`}>
                     {charCount} / {maxChars}
