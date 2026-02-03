@@ -6,6 +6,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TarotCard } from '../../types/annual-fortune';
 
+// 兼容旧数据格式的辅助函数：获取含义文本
+const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  return value.meaning || '';
+};
+
 interface CardDetailModalProps {
   card: TarotCard | null;
   monthLabel?: string;  // 例如："一月"、"年度主题"
@@ -121,14 +128,14 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
               {card.upright && (
                 <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
                   <h3 className="text-sm font-semibold text-green-300 mb-1">正位含义</h3>
-                  <p className="text-white/80 text-sm leading-relaxed">{card.upright}</p>
+                  <p className="text-white/80 text-sm leading-relaxed">{getMeaning(card.upright)}</p>
                 </div>
               )}
 
               {card.reversed && (
                 <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                   <h3 className="text-sm font-semibold text-amber-300 mb-1">逆位含义</h3>
-                  <p className="text-white/80 text-sm leading-relaxed">{card.reversed}</p>
+                  <p className="text-white/80 text-sm leading-relaxed">{getMeaning(card.reversed)}</p>
                 </div>
               )}
             </div>

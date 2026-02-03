@@ -6,7 +6,7 @@ import CardItem from '../../../components/fortune/CardItem';
 import EmptySlot from '../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../components/fortune/ScrollBar';
 import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
-import { TarotCard } from '../../../components/fortune/CardItem';
+import { TarotCard, CardMeaning } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 
 // 完整的78张塔罗牌数据（仅用于UI渲染背面卡片）
@@ -871,9 +871,9 @@ interface SeasonalResult {
     id: number;
     name: string;
     image: string;
-    upright: string;
-    reversed: string;
-    keywords: string[];
+    upright: string | CardMeaning;
+    reversed: string | CardMeaning;
+    keywords?: string[];
     orientation: 'upright' | 'reversed';
   }>;
   reading?: any | null;  // AI 解读结果

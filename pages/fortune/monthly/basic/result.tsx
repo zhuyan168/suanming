@@ -3,8 +3,17 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
-import { TarotCard } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+
+// 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
+interface LocalTarotCard {
+  id: number;
+  name: string;
+  image: string;
+  upright: string;
+  reversed: string;
+  keywords: string[];
+}
 
 // ============ 工具函数 ============
 
@@ -67,7 +76,7 @@ const saveMonthlyBasicResult = (data: MonthlyBasicResult): void => {
 };
 
 // 完整的78张塔罗牌数据（用于数据验证和修复）
-const tarotCards: TarotCard[] = [
+const tarotCards: LocalTarotCard[] = [
   { id: 0, name: '0. The Fool', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_fool.png', upright: '新的开始、信任直觉、勇敢冒险', reversed: '冲动行事、犹豫不决、方向不明', keywords: ['纯真', '自由', '机会'] },
   { id: 1, name: 'I. The Magician', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_magician.png', upright: '资源整合、贯彻执行、影响力', reversed: '分散注意、欺骗、缺乏计划', keywords: ['行动', '意志', '显化'] },
   { id: 2, name: 'II. The High Priestess', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_priestess.png', upright: '内在智慧、直觉洞察、保持沉静', reversed: '忽略直觉、情绪混乱、资讯不明', keywords: ['直觉', '秘密', '平衡'] },

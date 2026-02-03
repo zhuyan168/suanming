@@ -7,6 +7,20 @@ import ScrollBar from '../../components/fortune/ScrollBar';
 import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
 import { TarotCard } from '../../components/fortune/CardItem';
 
+// 兼容旧数据格式的辅助函数：获取含义文本
+const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  return value.meaning || '';
+};
+
+// 兼容旧数据格式的辅助函数：获取关键词数组
+const getKeywords = (value: string | { keywords: string[]; meaning: string } | undefined, fallbackKeywords?: string[]): string[] => {
+  if (!value) return fallbackKeywords || [];
+  if (typeof value === 'string') return fallbackKeywords || [];
+  return value.keywords || fallbackKeywords || [];
+};
+
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -794,8 +808,8 @@ export default function DailyFortune() {
     setIsLoading(true);
     setError(null);
 
-    // 准备API调用参数
-    const baseMeaning = orientation === 'upright' ? card.upright : card.reversed;
+    // 准备API调用参数（兼容字符串和对象格式）
+    const baseMeaning = orientation === 'upright' ? getMeaning(card.upright) : getMeaning(card.reversed);
     
     // 立即开始API调用，不等待动画完成
     const apiPromise = (async () => {
@@ -1113,10 +1127,10 @@ export default function DailyFortune() {
                           <h3 className="text-2xl font-bold text-white mb-1">{todayResult.card.name}</h3>
                           <p className="text-sm text-white/60 mb-3">
                             {todayResult.orientation === 'upright' ? '正位' : '逆位'} · 
-                            {todayResult.orientation === 'upright' ? todayResult.card.upright : todayResult.card.reversed}
+                            {todayResult.orientation === 'upright' ? getMeaning(todayResult.card.upright) : getMeaning(todayResult.card.reversed)}
                           </p>
                           <div className="flex flex-wrap gap-2 justify-center">
-                            {todayResult.card.keywords.map((keyword) => (
+                            {(todayResult.orientation === 'upright' ? getKeywords(todayResult.card.upright, todayResult.card.keywords) : getKeywords(todayResult.card.reversed, todayResult.card.keywords)).map((keyword) => (
                               <span
                                 key={keyword}
                                 className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"

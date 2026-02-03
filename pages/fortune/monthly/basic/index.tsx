@@ -6,8 +6,17 @@ import CardItem from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
-import { TarotCard } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+
+// 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
+interface LocalTarotCard {
+  id: number;
+  name: string;
+  image: string;
+  upright: string;
+  reversed: string;
+  keywords: string[];
+}
 
 // 完整的78张塔罗牌数据（与daily.tsx保持一致）
 const tarotCards = [
@@ -705,7 +714,7 @@ const saveMonthlyBasicResult = (data: MonthlyBasicResult): void => {
 };
 
 // 扩展的卡牌类型，包含预设的正逆位
-interface ShuffledTarotCard extends TarotCard {
+interface ShuffledTarotCard extends LocalTarotCard {
   orientation: 'upright' | 'reversed';
 }
 
@@ -720,7 +729,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 // 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
-const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
+const shuffleCards = (cards: LocalTarotCard[]): ShuffledTarotCard[] => {
   // 先为每张牌随机分配正逆位
   const cardsWithOrientation = cards.map(card => {
     let randomValue: number;

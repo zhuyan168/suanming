@@ -6,7 +6,7 @@ import CardItem from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import SevenCardSlots from '../../../../components/fortune/SevenCardSlots'; // Import SevenCardSlots
-import { TarotCard } from '../../../../components/fortune/CardItem';
+import { TarotCard, CardMeaning } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
 
 // 完整的78张塔罗牌数据
@@ -199,9 +199,9 @@ interface MonthlyMemberResult {
     id: number;
     name: string;
     image: string;
-    upright: string;
-    reversed: string;
-    keywords: string[];
+    upright: string | CardMeaning;
+    reversed: string | CardMeaning;
+    keywords?: string[];
     orientation: 'upright' | 'reversed';
   }>;
   result?: any; // 解析内容，后续扩展

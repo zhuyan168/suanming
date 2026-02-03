@@ -6,7 +6,7 @@ import CardItem from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
-import { TarotCard } from '../../../../components/fortune/CardItem';
+// 注意：不再导入 TarotCard 类型，使用本地定义的 LocalTarotCard 以兼容旧数据格式
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -105,8 +105,18 @@ const getYearAheadKey = (year: string): string => {
   return `year_ahead_${year}`;
 };
 
+// 本地卡牌类型定义（与实际数据格式匹配）
+interface LocalTarotCard {
+  id: number;
+  name: string;
+  image: string;
+  upright: string;
+  reversed: string;
+  keywords: string[];
+}
+
 // 扩展的卡牌类型，包含预设的正逆位
-interface ShuffledTarotCard extends TarotCard {
+interface ShuffledTarotCard extends LocalTarotCard {
   orientation: 'upright' | 'reversed';
 }
 
@@ -121,7 +131,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 // 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
-const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
+const shuffleCards = (cards: LocalTarotCard[]): ShuffledTarotCard[] => {
   // 先为每张牌随机分配正逆位
   const cardsWithOrientation = cards.map(card => {
     let randomValue: number;

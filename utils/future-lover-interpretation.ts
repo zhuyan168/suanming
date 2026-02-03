@@ -3,14 +3,7 @@
  * 使用牌义关键词 + 牌位模板生成可读的基础解读
  */
 
-interface TarotCard {
-  id: number;
-  name: string;
-  image: string;
-  upright: string;
-  reversed: string;
-  keywords: string[];
-}
+import { TarotCard } from '../components/fortune/CardItem';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';

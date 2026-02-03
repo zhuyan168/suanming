@@ -1,19 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+export interface CardMeaning {
+  keywords: string[];
+  meaning: string;
+}
+
 export interface TarotCard {
   id: number;
   name: string;
   image: string;
-  upright: {
-    keywords: string[];
-    meaning: string;
-  };
-  reversed: {
-    keywords: string[];
-    meaning: string;
-  };
-  // 保留旧的字段以兼容
+  upright: string | CardMeaning;
+  reversed: string | CardMeaning;
   keywords?: string[];
 }
 
