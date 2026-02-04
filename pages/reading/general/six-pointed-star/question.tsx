@@ -3,10 +3,11 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 
-const QUESTION_STORAGE_KEY = 'general_sacred_triangle_question';
-const RESULT_STORAGE_KEY = 'general_sacred_triangle_result';
+// LocalStorage Keys
+const QUESTION_STORAGE_KEY = 'general_six_pointed_star_question';
+const RESULT_STORAGE_KEY = 'general_six_pointed_star_draw_result';
 
-export default function SacredTriangleQuestionPage() {
+export default function SixPointedStarQuestionPage() {
   const router = useRouter();
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -15,22 +16,21 @@ export default function SacredTriangleQuestionPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    // 检查是否已有抽牌结果，如果有则直接跳转到结果页
-    const savedResult = localStorage.getItem(RESULT_STORAGE_KEY);
-    if (savedResult) {
+    // 检查是否已有抽牌结果
+    const existingResult = localStorage.getItem(RESULT_STORAGE_KEY);
+    if (existingResult) {
       try {
-        const parsed = JSON.parse(savedResult);
-        if (parsed.cards && parsed.cards.length === 3) {
-          router.replace('/reading/general/sacred-triangle/result');
+        const result = JSON.parse(existingResult);
+        if (result.cards && result.cards.length === 7) {
+          router.replace('/reading/general/six-pointed-star/reveal');
           return;
         }
-      } catch (e) {
-        // 如果数据损坏，清除并继续
-        localStorage.removeItem(RESULT_STORAGE_KEY);
+      } catch (error) {
+        console.error('Failed to parse existing result:', error);
       }
     }
     
-    // 加载保存的问题
+    // 从 localStorage 加载已保存的问题
     const saved = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (saved) {
       setQuestion(saved);
@@ -50,7 +50,7 @@ export default function SacredTriangleQuestionPage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem(QUESTION_STORAGE_KEY, question.trim());
     }
-    router.push('/reading/general/sacred-triangle/draw');
+    router.push('/reading/general/six-pointed-star/draw');
   };
 
   const handleBack = () => {
@@ -60,10 +60,10 @@ export default function SacredTriangleQuestionPage() {
   return (
     <>
       <Head>
-        <title>圣三角牌阵 - 问题输入 | Mystic Insights</title>
+        <title>六芒星牌阵 - 问题输入 | Mystic Insights</title>
         <meta
           name="description"
-          content="经典三张牌阵，适合快速厘清问题"
+          content="输入你的问题，获得更精准的塔罗占卜解读"
         />
       </Head>
 
@@ -104,11 +104,14 @@ export default function SacredTriangleQuestionPage() {
               className="text-center mb-12"
             >
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-4">
-                SACRED TRIANGLE SPREAD
+                SIX-POINTED STAR SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                圣三角牌阵
+                六芒星牌阵
               </h1>
+              <p className="text-white/70 text-lg">
+                可输入你的问题（可选），让牌阵帮你梳理局势与方向。
+              </p>
             </motion.div>
 
             {/* 输入卡片 */}
@@ -126,7 +129,7 @@ export default function SacredTriangleQuestionPage() {
                 <textarea
                   value={question}
                   onChange={handleQuestionChange}
-                  placeholder="例如：我该如何面对当前的困境？ / 接下来三个月我应该注意什么？"
+                  placeholder="例如：最近工作和感情都很复杂，我该如何应对？ / 这段关系的未来会怎样？"
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
@@ -165,7 +168,7 @@ export default function SacredTriangleQuestionPage() {
                   auto_awesome
                 </span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  六芒星牌阵适合复杂局面，帮你从多个维度梳理问题与方向。
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                   auto_awesome

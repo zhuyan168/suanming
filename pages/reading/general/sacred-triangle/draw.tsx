@@ -122,6 +122,12 @@ export default function SacredTriangleDraw() {
 
     const saved = loadSacredTriangleResult();
     if (saved) {
+      // 如果已经有完整的抽牌结果，直接跳转到结果页
+      if (saved.cards && saved.cards.length === 3) {
+        router.replace('/reading/general/sacred-triangle/result');
+        return;
+      }
+      
       setSavedResult(saved);
       setHasDrawn(true);
       setSessionId(saved.sessionId);
@@ -134,7 +140,7 @@ export default function SacredTriangleDraw() {
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [router]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -213,7 +219,7 @@ export default function SacredTriangleDraw() {
   };
 
   const handleReturnToList = () => {
-    router.back();
+    router.push('/reading/general');
   };
 
   const handleReset = () => {

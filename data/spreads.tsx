@@ -26,15 +26,15 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     href: '/reading/general/sacred-triangle/question',
   },
   {
-    id: 'choose-between',
+    id: 'two-choices',
     titleZh: '二选一牌阵',
-    titleEn: 'Choose Between',
+    titleEn: 'Two Choices Spread',
     descZh: '当你在 A / B 之间犹豫时，帮你看清差异与更合适的选择。',
     descEn: 'Highlights contrasts so you can decide between two options.',
-    cardsCount: 4,
-    isPaid: true,
+    cardsCount: 5,
+    isPaid: false, // 测试期间免费
     icon: '🔀',
-    href: '/reading/general/choose-between',
+    href: '/reading/general/two-choices/question',
   },
   {
     id: 'hexagram',
@@ -42,10 +42,10 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     titleEn: 'Hexagram Spread',
     descZh: '适合复杂局面与多因素交织的问题，给出更全面的洞察。',
     descEn: 'Untangles complex situations with six factors of meaning.',
-    cardsCount: 6,
-    isPaid: true,
+    cardsCount: 7,
+    isPaid: false, // 会员验证放在展示页的"开始解读"按钮处
     icon: '🔯',
-    href: '/reading/general/hexagram',
+    href: '/reading/general/hexagram/question',
   },
   {
     id: 'horseshoe',
