@@ -53,10 +53,10 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     titleEn: 'Horseshoe Spread',
     descZh: '梳理事件的来龙去脉与发展轨迹，找到关键转折点。',
     descEn: 'Maps past, present, and potential turns in your story.',
-    cardsCount: 6,
-    isPaid: true,
+    cardsCount: 7,
+    isPaid: false, // 会员验证放在展示页的"开始解读"按钮处
     icon: '🧲',
-    href: '/reading/general/horseshoe',
+    href: '/reading/general/horseshoe/question',
   },
   {
     id: 'keltic-cross',

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { motion, AnimatePresence } from 'framer-motion';
-import HexagramSlots from '../../../../components/fortune/HexagramSlots';
+import { motion } from 'framer-motion';
+import HorseshoeSlots from '../../../../components/fortune/HorseshoeSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 
 interface ShuffledTarotCard extends TarotCard {
@@ -105,50 +105,44 @@ const getChineseCardName = (englishName: string): string => {
 };
 
 // LocalStorage Keys
-const QUESTION_STORAGE_KEY = 'general_hexagram_question';
-const RESULT_STORAGE_KEY = 'general_hexagram_draw_result';
+const QUESTION_STORAGE_KEY = 'general_horseshoe_question';
+const RESULT_STORAGE_KEY = 'general_horseshoe_draw_result';
 
 // 结果数据接口
-interface HexagramResult {
+interface HorseshoeResult {
   timestamp: number;
   cards: ShuffledTarotCard[];
   question?: string;
 }
 
-// 牌位标题
-const POSITION_TITLES = [
-  '过去｜问题的根源',
-  '现在｜问题的真实状态',
-  '未来｜问题的发展趋势',
-  '内在｜情绪与心态的影响',
-  '外在｜环境与他人的影响',
-  '行动｜你对问题的态度与对策',
-  '指引牌｜对整体局势的总结与提醒'
-];
-
 // 从 localStorage 读取结果
-const loadResult = (): HexagramResult | null => {
+const loadResult = (): HorseshoeResult | null => {
   if (typeof window === 'undefined') return null;
   try {
     const data = localStorage.getItem(RESULT_STORAGE_KEY);
     if (!data) return null;
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to load hexagram result:', error);
+    console.error('Failed to load horseshoe result:', error);
     return null;
   }
 };
 
-export default function HexagramRevealPage() {
+export default function HorseshoeRevealPage() {
   const router = useRouter();
-  const [result, setResult] = useState<HexagramResult | null>(null);
+  const [result, setResult] = useState<HorseshoeResult | null>(null);
   const [question, setQuestion] = useState<string>('');
-  const [showMemberModal, setShowMemberModal] = useState(false);
 
-  // TODO: 会员系统上线后，从真实的会员状态hook获取
-  // import { useMembership } from '../../../../hooks/useMembership';
-  // const { isMember } = useMembership();
-  const isMember = false; // 临时占位，会员系统未上线
+  // 牌位名称
+  const positionNames = [
+    '过去的影响',          // 1
+    '当下的状态',          // 2
+    '隐藏的影响',          // 3
+    '阻碍与挑战',          // 4 (核心位)
+    '潜在的发展',          // 5
+    '行动建议',            // 6
+    '可能的结果',          // 7
+  ];
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -157,7 +151,7 @@ export default function HexagramRevealPage() {
     const saved = loadResult();
     if (!saved) {
       // 如果没有结果，跳转回问题输入页
-      router.replace('/reading/general/hexagram/question');
+      router.replace('/reading/general/horseshoe/question');
       return;
     }
     
@@ -178,19 +172,22 @@ export default function HexagramRevealPage() {
       localStorage.removeItem(QUESTION_STORAGE_KEY);
     }
     
-    router.push('/reading/general/hexagram/question');
+    router.push('/reading/general/horseshoe/question');
   };
 
   const handleStartInterpretation = () => {
-    // TODO: 会员系统上线后，改为真实判断
-    // if (isMember) {
-    //   router.push('/reading/general/hexagram/reading');
-    // } else {
-    //   setShowMemberModal(true);
+    // TODO: 会员验证接口预留
+    // 接入会员系统后，在此处进行会员验证
+    // 示例代码：
+    // const isMember = checkMembershipStatus(); // 检查会员状态
+    // if (!isMember) {
+    //   // 非会员：显示会员开通提示或跳转到会员页面
+    //   router.push('/membership');
+    //   return;
     // }
     
-    // 暂时绕过会员判断，直接跳转到解读页
-    router.push('/reading/general/hexagram/reading');
+    // 通过会员验证后，跳转到解读页
+    router.push('/reading/general/horseshoe/reading');
   };
 
   const handleBackToHome = () => {
@@ -215,8 +212,8 @@ export default function HexagramRevealPage() {
   return (
     <>
       <Head>
-        <title>六芒星牌阵 - 结果展示 | Mystic Insights</title>
-        <meta name="description" content="查看你的六芒星牌阵占卜结果" />
+        <title>马蹄铁牌阵 - 结果展示 | Mystic Insights</title>
+        <meta name="description" content="查看你的塔罗牌占卜结果" />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -262,10 +259,10 @@ export default function HexagramRevealPage() {
               className="text-center mb-12"
             >
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-4">
-                HEXAGRAM SPREAD
+                HORSESHOE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                六芒星牌阵
+                马蹄铁牌阵
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
                 牌已就位，以下是你抽到的塔罗牌
@@ -299,9 +296,9 @@ export default function HexagramRevealPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="max-w-5xl mx-auto"
+              className="max-w-6xl mx-auto"
             >
-              <HexagramSlots
+              <HorseshoeSlots
                 cards={result.cards}
                 isAnimating={Array(7).fill(false)}
                 showLoadingText={false}
@@ -315,35 +312,45 @@ export default function HexagramRevealPage() {
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.5 + index * 0.08 }}
-                    className={`rounded-2xl border ${index === 6 ? 'border-primary/40 bg-primary/10' : 'border-white/10 bg-white/5'} backdrop-blur-sm p-6`}
+                    transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
+                    className={`rounded-2xl border ${
+                      index === 3 
+                        ? 'border-primary/40 bg-primary/5' 
+                        : 'border-white/10 bg-white/5'
+                    } backdrop-blur-sm p-6`}
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${index === 6 ? 'bg-primary/40 text-primary' : 'bg-primary/20 text-primary'} font-bold text-sm`}>
-                        {index === 6 ? '✨' : index + 1}
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                        index === 3 
+                          ? 'bg-primary text-white' 
+                          : 'bg-primary/20 text-primary'
+                      } font-bold text-sm`}>
+                        {index + 1}
                       </div>
-                      <h3 className="text-white font-semibold flex-1 text-sm">
-                        {POSITION_TITLES[index]}
-                      </h3>
+                      <div className="flex-1">
+                        <p className={`text-xs font-medium mb-1 ${
+                          index === 3 ? 'text-primary' : 'text-white/50'
+                        }`}>
+                          {positionNames[index]}
+                        </p>
+                        <h3 className="text-white font-semibold">
+                          {getChineseCardName(card.name)}
+                        </h3>
+                      </div>
                     </div>
                     
-                    <div className="mb-3">
-                      <p className="text-white/90 font-semibold text-base">
-                        {getChineseCardName(card.name)}
-                      </p>
-                      <p className="text-white/70 text-sm mt-1">
-                        {card.orientation === 'upright' ? '正位' : '逆位'}
-                      </p>
-                    </div>
+                    <p className="text-white/90 font-medium mb-2">
+                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                    </p>
                     
-                    <div className="space-y-3 text-sm">
+                    <div className="space-y-2 text-sm">
                       <div>
                         <p className="text-white/50 mb-1">关键词</p>
                         <div className="flex flex-wrap gap-2">
                           {(card.orientation === 'upright' 
                             ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
                             : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
-                          ).slice(0, 3).map((keyword, i) => (
+                          ).map((keyword, i) => (
                             <span
                               key={i}
                               className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
@@ -356,7 +363,7 @@ export default function HexagramRevealPage() {
                       
                       <div>
                         <p className="text-white/50 mb-1">含义</p>
-                        <p className="text-white/70 leading-relaxed text-sm">
+                        <p className="text-white/70 leading-relaxed">
                           {card.orientation === 'upright' 
                             ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
                             : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
@@ -372,7 +379,7 @@ export default function HexagramRevealPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
                 className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
               >
                 <div className="flex items-start gap-4">
@@ -398,7 +405,7 @@ export default function HexagramRevealPage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.1 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
                 className="mt-8 space-y-4"
               >
                 {/* 操作按钮 */}
@@ -437,7 +444,7 @@ export default function HexagramRevealPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.3 }}
+                transition={{ duration: 0.5, delay: 1.6 }}
                 className="mt-8 flex justify-center"
               >
                 <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
@@ -456,51 +463,6 @@ export default function HexagramRevealPage() {
             </motion.div>
           </div>
         </main>
-
-        {/* 会员提示 Modal - 暂时注释掉方便测试 */}
-        {/* <AnimatePresence>
-          {showMemberModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4"
-              onClick={() => setShowMemberModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-8 max-w-md w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                    <span className="material-symbols-outlined text-primary text-3xl">
-                      workspace_premium
-                    </span>
-                  </div>
-                  <h3 className="text-white font-bold text-xl mb-2">
-                    解读需开通会员
-                  </h3>
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    会员系统即将上线。上线后，开通会员即可解锁六芒星牌阵的完整解读。
-                  </p>
-                </div>
-                
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowMemberModal(false)}
-                  className="w-full px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90"
-                  style={{ backgroundColor: '#7f13ec' }}
-                >
-                  我知道了
-                </motion.button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence> */}
       </div>
     </>
   );

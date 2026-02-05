@@ -59,7 +59,7 @@ export default function HexagramSlots({
               duration: 0.3,
               ease: 'easeOut',
             }}
-            className="relative w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36"
+            className="relative w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36 lg:w-28 lg:h-44"
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -126,7 +126,7 @@ export default function HexagramSlots({
             animate={{ scale: 1 }}
             exit={{ scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center"
+            className="w-16 h-24 sm:w-20 sm:h-32 md:w-24 md:h-36 lg:w-28 lg:h-44 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center"
           >
             <div className="text-center text-white/30">
               <div className="text-xl sm:text-2xl mb-1">🎴</div>
@@ -142,9 +142,9 @@ export default function HexagramSlots({
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mt-2 text-center"
+          className="mt-3 text-center"
         >
-          <p className="text-[10px] sm:text-xs text-white/60 leading-tight max-w-[64px] sm:max-w-[80px] md:max-w-[100px]">
+          <p className="text-[9px] sm:text-[10px] md:text-xs text-white/60 leading-snug max-w-[80px] sm:max-w-[100px] md:max-w-[130px] lg:max-w-[150px]">
             {positionTitle}
           </p>
         </motion.div>
@@ -153,21 +153,21 @@ export default function HexagramSlots({
   );
 
   return (
-    <div className="hexagram-slots w-full flex flex-col justify-center items-center py-8">
-      {/* 六芒星布局容器 */}
-      <div className="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-[500px] mx-auto" style={{ aspectRatio: '1/1.15' }}>
+    <div className="hexagram-slots w-full flex flex-col justify-center items-center py-8 px-4">
+      {/* 六芒星布局容器 - 增加尺寸和高度 */}
+      <div className="relative w-full max-w-[400px] sm:max-w-[520px] md:max-w-[640px] lg:max-w-[720px] mx-auto" style={{ aspectRatio: '1/1.3', minHeight: '500px' }}>
         {/* 顶部 - 位置1：过去 */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2">
           {renderCard(cards[0], 0, POSITION_TITLES[0])}
         </div>
         
         {/* 右上 - 位置2：现在 */}
-        <div className="absolute top-[18%] right-[2%] sm:right-[8%] md:right-[10%]">
+        <div className="absolute top-[15%] right-[5%] sm:right-[10%] md:right-[12%]">
           {renderCard(cards[1], 1, POSITION_TITLES[1])}
         </div>
         
         {/* 右下 - 位置3：未来 */}
-        <div className="absolute bottom-[25%] right-[2%] sm:right-[8%] md:right-[10%]">
+        <div className="absolute bottom-[20%] right-[5%] sm:right-[10%] md:right-[12%]">
           {renderCard(cards[2], 2, POSITION_TITLES[2])}
         </div>
         
@@ -177,12 +177,12 @@ export default function HexagramSlots({
         </div>
         
         {/* 左下 - 位置5：外在 */}
-        <div className="absolute bottom-[25%] left-[2%] sm:left-[8%] md:left-[10%]">
+        <div className="absolute bottom-[20%] left-[5%] sm:left-[10%] md:left-[12%]">
           {renderCard(cards[4], 4, POSITION_TITLES[4])}
         </div>
         
         {/* 左上 - 位置6：行动 */}
-        <div className="absolute top-[18%] left-[2%] sm:left-[8%] md:left-[10%]">
+        <div className="absolute top-[15%] left-[5%] sm:left-[10%] md:left-[12%]">
           {renderCard(cards[5], 5, POSITION_TITLES[5])}
         </div>
         
@@ -215,7 +215,7 @@ export default function HexagramSlots({
                     duration: 0.3,
                     ease: 'easeOut',
                   }}
-                  className="relative w-16 h-28 sm:w-20 sm:h-32 md:w-24 md:h-36"
+                  className="relative w-20 h-32 sm:w-24 sm:h-40 md:w-28 md:h-44 lg:w-32 lg:h-52"
                   style={{
                     transformStyle: 'preserve-3d',
                   }}
@@ -284,7 +284,7 @@ export default function HexagramSlots({
                   animate={{ scale: 1 }}
                   exit={{ scale: 0.9 }}
                   transition={{ duration: 0.3 }}
-                  className="w-16 h-28 sm:w-20 sm:h-32 md:w-24 md:h-36 rounded-lg border-2 border-dashed border-primary/40 flex items-center justify-center bg-primary/5"
+                  className="w-20 h-32 sm:w-24 sm:h-40 md:w-28 md:h-44 lg:w-32 lg:h-52 rounded-lg border-2 border-dashed border-primary/40 flex items-center justify-center bg-primary/5"
                 >
                   <div className="text-center text-white/40">
                     <div className="text-2xl sm:text-3xl mb-1">✨</div>
@@ -299,9 +299,9 @@ export default function HexagramSlots({
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-2 text-center"
+                className="mt-3 text-center"
               >
-                <p className="text-[10px] sm:text-xs text-primary font-semibold leading-tight max-w-[80px] sm:max-w-[112px] text-center">
+                <p className="text-[9px] sm:text-[10px] md:text-xs text-primary font-semibold leading-snug max-w-[90px] sm:max-w-[120px] md:max-w-[150px] text-center">
                   {POSITION_TITLES[6]}
                 </p>
               </motion.div>

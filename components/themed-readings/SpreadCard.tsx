@@ -22,18 +22,13 @@ export default function SpreadCard({
 }: SpreadCardProps) {
   const router = useRouter();
 
-  // 临时白名单：relationship-development, reconciliation, offer-decision, stay-or-leave, wealth-obstacles 暂时开放（会员系统上线后移除）
-  const isTemporarilyOpen = spread.id === 'relationship-development' || spread.id === 'reconciliation' || spread.id === 'offer-decision' || spread.id === 'stay-or-leave' || spread.id === 'wealth-obstacles';
-  const isLocked = spread.isPaid && !isMember && !isTemporarilyOpen;
+  // 会员验证已移至展示页的"开始解读"按钮处
+  // 所有人都可以进入抽牌页面，付费牌阵只在解读时验证会员
+  const showPaywallBadge = spread.isPaid && !isMember;
 
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);
-      return;
-    }
-
-    if (isLocked) {
-      onLockedClick();
       return;
     }
 
@@ -71,11 +66,11 @@ export default function SpreadCard({
       `}
       onClick={handleClick}
     >
-      {/* 付费锁标识（暂时开放的也显示会员角标） */}
-      {(isLocked || isTemporarilyOpen) && <PaywallBadge />}
+      {/* 付费锁标识（仅显示角标，不阻止点击） */}
+      {showPaywallBadge && <PaywallBadge />}
 
       {/* 热门标签 */}
-      {spread.badge && !isLocked && !isTemporarilyOpen && (
+      {spread.badge && !showPaywallBadge && (
         <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-primary/30 backdrop-blur-sm">
           <span className="text-primary text-xs font-semibold tracking-wide">
             {spread.badge}
