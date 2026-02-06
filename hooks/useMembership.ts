@@ -23,8 +23,8 @@ export function useMembership(): MembershipStatus {
   // 2. 调用后端 API 验证会员状态
   // 3. 处理会员过期、续费等逻辑
   
-  // 临时设置为 true，方便测试（会员系统完成后改回 false）
-  const isMember = true;
+  // 临时设置为 false，用于显示会员提醒框（但不做拦截）
+  const isMember = false;
 
   return {
     isMember,

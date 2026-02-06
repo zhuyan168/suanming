@@ -372,7 +372,7 @@ export default function HorseshoeRevealPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1.2 }}
+                  transition={{ duration: 0.5, delay: 1.0 }}
                   className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
                 >
                   <div className="flex items-start gap-4">
@@ -381,10 +381,10 @@ export default function HorseshoeRevealPage() {
                     </span>
                     <div className="flex-1">
                       <h3 className="text-white font-semibold mb-2 text-lg">
-                        深度解读需开通会员
+                        解读需开通会员
                       </h3>
                       <p className="text-white/80 text-sm leading-relaxed mb-3">
-                        马蹄铁牌阵的深度解读属于会员专属功能。你可以先根据牌面含义与关键词自行理解；如果想获得由 AI 生成的完整解读（包括整体分析、逐张解析和行动建议），可以开通会员后解锁。
+                        这个牌阵的解读属于付费内容。你可以先根据牌面含义自行理解；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。
                       </p>
                       <div className="flex items-center gap-2 text-amber-400/90 text-xs">
                         <span className="material-symbols-outlined text-sm">info</span>
