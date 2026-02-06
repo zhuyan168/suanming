@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import HorseshoeSlots from '../../../../components/fortune/HorseshoeSlots';
+import CelticCrossSlots from '../../../../components/fortune/CelticCrossSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useMembership } from '../../../../hooks/useMembership';
 
@@ -105,46 +105,154 @@ const getChineseCardName = (englishName: string): string => {
   return nameMap[englishName] || englishName;
 };
 
+// 牌位名称与含义
+const POSITION_INFO = [
+  { name: '现状', desc: '代表你当前面对的核心情况' },
+  { name: '阻碍', desc: '阻挡你前进的挑战或障碍' },
+  { name: '重点', desc: '这个问题的焦点或意识层面的关键' },
+  { name: '过去', desc: '影响现状的过去事件或根源' },
+  { name: '优势', desc: '你拥有的资源、可能性或最佳潜力' },
+  { name: '近期', desc: '即将到来的发展方向' },
+  { name: '应对', desc: '你可以采取的态度或行动' },
+  { name: '提醒', desc: '外部环境或周围人对你的影响' },
+  { name: '期待恐惧', desc: '你内心深处的希望或担忧' },
+  { name: '走向', desc: '最终可能的结果或发展方向' },
+];
+
 // LocalStorage Keys
-const QUESTION_STORAGE_KEY = 'general_horseshoe_question';
-const RESULT_STORAGE_KEY = 'general_horseshoe_draw_result';
+const QUESTION_STORAGE_KEY = 'general_celtic_cross_question';
+const RESULT_STORAGE_KEY = 'general_celtic_cross_draw_result';
 
 // 结果数据接口
-interface HorseshoeResult {
+interface CelticCrossResult {
   timestamp: number;
   cards: ShuffledTarotCard[];
   question?: string;
 }
 
 // 从 localStorage 读取结果
-const loadResult = (): HorseshoeResult | null => {
+const loadResult = (): CelticCrossResult | null => {
   if (typeof window === 'undefined') return null;
   try {
     const data = localStorage.getItem(RESULT_STORAGE_KEY);
     if (!data) return null;
     return JSON.parse(data);
   } catch (error) {
-    console.error('Failed to load horseshoe result:', error);
+    console.error('Failed to load celtic cross result:', error);
     return null;
   }
 };
 
-export default function HorseshoeRevealPage() {
+// 会员提示弹窗组件
+function MembershipModal({ 
+  isOpen, 
+  onClose 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+}) {
   const router = useRouter();
-  const [result, setResult] = useState<HorseshoeResult | null>(null);
-  const [question, setQuestion] = useState<string>('');
-  const { isMember } = useMembership();
 
-  // 牌位名称
-  const positionNames = [
-    '过去的影响',          // 1
-    '当下的状态',          // 2
-    '隐藏的影响',          // 3
-    '阻碍与挑战',          // 4 (核心位)
-    '潜在的发展',          // 5
-    '行动建议',            // 6
-    '可能的结果',          // 7
-  ];
+  if (!isOpen) return null;
+
+  const handleGoToMembership = () => {
+    // TODO: 后续接入会员系统后，跳转到会员开通页面
+    // router.push('/membership');
+    alert('会员系统即将上线，敬请期待！');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* 背景遮罩 */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
+
+      {/* 弹窗内容 */}
+      <div className="relative w-full max-w-md animate-scale-in">
+        <div className="bg-[#1a1a2e] rounded-2xl border border-primary/30 shadow-2xl overflow-hidden">
+          {/* 顶部装饰 */}
+          <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+
+          {/* 内容区域 */}
+          <div className="p-8">
+            {/* 图标 */}
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-4xl">auto_awesome</span>
+              </div>
+            </div>
+
+            {/* 标题 */}
+            <h3 className="text-white text-2xl font-bold text-center mb-4">
+              会员专属解读
+            </h3>
+
+            {/* 说明 */}
+            <p className="text-white/70 text-center leading-relaxed mb-8">
+              这是会员专属解读功能。<br />开通会员后即可开始解读（功能即将上线）。
+            </p>
+
+            {/* 按钮 */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleGoToMembership}
+                className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
+              >
+                去开通会员
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full py-3 rounded-lg bg-white/10 text-white/70 font-semibold hover:bg-white/20 transition-colors"
+              >
+                我知道了
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out;
+        }
+
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function CelticCrossRevealPage() {
+  const router = useRouter();
+  const { isMember } = useMembership();
+  const [result, setResult] = useState<CelticCrossResult | null>(null);
+  const [question, setQuestion] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -153,7 +261,7 @@ export default function HorseshoeRevealPage() {
     const saved = loadResult();
     if (!saved) {
       // 如果没有结果，跳转回问题输入页
-      router.replace('/reading/general/horseshoe/question');
+      router.replace('/reading/general/celtic-cross/question');
       return;
     }
     
@@ -174,12 +282,20 @@ export default function HorseshoeRevealPage() {
       localStorage.removeItem(QUESTION_STORAGE_KEY);
     }
     
-    router.push('/reading/general/horseshoe/question');
+    router.push('/reading/general/celtic-cross/question');
   };
 
   const handleStartInterpretation = () => {
-    // 跳转到解读页（解读页内部会处理会员门槛）
-    router.push('/reading/general/horseshoe/reading');
+    // TODO: 后续接入会员系统后，在此处校验会员状态
+    if (!isMember) {
+      // 非会员：显示会员提示弹窗
+      setIsModalOpen(true);
+      return;
+    }
+    
+    // 会员：跳转到解读页
+    // TODO: 解读页开发中
+    router.push('/reading/general/celtic-cross/reading');
   };
 
   const handleBackToHome = () => {
@@ -204,8 +320,8 @@ export default function HorseshoeRevealPage() {
   return (
     <>
       <Head>
-        <title>马蹄铁牌阵 - 结果展示 | Mystic Insights</title>
-        <meta name="description" content="查看你的塔罗牌占卜结果" />
+        <title>凯尔特十字牌阵 - 结果展示 | Mystic Insights</title>
+        <meta name="description" content="查看你的凯尔特十字牌阵占卜结果" />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -251,13 +367,13 @@ export default function HorseshoeRevealPage() {
               className="text-center mb-12"
             >
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-4">
-                HORSESHOE SPREAD
+                CELTIC CROSS SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                马蹄铁牌阵
+                凯尔特十字牌阵
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                牌已就位，以下是你抽到的塔罗牌
+                牌已就位，以下是你抽到的十张塔罗牌
               </p>
             </motion.div>
 
@@ -290,116 +406,77 @@ export default function HorseshoeRevealPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="max-w-6xl mx-auto"
             >
-              <HorseshoeSlots
+              <CelticCrossSlots
                 cards={result.cards}
-                isAnimating={Array(7).fill(false)}
+                isAnimating={Array(10).fill(false)}
                 showLoadingText={false}
                 forceFlipped={true}
               />
 
               {/* 卡牌信息列表 */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {result.cards.map((card, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.5 + index * 0.1 }}
-                    className={`rounded-2xl border ${
-                      index === 3 
-                        ? 'border-primary/40 bg-primary/5' 
-                        : 'border-white/10 bg-white/5'
-                    } backdrop-blur-sm p-6`}
+                    transition={{ duration: 0.4, delay: 0.5 + index * 0.05 }}
+                    className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4"
                   >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                        index === 3 
-                          ? 'bg-primary text-white' 
-                          : 'bg-primary/20 text-primary'
-                      } font-bold text-sm`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs">
                         {index + 1}
                       </div>
                       <div className="flex-1">
-                        <p className={`text-xs font-medium mb-1 ${
-                          index === 3 ? 'text-primary' : 'text-white/50'
-                        }`}>
-                          {positionNames[index]}
+                        <p className="text-primary/80 text-xs font-medium">
+                          {POSITION_INFO[index].name}
                         </p>
-                        <h3 className="text-white font-semibold">
-                          {getChineseCardName(card.name)}
-                        </h3>
                       </div>
                     </div>
                     
-                    <p className="text-white/90 font-medium mb-2">
+                    <h3 className="text-white font-semibold text-sm mb-1">
+                      {getChineseCardName(card.name)}
+                    </h3>
+                    
+                    <p className="text-white/70 text-xs mb-2">
                       {card.orientation === 'upright' ? '正位' : '逆位'}
                     </p>
                     
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <p className="text-white/50 mb-1">关键词</p>
-                        <div className="flex flex-wrap gap-2">
-                          {(card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
-                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
-                          ).map((keyword, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
-                            >
-                              {keyword}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-white/50 mb-1">含义</p>
-                        <p className="text-white/70 leading-relaxed">
-                          {card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
-                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
-                          }
-                        </p>
-                      </div>
-                    </div>
+                    <p className="text-white/50 text-xs leading-relaxed">
+                      {POSITION_INFO[index].desc}
+                    </p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* 付费提示区域（仅非会员展示） */}
-              {!isMember && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 1.2 }}
-                  className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-amber-400 text-2xl mt-1">
-                      workspace_premium
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="text-white font-semibold mb-2 text-lg">
-                        深度解读需开通会员
-                      </h3>
-                      <p className="text-white/80 text-sm leading-relaxed mb-3">
-                        马蹄铁牌阵的深度解读属于会员专属功能。你可以先根据牌面含义与关键词自行理解；如果想获得由 AI 生成的完整解读（包括整体分析、逐张解析和行动建议），可以开通会员后解锁。
-                      </p>
-                      <div className="flex items-center gap-2 text-amber-400/90 text-xs">
-                        <span className="material-symbols-outlined text-sm">info</span>
-                        <span>会员系统即将上线，敬请期待</span>
-                      </div>
-                    </div>
+              {/* 温柔提醒 */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                className="mt-10 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-amber-400 text-xl">favorite</span>
                   </div>
-                </motion.div>
-              )}
+                  <div className="flex-1">
+                    <h4 className="text-amber-400 font-semibold mb-2">温柔提醒</h4>
+                    <p className="text-white/80 text-sm leading-relaxed mb-3">
+                      凯尔特十字属于深度牌阵，解读会更细也更耗时。你可以先根据牌位含义自行阅读牌面；如果希望获得更完整的AI付费解读，需要开通会员后再继续。
+                    </p>
+                    <p className="text-white/50 text-xs leading-relaxed">
+                      占卜呈现的是当下能量趋势，不替你做决定；真正推动结果的，仍是你的选择与行动。
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
 
               {/* 操作按钮区域 */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.4 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
                 className="mt-8 space-y-4"
               >
                 {/* 操作按钮 */}
@@ -408,15 +485,12 @@ export default function HorseshoeRevealPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleStartInterpretation}
-                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)] relative overflow-hidden"
+                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
                       开始解读
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
-                        会员
-                      </span>
                     </span>
                   </motion.button>
                   
@@ -438,7 +512,7 @@ export default function HorseshoeRevealPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.6 }}
+                transition={{ duration: 0.5, delay: 1.1 }}
                 className="mt-8 flex justify-center"
               >
                 <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
@@ -458,6 +532,12 @@ export default function HorseshoeRevealPage() {
           </div>
         </main>
       </div>
+
+      {/* 会员提示弹窗 */}
+      <MembershipModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </>
   );
 }

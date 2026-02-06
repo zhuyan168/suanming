@@ -59,14 +59,14 @@ export const GENERAL_SPREADS: GeneralSpread[] = [
     href: '/reading/general/horseshoe/question',
   },
   {
-    id: 'keltic-cross',
+    id: 'celtic-cross',
     titleZh: '凯尔特十字牌阵',
-    titleEn: 'Keltic Cross',
+    titleEn: 'Celtic Cross',
     descZh: '适合人生级课题与深度探索，提供更完整的全景解读。',
     descEn: 'Full-system view for life-level questions and depth work.',
     cardsCount: 10,
     isPaid: true,
     icon: '✝️',
-    href: '/reading/general/keltic-cross',
+    href: '/reading/general/celtic-cross/question',
   },
 ];
