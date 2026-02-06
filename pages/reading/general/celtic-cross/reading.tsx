@@ -211,12 +211,12 @@ export default function CelticCrossReadingPage() {
     }
   };
 
-  // 自动生成解读（仅会员）
+  // 自动生成解读（暂时不检查会员状态，方便测试）
   useEffect(() => {
-    if (result && result.cards.length === 10 && !reading && !loading && !error && isMember) {
+    if (result && result.cards.length === 10 && !reading && !loading && !error) {
       generateReading();
     }
-  }, [result, isMember]);
+  }, [result]);
 
   const handleReturn = () => {
     router.push('/reading/general');
@@ -234,119 +234,120 @@ export default function CelticCrossReadingPage() {
   };
 
   // 会员门槛提示
-  if (!isMember) {
-    return (
-      <>
-        <Head>
-          <title>凯尔特十字牌阵 · 解读 | Mystic Insights</title>
-          <meta name="description" content="查看你的塔罗牌解读结果" />
-        </Head>
+  // 暂时注释掉会员检查，方便测试
+  // if (!isMember) {
+  //   return (
+  //     <>
+  //       <Head>
+  //         <title>凯尔特十字牌阵 · 解读 | Mystic Insights</title>
+  //         <meta name="description" content="查看你的塔罗牌解读结果" />
+  //       </Head>
 
-        <div className="min-h-screen bg-[#0f0f23] text-white">
-          {/* 背景装饰 */}
-          <div className="fixed inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-          </div>
+  //       <div className="min-h-screen bg-[#0f0f23] text-white">
+  //         {/* 背景装饰 */}
+  //         <div className="fixed inset-0 overflow-hidden pointer-events-none">
+  //           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+  //           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+  //         </div>
 
-          {/* 顶部导航 */}
-          <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
-            <button
-              onClick={() => router.push('/reading/general/celtic-cross/reveal')}
-              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
-            </button>
+  //         {/* 顶部导航 */}
+  //         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
+  //           <button
+  //             onClick={() => router.push('/reading/general/celtic-cross/reveal')}
+  //             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+  //           >
+  //             <span className="material-symbols-outlined">arrow_back</span>
+  //             <span className="text-sm font-medium">返回</span>
+  //           </button>
 
-            <div className="flex items-center gap-4">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-                Mystic Insights
-              </h2>
-            </div>
+  //           <div className="flex items-center gap-4">
+  //             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
+  //               Mystic Insights
+  //             </h2>
+  //           </div>
 
-            <div className="w-20" />
-          </header>
+  //           <div className="w-20" />
+  //         </header>
 
-          {/* 会员提示主内容 */}
-          <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
-            <div className="mx-auto max-w-2xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-12 text-center"
-              >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-amber-400 text-4xl">
-                    workspace_premium
-                  </span>
-                </div>
+  //         {/* 会员提示主内容 */}
+  //         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
+  //           <div className="mx-auto max-w-2xl">
+  //             <motion.div
+  //               initial={{ opacity: 0, y: 20 }}
+  //               animate={{ opacity: 1, y: 0 }}
+  //               className="bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-12 text-center"
+  //             >
+  //               <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-500/20 flex items-center justify-center">
+  //                 <span className="material-symbols-outlined text-amber-400 text-4xl">
+  //                   workspace_premium
+  //                 </span>
+  //               </div>
                 
-                <h1 className="text-3xl font-bold mb-4">需要开通会员</h1>
+  //               <h1 className="text-3xl font-bold mb-4">需要开通会员</h1>
                 
-                <p className="text-white/70 text-lg leading-relaxed mb-8">
-                  凯尔特十字牌阵的深度解读是会员专属功能。开通会员后，你将获得由 AI 生成的完整解读，包括整体分析、10张牌逐一解析和行动建议。
-                </p>
+  //               <p className="text-white/70 text-lg leading-relaxed mb-8">
+  //                 凯尔特十字牌阵的深度解读是会员专属功能。开通会员后，你将获得由 AI 生成的完整解读，包括整体分析、10张牌逐一解析和行动建议。
+  //               </p>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
-                  <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-xl">
-                      check_circle
-                    </span>
-                    会员解读包含
-                  </h3>
-                  <ul className="space-y-2 text-white/70 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>整体解读：综合分析 10 张牌的能量趋势与深层含义</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>逐张解析：每张牌在其牌位上的具体含义与启示</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>行动建议：可执行的具体建议与现实提醒（有问题时）</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      <span>问题模式：结合你的问题给出更贴合的解读</span>
-                    </li>
-                  </ul>
-                </div>
+  //               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
+  //                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+  //                   <span className="material-symbols-outlined text-primary text-xl">
+  //                     check_circle
+  //                   </span>
+  //                   会员解读包含
+  //                 </h3>
+  //                 <ul className="space-y-2 text-white/70 text-sm">
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-primary mt-1">•</span>
+  //                     <span>整体解读：综合分析 10 张牌的能量趋势与深层含义</span>
+  //                   </li>
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-primary mt-1">•</span>
+  //                     <span>逐张解析：每张牌在其牌位上的具体含义与启示</span>
+  //                   </li>
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-primary mt-1">•</span>
+  //                     <span>行动建议：可执行的具体建议与现实提醒（有问题时）</span>
+  //                   </li>
+  //                   <li className="flex items-start gap-2">
+  //                     <span className="text-primary mt-1">•</span>
+  //                     <span>问题模式：结合你的问题给出更贴合的解读</span>
+  //                   </li>
+  //                 </ul>
+  //               </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={() => router.push('/reading/general/celtic-cross/reveal')}
-                    className="flex-1 px-6 py-3 rounded-xl border border-white/20 text-white font-semibold transition-all duration-300 hover:bg-white/10"
-                  >
-                    返回查看牌面
-                  </button>
-                  <button
-                    onClick={() => {
-                      // TODO: 跳转到会员开通页面
-                      alert('会员系统即将上线，敬请期待！');
-                    }}
-                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
-                    style={{ backgroundColor: '#7f13ec' }}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="material-symbols-outlined text-xl">star</span>
-                      开通会员
-                    </span>
-                  </button>
-                </div>
+  //               <div className="flex flex-col sm:flex-row gap-4">
+  //                 <button
+  //                   onClick={() => router.push('/reading/general/celtic-cross/reveal')}
+  //                   className="flex-1 px-6 py-3 rounded-xl border border-white/20 text-white font-semibold transition-all duration-300 hover:bg-white/10"
+  //                 >
+  //                   返回查看牌面
+  //                 </button>
+  //                 <button
+  //                   onClick={() => {
+  //                     // TODO: 跳转到会员开通页面
+  //                     alert('会员系统即将上线，敬请期待！');
+  //                   }}
+  //                   className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
+  //                   style={{ backgroundColor: '#7f13ec' }}
+  //                 >
+  //                   <span className="flex items-center justify-center gap-2">
+  //                     <span className="material-symbols-outlined text-xl">star</span>
+  //                     开通会员
+  //                   </span>
+  //                 </button>
+  //               </div>
 
-                <p className="mt-6 text-white/40 text-xs">
-                  会员系统即将上线，敬请期待
-                </p>
-              </motion.div>
-            </div>
-          </main>
-        </div>
-      </>
-    );
-  }
+  //               <p className="mt-6 text-white/40 text-xs">
+  //                 会员系统即将上线，敬请期待
+  //               </p>
+  //             </motion.div>
+  //           </div>
+  //         </main>
+  //       </div>
+  //     </>
+  //   );
+  // }
 
   // 错误态
   if (error) {

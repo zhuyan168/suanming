@@ -287,11 +287,12 @@ export default function CelticCrossRevealPage() {
 
   const handleStartInterpretation = () => {
     // TODO: 后续接入会员系统后，在此处校验会员状态
-    if (!isMember) {
-      // 非会员：显示会员提示弹窗
-      setIsModalOpen(true);
-      return;
-    }
+    // 暂时注释掉会员检查，方便测试
+    // if (!isMember) {
+    //   // 非会员：显示会员提示弹窗
+    //   setIsModalOpen(true);
+    //   return;
+    // }
     
     // 会员：跳转到解读页
     // TODO: 解读页开发中
