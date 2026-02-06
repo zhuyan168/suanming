@@ -449,7 +449,7 @@ export default function CelticCrossRevealPage() {
                 ))}
               </div>
 
-              {/* 温柔提醒 */}
+              {/* 付费提示区域 */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -457,17 +457,20 @@ export default function CelticCrossRevealPage() {
                 className="mt-10 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-amber-400 text-xl">favorite</span>
-                  </div>
+                  <span className="material-symbols-outlined text-amber-400 text-2xl mt-1">
+                    workspace_premium
+                  </span>
                   <div className="flex-1">
-                    <h4 className="text-amber-400 font-semibold mb-2">温柔提醒</h4>
+                    <h3 className="text-white font-semibold mb-2 text-lg">
+                      解读需开通会员
+                    </h3>
                     <p className="text-white/80 text-sm leading-relaxed mb-3">
-                      凯尔特十字属于深度牌阵，解读会更细也更耗时。你可以先根据牌位含义自行阅读牌面；如果希望获得更完整的AI付费解读，需要开通会员后再继续。
+                      凯尔特十字属于深度牌阵，解读会更详细也更耗时。你可以先根据牌位含义自行阅读牌面；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。
                     </p>
-                    <p className="text-white/50 text-xs leading-relaxed">
-                      占卜呈现的是当下能量趋势，不替你做决定；真正推动结果的，仍是你的选择与行动。
-                    </p>
+                    <div className="flex items-center gap-2 text-amber-400/90 text-xs">
+                      <span className="material-symbols-outlined text-sm">info</span>
+                      <span>会员系统即将上线，敬请期待</span>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -485,12 +488,15 @@ export default function CelticCrossRevealPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleStartInterpretation}
-                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
+                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)] relative overflow-hidden"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
                       开始解读
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
+                        会员
+                      </span>
                     </span>
                   </motion.button>
                   

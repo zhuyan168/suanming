@@ -36,6 +36,8 @@ function CardSlot({
   forceFlipped,
   isHorizontal = false,
   size = 'normal',
+  hideLabel = false,
+  hideNumber = false,
 }: {
   card: ShuffledTarotCard | null;
   index: number;
@@ -43,6 +45,8 @@ function CardSlot({
   forceFlipped: boolean;
   isHorizontal?: boolean;
   size?: 'small' | 'normal';
+  hideLabel?: boolean;
+  hideNumber?: boolean;
 }) {
   const sizeClasses = size === 'small' 
     ? 'w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28'
@@ -57,18 +61,22 @@ function CardSlot({
             initial={isAnimating ? { 
               scale: 0.8,
               y: -100,
+              rotate: isHorizontal ? 90 : 0,
             } : { 
               scale: 1,
               y: 0,
+              rotate: isHorizontal ? 90 : 0,
             }}
             animate={isAnimating ? {
               scale: 1.08,
               y: -20,
+              rotate: isHorizontal ? 90 : 0,
             } : {
               scale: 1,
               y: 0,
+              rotate: isHorizontal ? 90 : 0,
             }}
-            exit={{ scale: 0.9 }}
+            exit={{ scale: 0.9, rotate: isHorizontal ? 90 : 0 }}
             transition={isAnimating ? {
               duration: 0.15,
               ease: 'easeOut',
@@ -76,7 +84,7 @@ function CardSlot({
               duration: 0.3,
               ease: 'easeOut',
             }}
-            className={`relative ${sizeClasses} ${isHorizontal ? 'rotate-90' : ''}`}
+            className={`relative ${sizeClasses}`}
             style={{
               transformStyle: 'preserve-3d',
             }}
@@ -137,18 +145,20 @@ function CardSlot({
             </div>
             
             {/* 牌位编号标签 */}
-            <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shadow-lg z-10">
-              {index + 1}
-            </div>
+            {!hideNumber && (
+              <div className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center shadow-lg z-10">
+                {index + 1}
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
             key={`empty-${index}`}
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.9 }}
+            initial={{ scale: 0.9, rotate: isHorizontal ? 90 : 0 }}
+            animate={{ scale: 1, rotate: isHorizontal ? 90 : 0 }}
+            exit={{ scale: 0.9, rotate: isHorizontal ? 90 : 0 }}
             transition={{ duration: 0.3 }}
-            className={`${sizeClasses} rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center ${isHorizontal ? 'rotate-90' : ''}`}
+            className={`${sizeClasses} rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center`}
           >
             <div className="text-center text-white/30">
               <div className="text-lg mb-0.5">🎴</div>
@@ -159,9 +169,11 @@ function CardSlot({
       </AnimatePresence>
       
       {/* 牌位名称 */}
-      <p className={`mt-1 text-white/50 text-[10px] sm:text-xs text-center ${isHorizontal ? 'mt-3' : ''}`}>
-        {POSITION_NAMES[index]}
-      </p>
+      {!hideLabel && (
+        <p className={`text-white/50 text-[10px] sm:text-xs text-center ${isHorizontal ? 'mt-6 sm:mt-8 md:mt-10' : 'mt-1'}`}>
+          {POSITION_NAMES[index]}
+        </p>
+      )}
     </div>
   );
 }
@@ -178,7 +190,7 @@ export default function CelticCrossSlots({
         {/* 左侧：中心十字布局 (1-6) */}
         <div className="relative flex items-center justify-center">
           {/* 使用 grid 实现十字布局 */}
-          <div className="grid grid-cols-3 gap-1 sm:gap-2">
+          <div className="grid grid-cols-3 gap-x-10 gap-y-1 sm:gap-x-14 sm:gap-y-2 md:gap-x-20 md:gap-y-2">
             {/* 第一行：空 - 5优势 - 空 */}
             <div className="w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36" /> {/* 占位 */}
             <CardSlot
@@ -198,24 +210,41 @@ export default function CelticCrossSlots({
             />
             
             {/* 中心位置：牌1和牌2叠加 */}
-            <div className="relative flex items-center justify-center">
+            <div className="relative w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36 flex items-center justify-center">
               {/* 牌1：现状（竖向） */}
-              <CardSlot
-                card={cards[0]}
-                index={0}
-                isAnimating={isAnimating[0]}
-                forceFlipped={forceFlipped}
-              />
+              <div className="absolute inset-0 flex flex-col items-center z-10">
+                <CardSlot
+                  card={cards[0]}
+                  index={0}
+                  isAnimating={isAnimating[0]}
+                  forceFlipped={forceFlipped}
+                />
+              </div>
               
-              {/* 牌2：阻碍（横向，压在牌1上） */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              {/* 牌2：阻碍（横向，压在牌1的中下部） */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20" style={{ top: '35%' }}>
                 <CardSlot
                   card={cards[1]}
                   index={1}
                   isAnimating={isAnimating[1]}
                   forceFlipped={forceFlipped}
                   isHorizontal={true}
+                  hideLabel={true}
                 />
+              </div>
+              
+              {/* 牌2的标签：阻碍（竖向，在左侧） */}
+              <div 
+                className="absolute z-30 text-white/50 text-[10px] sm:text-xs"
+                style={{ 
+                  left: '-2.5rem',
+                  top: '70%',
+                  transform: 'translateY(-50%)',
+                  writingMode: 'vertical-rl',
+                  letterSpacing: '0.3em',
+                }}
+              >
+                阻碍
               </div>
             </div>
             

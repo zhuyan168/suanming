@@ -26,6 +26,7 @@ interface ReadingResult {
     interpretation: string;
   }[];
   tips: string[];
+  reminder: string;
 }
 
 // LocalStorage Keys
@@ -442,50 +443,27 @@ export default function HorseshoeReadingPage() {
             </motion.div>
 
             {/* 问题展示区域 */}
-            {question && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mb-8 mx-auto max-w-3xl"
-              >
-                <div className="rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">
-                      psychology
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
-                      <p className="text-white/90 text-sm leading-relaxed">
-                        {question}
-                      </p>
-                    </div>
+            {/* 问题展示区域 */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8 mx-auto max-w-3xl"
+            >
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm p-4">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-primary text-xl mt-0.5">
+                    psychology
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/90 text-sm leading-relaxed">
+                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                    </p>
                   </div>
                 </div>
-              </motion.div>
-            )}
-
-            {!question && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mb-8 mx-auto max-w-3xl"
-              >
-                <div className="rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="material-symbols-outlined text-white/50 text-xl mt-0.5">
-                      info
-                    </span>
-                    <div className="flex-1">
-                      <p className="text-white/70 text-sm leading-relaxed">
-                        你没有写下具体问题，我们将以你当下的能量趋势进行通用解读
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
 
             {/* 卡牌展示区域 */}
             {result && (
@@ -693,22 +671,18 @@ export default function HorseshoeReadingPage() {
                   <div className="text-center py-10 space-y-8">
                     <div className="relative inline-block px-8 py-4">
                       <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full" />
-                      <p className="relative z-10 text-lg font-medium text-purple-200 italic leading-relaxed">
-                        占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                      <p className="relative z-10 text-xl font-medium text-purple-200 italic leading-relaxed">
+                        {reading.reminder ? (
+                          `「${reading.reminder}」`
+                        ) : question ? (
+                          `「这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。」`
+                        ) : (
+                          `「占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。」`
+                        )}
                       </p>
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
-                      <button
-                        onClick={() => {
-                          setError(null);
-                          generateReading();
-                        }}
-                        className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-                      >
-                        <span className="material-symbols-outlined text-sm">refresh</span>
-                        重新生成解读
-                      </button>
                       <button
                         onClick={() => router.push('/')}
                         className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"

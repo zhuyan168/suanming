@@ -11,7 +11,6 @@ export default function CelticCrossQuestionPage() {
   const router = useRouter();
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
-  const [inputMode, setInputMode] = useState<'with' | 'without'>('with');
   const maxChars = 200;
 
   // 检查是否已有抽牌结果，如果有则直接跳转到展示页
@@ -50,10 +49,9 @@ export default function CelticCrossQuestionPage() {
   };
 
   const handleStartDraw = () => {
-    // 保存问题到 localStorage（如果选择不输入则保存空字符串）
+    // 保存问题到 localStorage
     if (typeof window !== 'undefined') {
-      const questionToSave = inputMode === 'with' ? question.trim() : '';
-      localStorage.setItem(QUESTION_STORAGE_KEY, questionToSave);
+      localStorage.setItem(QUESTION_STORAGE_KEY, question.trim());
     }
     // 跳转到抽牌页
     router.push('/reading/general/celtic-cross/draw');
@@ -127,70 +125,27 @@ export default function CelticCrossQuestionPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm p-8"
             >
-              {/* 输入模式选择 */}
-              <div className="mb-6">
-                <p className="text-white/70 text-sm mb-4 leading-relaxed">
-                  你可以输入一个更具体的问题，也可以不输入，让牌阵为你做一次通用解读的抽牌准备。
-                </p>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setInputMode('with')}
-                    className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-300 ${
-                      inputMode === 'with'
-                        ? 'border-primary bg-primary/20 text-white'
-                        : 'border-white/20 bg-white/5 text-white/60 hover:border-white/40'
-                    }`}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      {inputMode === 'with' ? '✅' : '⭕'} 输入问题
-                    </span>
-                  </button>
-                  <button
-                    onClick={() => setInputMode('without')}
-                    className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-300 ${
-                      inputMode === 'without'
-                        ? 'border-primary bg-primary/20 text-white'
-                        : 'border-white/20 bg-white/5 text-white/60 hover:border-white/40'
-                    }`}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      {inputMode === 'without' ? '✅' : '⭕'} 暂不输入
-                    </span>
-                  </button>
+              {/* 输入框 */}
+              <div className="mb-4">
+                <label className="block text-white/90 font-semibold mb-3">
+                  你的问题（可选）
+                </label>
+                <textarea
+                  value={question}
+                  onChange={handleQuestionChange}
+                  placeholder="例如：我在这段关系中的位置与未来走向是什么？ / 我目前的职业发展遇到了哪些阻碍？"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                  rows={4}
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-white/50">
+                    输入问题后可获得更精准的解读，也可以不输入问题直接开始抽牌
+                  </span>
+                  <span className={`text-xs ${charCount > maxChars * 0.9 ? 'text-primary' : 'text-white/50'}`}>
+                    {charCount} / {maxChars}
+                  </span>
                 </div>
               </div>
-
-              {/* 输入框 */}
-              <motion.div
-                initial={false}
-                animate={{
-                  height: inputMode === 'with' ? 'auto' : 0,
-                  opacity: inputMode === 'with' ? 1 : 0,
-                }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-              >
-                <div className="mb-4">
-                  <label className="block text-white/90 font-semibold mb-3">
-                    你的问题
-                  </label>
-                  <textarea
-                    value={question}
-                    onChange={handleQuestionChange}
-                    placeholder="例如：我在这段关系中的位置与未来走向是什么？ / 我目前的职业发展遇到了哪些阻碍？"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
-                    rows={4}
-                  />
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-white/50">
-                      {question.trim() ? '已输入问题' : '输入你的问题后可获得更精准的解读'}
-                    </span>
-                    <span className={`text-xs ${charCount > maxChars * 0.9 ? 'text-primary' : 'text-white/50'}`}>
-                      {charCount} / {maxChars}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
 
               {/* 开始抽牌按钮 */}
               <motion.button
@@ -204,11 +159,35 @@ export default function CelticCrossQuestionPage() {
               </motion.button>
             </motion.div>
 
+            {/* 牌阵说明 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6"
+            >
+              <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">info</span>
+                关于凯尔特十字牌阵
+              </h3>
+              <div className="space-y-3 text-sm text-white/70 leading-relaxed">
+                <p>
+                  凯尔特十字是一种经典的深度牌阵，适合用来全面梳理一件复杂或重要的事情。
+                </p>
+                <p>
+                  牌阵将从现状、阻碍、过去、优势、近期发展，到你内在的期待与担忧，逐层展开，帮助你看清事情的整体脉络，以及自己在其中所处的位置。
+                </p>
+                <p className="mt-4 text-primary/90">
+                  ✨ 如果你正面对一个难以取舍、需要长期思考的问题，凯尔特十字会更适合你。
+                </p>
+              </div>
+            </motion.div>
+
             {/* 底部提示 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
               className="mt-8 flex justify-center"
             >
               <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10">
