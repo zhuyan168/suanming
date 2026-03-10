@@ -96,6 +96,75 @@
     animation: flip-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
+  /* Luna floating avatar breathing glow */
+  @keyframes luna-breathe {
+    0%, 100% {
+      box-shadow: 0 0 12px 3px rgba(127, 19, 236, 0.35), 0 0 24px 6px rgba(167, 139, 250, 0.18);
+    }
+    50% {
+      box-shadow: 0 0 20px 6px rgba(127, 19, 236, 0.55), 0 0 36px 12px rgba(167, 139, 250, 0.28);
+    }
+  }
+  .animate-luna-breathe {
+    animation: luna-breathe 3.5s ease-in-out infinite;
+  }
+
+  /* Luna tooltip bubble fade in/out */
+  @keyframes luna-bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes luna-bubble-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(8px) scale(0.95);
+    }
+  }
+  .animate-luna-bubble-in {
+    animation: luna-bubble-in 0.4s ease-out forwards;
+  }
+  .animate-luna-bubble-out {
+    animation: luna-bubble-out 0.4s ease-in forwards;
+  }
+
+  /* Luna chat panel slide up */
+  @keyframes luna-panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes luna-panel-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+    }
+  }
+  .animate-luna-panel-in {
+    animation: luna-panel-in 0.3s ease-out forwards;
+  }
+  .animate-luna-panel-out {
+    animation: luna-panel-out 0.25s ease-in forwards;
+  }
+
   .preserve-3d {
     transform-style: preserve-3d;
   }

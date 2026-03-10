@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import FloatingLuna from '../components/luna/FloatingLuna';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -1216,6 +1217,7 @@ export default function Home() {
           <TarotReadingModal isOpen={isTarotOpen} onRequestClose={handleTarotClose} />
         </div>
       </div>
+      <FloatingLuna />
       <FeatureToast visible={isToastVisible} title={toast.title} message={toast.message} onClose={handleCloseToast} />
     </>
   );
