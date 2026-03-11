@@ -1,14 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import LunaChatPanel from './LunaChatPanel';
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
+import LunaChatPanel, { type LunaMessage } from './LunaChatPanel';
 
 export default function FloatingLuna() {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<LunaMessage[]>([]);
 
   // Bubble visibility: 'hidden' -> 'visible' -> 'fading' -> 'hidden'
   const [bubbleState, setBubbleState] = useState<'hidden' | 'visible' | 'fading'>('hidden');

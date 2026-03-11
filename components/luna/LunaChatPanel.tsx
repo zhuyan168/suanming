@@ -1,21 +1,35 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { matchSpreadByMessage, getSpreadById } from '../../utils/luna/spreadMatcher';
 
-interface Message {
+interface MessageAction {
+  label: string;
+  type: 'quick-entry' | 'link';
+  href?: string;
+  payload?: string;
+}
+
+export interface LunaMessage {
   role: 'user' | 'assistant';
   content: string;
+  actions?: MessageAction[];
 }
 
 interface LunaChatPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  messages: Message[];
-  onMessagesChange: (msgs: Message[]) => void;
+  messages: LunaMessage[];
+  onMessagesChange: (msgs: LunaMessage[]) => void;
 }
 
-const WELCOME_MESSAGE: Message = {
+type ConversationMode = 'idle' | 'spread-select' | 'support';
+
+const WELCOME_MESSAGE: LunaMessage = {
   role: 'assistant',
-  content:
-    '嗨，我是 Luna。你不需要想好要问什么，有时候，只是开口说说，就已经是一个好的开始了。',
+  content: '嗨，我是 Luna。\n不知道从哪里开始的话，就先来找我吧。',
+  actions: [
+    { label: '帮我选牌阵', type: 'quick-entry', payload: 'spread-select' },
+    { label: '充值 / 使用问题', type: 'quick-entry', payload: 'support' },
+  ],
 };
 
 export default function LunaChatPanel({
@@ -27,10 +41,10 @@ export default function LunaChatPanel({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [mode, setMode] = useState<ConversationMode>('idle');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-add welcome message on first open
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       onMessagesChange([WELCOME_MESSAGE]);
@@ -47,6 +61,12 @@ export default function LunaChatPanel({
     }
   }, [isOpen, isClosing]);
 
+  useEffect(() => {
+    if (!isLoading && isOpen && !isClosing) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isLoading, isOpen, isClosing]);
+
   const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
@@ -55,18 +75,167 @@ export default function LunaChatPanel({
     }, 250);
   }, [onClose]);
 
+  const appendMessages = useCallback(
+    (current: LunaMessage[], ...newMsgs: LunaMessage[]) => {
+      const updated = [...current, ...newMsgs];
+      onMessagesChange(updated);
+      return updated;
+    },
+    [onMessagesChange],
+  );
+
+  const handleSpreadSelect = useCallback(
+    async (userText: string, current: LunaMessage[]) => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/luna-spread-match', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userText }),
+        });
+
+        if (!res.ok) throw new Error('API failed');
+
+        const data = await res.json();
+        const spread = getSpreadById(data.spreadId);
+
+        if (spread) {
+          const reply: LunaMessage = {
+            role: 'assistant',
+            content: data.reason || `推荐你试试「${spread.name}」——${spread.description}`,
+            actions: [
+              { label: '去看看这个牌阵', type: 'link', href: spread.url },
+              { label: '换个问题重新选', type: 'quick-entry', payload: 'spread-select' },
+            ],
+          };
+          appendMessages(current, reply);
+          setMode('idle');
+          return;
+        }
+      } catch {
+        // AI failed, fall through to keyword matching
+      } finally {
+        setIsLoading(false);
+      }
+
+      const result = matchSpreadByMessage(userText);
+      const reply: LunaMessage = {
+        role: 'assistant',
+        content: result.message,
+        actions: [
+          { label: '去看看这个牌阵', type: 'link', href: result.spread.url },
+          { label: '换个问题重新选', type: 'quick-entry', payload: 'spread-select' },
+        ],
+      };
+      appendMessages(current, reply);
+      setMode('idle');
+    },
+    [appendMessages],
+  );
+
+  const handleSupport = useCallback(
+    (current: LunaMessage[]) => {
+      const reply: LunaMessage = {
+        role: 'assistant',
+        content: '你想了解哪方面的问题？',
+        actions: [
+          { label: '如何充值 / 成为会员', type: 'quick-entry', payload: 'faq-membership' },
+          { label: '占卜结果在哪里看', type: 'quick-entry', payload: 'faq-result' },
+          { label: '联系人工客服', type: 'quick-entry', payload: 'faq-human' },
+        ],
+      };
+      appendMessages(current, reply);
+      setMode('idle');
+    },
+    [appendMessages],
+  );
+
+  const handleFaq = useCallback(
+    (faqKey: string, current: LunaMessage[]) => {
+      const answers: Record<string, string> = {
+        'faq-membership':
+          '目前会员功能还在完善中，部分高级牌阵会在页面上标注「会员专属」。后续我们会上线正式的会员系统，届时你可以在个人中心完成开通。\n\n如果你有其他问题，随时可以问我。',
+        'faq-result':
+          '你的占卜结果会在完成抽牌后直接展示在页面上。如果中途离开了页面，目前暂不支持历史记录查看，建议占卜时截图保存。\n\n后续我们会上线历史记录功能，敬请期待。',
+        'faq-human':
+          '目前暂未开通人工客服通道。如果你遇到了无法解决的问题，可以通过页面底部的联系方式给我们留言，我们会尽快回复。',
+      };
+      const reply: LunaMessage = {
+        role: 'assistant',
+        content: answers[faqKey] || '这个问题我暂时还回答不了，后续会继续完善。',
+        actions: [
+          { label: '我还有别的问题', type: 'quick-entry', payload: 'support' },
+          { label: '返回主菜单', type: 'quick-entry', payload: 'home' },
+        ],
+      };
+      appendMessages(current, reply);
+    },
+    [appendMessages],
+  );
+
+  const handleActionClick = useCallback(
+    (action: MessageAction) => {
+      if (action.type === 'link' && action.href) {
+        window.location.href = action.href;
+        return;
+      }
+
+      const payload = action.payload;
+      if (!payload) return;
+
+      const userMsg: LunaMessage = { role: 'user', content: action.label };
+      const current = [...messages, userMsg];
+      onMessagesChange(current);
+
+      if (payload === 'spread-select') {
+        const reply: LunaMessage = {
+          role: 'assistant',
+          content: '把你现在最想占卜的事情告诉我，我来帮你推荐更适合的牌阵。',
+        };
+        appendMessages(current, reply);
+        setMode('spread-select');
+        return;
+      }
+
+      if (payload === 'support') {
+        handleSupport(current);
+        return;
+      }
+
+      if (payload === 'home') {
+        const homeReply: LunaMessage = {
+          ...WELCOME_MESSAGE,
+          content: '好的，还有什么我能帮你的吗？',
+        };
+        appendMessages(current, homeReply);
+        setMode('idle');
+        return;
+      }
+
+      if (payload.startsWith('faq-')) {
+        handleFaq(payload, current);
+        return;
+      }
+    },
+    [messages, onMessagesChange, appendMessages, handleSupport, handleFaq],
+  );
+
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
 
-    const userMsg: Message = { role: 'user', content: trimmed };
+    const userMsg: LunaMessage = { role: 'user', content: trimmed };
     const updated = [...messages, userMsg];
     onMessagesChange(updated);
     setInput('');
 
+    if (mode === 'spread-select') {
+      await handleSpreadSelect(trimmed, updated);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Only send last 20 messages for context window management
       const contextMessages = updated
         .filter((m) => m.role === 'user' || m.role === 'assistant')
         .slice(-20)
@@ -78,26 +247,24 @@ export default function LunaChatPanel({
         body: JSON.stringify({ messages: contextMessages }),
       });
 
-      if (!res.ok) {
-        throw new Error('Request failed');
-      }
+      if (!res.ok) throw new Error('Request failed');
 
       const data = await res.json();
-      const assistantMsg: Message = {
+      const assistantMsg: LunaMessage = {
         role: 'assistant',
-        content: data.reply || 'Hmm, I seem to have lost my train of thought. Could you try again?',
+        content: data.reply || '嗯，我好像走神了。你可以再说一次吗？',
       };
       onMessagesChange([...updated, assistantMsg]);
     } catch {
-      const errorMsg: Message = {
+      const errorMsg: LunaMessage = {
         role: 'assistant',
-        content: "I'm having a little trouble connecting right now. Please try again in a moment.",
+        content: '我现在连接遇到了一点问题，请稍后再试。',
       };
       onMessagesChange([...updated, errorMsg]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, onMessagesChange]);
+  }, [input, isLoading, messages, onMessagesChange, mode, handleSpreadSelect]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -117,15 +284,11 @@ export default function LunaChatPanel({
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-purple-500/10">
         <div className="w-9 h-9 rounded-full overflow-hidden ring-1 ring-purple-500/30 flex-shrink-0">
-          <img
-            src="/assets/luna-avatar.png"
-            alt="Luna"
-            className="w-full h-full object-cover"
-          />
+          <img src="/assets/luna-avatar.png" alt="Luna" className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-semibold leading-tight">Luna</p>
-          <p className="text-purple-300/60 text-xs">Tarot Companion</p>
+          <p className="text-purple-300/60 text-xs">你的站内小助手</p>
         </div>
         <button
           onClick={handleClose}
@@ -133,12 +296,7 @@ export default function LunaChatPanel({
           aria-label="Close chat"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M4 4L12 12M12 4L4 12"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
+            <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       </div>
@@ -146,19 +304,40 @@ export default function LunaChatPanel({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px] max-h-[calc(70vh-120px)] scrollbar-thin">
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'bg-primary/80 text-white rounded-br-md'
-                  : 'bg-white/[0.06] text-white/90 rounded-bl-md'
-              }`}
-            >
-              {msg.content}
+          <div key={i}>
+            <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
+                  msg.role === 'user'
+                    ? 'bg-primary/80 text-white rounded-br-md'
+                    : 'bg-white/[0.06] text-white/90 rounded-bl-md'
+                }`}
+              >
+                {msg.content}
+              </div>
             </div>
+
+            {/* Action buttons */}
+            {msg.actions && msg.actions.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2 ml-0.5">
+                {msg.actions.map((action, j) => (
+                  <button
+                    key={j}
+                    onClick={() => handleActionClick(action)}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-200 ${
+                      action.type === 'link'
+                        ? 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/60'
+                        : 'border-purple-400/20 bg-white/[0.04] text-white/70 hover:text-white hover:bg-white/[0.08] hover:border-purple-400/40'
+                    }`}
+                  >
+                    {action.type === 'link' && (
+                      <span className="mr-1">→</span>
+                    )}
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 
@@ -177,13 +356,18 @@ export default function LunaChatPanel({
 
       {/* Input */}
       <div className="px-3 py-3 border-t border-purple-500/10">
+        {mode === 'spread-select' && (
+          <p className="text-[11px] text-purple-300/50 mb-1.5 px-1">
+            描述你想占卜的事情，我来帮你匹配牌阵
+          </p>
+        )}
         <div className="flex items-end gap-2 bg-white/[0.04] rounded-xl px-3 py-2 ring-1 ring-purple-500/10 focus-within:ring-purple-500/30 transition-all">
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your thoughts..."
+            placeholder={mode === 'spread-select' ? '比如：我想知道前任怎么想我...' : '输入你想说的...'}
             rows={1}
             className="flex-1 bg-transparent text-white/90 text-sm resize-none outline-none placeholder:text-white/25 max-h-[80px] min-h-[24px]"
             style={{ height: 'auto', overflow: 'hidden' }}
