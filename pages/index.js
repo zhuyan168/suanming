@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { supabase } from '../lib/supabase';
 import FloatingLuna from '../components/luna/FloatingLuna';
 
 // 完整的78张塔罗牌数据
@@ -868,6 +870,35 @@ export default function Home() {
   const [toast, setToast] = useState({ title: '', message: '' });
   const [isToastVisible, setIsToastVisible] = useState(false);
   const toastTimerRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const displayEmail = (email) => {
+    if (!email) return '';
+    if (email.length <= 20) return email;
+    const [local, domain] = email.split('@');
+    if (!domain) return email;
+    const truncated = local.length > 8 ? local.slice(0, 8) + '…' : local;
+    return `${truncated}@${domain}`;
+  };
 
   useEffect(() => () => {
     if (toastTimerRef.current) {
@@ -921,7 +952,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Mystic Insights - Fortune Telling &amp; Horoscope</title>
+        <title>FateAura - 命运占卜与运势指引</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -948,36 +979,50 @@ export default function Home() {
                       ></path>
                     </svg>
                   </div>
-                  <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+                  <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
                 </div>
                 <div className="hidden md:flex flex-1 justify-end gap-8">
                   <div className="flex items-center gap-9">
                     <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                      Home
+                      首页
                     </a>
                     <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                      My Readings
+                      我的占卜
                     </a>
                     <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                      About
+                      关于
                     </a>
                   </div>
-                  <div className="flex gap-2">
-                    {/* 原按钮缺少交互反馈，导致用户点击无响应，这里统一提示路线计划 */}
-                    <button
-                      type="button"
-                      onClick={() => handleFeatureComingSoon('Sign Up 功能开发中')}
-                      className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
-                    >
-                      <span className="truncate">Sign Up</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFeatureComingSoon('Login 功能开发中')}
-                      className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
-                    >
-                      <span className="truncate">Login</span>
-                    </button>
+                  <div className="flex gap-2 items-center">
+                    {authLoading ? (
+                      <div className="h-10 w-20" />
+                    ) : user ? (
+                      <>
+                        <span className="text-white/70 text-sm mr-1">{displayEmail(user.email)}</span>
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
+                        >
+                          <span className="truncate">退出登录</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          href="/register"
+                          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+                        >
+                          <span className="truncate">注册</span>
+                        </Link>
+                        <Link
+                          href="/login"
+                          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
+                        >
+                          <span className="truncate">登录</span>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
                 <button
@@ -1195,7 +1240,7 @@ export default function Home() {
                           ></path>
                         </svg>
                       </div>
-                      <span className="text-sm">© 2024 Mystic Insights. All rights reserved.</span>
+                      <span className="text-sm">© 2024 FateAura. All rights reserved.</span>
                     </div>
                     <div className="flex items-center gap-6">
                       <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
