@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -36,6 +38,7 @@ const STORAGE_KEY = 'general_sacred_triangle_result';
 
 export default function SacredTriangleReadingPage() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<SacredTriangleResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [reading, setReading] = useState<ReadingResult | null>(null);
@@ -95,14 +98,21 @@ export default function SacredTriangleReadingPage() {
 
       const data = await response.json();
       setReading(data);
-      setError(null); // 成功后确保清除错误状态
+      setError(null);
 
-      // 保存解读结果到 localStorage
       const updatedResult = {
         ...result,
         reading: data,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
+
+      saveReadingHistory({
+        spreadType: 'sacred-triangle',
+        question: question || undefined,
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/reading/general/sacred-triangle/reading',
+      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');
@@ -183,13 +193,13 @@ export default function SacredTriangleReadingPage() {
         {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
-            onClick={handleReturn}
+            onClick={isFromHistory ? goBackToHistory : handleReturn}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
           </button>
-
+          
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
               Mystic Insights

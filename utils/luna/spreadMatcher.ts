@@ -1,3 +1,5 @@
+import { SPREAD_LIST, type SpreadMeta } from '../../lib/spreads';
+
 export type SpreadCategory = 'love' | 'career' | 'wealth' | 'fortune' | 'general';
 
 export interface SpreadItem {
@@ -9,134 +11,46 @@ export interface SpreadItem {
   keywords: string[];
 }
 
-export const LUNA_SPREADS: SpreadItem[] = [
-  // ---- 感情类 ----
-  {
-    id: 'what-they-think',
-    name: '对方在想什么',
-    category: 'love',
-    description: '探索对方此刻的真实想法、感受与关系的短期走向',
-    url: '/themed-readings/love/what-they-think/draw',
-    keywords: ['想法', '想我', '态度', '心里', '怎么看', '怎么想', '在想', '喜不喜欢', '有没有感觉'],
-  },
-  {
-    id: 'reconciliation',
-    name: '复合的可能性',
-    category: 'love',
-    description: '评估重新靠近的空间与代价，帮你做更稳的选择',
-    url: '/themed-readings/love/reconciliation/draw',
-    keywords: ['复合', '前任', '挽回', '和好', '重新在一起', '回头', '吃回头草', '分手后'],
-  },
-  {
-    id: 'relationship-development',
-    name: '这段感情的发展',
-    category: 'love',
-    description: '看看这段关系的真实状态与自然走向',
-    url: '/themed-readings/love/relationship-development/draw',
-    keywords: ['发展', '未来', '关系', '走向', '在一起', '结果', '进展', '感情',
-      '第三者', '小三', '插足', '出轨', '分手', '会不会', '有没有可能', '能不能'],
-  },
-  {
-    id: 'future-lover',
-    name: '未来恋人牌阵',
-    category: 'love',
-    description: '看看未来恋人的画像与相遇路径',
-    url: '/themed-readings/love/future-lover/draw',
-    keywords: ['恋人', '遇见', '桃花', '单身', '脱单', '另一半', '对象'],
-  },
-  // ---- 事业类 ----
-  {
-    id: 'skills-direction',
-    name: '我应该找什么样的工作 / 学什么技能',
-    category: 'career',
-    description: '理清你的优势与能量倾向，找到更适合的方向',
-    url: '/themed-readings/career-study/skills-direction/draw',
-    keywords: ['方向', '什么工作', '技能', '学什么', '专业', '适合', '转行', '求职', '找工作'],
-  },
-  {
-    id: 'interview-exam',
-    name: '面试 / 考试关键提醒',
-    category: 'career',
-    description: '看清重点，避开容易忽略的坑',
-    url: '/themed-readings/career-study/interview-exam-key-reminders/draw',
-    keywords: ['面试', '考试', '考研', '高考', '笔试', '准备'],
-  },
-  {
-    id: 'offer-decision',
-    name: '我已经拿到 offer 了，要不要接受',
-    category: 'career',
-    description: '在选择分岔口看清代价与机会',
-    url: '/themed-readings/career-study/offer-decision/draw',
-    keywords: ['offer', '接受', '录取', '入职'],
-  },
-  {
-    id: 'stay-or-leave',
-    name: '这份工作是否值得继续做下去',
-    category: 'career',
-    description: '评估继续投入的意义、消耗与转机',
-    url: '/themed-readings/career-study/stay-or-leave/draw',
-    keywords: ['辞职', '跳槽', '继续', '做下去', '换工作', '离职', '不想干'],
-  },
-  // ---- 财运类 ----
-  {
-    id: 'current-wealth-status',
-    name: '我现在的财运如何',
-    category: 'wealth',
-    description: '快速看清你当前的财运状态与近期走向',
-    url: '/themed-readings/wealth/current-wealth-status/draw',
-    keywords: ['财运', '财富', '赚钱', '收入', '理财', '存款', '金钱'],
-  },
-  {
-    id: 'wealth-obstacles',
-    name: '我现在的财富阻碍是什么',
-    category: 'wealth',
-    description: '找到财务改善的突破口',
-    url: '/themed-readings/wealth/wealth-obstacles/draw',
-    keywords: ['阻碍', '破财', '花钱', '瓶颈', '开销', '困难', '欠'],
-  },
-  // ---- 运势类 ----
-  {
-    id: 'daily-fortune',
-    name: '每日运势',
-    category: 'fortune',
-    description: '看看你今天的整体运势与能量提示',
-    url: '/fortune/daily',
-    keywords: ['今天', '今日', '每日', '每天', '日运'],
-  },
-  {
-    id: 'monthly-fortune',
-    name: '月度运势',
-    category: 'fortune',
-    description: '了解这个月的整体运势走向与关注重点',
-    url: '/fortune/monthly/basic',
-    keywords: ['月', '这个月', '月度', '月运', '本月'],
-  },
-  {
-    id: 'seasonal-fortune',
-    name: '四季运势',
-    category: 'fortune',
-    description: '从更长的时间维度看当前季节的能量趋势',
-    url: '/fortune/seasonal',
-    keywords: ['季', '季度', '四季', '这一季', '季节'],
-  },
-  {
-    id: 'year-ahead-fortune',
-    name: '年度运势',
-    category: 'fortune',
-    description: '看看今年的整体运势格局与重要节点',
-    url: '/fortune/annual/year-ahead',
-    keywords: ['年', '今年', '年度', '年运', '全年', '一年'],
-  },
-  // ---- 通用类 ----
-  {
-    id: 'three-card-universal',
-    name: '三张牌万能牌阵',
-    category: 'general',
-    description: '适合还在犹豫、想先弄清自己现状的问题',
-    url: '/reading/general/three-card-universal/question',
-    keywords: ['不确定', '迷茫', '不知道', '看看', '通用', '随便'],
-  },
-];
+/**
+ * Luna 推荐用的关键词扩展表。
+ * key 与 lib/spreads.ts 的 spread_type 对齐；keywords 仅供 Luna 匹配使用。
+ */
+const LUNA_KEYWORDS: Record<string, string[]> = {
+  'love-what-they-think': ['想法', '想我', '态度', '心里', '怎么看', '怎么想', '在想', '喜不喜欢', '有没有感觉'],
+  'love-reconciliation': ['复合', '前任', '挽回', '和好', '重新在一起', '回头', '吃回头草', '分手后'],
+  'love-relationship-development': ['发展', '未来', '关系', '走向', '在一起', '结果', '进展', '感情',
+    '第三者', '小三', '插足', '出轨', '分手', '会不会', '有没有可能', '能不能'],
+  'love-future-lover': ['恋人', '遇见', '桃花', '单身', '脱单', '另一半', '对象'],
+  'career-skills-direction': ['方向', '什么工作', '技能', '学什么', '专业', '适合', '转行', '求职', '找工作'],
+  'career-interview-exam': ['面试', '考试', '考研', '高考', '笔试', '准备'],
+  'career-offer-decision': ['offer', '接受', '录取', '入职'],
+  'career-stay-or-leave': ['辞职', '跳槽', '继续', '做下去', '换工作', '离职', '不想干'],
+  'wealth-current-status': ['财运', '财富', '赚钱', '收入', '理财', '存款', '金钱'],
+  'wealth-obstacles': ['阻碍', '破财', '花钱', '瓶颈', '开销', '困难', '欠'],
+  'fortune-daily': ['今天', '今日', '每日', '每天', '日运'],
+  'fortune-monthly': ['月', '这个月', '月度', '月运', '本月'],
+  'fortune-seasonal': ['季', '季度', '四季', '这一季', '季节'],
+  'fortune-yearly': ['年', '今年', '年度', '年运', '全年', '一年'],
+  'three-card-general': ['不确定', '迷茫', '不知道', '看看', '通用', '随便'],
+};
+
+function categoryFromMeta(s: SpreadMeta): SpreadCategory {
+  const c = s.category;
+  if (c === 'divination') return 'general';
+  return c as SpreadCategory;
+}
+
+/** Luna 可推荐的牌阵列表（从 lib/spreads.ts 生成） */
+export const LUNA_SPREADS: SpreadItem[] = SPREAD_LIST
+  .filter((s) => LUNA_KEYWORDS[s.key])
+  .map((s) => ({
+    id: s.key,
+    name: s.name,
+    category: categoryFromMeta(s),
+    description: s.description ?? '',
+    url: s.path,
+    keywords: LUNA_KEYWORDS[s.key] ?? [],
+  }));
 
 const CATEGORY_KEYWORDS: Record<SpreadCategory, string[]> = {
   love: [
@@ -163,11 +77,11 @@ const CATEGORY_KEYWORDS: Record<SpreadCategory, string[]> = {
 };
 
 const CATEGORY_DEFAULTS: Record<SpreadCategory, string> = {
-  love: 'relationship-development',
-  career: 'skills-direction',
-  wealth: 'current-wealth-status',
-  fortune: 'monthly-fortune',
-  general: 'three-card-universal',
+  love: 'love-relationship-development',
+  career: 'career-skills-direction',
+  wealth: 'wealth-current-status',
+  fortune: 'fortune-monthly',
+  general: 'three-card-general',
 };
 
 function detectCategory(message: string): SpreadCategory {

@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EightCardsSpecialSlots from '../../../../components/fortune/EightCardsSpecialSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { SpreadCard } from '../../../../types/spread-reading';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -143,6 +145,7 @@ const validateReading = (reading: any): boolean => {
 
 export default function RelationshipDev8Result() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<RelationshipDev8Result | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -199,6 +202,13 @@ export default function RelationshipDev8Result() {
         
         setReading(data.reading);
         saveReading(data.reading);
+
+        saveReadingHistory({
+          spreadType: 'love-relationship-development',
+          cards: result.cards,
+          readingResult: data.reading,
+          resultPath: '/themed-readings/love/relationship-development/result',
+        });
       } else {
         throw new Error('解读数据格式错误');
       }
@@ -377,11 +387,11 @@ export default function RelationshipDev8Result() {
             {/* 顶部导航 */}
             <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm" style={{ backgroundColor: 'rgba(25, 16, 34, 0.8)' }}>
               <button
-                onClick={handleReturnToList}
+                onClick={isFromHistory ? goBackToHistory : handleReturnToList}
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="text-sm font-medium">返回</span>
+                <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
               </button>
               
               <div className="flex items-center gap-4 text-white">

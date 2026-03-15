@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
+import { saveReadingHistory } from '../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard {
   id: number;
@@ -116,6 +118,7 @@ const rehydrateTarotCard = (card: ShuffledTarotCard): ShuffledTarotCard => {
 
 export default function YesNoTarotResult() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [question, setQuestion] = useState('');
   const [card, setCard] = useState<ShuffledTarotCard | null>(null);
   const [answer, setAnswer] = useState<YesNoAnswer | null>(null);
@@ -154,6 +157,13 @@ export default function YesNoTarotResult() {
       setAnswer(result.answer);
       setInterpretation(result.reason);
       setIsLoading(false);
+
+      saveReadingHistory({
+        spreadType: 'divination-yesno',
+        cards: [draw.card],
+        readingResult: { answer: result.answer, interpretation: result.reason },
+        resultPath: '/fortune/yesno-tarot/result',
+      });
     }
   }, [router]);
 
@@ -189,6 +199,14 @@ export default function YesNoTarotResult() {
       setAnswer(parsedAnswer);
       setInterpretation(data.interpretation || data.answer);
       setIsLoading(false);
+
+      saveReadingHistory({
+        spreadType: 'divination-yesno',
+        question: userQuestion,
+        cards: [drawnCard],
+        readingResult: { answer: parsedAnswer, interpretation: data.interpretation || data.answer },
+        resultPath: '/fortune/yesno-tarot/result',
+      });
     } catch (error) {
       console.error('获取AI解读失败:', error);
       // 降级到本地映射表
@@ -250,11 +268,11 @@ export default function YesNoTarotResult() {
         {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button
-            onClick={() => router.push('/')}
+            onClick={isFromHistory ? goBackToHistory : () => router.push('/')}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
-            <span className="material-symbols-outlined">home</span>
-            <span className="text-sm font-medium">首页</span>
+            <span className="material-symbols-outlined">{isFromHistory ? 'arrow_back' : 'home'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '首页'}</span>
           </button>
           
           <h2 className="text-lg font-bold">Mystic Insights</h2>

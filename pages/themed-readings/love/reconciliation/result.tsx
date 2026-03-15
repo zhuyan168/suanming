@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TenCardsReconciliationSlots from '../../../../components/fortune/TenCardsReconciliationSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -52,6 +54,7 @@ const SLOT_CONFIG = [
 
 export default function ReconciliationResultPage() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<ReconciliationResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingDeep, setIsGeneratingDeep] = useState(false);
@@ -122,6 +125,13 @@ export default function ReconciliationResultPage() {
       const data: DeepReading = await response.json();
       setDeepReading(data);
       saveDeepReading(data);
+
+      saveReadingHistory({
+        spreadType: 'love-reconciliation',
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/themed-readings/love/reconciliation/result',
+      });
     } catch (err: any) {
       console.error('Failed to generate deep reading:', err);
       setError(err.message || '生成解读失败，请稍后重试');
@@ -182,9 +192,9 @@ export default function ReconciliationResultPage() {
 
       <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
-          <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+          <button onClick={isFromHistory ? goBackToHistory : handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
           </button>
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Mystic Insights</h2>
           <button onClick={handleDrawAgain} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">

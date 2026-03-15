@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 // 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
 interface LocalTarotCard {
@@ -197,6 +199,7 @@ interface ShuffledTarotCard {
 
 export default function MonthlyBasicResult() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentMonth = getCurrentMonth();
   
   const [savedResult, setSavedResult] = useState<MonthlyBasicResult | null>(null);
@@ -308,10 +311,15 @@ export default function MonthlyBasicResult() {
         result: data.fortune,
       };
 
-      // 使用统一的保存函数
       saveMonthlyBasicResult(updatedResult);
-      
       setSavedResult(updatedResult);
+
+      saveReadingHistory({
+        spreadType: 'fortune-monthly',
+        cards: result.cards,
+        readingResult: data.fortune,
+        resultPath: '/fortune/monthly/basic/result',
+      });
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
       setError(err.message || '生成运势失败，请稍后重试');
@@ -479,11 +487,11 @@ export default function MonthlyBasicResult() {
           {/* 头部 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button
-              onClick={handleBackToMonthly}
+              onClick={isFromHistory ? goBackToHistory : handleBackToMonthly}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回月度运势</span>
+              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回月度运势'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">

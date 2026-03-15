@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
+import { saveReadingHistory } from '../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../hooks/useHistoryBack';
 
 // 获取当前季节
 const getCurrentSeason = (): string => {
@@ -156,6 +158,7 @@ const SLOT_DESCRIPTIONS = [
 
 export default function SeasonalResult() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<SeasonalResult | null>(null);
   const [cards, setCards] = useState<ShuffledTarotCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -195,7 +198,14 @@ export default function SeasonalResult() {
 
       const readingData = await response.json();
       setReading(readingData);
-      
+
+      saveReadingHistory({
+        spreadType: 'fortune-seasonal',
+        cards: cardsData,
+        readingResult: readingData,
+        resultPath: '/fortune/seasonal/result',
+      });
+
       // 保存解读结果到 localStorage（按季度）
       if (typeof window !== 'undefined') {
         const currentQuarter = getCurrentQuarter();
@@ -371,11 +381,11 @@ export default function SeasonalResult() {
           {/* 头部 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button
-              onClick={handleBackToHome}
+              onClick={isFromHistory ? goBackToHistory : handleBackToHome}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">

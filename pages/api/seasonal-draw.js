@@ -855,7 +855,7 @@ async function saveSeasonalRecord(userId, cards) {
   // 示例：
   // await db.tarotRecords.insert({
   //   userId: userId,
-  //   spreadType: 'seasonal',
+  //   spread_type: 'fortune-seasonal',
   //   cards: cards,
   //   createdAt: new Date()
   // });

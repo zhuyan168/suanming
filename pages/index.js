@@ -987,9 +987,6 @@ export default function Home() {
                       首页
                     </a>
                     <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                      我的占卜
-                    </a>
-                    <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
                       关于
                     </a>
                   </div>
@@ -998,7 +995,13 @@ export default function Home() {
                       <div className="h-10 w-20" />
                     ) : user ? (
                       <>
-                        <span className="text-white/70 text-sm mr-1">{displayEmail(user.email)}</span>
+                        <Link
+                          href="/account"
+                          className="flex items-center gap-1.5 text-white/70 text-sm font-medium hover:text-primary transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">person</span>
+                          个人中心
+                        </Link>
                         <button
                           type="button"
                           onClick={handleSignOut}

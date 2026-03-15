@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import SevenCardSlots from '../../../../components/fortune/SevenCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards = [
@@ -189,6 +191,7 @@ interface ShuffledTarotCard {
 
 export default function MonthlyMemberResultPage() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentMonth = getCurrentMonth();
   
   const [savedResult, setSavedResult] = useState<MonthlyMemberResult | null>(null);
@@ -309,10 +312,15 @@ export default function MonthlyMemberResultPage() {
         result: data, // data 结构应该符合 { month, summary, cards: [...] }
       };
 
-      // 使用统一的保存函数
       saveMonthlyMemberResult(updatedResult);
-      
       setSavedResult(updatedResult);
+
+      saveReadingHistory({
+        spreadType: 'fortune-monthly-member',
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/fortune/monthly/member/result',
+      });
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
       setError(err.message || '生成运势失败，请稍后重试');
@@ -449,11 +457,11 @@ export default function MonthlyMemberResultPage() {
           {/* 头部 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button
-              onClick={handleBackToMonthly}
+              onClick={isFromHistory ? goBackToHistory : handleBackToMonthly}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回月度运势</span>
+              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回月度运势'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>

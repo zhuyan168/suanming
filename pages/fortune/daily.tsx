@@ -6,6 +6,8 @@ import CardStrip from '../../components/fortune/CardStrip';
 import ScrollBar from '../../components/fortune/ScrollBar';
 import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
 import { TarotCard } from '../../components/fortune/CardItem';
+import { saveReadingHistory } from '../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../hooks/useHistoryBack';
 
 // 兼容旧数据格式的辅助函数：获取含义文本
 const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
@@ -730,6 +732,7 @@ interface DrawResult {
 
 export default function DailyFortune() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [hasDrawnToday, setHasDrawnToday] = useState(false);
   const [todayResult, setTodayResult] = useState<DrawResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -879,9 +882,14 @@ export default function DailyFortune() {
       setTodayResult(result);
       setHasDrawnToday(true);
       setIsAnimating(false);
-      
-      // 立即隐藏卡片展示结果
       setShowCards(false);
+
+      saveReadingHistory({
+        spreadType: 'fortune-daily',
+        cards: [{ name: card.name, orientation, id: card.id }],
+        readingResult: data.fortune,
+        resultPath: '/fortune/daily',
+      });
     } catch (err: any) {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);
@@ -1009,11 +1017,11 @@ export default function DailyFortune() {
           {/* 头部 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button
-              onClick={handleBackToHome}
+              onClick={isFromHistory ? goBackToHistory : handleBackToHome}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">

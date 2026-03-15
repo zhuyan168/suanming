@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { SpreadReading, SpreadCard } from '../../../../types/spread-reading';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -89,6 +91,7 @@ const loadReading = (): SpreadReading | null => {
 
 export default function WhatTheyThinkResult() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<WhatTheyThinkResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -131,6 +134,13 @@ export default function WhatTheyThinkResult() {
       if (data.ok && data.reading) {
         setReading(data.reading);
         saveReading(data.reading);
+
+        saveReadingHistory({
+          spreadType: 'love-what-they-think',
+          cards: result.cards,
+          readingResult: data.reading,
+          resultPath: '/themed-readings/love/what-they-think/result',
+        });
       } else {
         throw new Error('解读数据格式错误');
       }
@@ -270,11 +280,11 @@ export default function WhatTheyThinkResult() {
             {/* 顶部导航 */}
             <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm" style={{ backgroundColor: 'rgba(25, 16, 34, 0.8)' }}>
               <button
-                onClick={handleReturnToList}
+                onClick={isFromHistory ? goBackToHistory : handleReturnToList}
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="text-sm font-medium">返回</span>
+                <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
               </button>
               
               <div className="flex items-center gap-4 text-white">

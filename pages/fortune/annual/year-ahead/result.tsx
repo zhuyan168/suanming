@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards: TarotCard[] = [
@@ -302,6 +304,7 @@ function MagicalLoading() {
 
 export default function YearAheadResultPage() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentYear = getCurrentYear();
   
   const [savedResult, setSavedResult] = useState<YearAheadResult | null>(null);
@@ -364,6 +367,13 @@ export default function YearAheadResultPage() {
 
       saveYearAheadResult(updatedResult);
       setSavedResult(updatedResult);
+
+      saveReadingHistory({
+        spreadType: 'fortune-yearly',
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/fortune/annual/year-ahead/result',
+      });
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
       setError(err.message || '生成运势失败，请稍后重试');
@@ -505,11 +515,11 @@ export default function YearAheadResultPage() {
           {/* 头部 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button
-              onClick={handleBackToAnnual}
+              onClick={isFromHistory ? goBackToHistory : handleBackToAnnual}
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>

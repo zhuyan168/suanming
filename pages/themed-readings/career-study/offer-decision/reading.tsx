@@ -3,6 +3,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 const STORAGE_KEY = 'offer_decision_result';
 
@@ -36,6 +38,7 @@ interface ReadingResult {
 
 export default function OfferDecisionReading() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,7 +85,6 @@ export default function OfferDecisionReading() {
       const data = await response.json();
       setReading(data);
       
-      // 保存解读结果到 localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -91,6 +93,13 @@ export default function OfferDecisionReading() {
           reading: data
         }));
       }
+
+      saveReadingHistory({
+        spreadType: 'career-offer-decision',
+        cards: cards,
+        readingResult: data,
+        resultPath: '/themed-readings/career-study/offer-decision/reading',
+      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {
@@ -189,9 +198,9 @@ export default function OfferDecisionReading() {
       </Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
-        <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+        <button onClick={isFromHistory ? goBackToHistory : handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span className="text-sm">返回</span>
+          <span className="text-sm">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
         </button>
         <h2 className="text-lg font-bold">Offer 决策解读</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">

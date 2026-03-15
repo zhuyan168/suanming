@@ -3,6 +3,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import CareerDevelopmentSevenSlots from '../../../../components/fortune/CareerDevelopmentSevenSlots';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard {
   id: number;
@@ -74,6 +76,7 @@ const SLOT_CONFIG = [
 
 export default function StayOrLeaveReading() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const { key } = router.query;
   
   const [result, setResult] = useState<StayOrLeaveResult | null>(null);
@@ -118,6 +121,14 @@ export default function StayOrLeaveReading() {
           const storageKey = (router.query.key as string) || 'career_spread_should_i_stay_v1';
           localStorage.setItem(storageKey, JSON.stringify(updated));
           sessionStorage.setItem(storageKey, JSON.stringify(updated));
+
+          saveReadingHistory({
+            spreadType: 'career-stay-or-leave',
+            question: '这份工作是否值得继续做下去？',
+            cards: result.cards,
+            readingResult: data,
+            resultPath: '/themed-readings/career-study/stay-or-leave/reading',
+          });
         }
       } else {
         setError(data.error || '生成解读失败');
@@ -151,9 +162,9 @@ export default function StayOrLeaveReading() {
       <Head><title>职业发展全景解读 - Mystic Insights</title></Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
-        <button onClick={() => router.push('/themed-readings/career-study')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+        <button onClick={isFromHistory ? goBackToHistory : () => router.push('/themed-readings/career-study')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span className="text-sm">返回</span>
+          <span className="text-sm">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
         </button>
         <h2 className="text-base sm:text-lg font-bold tracking-widest uppercase">Interpretation</h2>
         <button 

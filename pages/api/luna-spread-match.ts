@@ -15,7 +15,7 @@ ${SPREAD_LIST}
 2. spreadId 必须是上面列表中的某个 id，不能自己编造
 3. reason 用中文，简洁友好，1-2 句话，说明为什么推荐这个牌阵
 4. 不要输出任何 JSON 以外的内容，不要加 markdown 代码块标记
-5. 如果用户的问题实在无法归类，选 "three-card-universal"`;
+5. 如果用户的问题实在无法归类，选 "three-card-general"`;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -71,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!parsed.spreadId || !validIds.has(parsed.spreadId)) {
       return res.status(200).json({
-        spreadId: 'three-card-universal',
+        spreadId: 'three-card-general',
         reason: parsed.reason || '你可以先试试通用牌阵，适合任何主题的问题。',
       });
     }

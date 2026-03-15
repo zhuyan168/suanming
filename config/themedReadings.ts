@@ -9,6 +9,8 @@ import type { ReactNode } from 'react';
 
 export interface SpreadConfig {
   id: string;
+  /** 统一的 spread_type key，写入数据库时使用此字段 */
+  spreadType?: string;
   titleZh: string;
   titleEn: string;
   descZh: string;
@@ -38,6 +40,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
   // 免费牌阵 (2个)
   {
     id: 'future-lover',
+    spreadType: 'love-future-lover',
     titleZh: '未来恋人牌阵',
     titleEn: 'Future Lover Spread',
     descZh: '看看未来恋人的画像与相遇路径',
@@ -49,6 +52,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
   },
   {
     id: 'what-they-think',
+    spreadType: 'love-what-they-think',
     titleZh: '对方在想什么',
     titleEn: 'What They Think',
     descZh: '探索对方此刻的真实想法、感受与关系的短期走向',
@@ -59,6 +63,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
   },
   {
     id: 'relationship-development',
+    spreadType: 'love-relationship-development',
     titleZh: '这段感情的发展',
     titleEn: 'Relationship Development',
     descZh: '抽取 8 张牌，看看这段关系的真实状态与自然走向',
@@ -71,6 +76,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
   // 会员牌阵 (1个)
   {
     id: 'reconciliation',
+    spreadType: 'love-reconciliation',
     titleZh: '复合的可能性',
     titleEn: 'Reconciliation Potential',
     descZh: '评估重新靠近的空间与代价，给你更稳的选择',
@@ -116,6 +122,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
     spreads: [
       {
         id: 'skills-direction',
+        spreadType: 'career-skills-direction',
         titleZh: '我应该找什么样的工作 / 学什么技能？',
         titleEn: 'Career Direction & Skills',
         descZh: '理清你的优势与能量倾向，找到更适合你的方向与成长路径。',
@@ -133,6 +140,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'interview-exam-key-reminders',
+        spreadType: 'career-interview-exam',
         titleZh: '面试 / 考试关键提醒牌阵',
         titleEn: 'Interview & Exam Key Reminders',
         descZh: '看清重点，避开容易忽略的坑，把能掌控的部分做到最好。',
@@ -150,6 +158,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'offer-decision',
+        spreadType: 'career-offer-decision',
         titleZh: '我已经拿到offer了，要不要接受？',
         titleEn: 'Offer Decision',
         descZh: '在选择分岔口看清代价与机会，帮你做更安心的决定。',
@@ -168,6 +177,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'stay-or-leave',
+        spreadType: 'career-stay-or-leave',
         titleZh: '这份工作是否值得继续做下去？',
         titleEn: 'Stay or Leave',
         descZh: '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。',
@@ -197,6 +207,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
     spreads: [
       {
         id: 'current-wealth-status',
+        spreadType: 'wealth-current-status',
         titleZh: '我现在的财运如何？',
         titleEn: 'Current Wealth Status',
         descZh: '用三张牌快速看清你当前的财运状态、影响因素与近期走向。',
@@ -207,6 +218,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
       },
       {
         id: 'wealth-obstacles',
+        spreadType: 'wealth-obstacles',
         titleZh: '我现在的财富阻碍是什么？',
         titleEn: 'Wealth Obstacles',
         descZh: '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。',

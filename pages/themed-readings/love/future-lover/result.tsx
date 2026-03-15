@@ -9,6 +9,8 @@ import {
   generateBasicSummary,
   generateBasicActions,
 } from '../../../../utils/future-lover-interpretation';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -85,6 +87,7 @@ const loadDeepReading = (): DeepReading | null => {
 
 export default function FutureLoverResult() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<FutureLoverResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingDeep, setIsGeneratingDeep] = useState(false);
@@ -126,6 +129,13 @@ export default function FutureLoverResult() {
       const data: DeepReading = await response.json();
       setDeepReading(data);
       saveDeepReading(data);
+
+      saveReadingHistory({
+        spreadType: 'love-future-lover',
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/themed-readings/love/future-lover/result',
+      });
     } catch (err: any) {
       console.error('Failed to generate deep reading:', err);
       setError(err.message || '生成深度解读失败，已显示基础解读');
@@ -270,11 +280,11 @@ export default function FutureLoverResult() {
           <div className="px-4 sm:px-8 py-6">
             <div className="max-w-7xl mx-auto flex items-center justify-between">
               <button
-                onClick={handleReturnToList}
+                onClick={isFromHistory ? goBackToHistory : handleReturnToList}
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="hidden sm:inline">返回</span>
+                <span className="hidden sm:inline">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
               </button>
               
               <div className="text-center">

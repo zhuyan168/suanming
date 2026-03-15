@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import HexagramSlots from '../../../../components/fortune/HexagramSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
+import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -43,6 +45,7 @@ const QUESTION_STORAGE_KEY = 'general_hexagram_question';
 
 export default function HexagramReadingPage() {
   const router = useRouter();
+  const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<HexagramResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [reading, setReading] = useState<ReadingResult | null>(null);
@@ -109,12 +112,19 @@ export default function HexagramReadingPage() {
       setReading(data);
       setError(null);
 
-      // 保存解读结果到 localStorage
       const updatedResult = {
         ...result,
         reading: data,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
+
+      saveReadingHistory({
+        spreadType: 'hexagram',
+        question: question || undefined,
+        cards: result.cards,
+        readingResult: data,
+        resultPath: '/reading/general/hexagram/reading',
+      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');
@@ -195,11 +205,11 @@ export default function HexagramReadingPage() {
         {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
-            onClick={handleReturn}
+            onClick={isFromHistory ? goBackToHistory : handleReturn}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
           </button>
 
           <div className="flex items-center gap-4">
