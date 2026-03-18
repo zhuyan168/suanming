@@ -1,9 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import type { User } from '@supabase/supabase-js'
+
+const resendErrorMap: Record<string, string> = {
+  'Email rate limit exceeded': '发送邮件次数过多，请稍后再试',
+  'Too many requests': '请求过于频繁，请稍后再试',
+  'For security purposes, you can only request this after': '操作过于频繁，请稍后再试',
+}
+
+function toChineseResendError(msg: string): string {
+  const lower = msg.toLowerCase()
+  for (const [en, zh] of Object.entries(resendErrorMap)) {
+    if (lower.includes(en.toLowerCase())) return zh
+  }
+  return `发送失败：${msg}`
+}
 
 interface Profile {
   username: string | null
@@ -35,6 +49,23 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [signingOut, setSigningOut] = useState(false)
+  const [sendingVerification, setSendingVerification] = useState(false)
+
+  const isGoogleUser = user?.app_metadata?.provider === 'google' ||
+    (Array.isArray(user?.app_metadata?.providers) && user.app_metadata.providers.includes('google'))
+  const isEmailVerified = isGoogleUser || !!user?.email_confirmed_at
+
+  const handleSendVerification = useCallback(async () => {
+    if (!user?.email) return
+    setSendingVerification(true)
+    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email })
+    setSendingVerification(false)
+    if (error) {
+      setToast({ type: 'error', text: toChineseResendError(error.message) })
+    } else {
+      setToast({ type: 'success', text: '验证邮件已发送，请前往邮箱查看' })
+    }
+  }, [user?.email])
 
   useEffect(() => {
     async function load() {
@@ -246,6 +277,34 @@ export default function AccountPage() {
               {/* Info rows */}
               <div className="space-y-4">
                 <InfoRow label="邮箱" value={user?.email ?? '未知'} icon="mail" />
+
+                {/* 邮箱验证状态 */}
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-white/30 text-lg w-6 text-center shrink-0 mt-0.5">
+                    {isEmailVerified ? 'verified_user' : 'gpp_maybe'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/40 text-[11px] leading-none mb-0.5">邮箱验证</p>
+                    {isEmailVerified ? (
+                      <p className="text-sm text-emerald-400">
+                        {isGoogleUser ? '已验证（Google 登录）' : '已验证'}
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-sm text-amber-400">未验证</p>
+                        <button
+                          onClick={handleSendVerification}
+                          disabled={sendingVerification}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-white/50 text-xs font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-sm">send</span>
+                          {sendingVerification ? '发送中...' : '发送验证邮件'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <InfoRow
                   label="昵称"
                   value={displayNickname}
@@ -311,6 +370,17 @@ export default function AccountPage() {
               >
                 <span className="material-symbols-outlined text-lg">auto_stories</span>
                 我的占卜记录
+              </Link>
+            </div>
+
+            {/* 修改密码 */}
+            <div className="mt-3">
+              <Link
+                href="/change-password"
+                className="w-full rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-3.5 text-white/70 text-sm font-medium hover:bg-white/[0.06] hover:text-white/90 hover:border-white/20 transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-lg">lock_reset</span>
+                修改密码
               </Link>
             </div>
 

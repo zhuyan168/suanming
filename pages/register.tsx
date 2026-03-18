@@ -1,7 +1,23 @@
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useCallback, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { supabase } from '../lib/supabase'
+
+const signUpErrorMap: Record<string, string> = {
+  'User already registered': '该邮箱已被注册',
+  'Email rate limit exceeded': '发送邮件次数过多，请稍后再试',
+  'Too many requests': '请求过于频繁，请稍后再试',
+  'Signup requires a valid password': '请输入有效的密码',
+  'Password should be at least 6 characters': '密码至少需要 6 个字符',
+}
+
+function toChineseError(msg: string): string {
+  const lower = msg.toLowerCase()
+  for (const [en, zh] of Object.entries(signUpErrorMap)) {
+    if (lower.includes(en.toLowerCase())) return zh
+  }
+  return msg
+}
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -10,6 +26,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
+  const [resendResult, setResendResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   function validate(): string | null {
     if (!email.trim()) return '请输入邮箱地址'
@@ -19,6 +37,19 @@ export default function RegisterPage() {
     if (password !== confirmPassword) return '两次输入的密码不一致'
     return null
   }
+
+  const handleResend = useCallback(async () => {
+    if (!email.trim()) return
+    setResending(true)
+    setResendResult(null)
+    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+    setResending(false)
+    if (resendError) {
+      setResendResult({ type: 'error', text: toChineseError(resendError.message) })
+    } else {
+      setResendResult({ type: 'success', text: '验证邮件已重新发送，请查收' })
+    }
+  }, [email])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -40,7 +71,7 @@ export default function RegisterPage() {
     setLoading(false)
 
     if (signUpError) {
-      setError(signUpError.message)
+      setError(toChineseError(signUpError.message))
       return
     }
 
@@ -78,18 +109,44 @@ export default function RegisterPage() {
             {success ? (
               <div className="text-center py-6 animate-fade-in">
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
-                  check_circle
+                  mark_email_read
                 </span>
-                <h2 className="text-xl font-semibold text-white mb-2">注册成功</h2>
+                <h2 className="text-xl font-semibold text-white mb-2">注册成功，请验证邮箱</h2>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  你的账号已创建完成，现在可以直接登录。
+                  我们已向 <span className="text-white/80">{email}</span> 发送了一封验证邮件，请前往邮箱点击验证链接完成注册。
                 </p>
-                <Link
-                  href="/login"
-                  className="inline-block mt-6 px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/80 text-white text-sm font-medium transition-colors"
-                >
-                  前往登录
-                </Link>
+                <p className="text-white/40 text-xs leading-relaxed mt-3">
+                  验证完成后即可登录，使用历史记录、个人中心等账号功能。
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  <Link
+                    href="/login"
+                    className="inline-block w-full px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/80 text-white text-sm font-medium transition-colors"
+                  >
+                    返回登录
+                  </Link>
+                  <button
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="w-full px-6 py-2.5 rounded-lg border border-white/10 bg-white/5 text-white/60 text-sm font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {resending ? '发送中...' : '重新发送验证邮件'}
+                  </button>
+                </div>
+
+                {resendResult && (
+                  <div className={`mt-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs animate-fade-in ${
+                    resendResult.type === 'success'
+                      ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                  }`}>
+                    <span className="material-symbols-outlined text-sm">
+                      {resendResult.type === 'success' ? 'check_circle' : 'error'}
+                    </span>
+                    {resendResult.text}
+                  </div>
+                )}
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
