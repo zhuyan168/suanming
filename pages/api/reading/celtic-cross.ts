@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 export default async function handler(
   req: NextApiRequest,
