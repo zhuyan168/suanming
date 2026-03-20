@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,8 +10,6 @@ import { saveReadingHistory } from '../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { useSpreadAccess } from '../../hooks/useSpreadAccess';
 import { getAuthHeaders } from '../../lib/apiHeaders';
-import { supabase } from '../../lib/supabase';
-import { checkReadingAccess } from '../../lib/access';
 
 // 兼容旧数据格式的辅助函数：获取含义文本
 const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
@@ -745,7 +743,6 @@ export default function DailyFortune() {
   const [hasDrawnToday, setHasDrawnToday] = useState(false);
   const [todayResult, setTodayResult] = useState<DrawResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const hasAccessCheckRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -796,16 +793,6 @@ export default function DailyFortune() {
     
     // 如果该位置已经是 null，则不执行任何操作
     if (!card) return;
-
-    // 点击后第一步：检查免费次数
-    if (!hasAccessCheckRef.current) {
-      hasAccessCheckRef.current = true;
-      const accessResult = await checkReadingAccess({ supabase });
-      if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
-        setError('今日免费解读次数已用完');
-        return;
-      }
-    }
 
     // 先锁定操作状态
     setError(null);

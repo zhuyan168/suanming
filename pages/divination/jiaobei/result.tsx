@@ -2,8 +2,6 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { saveReadingHistory } from '../../../lib/saveReadingHistory';
-import { supabase } from '../../../lib/supabase';
-import { checkReadingAccess } from '../../../lib/access';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
@@ -51,7 +49,6 @@ export default function ResultPage() {
   const [result, setResult] = useState<ResultInfo | null>(null);
   const [aiInterpretation, setAiInterpretation] = useState<string>('');
   const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const [dailyLimitReached, setDailyLimitReached] = useState(false);
   const hasSavedRef = useRef(false);
   const hasCheckedRef = useRef(false);
 
@@ -76,17 +73,9 @@ export default function ResultPage() {
     }
   }, [type, question, router]);
 
-  const checkAndProceed = async (resultType: ResultType, userQuestion?: string) => {
+  const checkAndProceed = (resultType: ResultType, userQuestion?: string) => {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
-
-    // 检查免费次数
-    const accessResult = await checkReadingAccess({ supabase });
-    
-    if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
-      setDailyLimitReached(true);
-      return;
-    }
 
     // 有问题则调用 AI 解读，否则直接保存基础结果
     if (userQuestion && userQuestion.trim()) {
@@ -367,11 +356,7 @@ export default function ResultPage() {
                           <div className="mb-3 text-white/70 text-sm">
                             <span className="font-medium">你的问题：</span>{question}
                           </div>
-                          {dailyLimitReached ? (
-                            <div className="text-amber-400 text-base leading-relaxed">
-                              今日免费解读次数已用完，开通会员后可继续使用
-                            </div>
-                          ) : isLoadingAI ? (
+                          {isLoadingAI ? (
                             <div className="flex items-center gap-2 text-white/60">
                               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                               <span className="text-sm">正在解读中...</span>
@@ -385,16 +370,6 @@ export default function ResultPage() {
                       </div>
                     )}
 
-                    {/* 每日免费次数超限提示（无问题情况） */}
-                    {dailyLimitReached && !(question && typeof question === 'string' && question.trim()) && (
-                      <div className="max-w-xl mx-auto mb-8">
-                        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 text-center">
-                          <p className="text-amber-400 text-base leading-relaxed">
-                            今日免费解读次数已用完，开通会员后可继续使用
-                          </p>
-                        </div>
-                      </div>
-                    )}
 
                     {/* 分隔线 */}
                     <div className="w-24 h-px bg-white/20 mx-auto mb-8" />

@@ -7,8 +7,6 @@ import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
-import { supabase } from '../../../../lib/supabase';
-import { checkReadingAccess } from '../../../../lib/access';
 
 // 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
 interface LocalTarotCard {
@@ -287,14 +285,6 @@ export default function MonthlyBasicResult() {
   }, [currentMonth, router]);
 
   const generateFortune = async (result: MonthlyBasicResult) => {
-    // 第一件事：检查免费次数（在 setIsGenerating 之前）
-    const accessResult = await checkReadingAccess({ supabase });
-    if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
-      setError('今日免费解读次数已用完，开通会员后可继续使用');
-      setIsLoading(false);
-      return;
-    }
-
     setIsGenerating(true);
     setError(null);
 

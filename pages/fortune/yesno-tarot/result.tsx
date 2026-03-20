@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
@@ -7,8 +7,6 @@ import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno
 import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
-import { supabase } from '../../../lib/supabase';
-import { checkReadingAccess } from '../../../lib/access';
 
 interface ShuffledTarotCard {
   id: number;
@@ -128,8 +126,6 @@ export default function YesNoTarotResult() {
   const [interpretation, setInterpretation] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [useAI, setUseAI] = useState(false);
-  const [dailyLimitReached, setDailyLimitReached] = useState(false);
-  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -157,18 +153,6 @@ export default function YesNoTarotResult() {
   }, [router]);
 
   const checkAndProceed = async (drawnCard: ShuffledTarotCard, savedQuestion: string, hasQuestion: boolean) => {
-    if (hasCheckedRef.current) return;
-    hasCheckedRef.current = true;
-
-    // 检查免费次数
-    const accessResult = await checkReadingAccess({ supabase });
-    
-    if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
-      setDailyLimitReached(true);
-      setIsLoading(false);
-      return;
-    }
-
     if (hasQuestion) {
       fetchAIInterpretation(savedQuestion, drawnCard);
     } else {
@@ -369,21 +353,7 @@ export default function YesNoTarotResult() {
                 transition={{ delay: 0.4 }}
                 className="flex flex-col gap-6"
               >
-                {dailyLimitReached ? (
-                  <>
-                    {/* 每日免费次数超限提示 */}
-                    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="material-symbols-outlined text-amber-400 text-3xl">warning</span>
-                        <p className="text-lg font-semibold text-amber-400">无法生成解读</p>
-                      </div>
-                      <p className="text-base leading-relaxed text-amber-200">
-                        今日免费解读次数已用完，开通会员后可继续使用
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
+                <>
                     {/* 答案 */}
                     <div className={`rounded-2xl border border-primary/30 bg-gradient-to-br ${answerBgColor} to-transparent p-6`}>
                       <div className="flex items-center gap-3 mb-3">
@@ -414,7 +384,6 @@ export default function YesNoTarotResult() {
                       </p>
                     </div>
                   </>
-                )}
 
                 {/* 按钮 */}
                 <div className="flex gap-4 mt-4">
