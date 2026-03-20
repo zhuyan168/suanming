@@ -12,7 +12,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * Career & Study themed Tarot Reading Page
  */
 export default function CareerStudyThemePage() {
-  const { isMember, userId } = useMembership();
+  const { isMember } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const themeConfig = getThemeConfig('career-study');
@@ -62,7 +62,6 @@ export default function CareerStudyThemePage() {
                   spread={spread}
                   theme="career-study"
                   isMember={isMember}
-                  userId={userId}
                   onLockedClick={handleLockedClick}
                 />
               ))}

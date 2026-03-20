@@ -11,7 +11,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * 财富主题占卜主界面
  */
 export default function WealthThemePage() {
-  const { isMember, userId } = useMembership();
+  const { isMember } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ visible: false, title: '', message: '' });
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -78,7 +78,6 @@ export default function WealthThemePage() {
                   spread={spread}
                   theme="wealth"
                   isMember={isMember}
-                  userId={userId}
                   onLockedClick={() => setIsModalOpen(true)}
                 />
               ))}
