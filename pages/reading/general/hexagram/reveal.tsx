@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import HexagramSlots from '../../../../components/fortune/HexagramSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -141,14 +142,15 @@ const loadResult = (): HexagramResult | null => {
 
 export default function HexagramRevealPage() {
   const router = useRouter();
+
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    spreadKey: 'hexagram',
+    redirectPath: '/reading/general',
+  });
+
   const [result, setResult] = useState<HexagramResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [showMemberModal, setShowMemberModal] = useState(false);
-
-  // TODO: 会员系统上线后，从真实的会员状态hook获取
-  // import { useMembership } from '../../../../hooks/useMembership';
-  // const { isMember } = useMembership();
-  const isMember = false; // 临时占位，会员系统未上线
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -201,7 +203,7 @@ export default function HexagramRevealPage() {
     router.push('/reading/general');
   };
 
-  if (!result) {
+  if (accessLoading || !allowed || !result) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
         <div className="text-center">

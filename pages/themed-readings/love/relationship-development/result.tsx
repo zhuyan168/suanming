@@ -8,6 +8,7 @@ import { SpreadCard } from '../../../../types/spread-reading';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -147,6 +148,12 @@ const validateReading = (reading: any): boolean => {
 export default function RelationshipDev8Result() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'love-relationship-development',
+    redirectPath: '/themed-readings/love',
+  });
+
   const [savedResult, setSavedResult] = useState<RelationshipDev8Result | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -288,7 +295,7 @@ export default function RelationshipDev8Result() {
     }
   };
 
-  if (isLoading) {
+  if (accessLoading || !allowed || isLoading) {
     return (
       <>
         <Head>

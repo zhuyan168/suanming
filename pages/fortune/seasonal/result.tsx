@@ -8,6 +8,7 @@ import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 // 获取当前季节
 const getCurrentSeason = (): string => {
@@ -160,6 +161,12 @@ const SLOT_DESCRIPTIONS = [
 export default function SeasonalResult() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-seasonal',
+    redirectPath: '/',
+  });
+
   const [result, setResult] = useState<SeasonalResult | null>(null);
   const [cards, setCards] = useState<ShuffledTarotCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -294,7 +301,7 @@ export default function SeasonalResult() {
     router.push('/');
   };
 
-  if (isLoading || !result) {
+  if (accessLoading || !allowed || isLoading || !result) {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">

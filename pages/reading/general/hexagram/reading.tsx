@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -47,6 +48,12 @@ const QUESTION_STORAGE_KEY = 'general_hexagram_question';
 export default function HexagramReadingPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'hexagram',
+    redirectPath: '/reading/general',
+  });
+
   const [result, setResult] = useState<HexagramResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [reading, setReading] = useState<ReadingResult | null>(null);
@@ -153,6 +160,14 @@ export default function HexagramReadingPage() {
     
     router.replace('/reading/general/hexagram/question');
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

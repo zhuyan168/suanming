@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards: TarotCard[] = [
@@ -307,7 +308,12 @@ export default function YearAheadResultPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentYear = getCurrentYear();
-  
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-yearly',
+    redirectPath: '/',
+  });
+
   const [savedResult, setSavedResult] = useState<YearAheadResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -389,7 +395,7 @@ export default function YearAheadResultPage() {
     router.push('/');
   };
 
-  if (isLoading) {
+  if (accessLoading || !allowed || isLoading) {
     return (
       <>
         <Head>

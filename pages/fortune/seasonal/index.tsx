@@ -8,6 +8,7 @@ import ScrollBar from '../../../components/fortune/ScrollBar';
 import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard, CardMeaning } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
+import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据（仅用于UI渲染背面卡片）
 const tarotCards = [
@@ -888,7 +889,12 @@ interface SeasonalRecords {
 
 export default function SeasonalFortune() {
   const router = useRouter();
-  
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-seasonal',
+    redirectPath: '/',
+  });
+
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedResult, setSavedResult] = useState<SeasonalResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -1196,6 +1202,16 @@ export default function SeasonalFortune() {
 
   // 检查是否可以开始测算（已抽满5张）
   const canStartReading = selectedCards.filter(c => c !== null).length === 5;
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

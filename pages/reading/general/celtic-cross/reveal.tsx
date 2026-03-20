@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import CelticCrossSlots from '../../../../components/fortune/CelticCrossSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { useMembership } from '../../../../hooks/useMembership';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -249,7 +249,12 @@ function MembershipModal({
 
 export default function CelticCrossRevealPage() {
   const router = useRouter();
-  const { isMember } = useMembership();
+
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    spreadKey: 'celtic-cross',
+    redirectPath: '/reading/general',
+  });
+
   const [result, setResult] = useState<CelticCrossResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -307,7 +312,7 @@ export default function CelticCrossRevealPage() {
     router.push('/reading/general');
   };
 
-  if (!result) {
+  if (accessLoading || !allowed || !result) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
         <div className="text-center">

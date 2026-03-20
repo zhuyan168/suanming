@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import HorseshoeSlots from '../../../../components/fortune/HorseshoeSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { useMembership } from '../../../../hooks/useMembership';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -131,9 +131,14 @@ const loadResult = (): HorseshoeResult | null => {
 
 export default function HorseshoeRevealPage() {
   const router = useRouter();
+
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    spreadKey: 'horseshoe',
+    redirectPath: '/reading/general',
+  });
+
   const [result, setResult] = useState<HorseshoeResult | null>(null);
   const [question, setQuestion] = useState<string>('');
-  const { isMember } = useMembership();
 
   // 牌位名称
   const positionNames = [
@@ -190,7 +195,7 @@ export default function HorseshoeRevealPage() {
     router.push('/reading/general');
   };
 
-  if (!result) {
+  if (accessLoading || !allowed || !result) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
         <div className="text-center">

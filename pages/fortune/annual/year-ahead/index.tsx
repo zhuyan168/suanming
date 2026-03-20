@@ -6,6 +6,7 @@ import CardItem from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 // 注意：不再导入 TarotCard 类型，使用本地定义的 LocalTarotCard 以兼容旧数据格式
 
 // 完整的78张塔罗牌数据
@@ -209,6 +210,12 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
 
 export default function YearAheadFortune() {
   const router = useRouter();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-yearly',
+    redirectPath: '/',
+  });
+
   const [currentYear, setCurrentYear] = useState<string>('');
   
   const [hasDrawnThisYear, setHasDrawnThisYear] = useState(false);
@@ -367,6 +374,16 @@ export default function YearAheadFortune() {
   };
 
   const canStartReading = selectedCards.filter(c => c !== null).length === 13;
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

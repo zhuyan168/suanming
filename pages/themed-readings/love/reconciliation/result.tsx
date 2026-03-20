@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -56,6 +57,12 @@ const SLOT_CONFIG = [
 export default function ReconciliationResultPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'love-reconciliation',
+    redirectPath: '/themed-readings/love',
+  });
+
   const [savedResult, setSavedResult] = useState<ReconciliationResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingDeep, setIsGeneratingDeep] = useState(false);
@@ -175,7 +182,7 @@ export default function ReconciliationResultPage() {
     }
   };
 
-  if (isLoading || !savedResult) {
+  if (accessLoading || !allowed || isLoading || !savedResult) {
     return (
       <div className="min-h-screen bg-[#191022] flex items-center justify-center">
         <div className="text-white/60 animate-pulse text-lg tracking-widest font-light">正在开启时空之门...</div>

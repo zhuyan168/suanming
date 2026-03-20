@@ -6,6 +6,7 @@ import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeCo
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 const STORAGE_KEY = 'offer_decision_result';
 
@@ -40,6 +41,12 @@ interface ReadingResult {
 export default function OfferDecisionReading() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'career-offer-decision',
+    redirectPath: '/themed-readings/career-study',
+  });
+
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -126,6 +133,14 @@ export default function OfferDecisionReading() {
     localStorage.removeItem(STORAGE_KEY);
     router.push('/themed-readings/career-study/offer-decision/draw');
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   // 错误兜底页面
   if (error && !cards.length) {

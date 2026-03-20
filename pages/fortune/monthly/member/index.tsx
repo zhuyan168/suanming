@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CardItem from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
-import SevenCardSlots from '../../../../components/fortune/SevenCardSlots'; // Import SevenCardSlots
+import SevenCardSlots from '../../../../components/fortune/SevenCardSlots';
 import { TarotCard, CardMeaning } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -210,6 +211,12 @@ interface MonthlyMemberResult {
 
 export default function MonthlyMemberFortune() {
   const router = useRouter();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-monthly-member',
+    redirectPath: '/',
+  });
+
   const [currentMonth, setCurrentMonth] = useState<string>('');
   
   const [hasDrawnThisMonth, setHasDrawnThisMonth] = useState(false);
@@ -413,7 +420,17 @@ export default function MonthlyMemberFortune() {
     router.push('/fortune/monthly');
   };
 
-  const canStartReading = selectedCards.filter(c => c !== null).length === 7; // Update condition
+  const canStartReading = selectedCards.filter(c => c !== null).length === 7;
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

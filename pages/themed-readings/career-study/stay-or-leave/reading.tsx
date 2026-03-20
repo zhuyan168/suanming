@@ -6,6 +6,7 @@ import CareerDevelopmentSevenSlots from '../../../../components/fortune/CareerDe
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard {
   id: number;
@@ -79,7 +80,12 @@ export default function StayOrLeaveReading() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const { key } = router.query;
-  
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'career-stay-or-leave',
+    redirectPath: '/themed-readings/career-study',
+  });
+
   const [result, setResult] = useState<StayOrLeaveResult | null>(null);
   const [interpretation, setInterpretation] = useState<InterpretationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -147,6 +153,14 @@ export default function StayOrLeaveReading() {
       fetchInterpretation(result.cards);
     }
   }, [result, interpretation, isLoading, error, fetchInterpretation]);
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   if (error && !interpretation) {
     return (

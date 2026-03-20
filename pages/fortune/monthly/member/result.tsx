@@ -8,6 +8,7 @@ import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards = [
@@ -194,7 +195,12 @@ export default function MonthlyMemberResultPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentMonth = getCurrentMonth();
-  
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-monthly-member',
+    redirectPath: '/',
+  });
+
   const [savedResult, setSavedResult] = useState<MonthlyMemberResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -336,7 +342,7 @@ export default function MonthlyMemberResultPage() {
     router.push('/fortune/monthly');
   };
 
-  if (isLoading) {
+  if (accessLoading || !allowed || isLoading) {
     return (
       <>
         <Head>

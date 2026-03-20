@@ -13,7 +13,7 @@ async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
   if (!accessStatus) return;
 
   const { cards } = req.body;

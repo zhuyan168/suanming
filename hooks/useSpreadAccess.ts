@@ -4,6 +4,7 @@ import type { SpreadTheme } from '../config/themedReadings';
 import { getSpreadConfig } from '../config/themedReadings';
 import { getSpreadByKey, type SpreadAccess } from '../lib/spreads';
 import { getAuthHeaders } from '../lib/apiHeaders';
+import { supabase } from '../lib/supabase';
 
 export interface SpreadAccessState {
   loading: boolean;
@@ -12,6 +13,51 @@ export interface SpreadAccessState {
   isMember: boolean;
   userId: string | null;
   remaining?: number;
+}
+
+// Codes that the access-check API (or any middleware in front of it) may return
+// as a "business denial" — these must NEVER be treated as Runtime Errors.
+const BUSINESS_DENIAL_CODES = new Set([
+  'not_logged_in',
+  'member_required',
+  'member_only',
+  'limit_reached',
+  'daily_limit',
+  'forbidden',
+  'unauthorized',
+]);
+
+function resolveReason(
+  code: string,
+  httpStatus: number,
+  spreadAccess: SpreadAccess = 'free'
+): SpreadAccessState['reason'] {
+  // Explicit semantic codes always win, regardless of HTTP status.
+  if (code === 'not_logged_in' || code === 'unauthorized') {
+    return 'not_logged_in';
+  }
+  if (code === 'member_required' || code === 'member_only') {
+    return 'member_only';
+  }
+  if (code === 'limit_reached' || code === 'daily_limit') {
+    return 'daily_limit';
+  }
+  if (code === 'forbidden' || code === 'access_denied') {
+    // "forbidden" without further detail: use spread type to pick the right copy.
+    return spreadAccess === 'member' ? 'member_only' : 'daily_limit';
+  }
+
+  // No semantic code — fall back on HTTP status + spread context.
+  if (httpStatus === 401) {
+    return 'not_logged_in';
+  }
+  if (httpStatus === 403) {
+    // A member spread being 403'd almost certainly means membership required.
+    // A free spread being 403'd almost certainly means the daily limit was hit.
+    return spreadAccess === 'member' ? 'member_only' : 'daily_limit';
+  }
+
+  return 'not_logged_in';
 }
 
 interface UseSpreadAccessOptions {
@@ -109,8 +155,41 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       });
 
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || '权限检查失败');
+        // Try to read the body; an unparseable body is itself a true error signal.
+        let errPayload: Record<string, unknown> = {};
+        try {
+          errPayload = await response.json();
+        } catch {
+          // Body is not JSON — this is a true server/infrastructure error.
+          throw new Error(`权限检查失败 (${response.status})`);
+        }
+
+        // Extract a semantic denial code if the server sent one.
+        const code =
+          typeof errPayload.code === 'string'
+            ? errPayload.code
+            : typeof errPayload.error === 'string'
+            ? errPayload.error
+            : '';
+
+        // 4xx with a known business code → soft denial, not a crash.
+        // Also treat any plain 401/403 as a business denial even without a code.
+        const isBusinessDenial =
+          BUSINESS_DENIAL_CODES.has(code) ||
+          response.status === 401 ||
+          response.status === 403;
+
+        if (isBusinessDenial) {
+          handleDenied(resolveReason(code, response.status, spreadAccess));
+          return;
+        }
+
+        // 5xx or unexpected 4xx — genuine server/infrastructure error.
+        throw new Error(
+          typeof errPayload.error === 'string'
+            ? errPayload.error
+            : `权限检查失败 (${response.status})`
+        );
       }
 
       const payload = await response.json();
@@ -125,15 +204,36 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
         return;
       }
 
-      handleDenied(payload.reason ?? 'daily_limit');
+      // payload.reason comes from the server and is already typed correctly.
+      // Only fall back to spread-context inference when the server omits it.
+      handleDenied(payload.reason ?? (spreadAccess === 'member' ? 'member_only' : 'daily_limit'));
     } catch (error) {
       console.error('[useSpreadAccess] 权限检查失败', error);
-      handleDenied('not_logged_in');
+      // Network/server errors should NOT be treated as "not logged in".
+      // Show a neutral error state so the user isn't wrongly redirected.
+      setState({ loading: false, allowed: false, reason: undefined, isMember: false, userId: null });
     }
   }, [theme, spreadId, spreadKey, redirectPath]);
 
   useEffect(() => {
-    checkAccess();
+    let cancelled = false;
+
+    // Wait for Supabase to finish hydrating the auth session from storage before
+    // making the access check. Without this, getSession() may return null on first
+    // render even for logged-in users, triggering a false "not_logged_in" denial.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'INITIAL_SESSION') {
+        subscription.unsubscribe();
+        if (!cancelled) {
+          checkAccess();
+        }
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, [checkAccess]);
 
   return state;

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import CelticCrossSlots from '../../../../components/fortune/CelticCrossSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { useMembership } from '../../../../hooks/useMembership';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
@@ -132,13 +132,17 @@ const getChineseCardName = (englishName: string): string => {
 export default function CelticCrossReadingPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    spreadKey: 'celtic-cross',
+    redirectPath: '/reading/general',
+  });
+
   const [result, setResult] = useState<CelticCrossResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // 获取会员状态
-  const { isMember } = useMembership();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -357,6 +361,14 @@ export default function CelticCrossReadingPage() {
   //     </>
   //   );
   // }
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   // 错误态
   if (error) {

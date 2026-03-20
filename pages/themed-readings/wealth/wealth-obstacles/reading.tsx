@@ -6,6 +6,7 @@ import MoneyBlocksSlots from '../../../../components/fortune/MoneyBlocksSlots';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 const STORAGE_KEY = 'wealth_obstacles_result';
 
@@ -42,6 +43,12 @@ interface ReadingResult {
 export default function WealthObstaclesReadingPage() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'wealth-obstacles',
+    redirectPath: '/themed-readings/wealth',
+  });
+
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -128,6 +135,14 @@ export default function WealthObstaclesReadingPage() {
     localStorage.removeItem(STORAGE_KEY);
     router.replace('/themed-readings/wealth/wealth-obstacles/draw');
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (

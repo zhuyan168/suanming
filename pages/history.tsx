@@ -3,7 +3,22 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
-import { getSpreadName, getSpreadByKey } from '../lib/spreads'
+import { getSpreadName, getSpreadByKey, resolveSpreadKey } from '../lib/spreads'
+
+// Extra aliases not covered by spreads.ts legacyId
+const EXTRA_ALIASES: Record<string, string> = {
+  'monthly-basic-fortune': 'fortune-monthly',
+  'monthly-member-fortune': 'fortune-monthly-member',
+  'year-ahead': 'fortune-yearly',
+  'annual-fortune': 'fortune-yearly',
+  'interview-exam': 'career-interview-exam',
+  'stay-or-leave': 'career-stay-or-leave',
+  'skills-direction': 'career-skills-direction',
+}
+
+function resolveDisplayKey(raw: string): string {
+  return EXTRA_ALIASES[raw] ?? resolveSpreadKey(raw) ?? raw
+}
 
 interface ReadingRecord {
   id: string
@@ -60,10 +75,7 @@ export default function HistoryPage() {
   }, [])
 
   function handleView(record: ReadingRecord) {
-    if (record.result_path) {
-      const separator = record.result_path.includes('?') ? '&' : '?'
-      router.push(`${record.result_path}${separator}from=history`)
-    }
+    router.push(`/history/${record.id}`)
   }
 
   return (
@@ -132,8 +144,9 @@ function RecordCard({
   record: ReadingRecord
   onView: (r: ReadingRecord) => void
 }) {
-  const spreadName = getSpreadName(record.spread_type)
-  const meta = getSpreadByKey(record.spread_type)
+  const canonicalKey = resolveDisplayKey(record.spread_type)
+  const spreadName = getSpreadName(canonicalKey)
+  const meta = getSpreadByKey(canonicalKey)
   const icon = meta?.icon ?? '🔮'
 
   return (
@@ -159,16 +172,12 @@ function RecordCard({
         <p className="mt-1 text-white/30 text-[11px]">{formatTime(record.created_at)}</p>
       </div>
 
-      {record.result_path ? (
-        <button
-          onClick={() => onView(record)}
-          className="shrink-0 rounded-lg bg-primary/20 border border-primary/30 text-primary text-xs font-medium px-3 py-1.5 hover:bg-primary/30 transition-colors"
-        >
-          查看结果
-        </button>
-      ) : (
-        <span className="shrink-0 text-white/20 text-xs">暂无链接</span>
-      )}
+      <button
+        onClick={() => onView(record)}
+        className="shrink-0 rounded-lg bg-primary/20 border border-primary/30 text-primary text-xs font-medium px-3 py-1.5 hover:bg-primary/30 transition-colors"
+      >
+        查看结果
+      </button>
     </div>
   )
 }
