@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,23 +9,14 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
+
   const { cards, question } = req.body;
 
   if (!cards || !Array.isArray(cards) || cards.length !== 7) {
     return res.status(400).json({ error: 'Invalid cards data: Expected 7 cards' });
   }
-
-  // TODO: 会员验证预留接口
-  // 接入会员系统后，在此处验证用户会员状态
-  // 示例代码：
-  // const userId = req.headers['x-user-id'] || req.cookies.userId;
-  // const isMember = await checkMembershipStatus(userId);
-  // if (!isMember) {
-  //   return res.status(403).json({ 
-  //     error: 'Membership required',
-  //     message: '此功能需要会员权限'
-  //   });
-  // }
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
@@ -297,6 +289,16 @@ ${cardsDescription}
     
     try {
       const reading = JSON.parse(content);
+      if (accessStatus.userId) {
+        await recordReadingHistory({
+          userId: accessStatus.userId,
+          spreadType: 'horseshoe',
+          question: question || null,
+          cards,
+          readingResult: reading,
+          resultPath: '/reading/general/horseshoe/reading'
+        });
+      }
       return res.status(200).json(reading);
     } catch (parseError: any) {
       console.error('JSON parse error:', parseError);

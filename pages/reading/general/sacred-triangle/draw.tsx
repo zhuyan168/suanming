@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThreeCardSlots';
 import { tarotCards } from '../../../../data/tarotCards';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // 使用从 data/tarotCards.ts 导入的完整78张塔罗牌数据
 
@@ -84,6 +85,11 @@ const loadSacredTriangleResult = (): SacredTriangleResult | null => {
 
 export default function SacredTriangleDraw() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'sacred-triangle',
+    redirectPath: '/reading/general',
+  });
+
   const [sessionId, setSessionId] = useState<string>('');
   
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -119,10 +125,10 @@ export default function SacredTriangleDraw() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
     const saved = loadSacredTriangleResult();
     if (saved) {
-      // 如果已经有完整的抽牌结果，直接跳转到结果页
       if (saved.cards && saved.cards.length === 3) {
         router.replace('/reading/general/sacred-triangle/result');
         return;
@@ -140,7 +146,7 @@ export default function SacredTriangleDraw() {
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, [router]);
+  }, [router, accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -239,6 +245,16 @@ export default function SacredTriangleDraw() {
     setDeck(shuffled);
     setUiSlots(shuffled);
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

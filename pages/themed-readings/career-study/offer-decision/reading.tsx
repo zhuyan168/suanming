@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 const STORAGE_KEY = 'offer_decision_result';
 
@@ -68,11 +69,10 @@ export default function OfferDecisionReading() {
     setLoading(true);
     setError(null);
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/reading/offer-decision', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: cards,
         }),

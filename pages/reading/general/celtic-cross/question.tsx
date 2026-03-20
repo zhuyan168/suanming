@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_celtic_cross_question';
@@ -13,16 +14,19 @@ export default function CelticCrossQuestionPage() {
   const [charCount, setCharCount] = useState(0);
   const maxChars = 200;
 
-  // 检查是否已有抽牌结果，如果有则直接跳转到展示页
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'celtic-cross',
+    redirectPath: '/reading/general',
+  });
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
     
-    // 检查是否已有抽牌结果
     const existingResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (existingResult) {
       try {
         const result = JSON.parse(existingResult);
-        // 如果结果有效（包含10张牌），直接跳转到展示页
         if (result.cards && result.cards.length === 10) {
           router.replace('/reading/general/celtic-cross/reveal');
           return;
@@ -32,13 +36,12 @@ export default function CelticCrossQuestionPage() {
       }
     }
     
-    // 从 localStorage 加载已保存的问题
     const saved = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (saved) {
       setQuestion(saved);
       setCharCount(saved.length);
     }
-  }, [router]);
+  }, [router, accessLoading, allowed]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -60,6 +63,14 @@ export default function CelticCrossQuestionPage() {
   const handleBack = () => {
     router.push('/reading/general');
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   return (
     <>

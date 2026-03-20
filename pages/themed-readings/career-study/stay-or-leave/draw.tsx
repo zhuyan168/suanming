@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -168,6 +169,10 @@ const loadResult = (): StayOrLeaveResult | null => {
 
 export default function StayOrLeaveDraw() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    theme: 'career-study',
+    spreadId: 'stay-or-leave',
+  });
   const [sessionId, setSessionId] = useState<string>('');
   const [hasDrawn, setHasDrawn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -181,13 +186,9 @@ export default function StayOrLeaveDraw() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
 
-  // TODO: 会员权限检查接口预留
-  // const requiresMembership = true;
-  // const canAccess = true; // 当前默认所有人可用，将来替换为 isMember 判断
-  // TODO: when membership system is ready, check access here
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
     const saved = loadResult();
     if (saved) {
@@ -198,7 +199,7 @@ export default function StayOrLeaveDraw() {
       setSessionId(generateSessionId());
       setUiSlots(shuffleCards(tarotCards));
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -276,6 +277,16 @@ export default function StayOrLeaveDraw() {
     setScrollValue(0);
     if (containerRef.current) containerRef.current.scrollLeft = 0;
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark">

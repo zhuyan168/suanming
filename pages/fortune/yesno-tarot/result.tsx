@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
@@ -6,6 +6,9 @@ import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
 import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../lib/apiHeaders';
+import { supabase } from '../../../lib/supabase';
+import { checkReadingAccess } from '../../../lib/access';
 
 interface ShuffledTarotCard {
   id: number;
@@ -125,6 +128,8 @@ export default function YesNoTarotResult() {
   const [interpretation, setInterpretation] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [useAI, setUseAI] = useState(false);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -132,7 +137,6 @@ export default function YesNoTarotResult() {
     // 读取抽牌结果
     const drawData = localStorage.getItem(STORAGE_KEY_DRAW);
     if (!drawData) {
-      // 如果没有抽牌结果，跳转回抽牌页
       router.replace('/');
       return;
     }
@@ -148,32 +152,46 @@ export default function YesNoTarotResult() {
     const hasQuestion = savedQuestion.trim().length > 0;
     setUseAI(hasQuestion);
 
+    // 检查免费次数后再决定是否继续
+    checkAndProceed(draw.card, savedQuestion, hasQuestion);
+  }, [router]);
+
+  const checkAndProceed = async (drawnCard: ShuffledTarotCard, savedQuestion: string, hasQuestion: boolean) => {
+    if (hasCheckedRef.current) return;
+    hasCheckedRef.current = true;
+
+    // 检查免费次数
+    const accessResult = await checkReadingAccess({ supabase });
+    
+    if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+      setDailyLimitReached(true);
+      setIsLoading(false);
+      return;
+    }
+
     if (hasQuestion) {
-      // 有问题：调用AI生成解读
-      fetchAIInterpretation(savedQuestion, draw.card);
+      fetchAIInterpretation(savedQuestion, drawnCard);
     } else {
-      // 无问题：使用本地映射表
-      const result = getYesNoByCard(draw.card.name, draw.card.orientation);
+      const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
       setAnswer(result.answer);
       setInterpretation(result.reason);
       setIsLoading(false);
 
       saveReadingHistory({
         spreadType: 'divination-yesno',
-        cards: [draw.card],
+        cards: [drawnCard],
         readingResult: { answer: result.answer, interpretation: result.reason },
         resultPath: '/fortune/yesno-tarot/result',
       });
     }
-  }, [router]);
+  };
 
   const fetchAIInterpretation = async (userQuestion: string, drawnCard: ShuffledTarotCard) => {
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/tarot', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           question: userQuestion,
           cardName: drawnCard.name,
@@ -351,35 +369,52 @@ export default function YesNoTarotResult() {
                 transition={{ delay: 0.4 }}
                 className="flex flex-col gap-6"
               >
-                {/* 答案 */}
-                <div className={`rounded-2xl border border-primary/30 bg-gradient-to-br ${answerBgColor} to-transparent p-6`}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className={`material-symbols-outlined ${answerColor} text-3xl`}>
-                      {answer === 'YES' ? 'check_circle' : answer === 'NO' ? 'cancel' : 'help'}
-                    </span>
-                    <div>
-                      <p className="text-sm font-medium text-white/70 uppercase tracking-wider">答案</p>
-                      <p className={`text-4xl font-black ${answerColor}`}>
-                        {answer ? getAnswerText(answer) : '未知'}
+                {dailyLimitReached ? (
+                  <>
+                    {/* 每日免费次数超限提示 */}
+                    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="material-symbols-outlined text-amber-400 text-3xl">warning</span>
+                        <p className="text-lg font-semibold text-amber-400">无法生成解读</p>
+                      </div>
+                      <p className="text-base leading-relaxed text-amber-200">
+                        今日免费解读次数已用完，开通会员后可继续使用
                       </p>
                     </div>
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    {/* 答案 */}
+                    <div className={`rounded-2xl border border-primary/30 bg-gradient-to-br ${answerBgColor} to-transparent p-6`}>
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className={`material-symbols-outlined ${answerColor} text-3xl`}>
+                          {answer === 'YES' ? 'check_circle' : answer === 'NO' ? 'cancel' : 'help'}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-white/70 uppercase tracking-wider">答案</p>
+                          <p className={`text-4xl font-black ${answerColor}`}>
+                            {answer ? getAnswerText(answer) : '未知'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* 解读 */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                  <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">解读</p>
-                  <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
-                    {interpretation}
-                  </p>
-                </div>
+                    {/* 解读 */}
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                      <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">解读</p>
+                      <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
+                        {interpretation}
+                      </p>
+                    </div>
 
-                {/* 温馨提示 */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                  <p className="text-sm text-white/60 leading-relaxed">
-                    ✨ 塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。
-                  </p>
-                </div>
+                    {/* 温馨提示 */}
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                      <p className="text-sm text-white/60 leading-relaxed">
+                        ✨ 塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。
+                      </p>
+                    </div>
+                  </>
+                )}
 
                 {/* 按钮 */}
                 <div className="flex gap-4 mt-4">

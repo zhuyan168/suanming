@@ -15,6 +15,7 @@ export const GENERAL_SPREADS: GeneralSpread[] = getSpreadsByCategory('general').
   descEn: '',
   cardsCount: s.cardCount,
   isPaid: s.isPaid,
+  access: s.access,
   icon: s.icon,
   href: s.path,
 }));

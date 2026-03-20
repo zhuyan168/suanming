@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMembership } from '../../../../hooks/useMembership';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -169,11 +169,11 @@ const loadResult = (): ReconciliationResult | null => {
 
 export default function ReconciliationDraw() {
   const router = useRouter();
-  const { isMember } = useMembership();
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    theme: 'love',
+    spreadId: 'reconciliation',
+  });
   const [sessionId, setSessionId] = useState<string>('');
-  
-  // 临时白名单逻辑：允许访问以便测试
-  const isTemporarilyOpen = true; 
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -192,15 +192,9 @@ export default function ReconciliationDraw() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
 
-  // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // 会员拦截逻辑（预留接口）
-    if (!isMember && !isTemporarilyOpen) {
-      setIsModalOpen(true);
-      return;
-    }
+    if (accessLoading || !allowed) return;
 
     const saved = loadResult();
     if (saved) {
@@ -214,7 +208,7 @@ export default function ReconciliationDraw() {
       const shuffled = shuffleCards(tarotCards);
       setUiSlots(shuffled);
     }
-  }, [isMember]);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -298,6 +292,16 @@ export default function ReconciliationDraw() {
       containerRef.current.scrollLeft = 0;
     }
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark">

@@ -6,6 +6,7 @@ import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards: TarotCard[] = [
@@ -338,9 +339,10 @@ export default function YearAheadResultPage() {
     setError(null);
 
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/year-ahead-reading', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           cards: result.cards,
           year: `${currentYear}年`,

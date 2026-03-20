@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -168,6 +169,10 @@ const loadFutureLoverResult = (): FutureLoverResult | null => {
 
 export default function FutureLoverDraw() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    theme: 'love',
+    spreadId: 'future-lover',
+  });
   const [sessionId, setSessionId] = useState<string>('');
   
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -207,11 +212,10 @@ export default function FutureLoverDraw() {
     setScrollValue(value);
   };
 
-  // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
-    // 尝试加载已保存的结果
     const saved = loadFutureLoverResult();
     if (saved) {
       setSavedResult(saved);
@@ -219,16 +223,14 @@ export default function FutureLoverDraw() {
       setSessionId(saved.sessionId);
       setSelectedCards(saved.cards);
     } else {
-      // 生成新的 session ID
       const newSessionId = generateSessionId();
       setSessionId(newSessionId);
       
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -322,6 +324,16 @@ export default function FutureLoverDraw() {
     setDeck(shuffled);
     setUiSlots(shuffled);
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

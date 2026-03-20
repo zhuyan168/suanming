@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 /**
  * 财富阻碍牌阵 (5张)
@@ -11,6 +12,9 @@ async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   const { cards } = req.body;
 
@@ -113,6 +117,16 @@ async function handler(
 
     const data = await response.json();
     const content = JSON.parse(data.choices[0].message.content);
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'wealth-obstacles',
+        cards,
+        readingResult: content,
+        resultPath: '/themed-readings/wealth/wealth-obstacles/reading'
+      });
+    }
 
     return res.status(200).json(content);
   } catch (error: any) {

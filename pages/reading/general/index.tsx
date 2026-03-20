@@ -8,7 +8,7 @@ import { useMembership } from '../../../hooks/useMembership';
 import { GENERAL_SPREADS } from '../../../data/spreads';
 
 export default function GeneralReadingPage() {
-  const { isMember } = useMembership();
+  const { isMember, userId } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleLockedClick = () => {
@@ -50,6 +50,7 @@ export default function GeneralReadingPage() {
                   spread={spread}
                   theme="general"
                   isMember={isMember}
+                  userId={userId}
                   onLockedClick={handleLockedClick}
                 />
               ))}

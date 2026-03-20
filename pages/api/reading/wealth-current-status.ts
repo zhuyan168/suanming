@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 /**
  * 免费牌阵：我现在的财运如何？
@@ -11,6 +12,9 @@ async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   const { cards } = req.body;
 
@@ -89,6 +93,16 @@ async function handler(
 
     const data = await response.json();
     const content = JSON.parse(data.choices[0].message.content);
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'wealth-current-status',
+        cards,
+        readingResult: content,
+        resultPath: '/themed-readings/wealth/current-wealth-status/reading'
+      });
+    }
 
     return res.status(200).json(content);
   } catch (error: any) {

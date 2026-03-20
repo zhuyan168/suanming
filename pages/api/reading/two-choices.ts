@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,6 +8,9 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   const { cards, question, optionA, optionB } = req.body;
 
@@ -208,6 +212,16 @@ ${optionB}
     
     try {
       const reading = JSON.parse(content);
+      if (accessStatus.userId) {
+        await recordReadingHistory({
+          userId: accessStatus.userId,
+          spreadType: 'two-choices',
+          question: question || null,
+          cards,
+          readingResult: reading,
+          resultPath: '/reading/general/two-choices/reading'
+        });
+      }
       return res.status(200).json(reading);
     } catch (parseError: any) {
       console.error('JSON parse error:', parseError);

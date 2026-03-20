@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import WealthThreeCardSlots from '../../../../components/fortune/WealthThreeCardSlots';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 const STORAGE_KEY = 'wealth_current_status_result';
 
@@ -71,12 +72,11 @@ export default function WealthCurrentStatusReadingPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/reading/wealth-current-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        const headers = await getAuthHeaders();
+        const response = await fetch('/api/reading/wealth-current-status', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
           cards: cards,
         }),
       });

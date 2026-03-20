@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards = [
@@ -281,9 +282,10 @@ export default function MonthlyMemberResultPage() {
       const month = now.getMonth() + 1;
       const monthDisplay = `${year}年${month}月`;
 
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/monthly-member-fortune', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           cards: result.cards,
           month: monthDisplay, // 传递格式化的月份

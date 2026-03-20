@@ -25,6 +25,7 @@
 // =============================================================================
 
 import { tarotImagesFlat } from '../../utils/tarotimages';
+import { requireAccessOrRespond } from '../../lib/accessServer';
 
 // =============================================================================
 // 完整的78张塔罗牌数据
@@ -914,19 +915,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
+
   try {
     const { slot, pick, sessionId } = req.query;
-    
-    // -------------------------------------------------------------------------
-    // 1. 会员验证（预留）
-    // -------------------------------------------------------------------------
-    // const userId = req.user?.id; // 未来从认证中间件获取
-    const userId = null; // 当前未实现用户系统
-    
-    const isMember = await verifyMembership(userId);
-    if (!isMember) {
-      return res.status(403).json({ error: 'not_member' });
-    }
     
     // -------------------------------------------------------------------------
     // 2. 参数验证

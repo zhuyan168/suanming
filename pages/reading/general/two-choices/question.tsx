@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_two_choices_question';
@@ -11,6 +12,11 @@ const RESULT_STORAGE_KEY = 'general_two_choices_draw_result';
 
 export default function TwoChoicesQuestionPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'two-choices',
+    redirectPath: '/reading/general',
+  });
+
   const [question, setQuestion] = useState('');
   const [optionA, setOptionA] = useState('');
   const [optionB, setOptionB] = useState('');
@@ -18,16 +24,14 @@ export default function TwoChoicesQuestionPage() {
   const maxChars = 200;
   const maxOptionChars = 50;
 
-  // 检查是否已有抽牌结果，如果有则直接跳转到展示页
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
     
-    // 检查是否已有抽牌结果
     const existingResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (existingResult) {
       try {
         const result = JSON.parse(existingResult);
-        // 如果结果有效（包含5张牌），直接跳转到展示页
         if (result.cards && result.cards.length === 5) {
           router.replace('/reading/general/two-choices/result');
           return;
@@ -37,7 +41,6 @@ export default function TwoChoicesQuestionPage() {
       }
     }
     
-    // 从 localStorage 加载已保存的问题和选项
     const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
     const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
     const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
@@ -45,7 +48,7 @@ export default function TwoChoicesQuestionPage() {
     if (savedQuestion) setQuestion(savedQuestion);
     if (savedOptionA) setOptionA(savedOptionA);
     if (savedOptionB) setOptionB(savedOptionB);
-  }, [router]);
+  }, [router, accessLoading, allowed]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -116,6 +119,14 @@ export default function TwoChoicesQuestionPage() {
     router.push('/reading/general');
   };
 
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -127,7 +138,6 @@ export default function TwoChoicesQuestionPage() {
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />

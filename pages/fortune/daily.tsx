@@ -8,6 +8,10 @@ import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
 import { TarotCard } from '../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
+import { useSpreadAccess } from '../../hooks/useSpreadAccess';
+import { getAuthHeaders } from '../../lib/apiHeaders';
+import { supabase } from '../../lib/supabase';
+import { checkReadingAccess } from '../../lib/access';
 
 // 兼容旧数据格式的辅助函数：获取含义文本
 const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
@@ -733,9 +737,15 @@ interface DrawResult {
 export default function DailyFortune() {
   const router = useRouter();
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-daily',
+    redirectPath: '/',
+  });
+
   const [hasDrawnToday, setHasDrawnToday] = useState(false);
   const [todayResult, setTodayResult] = useState<DrawResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const hasAccessCheckRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -750,8 +760,9 @@ export default function DailyFortune() {
   // 已抽取的卡牌数组
   const [drawnCards, setDrawnCards] = useState<ShuffledTarotCard[]>([]);
 
-  // 初始化：检查今日是否已经抽过牌，如果没有则重新洗牌
   useEffect(() => {
+    if (accessLoading || !allowed) return;
+
     const todayDate = getTodayDateString();
     const stored = localStorage.getItem('dailyFortuneResult');
     
@@ -762,10 +773,8 @@ export default function DailyFortune() {
           setHasDrawnToday(true);
           setTodayResult(result);
           setShowCards(false);
-          // 已经抽过牌，不需要重新洗牌
           return;
         } else {
-          // 清除过期数据
           localStorage.removeItem('dailyFortuneResult');
         }
       } catch (e) {
@@ -773,11 +782,10 @@ export default function DailyFortune() {
         localStorage.removeItem('dailyFortuneResult');
       }
     }
-    // 如果没有抽过牌或数据已过期，重新洗牌
     const shuffled = shuffleCards(tarotCards);
     setDeck(shuffled);
     setUiSlots(shuffled);
-  }, []);
+  }, [accessLoading, allowed]);
 
 
   const drawCard = async (slotIndex: number) => {
@@ -788,6 +796,20 @@ export default function DailyFortune() {
     
     // 如果该位置已经是 null，则不执行任何操作
     if (!card) return;
+
+    // 点击后第一步：检查免费次数
+    if (!hasAccessCheckRef.current) {
+      hasAccessCheckRef.current = true;
+      const accessResult = await checkReadingAccess({ supabase });
+      if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+        setError('今日免费解读次数已用完');
+        return;
+      }
+    }
+
+    // 先锁定操作状态
+    setError(null);
+    setIsLoading(true);
 
     // 使用洗牌时预设的正逆位
     const orientation = card.orientation;
@@ -808,32 +830,6 @@ export default function DailyFortune() {
     setSelectedCardIndex(null);
     setSelectedCard(card);
     setIsAnimating(true);
-    setIsLoading(true);
-    setError(null);
-
-    // 准备API调用参数（兼容字符串和对象格式）
-    const baseMeaning = orientation === 'upright' ? getMeaning(card.upright) : getMeaning(card.reversed);
-    
-    // 立即开始API调用，不等待动画完成
-    const apiPromise = (async () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🎴 准备调用API...');
-        console.log('📝 请求参数:', { cardName: card.name, orientation, baseMeaning });
-      }
-
-      const response = await fetch('/api/daily-fortune', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cardName: card.name,
-          orientation,
-          baseMeaning,
-        }),
-      });
-      return response;
-    })();
 
     // 等待动画完成（上浮 → 缩放 → 移动 → 翻牌）
     // 第一阶段：从上方进入并上浮 0.15秒
@@ -844,9 +840,25 @@ export default function DailyFortune() {
     // 第三阶段：翻牌动画已在组件中处理，等待完成（0.3秒）
     await new Promise(resolve => setTimeout(resolve, 300));
 
+    // 准备API调用参数（兼容字符串和对象格式）
+    const baseMeaning = orientation === 'upright' ? getMeaning(card.upright) : getMeaning(card.reversed);
+
     try {
-      // 等待API响应（可能已经完成，也可能还在进行中）
-      const response = await apiPromise;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🎴 准备调用API...');
+        console.log('📝 请求参数:', { cardName: card.name, orientation, baseMeaning });
+      }
+
+      const headers = await getAuthHeaders();
+      const response = await fetch('/api/daily-fortune', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          cardName: card.name,
+          orientation,
+          baseMeaning,
+        }),
+      });
 
       if (process.env.NODE_ENV === 'development') {
         console.log('📡 API响应状态:', response.status);
@@ -916,6 +928,16 @@ export default function DailyFortune() {
   const handleBackToHome = () => {
     router.push('/');
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

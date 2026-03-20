@@ -1,36 +1,73 @@
-/**
- * 会员状态 Hook
- * Membership Status Hook
- * 
- * TODO: 接入真实的会员系统
- * 目前返回 mock 数据，后续需要替换为实际的认证和会员状态检查
- */
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { isUserMember } from '../lib/access';
 
 export interface MembershipStatus {
   isMember: boolean;
-  // 预留字段，后续可扩展
-  membershipTier?: 'basic' | 'premium' | 'vip';
-  expiresAt?: Date;
-  features?: string[];
+  loading: boolean;
+  userId: string | null;
+  userProfile: {
+    membership_expires_at?: string | null;
+    is_member?: boolean | null;
+  } | null;
 }
 
 /**
  * 获取用户会员状态
+ * 以 membership_expires_at 为准判断是否为有效会员
  */
 export function useMembership(): MembershipStatus {
-  // TODO: 接入真实的会员系统
-  // 1. 从 localStorage/sessionStorage 读取用户登录状态
-  // 2. 调用后端 API 验证会员状态
-  // 3. 处理会员过期、续费等逻辑
-  
-  // 临时设置为 false，用于显示会员提醒框（但不做拦截）
-  const isMember = false;
+  const [state, setState] = useState<MembershipStatus>({
+    isMember: false,
+    loading: true,
+    userId: null,
+    userProfile: null,
+  });
 
-  return {
-    isMember,
-    membershipTier: isMember ? 'basic' : undefined,
-    expiresAt: undefined,
-    features: isMember ? ['themed_readings', 'seasonal_spread', 'annual_fortune'] : [],
-  };
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchMembershipStatus() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          if (!cancelled) {
+            setState({ isMember: false, loading: false, userId: null, userProfile: null });
+          }
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('membership_expires_at, is_member')
+          .eq('id', user.id)
+          .single();
+
+        if (!cancelled) {
+          const isMember = isUserMember(profile);
+          setState({
+            isMember,
+            loading: false,
+            userId: user.id,
+            userProfile: profile,
+          });
+        }
+      } catch (error) {
+        console.error('[useMembership] 获取会员状态失败:', error);
+        if (!cancelled) {
+          setState({ isMember: false, loading: false, userId: null, userProfile: null });
+        }
+      }
+    }
+
+    fetchMembershipStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return state;
 }
 

@@ -1,8 +1,13 @@
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { cardName, orientation, baseMeaning } = req.body;
@@ -130,6 +135,16 @@ export default async function handler(req, res) {
       return res.status(500).json({ 
         error: '运势数据不完整',
         missingFields 
+      });
+    }
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'fortune-daily',
+        cards: [{ cardName, orientation }],
+        readingResult: fortuneData,
+        resultPath: '/fortune/daily'
       });
     }
 

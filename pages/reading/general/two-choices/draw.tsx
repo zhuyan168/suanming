@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import TwoChoicesSlots from '../../../../components/fortune/TwoChoicesSlots';
 import { tarotCards } from '../../../../data/tarotCards';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -79,6 +80,11 @@ const loadResult = (): TwoChoicesResult | null => {
 
 export default function TwoChoicesDrawPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'two-choices',
+    redirectPath: '/reading/general',
+  });
+
   const [question, setQuestion] = useState<string>('');
   const [optionA, setOptionA] = useState<string>('');
   const [optionB, setOptionB] = useState<string>('');
@@ -118,11 +124,10 @@ export default function TwoChoicesDrawPage() {
     setScrollValue(value);
   };
 
-  // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
-    // 加载问题和选项
     const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
     const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
     const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
@@ -131,19 +136,17 @@ export default function TwoChoicesDrawPage() {
     if (savedOptionA) setOptionA(savedOptionA);
     if (savedOptionB) setOptionB(savedOptionB);
 
-    // 尝试加载已保存的结果
     const saved = loadResult();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCards(saved.cards);
     } else {
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -240,6 +243,14 @@ export default function TwoChoicesDrawPage() {
     setUiSlots(shuffled);
   };
 
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -248,7 +259,6 @@ export default function TwoChoicesDrawPage() {
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />

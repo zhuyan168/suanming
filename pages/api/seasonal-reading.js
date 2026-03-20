@@ -23,11 +23,16 @@
 // }
 // =============================================================================
 
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { cards } = req.body;
@@ -251,6 +256,16 @@ ${cardsInfo}
     if (missingFields.length > 0) {
       console.error('Missing fields in response:', missingFields);
       return res.status(500).json({ error: '解读数据不完整' });
+    }
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'fortune-seasonal',
+        cards,
+        readingResult: readingData,
+        resultPath: '/fortune/seasonal/result'
+      });
     }
 
     return res.status(200).json(readingData);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,9 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { SpreadReading, SpreadCard } from '../../../../types/spread-reading';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { supabase } from '../../../../lib/supabase';
+import { checkReadingAccess } from '../../../../lib/access';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -97,9 +100,21 @@ export default function WhatTheyThinkResult() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [reading, setReading] = useState<SpreadReading | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const hasCheckedRef = useRef(false);
 
   // 自动生成解读的函数
   const generateReading = async (result: WhatTheyThinkResult) => {
+    // 第一件事：检查免费次数（在 setIsGenerating 之前）
+    if (!hasCheckedRef.current) {
+      hasCheckedRef.current = true;
+      const accessResult = await checkReadingAccess({ supabase });
+      if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+        setDailyLimitReached(true);
+        return;
+      }
+    }
+
     setIsGenerating(true);
     setError(null);
 
@@ -114,11 +129,10 @@ export default function WhatTheyThinkResult() {
         keywords: card.keywords,
       })) || [];
 
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/what-they-think-reading', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: cardsData,
           locale: 'zh',
@@ -336,6 +350,33 @@ export default function WhatTheyThinkResult() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
+                  {/* 免费次数超限提示 */}
+                  <AnimatePresence>
+                    {dailyLimitReached && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="mb-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 p-6 text-center"
+                      >
+                        <div className="flex flex-col items-center gap-4">
+                          <span className="material-symbols-outlined text-amber-400 text-4xl">warning</span>
+                          <h3 className="text-xl font-bold text-amber-400">无法生成解读</h3>
+                          <p className="text-amber-200 text-base">
+                            今日免费解读次数已用完，开通会员后可继续使用
+                          </p>
+                          <button
+                            onClick={() => router.push('/membership')}
+                            className="px-8 py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
+                            style={{ backgroundColor: '#7f13ec' }}
+                          >
+                            开通会员
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* 错误提示 */}
                   <AnimatePresence>
                     {error && (

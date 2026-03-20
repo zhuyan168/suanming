@@ -2,20 +2,26 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 const QUESTION_STORAGE_KEY = 'general_sacred_triangle_question';
 const RESULT_STORAGE_KEY = 'general_sacred_triangle_result';
 
 export default function SacredTriangleQuestionPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'sacred-triangle',
+    redirectPath: '/reading/general',
+  });
+
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
   const maxChars = 200;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
     
-    // 检查是否已有抽牌结果，如果有则直接跳转到结果页
     const savedResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (savedResult) {
       try {
@@ -25,18 +31,16 @@ export default function SacredTriangleQuestionPage() {
           return;
         }
       } catch (e) {
-        // 如果数据损坏，清除并继续
         localStorage.removeItem(RESULT_STORAGE_KEY);
       }
     }
     
-    // 加载保存的问题
     const saved = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (saved) {
       setQuestion(saved);
       setCharCount(saved.length);
     }
-  }, [router]);
+  }, [router, accessLoading, allowed]);
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -57,6 +61,14 @@ export default function SacredTriangleQuestionPage() {
     router.push('/reading/general');
   };
 
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -68,7 +80,6 @@ export default function SacredTriangleQuestionPage() {
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />

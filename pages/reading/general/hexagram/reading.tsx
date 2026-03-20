@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,9 @@ import HexagramSlots from '../../../../components/fortune/HexagramSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { supabase } from '../../../../lib/supabase';
+import { checkReadingAccess } from '../../../../lib/access';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -51,6 +54,8 @@ export default function HexagramReadingPage() {
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -89,15 +94,24 @@ export default function HexagramReadingPage() {
   const generateReading = async () => {
     if (!result || result.cards.length !== 7) return;
 
+    // 第一件事：检查免费次数（在 setLoading 之前）
+    if (!hasCheckedRef.current) {
+      hasCheckedRef.current = true;
+      const accessResult = await checkReadingAccess({ supabase });
+      if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+        setDailyLimitReached(true);
+        return;
+      }
+    }
+
     setLoading(true);
     setError(null);
 
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/reading/hexagram', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: result.cards,
           question: question || '',
@@ -155,6 +169,37 @@ export default function HexagramReadingPage() {
     router.replace('/reading/general/hexagram/question');
   };
 
+  if (dailyLimitReached) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex flex-col items-center justify-center p-4">
+        <div className="bg-white/5 border border-amber-500/30 p-8 rounded-2xl max-w-md w-full text-center">
+          <div className="text-amber-400 mb-4 text-4xl">
+            <span className="material-symbols-outlined text-5xl">warning</span>
+          </div>
+          <h2 className="text-xl font-bold mb-3 text-amber-400">无法生成解读</h2>
+          <p className="text-lg mb-6 text-amber-200">
+            今日免费解读次数已用完，开通会员后可继续使用
+          </p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => router.push('/membership')}
+              className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
+              style={{ backgroundColor: '#7f13ec' }}
+            >
+              开通会员
+            </button>
+            <button
+              onClick={handleReturn}
+              className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
+            >
+              返回牌阵列表
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex flex-col items-center justify-center p-4">
@@ -168,6 +213,7 @@ export default function HexagramReadingPage() {
                   router.push('/reading/general/hexagram/question');
                 } else {
                   setError(null);
+                  hasCheckedRef.current = false;
                   generateReading();
                 }
               }}

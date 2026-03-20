@@ -15,6 +15,8 @@ export type SpreadCategory =
   | 'fortune'
   | 'divination';
 
+export type SpreadAccess = 'free' | 'member';
+
 export interface SpreadMeta {
   key: string;
   name: string;
@@ -23,6 +25,7 @@ export interface SpreadMeta {
   path: string;
   cardCount: number;
   isPaid: boolean;
+  access: SpreadAccess;
   icon: string;
   /** 现有 config / data 文件中使用的 id（可能与 key 不同） */
   legacyId?: string;
@@ -43,6 +46,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/three-card-universal/question',
     cardCount: 3,
     isPaid: false,
+    access: 'free',
     icon: '🔮',
     legacyId: 'three-card-universal',
     description: '适合还在犹豫、想先弄清自己现状的问题',
@@ -55,6 +59,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/sacred-triangle/question',
     cardCount: 3,
     isPaid: false,
+    access: 'free',
     icon: '🔺',
     description: '适合已经开始行动、需要判断下一步的问题',
   },
@@ -66,6 +71,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/two-choices/question',
     cardCount: 5,
     isPaid: false,
+    access: 'free',
     icon: '🔀',
     description: '当你在 A / B 之间犹豫时，帮你看清差异与更合适的选择',
   },
@@ -77,6 +83,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/hexagram/question',
     cardCount: 7,
     isPaid: false,
+    access: 'member',
     icon: '🔯',
     legacyId: 'six-pointed-star',
     description: '适合复杂局面与多因素交织的问题，给出更全面的洞察',
@@ -89,6 +96,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/horseshoe/question',
     cardCount: 7,
     isPaid: false,
+    access: 'member',
     icon: '🧲',
     description: '梳理事件的来龙去脉与发展轨迹，找到关键转折点',
   },
@@ -100,6 +108,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/reading/general/celtic-cross/question',
     cardCount: 10,
     isPaid: true,
+    access: 'member',
     icon: '✝️',
     description: '适合人生级课题与深度探索，提供更完整的全景解读',
   },
@@ -113,6 +122,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/love/future-lover/draw',
     cardCount: 6,
     isPaid: false,
+    access: 'free',
     icon: '💕',
     legacyId: 'future-lover',
     description: '看看未来恋人的画像与相遇路径',
@@ -125,6 +135,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/love/what-they-think/draw',
     cardCount: 6,
     isPaid: false,
+    access: 'free',
     icon: '💭',
     legacyId: 'what-they-think',
     description: '探索对方此刻的真实想法、感受与关系的短期走向',
@@ -137,6 +148,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/love/relationship-development/draw',
     cardCount: 8,
     isPaid: true,
+    access: 'member',
     icon: '🌸',
     legacyId: 'relationship-development',
     description: '看看这段关系的真实状态与自然走向',
@@ -149,6 +161,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/love/reconciliation/draw',
     cardCount: 10,
     isPaid: true,
+    access: 'member',
     icon: '🌙',
     legacyId: 'reconciliation',
     description: '评估重新靠近的空间与代价，帮你做更稳的选择',
@@ -163,6 +176,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/career-study/skills-direction/draw',
     cardCount: 5,
     isPaid: false,
+    access: 'free',
     icon: '🧭',
     legacyId: 'skills-direction',
     description: '理清你的优势与能量倾向，找到更适合的方向',
@@ -175,6 +189,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/career-study/interview-exam-key-reminders/draw',
     cardCount: 5,
     isPaid: false,
+    access: 'free',
     icon: '📝',
     legacyId: 'interview-exam-key-reminders',
     description: '看清重点，避开容易忽略的坑',
@@ -187,6 +202,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/career-study/offer-decision/draw',
     cardCount: 6,
     isPaid: true,
+    access: 'member',
     icon: '✉️',
     legacyId: 'offer-decision',
     description: '在选择分岔口看清代价与机会',
@@ -199,6 +215,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/career-study/stay-or-leave/draw',
     cardCount: 7,
     isPaid: true,
+    access: 'member',
     icon: '⚖️',
     legacyId: 'stay-or-leave',
     description: '评估继续投入的意义、消耗与转机',
@@ -213,6 +230,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/wealth/current-wealth-status/draw',
     cardCount: 3,
     isPaid: false,
+    access: 'free',
     icon: '💰',
     legacyId: 'current-wealth-status',
     description: '快速看清你当前的财运状态与近期走向',
@@ -225,6 +243,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/themed-readings/wealth/wealth-obstacles/draw',
     cardCount: 5,
     isPaid: true,
+    access: 'member',
     icon: '🚧',
     legacyId: 'wealth-obstacles',
     description: '找到财务改善的突破口',
@@ -239,6 +258,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/daily',
     cardCount: 1,
     isPaid: false,
+    access: 'free',
     icon: '☀️',
     legacyId: 'daily-fortune',
     description: '看看你今天的整体运势与能量提示',
@@ -251,6 +271,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/monthly/basic',
     cardCount: 3,
     isPaid: false,
+    access: 'free',
     icon: '🌙',
     legacyId: 'monthly-fortune',
     description: '了解这个月的整体运势走向与关注重点',
@@ -263,6 +284,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/monthly/member',
     cardCount: 7,
     isPaid: true,
+    access: 'member',
     icon: '🌕',
     description: '会员版七张牌深度解读本月各维度运势',
   },
@@ -274,6 +296,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/seasonal',
     cardCount: 4,
     isPaid: false,
+    access: 'member',
     icon: '🍂',
     legacyId: 'seasonal-fortune',
     description: '从更长的时间维度看当前季节的能量趋势',
@@ -286,6 +309,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/annual/year-ahead',
     cardCount: 12,
     isPaid: false,
+    access: 'member',
     icon: '🌟',
     legacyId: 'year-ahead-fortune',
     description: '看看今年的整体运势格局与重要节点',
@@ -300,6 +324,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/fortune/yesno-tarot/draw',
     cardCount: 1,
     isPaid: false,
+    access: 'free',
     icon: '❓',
     legacyId: 'yesno-tarot',
     description: '用一张牌快速获得 Yes 或 No 的直觉指引',
@@ -312,6 +337,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     path: '/divination/jiaobei',
     cardCount: 0,
     isPaid: false,
+    access: 'free',
     icon: '🥢',
     description: '模拟传统筊杯，快速获得神明的回应',
   },

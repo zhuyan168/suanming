@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -160,6 +161,10 @@ const loadResult = (): InterviewExamResult | null => {
 
 export default function InterviewExamDraw() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    theme: 'career-study',
+    spreadId: 'interview-exam-key-reminders',
+  });
   const [sessionId, setSessionId] = useState<string>('');
   const [hasDrawn, setHasDrawn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -175,6 +180,7 @@ export default function InterviewExamDraw() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
     const saved = loadResult();
     if (saved) {
@@ -185,7 +191,7 @@ export default function InterviewExamDraw() {
       setSessionId(generateSessionId());
       setUiSlots(shuffleCards(tarotCards));
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -260,6 +266,16 @@ export default function InterviewExamDraw() {
     setScrollValue(0);
     if (containerRef.current) containerRef.current.scrollLeft = 0;
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark">

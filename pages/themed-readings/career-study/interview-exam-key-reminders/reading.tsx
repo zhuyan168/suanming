@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import InterviewExamSlots from '../../../../components/fortune/InterviewExamSlots';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 const STORAGE_KEY = 'interview_exam_result';
 
@@ -76,11 +77,10 @@ export default function InterviewExamReadingPageNew() {
     setLoading(true);
     setError(null);
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/reading/interview-exam', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: cards,
           question: '',

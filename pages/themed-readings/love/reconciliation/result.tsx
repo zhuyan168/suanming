@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,6 +6,9 @@ import TenCardsReconciliationSlots from '../../../../components/fortune/TenCards
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { supabase } from '../../../../lib/supabase';
+import { checkReadingAccess } from '../../../../lib/access';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -60,6 +63,8 @@ export default function ReconciliationResultPage() {
   const [isGeneratingDeep, setIsGeneratingDeep] = useState(false);
   const [deepReading, setDeepReading] = useState<DeepReading | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const hasCheckedRef = useRef(false);
 
   // 从 localStorage 读取结果
   const loadResult = (): ReconciliationResult | null => {
@@ -95,6 +100,16 @@ export default function ReconciliationResultPage() {
 
   // 自动生成深度解读的函数
   const generateDeepReading = async (result: ReconciliationResult) => {
+    // 第一件事：检查免费次数（在 setIsGeneratingDeep 之前）
+    if (!hasCheckedRef.current) {
+      hasCheckedRef.current = true;
+      const accessResult = await checkReadingAccess({ supabase });
+      if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+        setDailyLimitReached(true);
+        return;
+      }
+    }
+
     setIsGeneratingDeep(true);
     setError(null);
 
@@ -107,11 +122,10 @@ export default function ReconciliationResultPage() {
         keywords: card.keywords,
       }));
 
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/reconciliation-reading', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: cardsData,
         }),
@@ -223,7 +237,30 @@ export default function ReconciliationResultPage() {
 
           {/* 解读内容区 */}
           <section className="space-y-8">
-            {isGeneratingDeep && !deepReading && (
+            {dailyLimitReached && (
+              <div className="flex flex-col items-center justify-center py-16 bg-white/5 rounded-3xl border border-amber-500/30 backdrop-blur-sm">
+                <span className="material-symbols-outlined text-amber-400 text-5xl mb-4">warning</span>
+                <h3 className="text-xl font-bold text-amber-400 mb-3">无法生成解读</h3>
+                <p className="text-amber-200 text-base mb-6">今日免费解读次数已用完，开通会员后可继续使用</p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={() => router.push('/membership')}
+                    className="px-8 py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
+                    style={{ backgroundColor: '#7f13ec' }}
+                  >
+                    开通会员
+                  </button>
+                  <button
+                    onClick={handleReturnToList}
+                    className="px-8 py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
+                  >
+                    返回爱情占卜
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!dailyLimitReached && isGeneratingDeep && !deepReading && (
               <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
                 <p className="text-primary font-medium tracking-widest">正在深度链接潜意识...</p>

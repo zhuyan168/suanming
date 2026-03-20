@@ -1,8 +1,13 @@
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { cards } = req.body;
@@ -183,6 +188,16 @@ ${cardsInfo}
       console.error('JSON Parse Error:', parseError);
       console.error('Raw Content:', content);
       return res.status(500).json({ error: '解析解读数据失败' });
+    }
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'reconciliation',
+        cards,
+        readingResult: readingData,
+        resultPath: '/themed-readings/love/reconciliation/result',
+      });
     }
 
     return res.status(200).json(readingData);

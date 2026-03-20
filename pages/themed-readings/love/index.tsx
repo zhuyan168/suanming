@@ -12,7 +12,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * Love-themed Tarot Reading Page
  */
 export default function LoveThemePage() {
-  const { isMember } = useMembership();
+  const { isMember, userId } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const themeConfig = getThemeConfig('love');
@@ -70,6 +70,7 @@ export default function LoveThemePage() {
                   spread={spread}
                   theme="love"
                   isMember={isMember}
+                  userId={userId}
                   onLockedClick={handleLockedClick}
                 />
               ))}

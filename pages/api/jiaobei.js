@@ -1,8 +1,13 @@
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { question, result } = req.body;
@@ -19,6 +24,19 @@ export default async function handler(req, res) {
         yin: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
         xiao: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
       };
+      if (accessStatus.userId) {
+        await recordReadingHistory({
+          userId: accessStatus.userId,
+          spreadType: 'divination-jiaobei',
+          question: question || null,
+          readingResult: {
+            interpretation: defaultInterpretations[result] || defaultInterpretations.sheng,
+            result,
+          },
+          resultPath: `/divination/jiaobei/result?type=${result}`,
+        });
+      }
+
       return res.status(200).json({
         interpretation: defaultInterpretations[result] || defaultInterpretations.sheng,
       });
@@ -96,6 +114,19 @@ export default async function handler(req, res) {
     
     if (!content) {
       return res.status(500).json({ error: '未能获取有效响应' });
+    }
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'divination-jiaobei',
+        question: question || null,
+        readingResult: {
+          interpretation: content.trim(),
+          result,
+        },
+        resultPath: `/divination/jiaobei/result?type=${result}`,
+      });
     }
 
     return res.status(200).json({

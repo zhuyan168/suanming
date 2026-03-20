@@ -12,6 +12,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { generateAnnualReading, validateInterpretation } from '../../../utils/annual-interpretation';
 import type { TarotCard, AnnualInterpretation } from '../../../types/annual-fortune';
 import { isMemberPlaceholder } from '../../../utils/membership-placeholder';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 interface InterpretRequest {
   themeCard: TarotCard;
@@ -213,6 +214,9 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
+
   try {
     const { themeCard, monthCards, year }: InterpretRequest = req.body;
 
@@ -261,14 +265,24 @@ export default async function handler(
       interpretation = generateAnnualReading(themeCard, monthCards);
     }
 
+    if (accessStatus.userId) {
+      const allCards = { themeCard, ...monthCards };
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'annual-fortune',
+        cards: allCards,
+        readingResult: interpretation,
+        resultPath: '/annual-fortune'
+      });
+    }
+
     // 返回结果
     return res.status(200).json({
       success: true,
       interpretation,
       method, // 'local' | 'llm' | 'llm-fallback-local'
       year: currentYear,
-      // TODO: 添加会员标识（当前为 false）
-      isMember: false
+      isMember: accessStatus.isMember
     });
 
   } catch (error: any) {

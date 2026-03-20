@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import CelticCrossSlots from '../../../../components/fortune/CelticCrossSlots';
 import { tarotCards } from '../../../../data/tarotCards';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 
 interface ShuffledTarotCard extends TarotCard {
@@ -94,8 +95,12 @@ const loadResult = (): CelticCrossResult | null => {
 
 export default function CelticCrossDrawPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'celtic-cross',
+    redirectPath: '/reading/general',
+  });
+
   const [question, setQuestion] = useState<string>('');
-  
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedResult, setSavedResult] = useState<CelticCrossResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -137,33 +142,30 @@ export default function CelticCrossDrawPage() {
   // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
-    // 加载问题
     const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (savedQuestion) {
       setQuestion(savedQuestion);
     }
 
-    // 尝试加载已保存的结果
     const saved = loadResult();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCards(saved.cards);
     } else {
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
       
-      // 过滤权杖牌
       const wands = shuffled.filter(card => isWandCard(card));
       if (wands.length < 4) {
         console.warn(`Warning: wandsDeck only has ${wands.length} cards, expected at least 4. Falling back to fullDeck for positions 7-10.`);
       }
       setWandsDeck(wands);
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -306,6 +308,14 @@ export default function CelticCrossDrawPage() {
   };
 
   const currentCardCount = selectedCards.filter(c => c !== null).length;
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
 
   return (
     <>

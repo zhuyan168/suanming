@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { saveReadingHistory } from '../../../lib/saveReadingHistory';
+import { supabase } from '../../../lib/supabase';
+import { checkReadingAccess } from '../../../lib/access';
+import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
 
@@ -47,6 +51,9 @@ export default function ResultPage() {
   const [result, setResult] = useState<ResultInfo | null>(null);
   const [aiInterpretation, setAiInterpretation] = useState<string>('');
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false);
+  const hasSavedRef = useRef(false);
+  const hasCheckedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -59,28 +66,55 @@ export default function ResultPage() {
       const resultType = type as ResultType;
       if (resultData[resultType]) {
         setResult(resultData[resultType]);
-        // 延迟显示以触发动画
         setTimeout(() => setIsVisible(true), 100);
         
-        // 如果有问题，调用 AI 解读
-        if (question && typeof question === 'string' && question.trim()) {
-          fetchAIInterpretation(resultType, question.trim());
-        }
+        // 检查免费次数后再决定是否继续
+        checkAndProceed(resultType, question as string | undefined);
       } else {
-        // 无效的结果类型，返回首页
         router.push('/');
       }
     }
   }, [type, question, router]);
 
+  const checkAndProceed = async (resultType: ResultType, userQuestion?: string) => {
+    if (hasCheckedRef.current) return;
+    hasCheckedRef.current = true;
+
+    // 检查免费次数
+    const accessResult = await checkReadingAccess({ supabase });
+    
+    if (!accessResult.canProceed && accessResult.reason === 'daily_limit') {
+      setDailyLimitReached(true);
+      return;
+    }
+
+    // 有问题则调用 AI 解读，否则直接保存基础结果
+    if (userQuestion && userQuestion.trim()) {
+      fetchAIInterpretation(resultType, userQuestion.trim());
+    } else {
+      if (!hasSavedRef.current) {
+        hasSavedRef.current = true;
+        saveReadingHistory({
+          spreadType: 'divination-jiaobei',
+          cards: [],
+          readingResult: {
+            type: resultType,
+            title: resultData[resultType].title,
+            description: resultData[resultType].description,
+          },
+          resultPath: `/divination/jiaobei/result?type=${resultType}`,
+        });
+      }
+    }
+  };
+
   const fetchAIInterpretation = async (resultType: ResultType, userQuestion: string) => {
     setIsLoadingAI(true);
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/jiaobei', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           question: userQuestion,
           result: resultType,
@@ -91,11 +125,58 @@ export default function ResultPage() {
 
       if (response.ok && data.interpretation) {
         setAiInterpretation(data.interpretation);
+        
+        // AI 解读成功后保存记录
+        if (!hasSavedRef.current) {
+          hasSavedRef.current = true;
+          saveReadingHistory({
+            spreadType: 'divination-jiaobei',
+            question: userQuestion,
+            cards: [],
+            readingResult: {
+              type: resultType,
+              title: resultData[resultType].title,
+              description: resultData[resultType].description,
+              aiInterpretation: data.interpretation,
+            },
+            resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
+          });
+        }
       } else {
         console.error('AI 解读失败:', data);
+        // 即使 AI 失败也保存记录
+        if (!hasSavedRef.current) {
+          hasSavedRef.current = true;
+          saveReadingHistory({
+            spreadType: 'divination-jiaobei',
+            question: userQuestion,
+            cards: [],
+            readingResult: {
+              type: resultType,
+              title: resultData[resultType].title,
+              description: resultData[resultType].description,
+            },
+            resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
+          });
+        }
       }
     } catch (error) {
       console.error('调用 AI 解读出错:', error);
+      // 即使出错也保存记录
+      if (!hasSavedRef.current) {
+        hasSavedRef.current = true;
+        saveReadingHistory({
+          spreadType: 'divination-jiaobei',
+          question: userQuestion,
+          cards: [],
+          readingResult: {
+            type: resultType,
+            title: resultData[resultType].title,
+            description: resultData[resultType].description,
+          },
+          resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
+        });
+      }
     } finally {
       setIsLoadingAI(false);
     }
@@ -286,7 +367,11 @@ export default function ResultPage() {
                           <div className="mb-3 text-white/70 text-sm">
                             <span className="font-medium">你的问题：</span>{question}
                           </div>
-                          {isLoadingAI ? (
+                          {dailyLimitReached ? (
+                            <div className="text-amber-400 text-base leading-relaxed">
+                              今日免费解读次数已用完，开通会员后可继续使用
+                            </div>
+                          ) : isLoadingAI ? (
                             <div className="flex items-center gap-2 text-white/60">
                               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                               <span className="text-sm">正在解读中...</span>
@@ -296,6 +381,17 @@ export default function ResultPage() {
                               {aiInterpretation}
                             </p>
                           ) : null}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 每日免费次数超限提示（无问题情况） */}
+                    {dailyLimitReached && !(question && typeof question === 'string' && question.trim()) && (
+                      <div className="max-w-xl mx-auto mb-8">
+                        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 text-center">
+                          <p className="text-amber-400 text-base leading-relaxed">
+                            今日免费解读次数已用完，开通会员后可继续使用
+                          </p>
                         </div>
                       </div>
                     )}

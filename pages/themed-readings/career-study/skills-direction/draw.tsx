@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMembership } from '../../../../hooks/useMembership';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -163,7 +163,10 @@ const loadResult = (): SkillsDirectionResult | null => {
 
 export default function SkillsDirectionDraw() {
   const router = useRouter();
-  const { isMember } = useMembership();
+  const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
+    theme: 'career-study',
+    spreadId: 'skills-direction',
+  });
   const [sessionId, setSessionId] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -181,6 +184,7 @@ export default function SkillsDirectionDraw() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
     const saved = loadResult();
     if (saved) {
@@ -192,7 +196,7 @@ export default function SkillsDirectionDraw() {
       setSessionId(generateSessionId());
       setUiSlots(shuffleCards(tarotCards));
     }
-  }, [isMember]);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -267,6 +271,16 @@ export default function SkillsDirectionDraw() {
     setScrollValue(0);
     if (containerRef.current) containerRef.current.scrollLeft = 0;
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark">

@@ -1,8 +1,13 @@
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { cards, positions, year } = req.body;
@@ -150,6 +155,16 @@ JSON 结构示例：
       console.error('JSON Parse Error:', parseError);
       console.error('Raw Content:', content);
       return res.status(500).json({ error: '解析运势数据失败' });
+    }
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'year-ahead',
+        cards,
+        readingResult: fortuneData,
+        resultPath: '/fortune/annual/year-ahead/result'
+      });
     }
 
     return res.status(200).json(fortuneData);

@@ -6,6 +6,7 @@ import CardItem, { TarotCard } from '../../../components/fortune/CardItem';
 import EmptySlot from '../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../components/fortune/ScrollBar';
 import SelectedCardSlot from '../../../components/fortune/SelectedCardSlot';
+import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -174,7 +175,11 @@ const loadYesNoTarotQuestion = (): string => {
 
 export default function YesNoTarotDraw() {
   const router = useRouter();
-  
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'divination-yesno',
+    redirectPath: '/',
+  });
+
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedResult, setSavedResult] = useState<YesNoTarotDraw | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -214,24 +219,22 @@ export default function YesNoTarotDraw() {
   // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
-    // 读取用户问题
     const savedQuestion = loadYesNoTarotQuestion();
     setQuestion(savedQuestion);
 
-    // 尝试加载已保存的抽牌结果
     const saved = loadYesNoTarotDraw();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCard(saved.card);
     } else {
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -301,17 +304,25 @@ export default function YesNoTarotDraw() {
 
     localStorage.removeItem(STORAGE_KEY_DRAW);
     
-    // 重置状态
     setHasDrawn(false);
     setSavedResult(null);
     setSelectedCard(null);
     setIsAnimating(false);
     
-    // 重新洗牌
     const shuffled = shuffleCards(tarotCards);
     setDeck(shuffled);
     setUiSlots(shuffled);
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -7,6 +7,7 @@ import { TarotCard } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 // 获取当前季节
 const getCurrentSeason = (): string => {
@@ -175,11 +176,10 @@ export default function SeasonalResult() {
     setReadingError(null);
 
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/seasonal-reading', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           cards: cardsData.map(card => ({
             id: card.id,

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
@@ -127,6 +128,10 @@ const SLOT_CONFIG = [
 
 export default function WealthObstaclesDraw() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    theme: 'wealth',
+    spreadId: 'wealth-obstacles',
+  });
   const [hasDrawn, setHasDrawn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
@@ -156,6 +161,8 @@ export default function WealthObstaclesDraw() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
+    
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -164,7 +171,7 @@ export default function WealthObstaclesDraw() {
     } else {
       setUiSlots(shuffleCards(tarotCards)); 
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -216,6 +223,16 @@ export default function WealthObstaclesDraw() {
     setUiSlots(shuffleCards(tarotCards));
     setScrollValue(0);
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark">

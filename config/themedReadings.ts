@@ -17,6 +17,8 @@ export interface SpreadConfig {
   descEn: string;
   cardsCount: number;
   isPaid: boolean;
+  /** 访问权限：free 免费（非会员每日限制3次），member 会员专属 */
+  access?: 'free' | 'member';
   icon?: ReactNode; // emoji, text, or icon component
   badge?: string; // e.g., "Most Popular"
   href?: string;
@@ -47,6 +49,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     descEn: 'Explore your future lover and how to meet them',
     cardsCount: 6,
     isPaid: false,
+    access: 'free',
     icon: '💕',
     badge: 'New',
   },
@@ -59,6 +62,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     descEn: 'Explore their true thoughts, feelings and short-term direction',
     cardsCount: 6,
     isPaid: false,
+    access: 'free',
     icon: '💭',
   },
   {
@@ -69,7 +73,8 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     descZh: '抽取 8 张牌，看看这段关系的真实状态与自然走向',
     descEn: 'Draw 8 cards to see the real state and natural direction of this relationship',
     cardsCount: 8,
-    isPaid: true, // 会员功能，但暂时在路由层面绕过拦截
+    isPaid: true,
+    access: 'member',
     icon: '🌸',
   },
   
@@ -83,6 +88,7 @@ export const LOVE_SPREADS: SpreadConfig[] = [
     descEn: 'Assess the space and cost of getting close again',
     cardsCount: 10,
     isPaid: true,
+    access: 'member',
     icon: '🌙',
     cards: [
       { id: "guide", name: "指引牌", meaning: "这组牌想提醒你的核心问题" },
@@ -129,6 +135,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'Clarify your strengths and energy tendencies to find a suitable direction.',
         cardsCount: 5,
         isPaid: false,
+        access: 'free',
         icon: '🧭',
         cards: [
           { id: "p1", name: "内心真正渴望的状态", meaning: "我内心真正渴望的工作/发展状态是什么？" },
@@ -147,6 +154,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'See key focus areas, avoid pitfalls, and do your best in what you can control.',
         cardsCount: 5,
         isPaid: false,
+        access: 'free',
         icon: '📝',
         cards: [
           { id: "p1", name: "你现在最不确定的地方", meaning: "你现在最不确定的地方" },
@@ -165,6 +173,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'See costs and opportunities at the crossroads to make a better decision.',
         cardsCount: 6,
         isPaid: true,
+        access: 'member',
         icon: '✉️',
         cards: [
           { id: "p1", name: "这项机会与你的契合程度", meaning: "这项机会与你的契合程度" },
@@ -184,6 +193,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'Assess the meaning, exhaustion, and opportunities of staying.',
         cardsCount: 7,
         isPaid: true,
+        access: 'member',
         icon: '⚖️',
         cards: [
           { id: "p1", name: "你现在的职业状态", meaning: "你现在的职业状态" },
@@ -214,6 +224,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'Quickly see your current wealth status, influences, and near-term trends with three cards.',
         cardsCount: 3,
         isPaid: false,
+        access: 'free',
         icon: '💰',
       },
       {
@@ -225,6 +236,7 @@ export const THEMED_READINGS_CONFIG: Record<SpreadTheme, ThemeConfig> = {
         descEn: 'Find the breakthrough for financial improvement from current status, external influences, attitude, and obstacles.',
         cardsCount: 5,
         isPaid: true,
+        access: 'member',
         icon: '🚧',
         cards: [
           { id: "p1", name: "你当前的财务状况", meaning: "你当前的财务状况" },

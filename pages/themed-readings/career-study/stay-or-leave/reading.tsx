@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CareerDevelopmentSevenSlots from '../../../../components/fortune/CareerDevelopmentSevenSlots';
 import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
+import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
 interface ShuffledTarotCard {
   id: number;
@@ -107,9 +108,10 @@ export default function StayOrLeaveReading() {
     setIsLoading(true);
     setError(null);
     try {
+      const headers = await getAuthHeaders();
       const response = await fetch('/api/reading/career-stay-or-leave', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ cards, questionTitle: '这份工作是否值得继续做下去？' })
       });
 

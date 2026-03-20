@@ -63,11 +63,16 @@ async function fixMalformedJSON(apiKey, rawContent) {
   }
 }
 
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { cards, locale = 'zh' } = req.body;
@@ -343,6 +348,16 @@ ${cardsInfo}
     }
 
     // 返回成功响应
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'relationship-development',
+        cards,
+        readingResult: readingData,
+        resultPath: '/themed-readings/love/relationship-development/result',
+      });
+    }
+
     return res.status(200).json({ ok: true, reading: readingData });
 
   } catch (error) {

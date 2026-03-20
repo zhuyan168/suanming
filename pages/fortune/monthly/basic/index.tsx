@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 // 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
 interface LocalTarotCard {
@@ -770,6 +771,11 @@ interface MonthlyBasicResult {
 
 export default function MonthlyBasicFortune() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'fortune-monthly',
+    redirectPath: '/',
+  });
+
   const [currentMonth, setCurrentMonth] = useState<string>('');
   
   const [hasDrawnThisMonth, setHasDrawnThisMonth] = useState(false);
@@ -843,15 +849,10 @@ export default function MonthlyBasicFortune() {
     }
   };
 
-  // 初始化：检查本月是否已经抽过牌
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // NOTE: Old monthly fortune key deprecated.
-    // We no longer read or migrate `tarotMonthlyResult`.
-    // Only use `monthly_basic_YYYY-MM`.
+    if (accessLoading || !allowed) return;
     
-    // 读取新版 key (monthly_basic_YYYY-MM)
     if (currentMonth) {
       const storageKey = `monthly_basic_${currentMonth}`;
       const stored = localStorage.getItem(storageKey);
@@ -934,7 +935,7 @@ export default function MonthlyBasicFortune() {
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, [currentMonth]);
+  }, [currentMonth, accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawnThisMonth) return;
@@ -1029,6 +1030,16 @@ export default function MonthlyBasicFortune() {
 
   // 检查是否可以开始测算（已抽满3张）
   const canStartReading = selectedCards.filter(c => c !== null).length === 3;
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

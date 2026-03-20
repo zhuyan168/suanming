@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { matchSpreadByMessage, getSpreadById } from '../../utils/luna/spreadMatcher';
+import { getAuthHeaders } from '../../lib/apiHeaders';
 
 interface MessageAction {
   label: string;
@@ -88,9 +89,10 @@ export default function LunaChatPanel({
     async (userText: string, current: LunaMessage[]) => {
       setIsLoading(true);
       try {
+        const headers = await getAuthHeaders();
         const res = await fetch('/api/luna-spread-match', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ message: userText }),
         });
 
@@ -241,9 +243,10 @@ export default function LunaChatPanel({
         .slice(-20)
         .map((m) => ({ role: m.role, content: m.content }));
 
+      const headers = await getAuthHeaders();
       const res = await fetch('/api/luna-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ messages: contextMessages }),
       });
 

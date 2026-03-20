@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
 
 export default function JiaoBeiPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'divination-jiaobei',
+    redirectPath: '/',
+  });
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [question, setQuestion] = useState('');
 
   useEffect(() => {
-    // 确保 Tailwind 配置已加载
     if (typeof window !== 'undefined') {
       document.documentElement.classList.add('dark');
     }
@@ -45,6 +50,16 @@ export default function JiaoBeiPage() {
       router.push(`/divination/jiaobei/result?${params.toString()}`);
     }, 1500);
   };
+
+  if (accessLoading || !allowed) {
+    return (
+      <div className="dark">
+        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
+          <div className="text-white/60">加载中...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

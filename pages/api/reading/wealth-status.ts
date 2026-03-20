@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,6 +8,9 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   const { cards } = req.body;
 
@@ -109,6 +113,16 @@ ${cardsInfo}`;
         interpretation: soften(item.interpretation)
     }));
     result.actionSuggestions = result.actionSuggestions.map(soften);
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'wealth-status',
+        cards,
+        readingResult: result,
+        resultPath: '/themed-readings/wealth/current-wealth-status/reading'
+      });
+    }
 
     return res.status(200).json(result);
   } catch (error) {

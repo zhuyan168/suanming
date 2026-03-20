@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotCards } from '../../../../data/tarotCards';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 
 
 interface ShuffledTarotCard extends TarotCard {
@@ -76,6 +77,11 @@ const loadResult = (): ThreeCardResult | null => {
 
 export default function ThreeCardDrawPage() {
   const router = useRouter();
+  const { loading: accessLoading, allowed } = useSpreadAccess({
+    spreadKey: 'three-card-general',
+    redirectPath: '/reading/general',
+  });
+
   const [question, setQuestion] = useState<string>('');
   
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -113,29 +119,26 @@ export default function ThreeCardDrawPage() {
     setScrollValue(value);
   };
 
-  // 初始化
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (accessLoading || !allowed) return;
 
-    // 加载问题
     const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (savedQuestion) {
       setQuestion(savedQuestion);
     }
 
-    // 尝试加载已保存的结果
     const saved = loadResult();
     if (saved) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCards(saved.cards);
     } else {
-      // 洗牌
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
     }
-  }, []);
+  }, [accessLoading, allowed]);
 
   const drawCard = async (slotIndex: number) => {
     if (isLoading || hasDrawn) return;
@@ -230,6 +233,14 @@ export default function ThreeCardDrawPage() {
     setUiSlots(shuffled);
   };
 
+  if (accessLoading || !allowed) {
+    return (
+      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
+        <div className="text-white/60">加载中...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Head>
@@ -238,7 +249,6 @@ export default function ThreeCardDrawPage() {
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />

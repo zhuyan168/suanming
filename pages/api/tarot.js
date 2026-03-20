@@ -1,8 +1,13 @@
+import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });
+  if (!accessStatus) return;
 
   try {
     const { question, cardName, orientation } = req.body;
@@ -116,10 +121,23 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({
+    const result = {
       answer: answer || 'Yes',
       interpretation: interpretation || content,
-    });
+    };
+
+    if (accessStatus.userId) {
+      await recordReadingHistory({
+        userId: accessStatus.userId,
+        spreadType: 'yesno-tarot',
+        question,
+        cards: [{ cardName, orientation }],
+        readingResult: result,
+        resultPath: '/fortune/yesno-tarot/result'
+      });
+    }
+
+    return res.status(200).json(result);
 
   } catch (error) {
     console.error('API route error:', error);
