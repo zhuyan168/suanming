@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
-import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
@@ -206,12 +205,6 @@ export default function SeasonalResult() {
       const readingData = await response.json();
       setReading(readingData);
 
-      saveReadingHistory({
-        spreadType: 'fortune-seasonal',
-        cards: cardsData,
-        readingResult: readingData,
-        resultPath: '/fortune/seasonal/result',
-      });
 
       // 保存解读结果到 localStorage（按季度）
       if (typeof window !== 'undefined') {

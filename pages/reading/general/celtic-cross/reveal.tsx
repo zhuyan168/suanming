@@ -156,10 +156,8 @@ function MembershipModal({
   if (!isOpen) return null;
 
   const handleGoToMembership = () => {
-    // TODO: 后续接入会员系统后，跳转到会员开通页面
-    // router.push('/membership');
-    alert('会员系统即将上线，敬请期待！');
     onClose();
+    router.push('/membership');
   };
 
   return (

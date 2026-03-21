@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EightCardsSpecialSlots from '../../../../components/fortune/EightCardsSpecialSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { SpreadCard } from '../../../../types/spread-reading';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -209,12 +208,6 @@ export default function RelationshipDev8Result() {
         setReading(data.reading);
         saveReading(data.reading);
 
-        saveReadingHistory({
-          spreadType: 'love-relationship-development',
-          cards: result.cards,
-          readingResult: data.reading,
-          resultPath: '/themed-readings/love/relationship-development/result',
-        });
       } else {
         throw new Error('解读数据格式错误');
       }

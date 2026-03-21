@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMembership } from '../../../hooks/useMembership';
@@ -11,9 +12,21 @@ import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
 export default function SpreadDetailPage() {
   const router = useRouter();
   const { spreadId } = router.query;
-  const { isMember } = useMembership();
+  const { isMember, loading: membershipLoading } = useMembership();
 
   const spreadConfig = spreadId ? getSpreadConfig('love', spreadId as string) : null;
+  const isTemporarilyOpen = spreadId === 'relationship-development';
+
+  useEffect(() => {
+    if (!router.isReady || membershipLoading) return;
+    const id = typeof spreadId === 'string' ? spreadId : null;
+    if (!id) return;
+    const cfg = getSpreadConfig('love', id);
+    if (!cfg?.isPaid || id === 'relationship-development') return;
+    if (!isMember) {
+      void router.replace('/membership');
+    }
+  }, [router.isReady, membershipLoading, spreadId, isMember, router]);
 
   // 如果牌阵不存在
   if (router.isReady && !spreadConfig) {
@@ -82,76 +95,38 @@ export default function SpreadDetailPage() {
     );
   }
 
-  // 如果是付费牌阵且用户非会员
-  // 临时白名单：relationship-development 暂时开放（会员系统上线后移除此条件）
-  const isTemporarilyOpen = spreadId === 'relationship-development';
-  
-  if (spreadConfig && spreadConfig.isPaid && !isMember && !isTemporarilyOpen) {
+  if (
+    router.isReady &&
+    spreadConfig?.isPaid &&
+    !isTemporarilyOpen &&
+    membershipLoading
+  ) {
     return (
       <>
         <Head>
-          <title>{spreadConfig.titleZh} - Mystic Insights</title>
+          <title>加载中 - Mystic Insights</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
           />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                  window.tailwindConfigSet = true;
-                  (function() {
-                    var script = document.createElement('script');
-                    script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                    script.async = true;
-                    script.onload = function() {
-                      if (window.tailwind) {
-                        window.tailwind.config = {
-                          darkMode: 'class',
-                          theme: {
-                            extend: {
-                              colors: {
-                                primary: '#7f13ec',
-                                'background-light': '#f7f6f8',
-                                'background-dark': '#191022',
-                              },
-                              fontFamily: {
-                                display: ['Spline Sans', 'sans-serif'],
-                              },
-                              borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                              boxShadow: {
-                                glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                              },
-                            }
-                          }
-                        };
-                      }
-                    };
-                    document.head.appendChild(script);
-                  })();
-                }
-              `,
-            }}
-          />
         </Head>
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
-          <div className="text-center max-w-md mx-4">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-primary text-4xl">lock</span>
-            </div>
-            <h1 className="text-white text-2xl font-bold mb-8">会员专享内容</h1>
-            <button
-              onClick={() => router.push('/themed-readings/love')}
-              className="px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
-            >
-              返回爱情占卜
-            </button>
-          </div>
+          <p className="text-white/50 text-sm">加载中…</p>
         </div>
       </>
     );
+  }
+
+  if (
+    router.isReady &&
+    spreadConfig?.isPaid &&
+    !isTemporarilyOpen &&
+    !membershipLoading &&
+    !isMember
+  ) {
+    return null;
   }
 
   if (!spreadConfig) {

@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -376,12 +375,6 @@ export default function YearAheadResultPage() {
       saveYearAheadResult(updatedResult);
       setSavedResult(updatedResult);
 
-      saveReadingHistory({
-        spreadType: 'fortune-yearly',
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/fortune/annual/year-ahead/result',
-      });
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
       setError(err.message || '生成运势失败，请稍后重试');

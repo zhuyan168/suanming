@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { parseAIJson, AIJsonParseError } from '../../../lib/parseAIJson';
 
 export default async function handler(
   req: NextApiRequest,
@@ -249,7 +250,7 @@ export default async function handler(
     console.log('DeepSeek raw response:', content);
     
     try {
-      const reading = JSON.parse(content);
+      const reading = parseAIJson(content);
       if (accessStatus.userId) {
         await recordReadingHistory({
           userId: accessStatus.userId,
@@ -261,9 +262,13 @@ export default async function handler(
         });
       }
       return res.status(200).json(reading);
-    } catch (parseError: any) {
-      console.error('JSON parse error:', parseError);
-      console.error('Content that failed to parse:', content);
+    } catch (parseError: unknown) {
+      if (parseError instanceof AIJsonParseError) {
+        console.error('JSON parse error:', parseError.message);
+        console.error('Content that failed to parse:', parseError.rawContent);
+      } else {
+        console.error('Unexpected parse error:', parseError);
+      }
       throw new Error('AI 返回的内容格式有误，请重试');
     }
   } catch (error: any) {

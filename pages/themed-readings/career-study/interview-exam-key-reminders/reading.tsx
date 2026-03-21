@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import InterviewExamSlots from '../../../../components/fortune/InterviewExamSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -103,12 +102,6 @@ export default function InterviewExamReadingPageNew() {
         }));
       }
 
-      saveReadingHistory({
-        spreadType: 'career-interview-exam',
-        cards: cards,
-        readingResult: data,
-        resultPath: '/themed-readings/career-study/interview-exam-key-reminders/reading',
-      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {

@@ -13,8 +13,24 @@ export interface ApiAccessStatus {
   userId?: string;
 }
 
-const TIMEZONE = 'America/Los_Angeles';
+/** Fallback timezone when the client sends nothing or an invalid value. */
+const FALLBACK_TIMEZONE = 'UTC';
 const DEFAULT_FREE_LIMIT = 3;
+
+/**
+ * Validate an IANA timezone string received from the client.
+ * Returns the original string if valid, FALLBACK_TIMEZONE otherwise.
+ */
+function sanitizeTimezone(tz: unknown): string {
+  if (typeof tz !== 'string' || !tz.trim()) return FALLBACK_TIMEZONE;
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return tz.trim();
+  } catch {
+    console.warn(`[accessServer] Invalid timezone "${tz}", falling back to ${FALLBACK_TIMEZONE}`);
+    return FALLBACK_TIMEZONE;
+  }
+}
 
 function parseCookies(cookieHeader?: string | null): Record<string, string> {
   const cookies: Record<string, string> = {};
@@ -43,46 +59,53 @@ function getAccessTokenFromRequest(req: NextApiRequest): string | null {
   return null;
 }
 
+/**
+ * Compute the UTC ISO string for 00:00:00 of "today" in the given IANA timezone.
+ *
+ * Uses `timeZoneName: 'shortOffset'` which always outputs "GMT+H", "GMT-H", or
+ * "GMT+H:MM" (never abbreviated names like "PDT"), making offset parsing reliable
+ * across all Node.js versions regardless of ICU data.
+ *
+ * Math:
+ *   local midnight in UTC = Date.UTC(local year, month, day) − offsetMinutes × 60 s
+ *   e.g. UTC+8:  Date.UTC(2025-03-21) − 480 min = 2025-03-20T16:00:00Z  ✓
+ *        UTC-7:  Date.UTC(2025-03-20) − (−420 min) = 2025-03-20T07:00:00Z ✓
+ */
 function getTodayStartIso(timeZone: string): string {
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-US', {
+
+  // Step 1 — local calendar date in target timezone (en-CA = YYYY-MM-DD)
+  const localDateStr = new Intl.DateTimeFormat('en-CA', {
     timeZone,
-    hour12: false,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZoneName: 'short'
-  });
+  }).format(now);
 
-  const parts = formatter.formatToParts(now);
-  const values: Record<string, string> = {};
+  // Step 2 — current UTC offset via shortOffset ("GMT+8", "GMT-7", "GMT+5:30", "UTC")
+  const tzPart =
+    new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
+      .formatToParts(now)
+      .find(p => p.type === 'timeZoneName')?.value ?? 'GMT+0';
+
+  // Step 3 — parse offset string into signed minutes
+  const match = tzPart.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
   let offsetMinutes = 0;
-
-  for (const part of parts) {
-    if (part.type === 'timeZoneName') {
-      const match = part.value.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
-      if (match) {
-        const hours = Number(match[1]);
-        const minutes = match[2] ? Number(match[2]) : 0;
-        offsetMinutes = hours * 60 + (hours >= 0 ? minutes : -minutes);
-      }
-    } else if (part.value && part.type !== 'literal') {
-      values[part.type] = part.value;
-    }
+  if (match) {
+    const sign = match[1] === '+' ? 1 : -1;
+    const hours = Number(match[2]);
+    const minutes = match[3] ? Number(match[3]) : 0;
+    offsetMinutes = sign * (hours * 60 + minutes);
   }
 
-  const year = Number(values.year ?? now.getUTCFullYear());
-  const month = Number(values.month ?? now.getUTCMonth() + 1);
-  const day = Number(values.day ?? now.getUTCDate());
-  const utcMidnight = Date.UTC(year, month - 1, day) - offsetMinutes * 60 * 1000;
+  // Step 4 — UTC timestamp for local midnight
+  const [year, month, day] = localDateStr.split('-').map(Number);
+  const utcMidnight = Date.UTC(year, month - 1, day) - offsetMinutes * 60 * 1_000;
   return new Date(utcMidnight).toISOString();
 }
 
-async function countTodayFreeReadings(userId: string): Promise<number> {
-  const todayStart = getTodayStartIso(TIMEZONE);
+async function countTodayFreeReadings(userId: string, timeZone: string): Promise<number> {
+  const todayStart = getTodayStartIso(timeZone);
   const { count, error } = await supabaseService
     .from('reading_history')
     .select('*', { count: 'exact', head: true })
@@ -127,6 +150,12 @@ export async function ensureAccessForRequest(params: {
   freeDailyLimit?: number;
 }): Promise<ApiAccessStatus> {
   const { req, spreadAccess = 'free', freeDailyLimit = DEFAULT_FREE_LIMIT } = params;
+
+  // Extract and validate the IANA timezone sent by the client (?tz=Asia/Shanghai).
+  // Falls back to FALLBACK_TIMEZONE ('UTC') when absent or invalid.
+  const rawTz = Array.isArray(req.query.tz) ? req.query.tz[0] : req.query.tz;
+  const timeZone = sanitizeTimezone(rawTz);
+
   const token = getAccessTokenFromRequest(req);
   if (!token) {
     return {
@@ -179,7 +208,7 @@ export async function ensureAccessForRequest(params: {
     };
   }
 
-  const todayCount = await countTodayFreeReadings(user.id);
+  const todayCount = await countTodayFreeReadings(user.id, timeZone);
   const remaining = freeDailyLimit - todayCount;
 
   if (todayCount >= freeDailyLimit) {

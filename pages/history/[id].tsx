@@ -40,6 +40,7 @@ const KEY_ALIASES: Record<string, string> = {
   'year-ahead-fortune': 'fortune-yearly',
   'annual-fortune': 'fortune-yearly',
   'yesno-tarot': 'divination-yesno',
+  'jiaobei': 'divination-jiaobei',
   'six-pointed-star': 'hexagram',
   'daily-fortune': 'fortune-daily',
   'seasonal-fortune': 'fortune-seasonal',
@@ -70,6 +71,7 @@ const SPREAD_NAME: Record<string, string> = {
   'love-relationship-development': '这段感情的发展',
   'love-reconciliation': '复合的可能性',
   'career-skills-direction': '工作 / 技能方向',
+  'career-job': '我应该找什么样的工作',
   'career-interview-exam': '面试 / 考试关键提醒',
   'career-offer-decision': 'Offer 抉择',
   'career-stay-or-leave': '去留抉择',
@@ -123,9 +125,21 @@ function lookupTarotImage(cardName: string): string | null {
   return tarotImagesFlat[key] ?? null
 }
 
+function getCardDisplayName(card: any): string {
+  if (!card) return ''
+  return (card.name ?? card.cardName ?? '').trim()
+}
+
+function getCardOrientation(card: any): 'upright' | 'reversed' {
+  if (!card) return 'upright'
+  if (card.orientation === 'reversed' || card.isReversed === true) return 'reversed'
+  return 'upright'
+}
+
 function getCardImage(card: any): string | null {
   if (!card) return null
-  return lookupTarotImage(card.name ?? '') ?? card.image ?? null
+  const name = getCardDisplayName(card)
+  return lookupTarotImage(name) ?? card.image ?? null
 }
 
 function formatTime(iso: string): string {
@@ -174,8 +188,8 @@ function CardRow({
   card: any; positionLabel: string; interpretation: string; index: number
 }) {
   const imageUrl = getCardImage(card)
-  const orientation: 'upright' | 'reversed' = card?.orientation ?? 'upright'
-  const cardName = card?.name ?? ''
+  const orientation = getCardOrientation(card)
+  const cardName = getCardDisplayName(card)
 
   return (
     <div className="flex gap-4 rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/[0.07] transition-colors">
@@ -269,32 +283,34 @@ function DailyFortuneView({ record }: { record: HistoryRecord }) {
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
       <QuestionBlock question={record.question} />
-      {r.quote && (
-        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5 text-center">
-          <p className="text-base font-bold text-white leading-relaxed">「{r.quote}」</p>
-        </div>
-      )}
-      <div className="grid md:grid-cols-[220px_1fr] gap-6">
+      <div className="grid md:grid-cols-[240px_1fr] gap-8">
         {/* Card */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-4">
           {imageUrl ? (
-            <div className="w-40 h-60 rounded-2xl overflow-hidden border border-white/20 shadow-[0_0_30px_rgba(127,19,236,0.3)]">
+            <div className="w-44 h-64 rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_30px_rgba(127,19,236,0.3)]">
               <img src={imageUrl} alt={cardRef?.name ?? ''} className={`w-full h-full object-cover ${orientation === 'reversed' ? 'rotate-180' : ''}`} />
             </div>
           ) : (
-            <div className="w-40 h-60 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
               <span className="text-white/20 text-sm">无图片</span>
             </div>
           )}
           {cardRef?.name && (
             <div className="text-center">
-              <p className="text-white font-semibold text-sm">{cardRef.name}</p>
-              <p className="text-white/50 text-xs mt-0.5">{orientation === 'upright' ? '正位' : '逆位'}</p>
+              <p className="text-white font-bold text-lg">{cardRef.name}</p>
+              <p className="text-white/50 text-sm mt-0.5">{orientation === 'upright' ? '正位' : '逆位'}</p>
             </div>
           )}
         </div>
-        {/* Fortune grid */}
-        <div className="flex flex-col gap-3">
+        {/* Fortune content */}
+        <div className="flex flex-col gap-4">
+          {/* Quote */}
+          {r.quote && (
+            <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-purple-900/20 p-6 text-center">
+              <p className="text-xl font-bold text-white leading-relaxed">{r.quote}</p>
+            </div>
+          )}
+          {/* Fortune grid */}
           <div className="grid sm:grid-cols-2 gap-3">
             <FortuneCard icon="wb_sunny" title="综合运势" content={r.overall} />
             <FortuneCard icon="favorite" title="爱情运势" content={r.love} />
@@ -323,32 +339,35 @@ function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
   const r = record.reading_result ?? {}
   const cards: any[] = Array.isArray(record.cards) ? record.cards : []
   const cardMeanings = [r.card1Meaning, r.card2Meaning, r.card3Meaning]
+  const cardLabels = ['第 1 张牌', '第 2 张牌', '第 3 张牌']
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
+      {/* Quote */}
       {r.quote && (
-        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5 text-center">
-          <p className="text-base font-bold text-white leading-relaxed">「{r.quote}」</p>
+        <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-purple-900/20 p-6 text-center">
+          <p className="text-xl font-bold text-white leading-relaxed">{r.quote}</p>
         </div>
       )}
 
       {/* 3 Cards + meanings */}
       {cards.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4">
           {cards.slice(0, 3).map((card, i) => {
             const img = getCardImage(card)
             return (
-              <div key={i} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-3">
+              <div key={i} className="flex flex-col items-center gap-2.5 rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs font-bold text-primary/80 uppercase tracking-wider">{cardLabels[i]}</p>
                 {img ? (
-                  <div className="w-16 h-24 rounded-lg overflow-hidden border border-white/15">
+                  <div className="w-20 h-28 rounded-lg overflow-hidden border border-white/15 shadow-md">
                     <img src={img} alt={card.name ?? ''} className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
-                  <div className="w-16 h-24 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                  <div className="w-20 h-28 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
                     <span className="material-symbols-outlined text-white/20 text-sm">style</span>
                   </div>
                 )}
-                <p className="text-white/70 text-xs text-center leading-tight">{card.name ?? ''}</p>
+                <p className="text-white/80 text-xs text-center leading-tight font-medium">{card.name ?? ''}</p>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${card.orientation === 'reversed' ? 'border-amber-500/40 text-amber-400/80' : 'border-emerald-500/40 text-emerald-400/80'}`}>
                   {card.orientation === 'upright' ? '正位' : '逆位'}
                 </span>
@@ -415,71 +434,144 @@ function FortuneMonthlyMemberView({ record }: { record: HistoryRecord }) {
 // ============================================================
 // View: Seasonal Fortune (5 cards, 6 dimensions)
 // ============================================================
-const SEASONAL_DIMENSIONS = [
-  { key: 'action', label: '行动力（Action）', icon: 'bolt', color: 'text-yellow-400', cardIdx: 0 },
-  { key: 'emotion', label: '情感与人际关系（Emotion）', icon: 'favorite', color: 'text-pink-400', cardIdx: 1 },
-  { key: 'mind', label: '思维与计划（Thinking）', icon: 'psychology', color: 'text-blue-400', cardIdx: 2 },
-  { key: 'material', label: '事业与财运（Wealth）', icon: 'account_balance_wallet', color: 'text-green-400', cardIdx: 3 },
-  { key: 'coreEnergy', label: '整体运势（Overall）', icon: 'auto_awesome', color: 'text-primary', cardIdx: 4 },
-]
+const SEASONAL_SLOT_LABELS = ['行动力', '情感与人际', '思维与计划', '事业与财运', '整体运势']
 
 function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
+  const hasReading = !!(r.coreEnergy || r.action || r.emotion || r.mind || r.material)
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl mx-auto">
-      {/* Mini card strip */}
+    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
+      {/* Card strip */}
       {rawCards.length > 0 && (
-        <div className="flex justify-center gap-2 flex-wrap">
+        <div className="flex justify-center gap-3 flex-wrap">
           {rawCards.map((card: any, i: number) => {
             const img = getCardImage(card)
             return (
-              <div key={i} className="flex flex-col items-center gap-1">
+              <div key={i} className="flex flex-col items-center gap-1.5">
                 {img ? (
-                  <div className="w-12 h-18 rounded-md overflow-hidden border border-white/15" style={{ height: '4.5rem' }}>
+                  <div className="w-16 rounded-lg overflow-hidden border border-white/20 shadow-[0_0_12px_rgba(127,19,236,0.2)]" style={{ height: '6rem' }}>
                     <img src={img} alt={card.name ?? ''} className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
-                  <div className="w-12 rounded-md bg-white/5 border border-white/10 flex items-center justify-center" style={{ height: '4.5rem' }}>
-                    <span className="material-symbols-outlined text-white/20 text-xs">style</span>
+                  <div className="w-16 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center" style={{ height: '6rem' }}>
+                    <span className="material-symbols-outlined text-white/20 text-sm">style</span>
                   </div>
                 )}
-                <p className="text-[9px] text-white/40 text-center w-12 truncate">{SEASONAL_DIMENSIONS[i]?.label.split('（')[0] ?? ''}</p>
+                <p className="text-[10px] text-white/40 text-center w-16 truncate">{SEASONAL_SLOT_LABELS[i] ?? ''}</p>
               </div>
             )
           })}
         </div>
       )}
-      {/* Dimension blocks */}
-      <div className="flex flex-col gap-3">
-        {SEASONAL_DIMENSIONS.map(({ key, label, icon, color, cardIdx }) => {
-          const text = r[key]
-          if (!text) return null
-          const card = rawCards[cardIdx]
-          return (
-            <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`material-symbols-outlined ${color} text-lg`}>{icon}</span>
-                <h4 className="font-semibold text-white/90 text-sm">{label}</h4>
-                {card?.name && (
-                  <span className="text-white/30 text-xs ml-auto">{card.name} · {card.orientation === 'upright' ? '正位' : '逆位'}</span>
-                )}
+
+      {!hasReading && (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
+          <span className="material-symbols-outlined text-white/20 text-4xl mb-3 block">auto_stories</span>
+          <p className="text-white/40 text-sm">该记录暂无 AI 解读数据</p>
+        </div>
+      )}
+
+      {hasReading && (
+        <div className="flex flex-col gap-5">
+          {/* 整体运势（Overall）*/}
+          {r.coreEnergy && (
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-primary text-2xl mt-0.5">auto_awesome</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">✧ 整体运势（Overall）</h3>
+                  {rawCards[4]?.name && (
+                    <p className="text-xs text-primary/70 mt-0.5">
+                      {rawCards[4].name}（{rawCards[4].orientation === 'upright' ? '正位' : '逆位'}）
+                    </p>
+                  )}
+                </div>
               </div>
-              <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{text}</p>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.coreEnergy}</p>
             </div>
-          )
-        })}
-        {r.synthesis && (
-          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-primary text-lg">explore</span>
-              <h4 className="font-semibold text-white/90 text-sm">综合建议</h4>
+          )}
+          {/* 行动力（Action）*/}
+          {r.action && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-yellow-400 text-2xl mt-0.5">bolt</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">⚡ 行动力（Action）</h3>
+                  {rawCards[0]?.name && (
+                    <p className="text-xs text-white/50 mt-0.5">
+                      {rawCards[0].name}（{rawCards[0].orientation === 'upright' ? '正位' : '逆位'}）
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.action}</p>
             </div>
-            <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{r.synthesis}</p>
-          </div>
-        )}
-      </div>
+          )}
+          {/* 情感与人际关系（Emotion）*/}
+          {r.emotion && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-pink-400 text-2xl mt-0.5">favorite</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">♡ 情感与人际关系（Emotion）</h3>
+                  {rawCards[1]?.name && (
+                    <p className="text-xs text-white/50 mt-0.5">
+                      {rawCards[1].name}（{rawCards[1].orientation === 'upright' ? '正位' : '逆位'}）
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.emotion}</p>
+            </div>
+          )}
+          {/* 思维与计划（Thinking）*/}
+          {r.mind && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-blue-400 text-2xl mt-0.5">psychology</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">THINKING 思维与计划</h3>
+                  {rawCards[2]?.name && (
+                    <p className="text-xs text-white/50 mt-0.5">
+                      {rawCards[2].name}（{rawCards[2].orientation === 'upright' ? '正位' : '逆位'}）
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.mind}</p>
+            </div>
+          )}
+          {/* 事业与财运（Wealth）*/}
+          {r.material && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-green-400 text-2xl mt-0.5">account_balance_wallet</span>
+                <div>
+                  <h3 className="text-lg font-bold text-white">$ 事业与财运（Wealth）</h3>
+                  {rawCards[3]?.name && (
+                    <p className="text-xs text-white/50 mt-0.5">
+                      {rawCards[3].name}（{rawCards[3].orientation === 'upright' ? '正位' : '逆位'}）
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.material}</p>
+            </div>
+          )}
+          {/* 综合建议 */}
+          {r.synthesis && (
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
+              <div className="flex items-start gap-3 mb-3">
+                <span className="material-symbols-outlined text-primary text-2xl mt-0.5">explore</span>
+                <h3 className="text-lg font-bold text-white">综合建议</h3>
+              </div>
+              <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.synthesis}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -494,56 +586,70 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const resultCards: any[] = Array.isArray(r.cards) ? r.cards : []
 
-  // Handle legacy annual-fortune format (may have different structure)
   const summary = r.summary ?? r.overview ?? r.yearSummary ?? ''
   const year = r.year ?? ''
 
   return (
-    <div className="flex flex-col gap-5 max-w-3xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-3xl mx-auto">
       {year && (
-        <p className="text-center text-primary font-semibold text-sm uppercase tracking-wider">{year} 年度运势</p>
+        <p className="text-center text-primary font-semibold text-base uppercase tracking-wider">{year} 年度指引</p>
       )}
       {summary && (
-        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">年度能量概览</p>
-          <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{summary}</p>
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">年度能量概览</p>
+          <p className="text-white/90 text-base leading-relaxed whitespace-pre-line">{summary}</p>
         </div>
       )}
-      <div className="flex flex-col gap-3">
+
+      {resultCards.length > 0 && (
+        <p className="text-lg font-bold text-white text-center">月度详细指引</p>
+      )}
+
+      <div className="flex flex-col gap-4">
         {resultCards.map((rc: any, i: number) => {
           const card = rawCards[i]
           const posLabel = rc.position ?? rc.month ?? MONTH_LABELS[i] ?? `第${i + 1}张`
           const interpretation = rc.meaning ?? rc.reading ?? rc.interpretation ?? ''
           const isTheme = i === 12
+          const cardKeywords: string[] = Array.isArray(card?.keywords) ? card.keywords : []
+
           return (
-            <div key={i} className={`flex gap-4 rounded-xl border p-4 hover:bg-white/[0.07] transition-colors ${isTheme ? 'border-primary/40 bg-primary/5' : 'border-white/10 bg-white/5'}`}>
+            <div key={i} className={`flex gap-5 rounded-2xl border p-5 transition-colors ${isTheme ? 'border-primary/40 bg-primary/5' : 'border-white/10 bg-white/5'}`}>
               <div className="shrink-0">
                 {getCardImage(card) ? (
-                  <div className={`rounded-lg overflow-hidden border border-white/15 ${isTheme ? 'w-16 h-24' : 'w-12 h-18'}`} style={{ height: isTheme ? '6rem' : '4.5rem' }}>
+                  <div className={`rounded-lg overflow-hidden border-2 ${isTheme ? 'w-20 border-primary/50' : 'w-16 border-white/20'}`} style={{ height: isTheme ? '7.5rem' : '6rem' }}>
                     <img src={getCardImage(card)!} alt={card?.name ?? ''} className={`w-full h-full object-cover ${card?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
-                  <div className={`rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${isTheme ? 'w-16' : 'w-12'}`} style={{ height: isTheme ? '6rem' : '4.5rem' }}>
-                    <span className="material-symbols-outlined text-white/20 text-xs">style</span>
+                  <div className={`rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${isTheme ? 'w-20' : 'w-16'}`} style={{ height: isTheme ? '7.5rem' : '6rem' }}>
+                    <span className="material-symbols-outlined text-white/20 text-sm">style</span>
                   </div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isTheme ? 'bg-primary text-white' : 'bg-white/10 text-white/60'}`}>{posLabel}</span>
-                  {card?.name && <span className="text-white/60 text-xs">{card.name}</span>}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${isTheme ? 'bg-primary text-white' : 'bg-white/10 text-white/60'}`}>{posLabel}</span>
                   {card?.orientation && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ml-auto ${card.orientation === 'reversed' ? 'border-amber-500/40 text-amber-400/80' : 'border-emerald-500/40 text-emerald-400/80'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${card.orientation === 'reversed' ? 'border-amber-500/40 text-amber-400/80' : 'border-emerald-500/40 text-emerald-400/80'}`}>
                       {card.orientation === 'upright' ? '正位' : '逆位'}
                     </span>
                   )}
                 </div>
-                {interpretation && <p className="text-white/80 text-sm leading-relaxed">{interpretation}</p>}
+                {card?.name && (
+                  <p className={`font-bold mb-1.5 ${isTheme ? 'text-lg text-primary' : 'text-base text-white'}`}>{card.name}</p>
+                )}
+                {cardKeywords.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {cardKeywords.map((kw: string, ki: number) => (
+                      <span key={ki} className="px-2 py-0.5 text-[10px] rounded-md bg-white/10 text-white/50 border border-white/10">{kw}</span>
+                    ))}
+                  </div>
+                )}
+                {interpretation && <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{interpretation}</p>}
               </div>
             </div>
           )
         })}
-        {/* If no result cards but raw cards exist, show raw cards only */}
         {resultCards.length === 0 && rawCards.length > 0 && (
           <div className="flex flex-col gap-3">
             {rawCards.map((card: any, i: number) => (
@@ -551,7 +657,6 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
             ))}
           </div>
         )}
-        {/* Fallback for legacy annual-fortune format */}
         {resultCards.length === 0 && rawCards.length === 0 && r.interpretation && (
           <div className="rounded-xl border border-white/10 bg-white/5 p-4">
             <p className="text-white/70 text-sm leading-relaxed whitespace-pre-line">
@@ -860,15 +965,15 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
               <div key={i} className="flex flex-col items-center gap-1">
                 {img ? (
                   <div className="w-12 rounded-md overflow-hidden border border-white/15" style={{ height: '4.5rem' }}>
-                    <img src={img} alt={card.name ?? ''} className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
+                    <img src={img} alt={getCardDisplayName(card)} className={`w-full h-full object-cover ${getCardOrientation(card) === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
                   <div className="w-12 rounded-md bg-white/5 border border-white/10 flex items-center justify-center" style={{ height: '4.5rem' }}>
                     <span className="material-symbols-outlined text-white/20 text-xs">style</span>
                   </div>
                 )}
-                <span className={`text-[9px] ${card.orientation === 'reversed' ? 'text-amber-400/60' : 'text-emerald-400/60'}`}>
-                  {card.orientation === 'upright' ? '正' : '逆'}
+                <span className={`text-[9px] ${getCardOrientation(card) === 'reversed' ? 'text-amber-400/60' : 'text-emerald-400/60'}`}>
+                  {getCardOrientation(card) === 'upright' ? '正' : '逆'}
                 </span>
               </div>
             )
@@ -1037,10 +1142,19 @@ function RelationshipDevView({ record }: { record: HistoryRecord }) {
 // ============================================================
 // View: Yes / No Tarot
 // ============================================================
+function normalizeYesNo(raw: unknown): YesNoAnswer | null {
+  if (!raw) return null
+  const s = String(raw).toLowerCase()
+  if (s.includes('yes') || s.includes('是')) return 'YES'
+  if (s.includes('no') || s.includes('否')) return 'NO'
+  if (s.includes('maybe') || s.includes('不确定') || s.includes('可能')) return 'MAYBE'
+  return 'MAYBE'
+}
+
 function YesNoView({ record }: { record: HistoryRecord }) {
   const cardData = Array.isArray(record.cards) ? record.cards[0] : null
   const result = record.reading_result ?? {}
-  const answer: YesNoAnswer | null = result.answer ?? null
+  const answer: YesNoAnswer | null = normalizeYesNo(result.answer)
   const interpretation: string = result.interpretation ?? ''
   const imageUrl = cardData ? (lookupTarotImage(cardData.name) ?? cardData.image ?? null) : null
   const answerColor = answer === 'YES' ? 'text-green-400' : answer === 'NO' ? 'text-red-400' : 'text-yellow-400'
@@ -1049,44 +1163,49 @@ function YesNoView({ record }: { record: HistoryRecord }) {
   return (
     <div className="max-w-3xl mx-auto">
       <QuestionBlock question={record.question} />
-      <div className="grid gap-6 md:grid-cols-[minmax(0,200px)_1fr]">
-        <div className="flex flex-col gap-3 items-center">
+      <div className="grid gap-8 md:grid-cols-[minmax(0,240px)_1fr]">
+        <div className="flex flex-col gap-4 items-center">
           {imageUrl ? (
-            <div className="w-40 h-60 overflow-hidden rounded-2xl border border-primary/30 shadow-[0_0_30px_rgba(127,19,236,0.4)]">
+            <div className="w-44 h-64 overflow-hidden rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_rgba(127,19,236,0.4)]">
               <img src={imageUrl} alt={cardData?.name ?? ''} className={`w-full h-full object-cover ${cardData?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
             </div>
           ) : (
-            <div className="w-40 h-60 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+            <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
               <span className="text-white/30 text-sm">无图片</span>
             </div>
           )}
           {cardData?.name && (
             <div className="text-center">
-              <p className="text-white font-semibold text-sm">{cardData.name}</p>
-              <p className="text-white/50 text-xs">{cardData.orientation === 'upright' ? '正位' : '逆位'}</p>
+              <p className="text-white font-bold text-lg">{cardData.name}</p>
+              <p className="text-white/50 text-sm">{cardData.orientation === 'upright' ? '正位' : '逆位'}</p>
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {answer && (
-            <div className={`rounded-2xl border border-primary/30 bg-gradient-to-br ${answerBg} to-transparent p-5`}>
+            <div className={`rounded-2xl border border-primary/30 bg-gradient-to-br ${answerBg} to-transparent p-6`}>
               <div className="flex items-center gap-3">
                 <span className={`material-symbols-outlined ${answerColor} text-3xl`}>
                   {answer === 'YES' ? 'check_circle' : answer === 'NO' ? 'cancel' : 'help'}
                 </span>
                 <div>
-                  <p className="text-xs font-medium text-white/60 uppercase tracking-wider">答案</p>
+                  <p className="text-sm font-medium text-white/60 uppercase tracking-wider">答案</p>
                   <p className={`text-4xl font-black ${answerColor}`}>{getAnswerText(answer)}</p>
                 </div>
               </div>
             </div>
           )}
           {interpretation && (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">解读</p>
-              <p className="text-sm leading-relaxed text-white/90 whitespace-pre-line">{interpretation}</p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">解读</p>
+              <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">{interpretation}</p>
             </div>
           )}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-sm text-white/50 leading-relaxed">
+              塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -1107,26 +1226,44 @@ function JiaobeiView({ record }: { record: HistoryRecord }) {
   const result = record.reading_result ?? {}
   const type: JiaobeiType | null = result.type ?? null
   const meta = type ? jiaobeiData[type] : null
-  if (!meta) return (
-    <div className="text-center py-16">
-      <p className="text-white/40 text-sm">无法解析掷筊结果数据</p>
-    </div>
-  )
+
+  const displayTitle = meta?.title ?? result.title ?? '筊杯结果'
+  const displaySubtitle = meta?.subtitle ?? ''
+  const displayEmoji = meta?.emoji ?? '🌕🌑'
+  const displayColor = meta?.color ?? '#a78bfa'
+  const displayGradient = meta?.gradient ?? 'from-purple-500/20 to-violet-500/20'
+  const displayDescription = result.description ?? ''
+
+  if (!meta && !result.title && !result.description) {
+    return (
+      <div className="text-center py-16">
+        <span className="material-symbols-outlined text-white/20 text-5xl mb-3 block">help_outline</span>
+        <p className="text-white/40 text-sm">无法解析掷筊结果数据</p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <QuestionBlock question={record.question} />
-      <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${meta.gradient} backdrop-blur-sm p-8 text-center`}>
-        <div className="text-7xl mb-5">{meta.emoji}</div>
-        <h2 className="text-5xl font-black mb-1 tracking-tight" style={{ color: meta.color }}>{meta.title}</h2>
-        <p className="text-white/60 text-lg font-medium uppercase tracking-wider mb-5">{meta.subtitle}</p>
-        {result.description && <p className="text-white/80 text-lg leading-relaxed max-w-xl mx-auto mb-5">{result.description}</p>}
+      <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${displayGradient} backdrop-blur-sm p-8 sm:p-10 text-center`}>
+        <div className="text-7xl sm:text-8xl mb-5">{displayEmoji}</div>
+        <h2 className="text-5xl sm:text-6xl font-black mb-1 tracking-tight" style={{ color: displayColor }}>{displayTitle}</h2>
+        {displaySubtitle && (
+          <p className="text-white/60 text-lg font-medium uppercase tracking-wider mb-5">{displaySubtitle}</p>
+        )}
+        {displayDescription && (
+          <div className="max-w-xl mx-auto mb-5">
+            <p className="text-white/80 text-lg sm:text-xl leading-relaxed">{displayDescription}</p>
+          </div>
+        )}
         {result.aiInterpretation && (
-          <div className="max-w-xl mx-auto rounded-2xl border border-primary/30 bg-primary/10 p-5 text-left">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="material-symbols-outlined text-primary text-lg">auto_awesome</span>
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">AI 解读</span>
+          <div className="max-w-xl mx-auto rounded-2xl border border-primary/30 bg-primary/10 p-5 sm:p-6 text-left">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">AI 解读</span>
             </div>
-            <p className="text-white/85 text-sm leading-relaxed">{result.aiInterpretation}</p>
+            <p className="text-white/85 text-sm sm:text-base leading-relaxed">{result.aiInterpretation}</p>
           </div>
         )}
       </div>
@@ -1152,7 +1289,7 @@ function renderContent(record: HistoryRecord) {
   if (key === 'two-choices') return <TwoChoicesView record={record} />
   if (key === 'wealth-current-status') return <WealthCurrentStatusView record={record} />
   if (key === 'wealth-obstacles') return <WealthObstaclesView record={record} />
-  if (['career-skills-direction', 'career-interview-exam'].includes(key))
+  if (['career-skills-direction', 'career-interview-exam', 'career-job'].includes(key))
     return <CareerDetailView record={record} />
   if (key === 'career-offer-decision') return <OfferDecisionView record={record} />
   if (key === 'career-stay-or-leave') return <StayOrLeaveView record={record} />
@@ -1196,6 +1333,14 @@ export default function HistoryDetailPage() {
         .single()
       if (error || !data) { setState('not_found'); return }
       if (data.user_id !== user.id) { setState('forbidden'); return }
+
+      if (typeof data.reading_result === 'string') {
+        try { data.reading_result = JSON.parse(data.reading_result) } catch {}
+      }
+      if (typeof data.cards === 'string') {
+        try { data.cards = JSON.parse(data.cards) } catch {}
+      }
+
       setRecord(data as HistoryRecord)
       setState('ready')
     }

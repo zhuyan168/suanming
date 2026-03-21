@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TenCardsReconciliationSlots from '../../../../components/fortune/TenCardsReconciliationSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -133,12 +132,6 @@ export default function ReconciliationResultPage() {
       setDeepReading(data);
       saveDeepReading(data);
 
-      saveReadingHistory({
-        spreadType: 'love-reconciliation',
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/themed-readings/love/reconciliation/result',
-      });
     } catch (err: any) {
       console.error('Failed to generate deep reading:', err);
       setError(err.message || '生成解读失败，请稍后重试');

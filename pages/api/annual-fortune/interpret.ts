@@ -13,6 +13,7 @@ import { generateAnnualReading, validateInterpretation } from '../../../utils/an
 import type { TarotCard, AnnualInterpretation } from '../../../types/annual-fortune';
 import { isMemberPlaceholder } from '../../../utils/membership-placeholder';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { parseAIJson } from '../../../lib/parseAIJson';
 
 interface InterpretRequest {
   themeCard: TarotCard;
@@ -171,20 +172,9 @@ ${monthCardsText}
       return null;
     }
 
-    // 解析 JSON
     let interpretation: any;
     try {
-      // 尝试提取 JSON（可能包裹在 ```json ``` 中）
-      const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || 
-                       content.match(/```\s*([\s\S]*?)\s*```/) ||
-                       content.match(/\{[\s\S]*\}/);
-      
-      if (jsonMatch) {
-        const jsonStr = jsonMatch[1] || jsonMatch[0];
-        interpretation = JSON.parse(jsonStr);
-      } else {
-        interpretation = JSON.parse(content);
-      }
+      interpretation = parseAIJson(content);
     } catch (parseError) {
       console.error('❌ Failed to parse DeepSeek response as JSON:', parseError);
       console.error('Response content:', content);

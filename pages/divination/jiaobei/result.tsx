@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
@@ -49,7 +48,6 @@ export default function ResultPage() {
   const [result, setResult] = useState<ResultInfo | null>(null);
   const [aiInterpretation, setAiInterpretation] = useState<string>('');
   const [isLoadingAI, setIsLoadingAI] = useState(false);
-  const hasSavedRef = useRef(false);
   const hasCheckedRef = useRef(false);
 
   useEffect(() => {
@@ -77,35 +75,20 @@ export default function ResultPage() {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
 
-    // 有问题则调用 AI 解读，否则直接保存基础结果
-    if (userQuestion && userQuestion.trim()) {
-      fetchAIInterpretation(resultType, userQuestion.trim());
-    } else {
-      if (!hasSavedRef.current) {
-        hasSavedRef.current = true;
-        saveReadingHistory({
-          spreadType: 'divination-jiaobei',
-          cards: [],
-          readingResult: {
-            type: resultType,
-            title: resultData[resultType].title,
-            description: resultData[resultType].description,
-          },
-          resultPath: `/divination/jiaobei/result?type=${resultType}`,
-        });
-      }
-    }
+    fetchInterpretation(resultType, userQuestion?.trim() || '');
   };
 
-  const fetchAIInterpretation = async (resultType: ResultType, userQuestion: string) => {
-    setIsLoadingAI(true);
+  const fetchInterpretation = async (resultType: ResultType, userQuestion: string) => {
+    const hasQuestion = userQuestion.length > 0;
+    if (hasQuestion) setIsLoadingAI(true);
+
     try {
       const headers = await getAuthHeaders();
       const response = await fetch('/api/jiaobei', {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          question: userQuestion,
+          question: userQuestion || '',
           result: resultType,
         }),
       });
@@ -114,60 +97,13 @@ export default function ResultPage() {
 
       if (response.ok && data.interpretation) {
         setAiInterpretation(data.interpretation);
-        
-        // AI 解读成功后保存记录
-        if (!hasSavedRef.current) {
-          hasSavedRef.current = true;
-          saveReadingHistory({
-            spreadType: 'divination-jiaobei',
-            question: userQuestion,
-            cards: [],
-            readingResult: {
-              type: resultType,
-              title: resultData[resultType].title,
-              description: resultData[resultType].description,
-              aiInterpretation: data.interpretation,
-            },
-            resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
-          });
-        }
-      } else {
-        console.error('AI 解读失败:', data);
-        // 即使 AI 失败也保存记录
-        if (!hasSavedRef.current) {
-          hasSavedRef.current = true;
-          saveReadingHistory({
-            spreadType: 'divination-jiaobei',
-            question: userQuestion,
-            cards: [],
-            readingResult: {
-              type: resultType,
-              title: resultData[resultType].title,
-              description: resultData[resultType].description,
-            },
-            resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
-          });
-        }
+      } else if (!response.ok) {
+        console.error('解读请求失败:', data);
       }
     } catch (error) {
-      console.error('调用 AI 解读出错:', error);
-      // 即使出错也保存记录
-      if (!hasSavedRef.current) {
-        hasSavedRef.current = true;
-        saveReadingHistory({
-          spreadType: 'divination-jiaobei',
-          question: userQuestion,
-          cards: [],
-          readingResult: {
-            type: resultType,
-            title: resultData[resultType].title,
-            description: resultData[resultType].description,
-          },
-          resultPath: `/divination/jiaobei/result?type=${resultType}&question=${encodeURIComponent(userQuestion)}`,
-        });
-      }
+      console.error('调用解读出错:', error);
     } finally {
-      setIsLoadingAI(false);
+      if (hasQuestion) setIsLoadingAI(false);
     }
   };
 

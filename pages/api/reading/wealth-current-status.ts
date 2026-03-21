@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { parseAIJson } from '../../../lib/parseAIJson';
 
 /**
  * 免费牌阵：我现在的财运如何？
@@ -92,7 +93,7 @@ async function handler(
     }
 
     const data = await response.json();
-    const content = JSON.parse(data.choices[0].message.content);
+    const content = parseAIJson(data.choices[0].message.content);
 
     if (accessStatus.userId) {
       await recordReadingHistory({

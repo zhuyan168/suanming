@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import ShootingForwardSlots from '../../../../components/fortune/ShootingForwardSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -104,13 +103,6 @@ export default function SkillsDirectionResult() {
         }));
       }
 
-      saveReadingHistory({
-        spreadType: 'career-skills-direction',
-        question: '我应该找什么样的工作？',
-        cards: cards,
-        readingResult: data,
-        resultPath: '/themed-readings/career-study/skills-direction/result',
-      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {

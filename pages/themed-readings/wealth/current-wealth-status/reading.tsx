@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import WealthThreeCardSlots from '../../../../components/fortune/WealthThreeCardSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -97,12 +96,6 @@ export default function WealthCurrentStatusReadingPage() {
         }));
       }
 
-      saveReadingHistory({
-        spreadType: 'wealth-current-status',
-        cards: cards,
-        readingResult: data,
-        resultPath: '/themed-readings/wealth/current-wealth-status/reading',
-      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {

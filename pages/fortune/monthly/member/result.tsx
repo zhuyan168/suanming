@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import SevenCardSlots from '../../../../components/fortune/SevenCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -323,12 +322,6 @@ export default function MonthlyMemberResultPage() {
       saveMonthlyMemberResult(updatedResult);
       setSavedResult(updatedResult);
 
-      saveReadingHistory({
-        spreadType: 'fortune-monthly-member',
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/fortune/monthly/member/result',
-      });
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
       setError(err.message || '生成运势失败，请稍后重试');

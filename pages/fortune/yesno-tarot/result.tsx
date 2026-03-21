@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
-import { saveReadingHistory } from '../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
 
@@ -144,40 +143,19 @@ export default function YesNoTarotResult() {
     const savedQuestion = localStorage.getItem(STORAGE_KEY_QUESTION) || '';
     setQuestion(savedQuestion);
 
-    // 判断是否使用AI解读
-    const hasQuestion = savedQuestion.trim().length > 0;
-    setUseAI(hasQuestion);
+    setUseAI(savedQuestion.trim().length > 0);
 
-    // 检查免费次数后再决定是否继续
-    checkAndProceed(draw.card, savedQuestion, hasQuestion);
+    fetchResult(savedQuestion, draw.card);
   }, [router]);
 
-  const checkAndProceed = async (drawnCard: ShuffledTarotCard, savedQuestion: string, hasQuestion: boolean) => {
-    if (hasQuestion) {
-      fetchAIInterpretation(savedQuestion, drawnCard);
-    } else {
-      const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
-      setAnswer(result.answer);
-      setInterpretation(result.reason);
-      setIsLoading(false);
-
-      saveReadingHistory({
-        spreadType: 'divination-yesno',
-        cards: [drawnCard],
-        readingResult: { answer: result.answer, interpretation: result.reason },
-        resultPath: '/fortune/yesno-tarot/result',
-      });
-    }
-  };
-
-  const fetchAIInterpretation = async (userQuestion: string, drawnCard: ShuffledTarotCard) => {
+  const fetchResult = async (userQuestion: string, drawnCard: ShuffledTarotCard) => {
     try {
       const headers = await getAuthHeaders();
       const response = await fetch('/api/tarot', {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          question: userQuestion,
+          question: userQuestion || '',
           cardName: drawnCard.name,
           orientation: drawnCard.orientation,
         }),
@@ -189,8 +167,7 @@ export default function YesNoTarotResult() {
         throw new Error(data.message || '获取解读失败');
       }
 
-      // 解析AI返回的答案
-      const aiAnswer = data.answer.toLowerCase();
+      const aiAnswer = (data.answer || '').toLowerCase();
       let parsedAnswer: YesNoAnswer = 'MAYBE';
       if (aiAnswer.includes('yes') || aiAnswer.includes('是')) {
         parsedAnswer = 'YES';
@@ -201,20 +178,11 @@ export default function YesNoTarotResult() {
       setAnswer(parsedAnswer);
       setInterpretation(data.interpretation || data.answer);
       setIsLoading(false);
-
-      saveReadingHistory({
-        spreadType: 'divination-yesno',
-        question: userQuestion,
-        cards: [drawnCard],
-        readingResult: { answer: parsedAnswer, interpretation: data.interpretation || data.answer },
-        resultPath: '/fortune/yesno-tarot/result',
-      });
     } catch (error) {
-      console.error('获取AI解读失败:', error);
-      // 降级到本地映射表
+      console.error('获取解读失败:', error);
       const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
       setAnswer(result.answer);
-      setInterpretation(result.reason + '\n\n（AI解读暂时不可用，这是基于牌意的简要判断）');
+      setInterpretation(result.reason + '\n\n（解读暂时不可用，这是基于牌意的简要判断）');
       setIsLoading(false);
     }
   };

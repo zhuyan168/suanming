@@ -9,6 +9,7 @@ import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard, CardMeaning } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
+import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 // 完整的78张塔罗牌数据（仅用于UI渲染背面卡片）
 const tarotCards = [
@@ -1101,8 +1102,10 @@ export default function SeasonalFortune() {
 
     try {
       // 调用后端 API 获取真实的塔罗牌，传递sessionId
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(`/api/seasonal-draw?slot=${emptySlotIndex + 1}&pick=${pickValue}&sessionId=${currentSessionId}`, {
         method: 'GET',
+        headers: authHeaders,
       });
 
       if (!response.ok) {

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { parseAIJson } from '../../../lib/parseAIJson';
 
 export default async function handler(
   req: NextApiRequest,
@@ -93,7 +94,7 @@ ${cardsInfo}`;
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '{}';
     
-    let result = JSON.parse(content);
+    let result = parseAIJson<any>(content);
 
     // 再次过滤确定性词汇
     const soften = (text: string) => {

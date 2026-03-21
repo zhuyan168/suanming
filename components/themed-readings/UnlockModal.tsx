@@ -1,11 +1,20 @@
+import { useRouter } from 'next/router';
+
 interface UnlockModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
+  const router = useRouter();
+
   if (typeof window === 'undefined') return null;
   if (!isOpen || isOpen !== true) return null;
+
+  const handleGoMembership = () => {
+    onClose();
+    router.push('/membership');
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -35,10 +44,11 @@ export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
 
             <div className="flex flex-col gap-3">
               <button
-                onClick={onClose}
+                type="button"
+                onClick={handleGoMembership}
                 className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
               >
-                了解更多
+                前往开通会员
               </button>
               <button
                 onClick={onClose}

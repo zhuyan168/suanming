@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import type { SpreadTheme } from '../config/themedReadings';
 import { getSpreadConfig } from '../config/themedReadings';
@@ -85,6 +85,10 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
     userId: null,
   });
 
+  // Tracks when the last access check completed; used by the visibility-change
+  // handler to avoid hammering the server on rapid tab switches.
+  const lastCheckedRef = useRef<number>(0);
+
   const handleDenied = (reason: SpreadAccessState['reason']) => {
     setState({
       loading: false,
@@ -102,10 +106,13 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       return;
     }
 
-    let message = '请先登录账号以继续占卜';
     if (reason === 'member_only') {
-      message = '该牌阵为会员专属，请开通会员后使用';
-    } else if (reason === 'daily_limit') {
+      router.replace('/membership');
+      return;
+    }
+
+    let message = '请先登录账号以继续占卜';
+    if (reason === 'daily_limit') {
       message = '今日免费次数已用完，开通会员后可继续使用';
     }
 
@@ -121,6 +128,10 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
   };
 
   const checkAccess = useCallback(async () => {
+    // Record the moment this check starts so the visibility-change handler
+    // can decide whether a recheck is needed on next tab focus.
+    lastCheckedRef.current = Date.now();
+
     try {
       let spreadAccess: SpreadAccess = 'free';
 
@@ -149,6 +160,9 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       const headers = await getAuthHeaders();
       const params = new URLSearchParams();
       params.set('spreadAccess', spreadAccess);
+      // Send the browser's IANA timezone so the server can compute "today"
+      // relative to the user's local clock rather than a fixed server timezone.
+      params.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
 
       const response = await fetch(`/api/access/check?${params.toString()}`, {
         headers,
@@ -234,6 +248,31 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       cancelled = true;
       subscription.unsubscribe();
     };
+  }, [checkAccess]);
+
+  // Recheck access when the user returns to this tab after being away.
+  // This handles the "crossed midnight without refreshing the page" scenario:
+  // the user's free quota resets at their local midnight, and the next time
+  // they tab back in (after ≥ 60 s since the last check) we re-verify.
+  //
+  // We use visibilitychange rather than a midnight timer because:
+  //  - No need to compute ms-to-midnight or handle DST / clock-change edge cases
+  //  - No stale timer references after component updates
+  //  - Naturally triggers when the user comes back to the page, which is exactly
+  //    when an updated answer is most useful
+  //  - A 60-second debounce prevents hammering the server on rapid tab switches
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        Date.now() - lastCheckedRef.current > 60_000
+      ) {
+        checkAccess();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [checkAccess]);
 
   return state;

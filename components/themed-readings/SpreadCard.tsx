@@ -31,6 +31,11 @@ export default function SpreadCard({
       return;
     }
 
+    if (showPaywallBadge) {
+      router.push('/membership');
+      return;
+    }
+
     const targetPath = spread.href 
       ? spread.href 
       : (

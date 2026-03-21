@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -104,13 +103,6 @@ export default function ThreeCardReadingPage() {
       };
       localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(updatedResult));
 
-      saveReadingHistory({
-        spreadType: 'three-card-general',
-        question: question || undefined,
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/reading/general/three-card-universal/reading',
-      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');

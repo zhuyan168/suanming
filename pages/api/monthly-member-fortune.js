@@ -1,4 +1,5 @@
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
   // 只允许 POST 请求
@@ -132,15 +133,9 @@ JSON 结构示例：
       return res.status(500).json({ error: '未能获取有效响应' });
     }
 
-    // 解析 JSON
     let fortuneData;
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        fortuneData = JSON.parse(jsonMatch[0]);
-      } else {
-        fortuneData = JSON.parse(content);
-      }
+      fortuneData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
       console.error('Raw Content:', content);

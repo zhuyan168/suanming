@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { parseAIJson } from '../../../lib/parseAIJson';
 
 async function handler(
   req: NextApiRequest,
@@ -122,7 +123,7 @@ async function handler(
     }
 
     const data = await response.json();
-    const reading = JSON.parse(data.choices[0].message.content);
+    const reading = parseAIJson(data.choices[0].message.content);
 
     if (accessStatus.userId) {
       await recordReadingHistory({

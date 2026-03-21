@@ -21,7 +21,7 @@ function toChineseResendError(msg: string): string {
 
 interface Profile {
   username: string | null
-  is_member: boolean
+  membership_expires_at: string | null
   created_at: string | null
 }
 
@@ -34,12 +34,20 @@ function formatDate(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
+/** 以 profiles.membership_expires_at 为准：有值、可解析且晚于当前时间则为有效会员 */
+function isActiveMemberByExpiresAt(expiresAt: string | null | undefined): boolean {
+  if (expiresAt == null || String(expiresAt).trim() === '') return false
+  const d = new Date(expiresAt)
+  if (Number.isNaN(d.getTime())) return false
+  return d > new Date()
+}
+
 export default function AccountPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile>({
     username: null,
-    is_member: false,
+    membership_expires_at: null,
     created_at: null,
   })
   const [state, setState] = useState<PageState>('loading')
@@ -77,22 +85,28 @@ export default function AccountPage() {
 
       setUser(currentUser)
 
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('username, is_member, created_at')
+        .select('username, created_at, membership_expires_at')
         .eq('id', currentUser.id)
-        .single()
+        .maybeSingle()
+
+      if (profileError) {
+        console.warn('[account] profiles 读取失败:', profileError.message)
+      }
 
       if (profileData) {
+        const exp = profileData.membership_expires_at
         setProfile({
-          username: profileData.username ?? null,
-          is_member: profileData.is_member === true,
+          username: profileData.username != null ? String(profileData.username) : null,
+          membership_expires_at:
+            exp != null && String(exp).trim() !== '' ? String(exp) : null,
           created_at: profileData.created_at ?? currentUser.created_at ?? null,
         })
       } else {
         setProfile({
           username: null,
-          is_member: false,
+          membership_expires_at: null,
           created_at: currentUser.created_at ?? null,
         })
       }
@@ -215,9 +229,12 @@ export default function AccountPage() {
     )
   }
 
-  const displayNickname = profile.username || '未设置昵称'
-  const displayMembership = profile.is_member ? '会员用户' : '普通用户'
+  const nicknameTrimmed = profile.username?.trim() ?? ''
+  const displayNickname = nicknameTrimmed || '未设置昵称'
+  const memberActive = isActiveMemberByExpiresAt(profile.membership_expires_at)
+  const displayMembership = memberActive ? '会员用户' : '普通用户'
   const displayDate = formatDate(profile.created_at)
+  const displayMembershipExpires = formatDate(profile.membership_expires_at)
 
   return (
     <>
@@ -265,7 +282,7 @@ export default function AccountPage() {
                   <span className="material-symbols-outlined text-primary text-2xl">person</span>
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-lg font-semibold truncate ${profile.username ? 'text-white' : 'text-white/40'}`}>
+                  <p className={`text-lg font-semibold truncate ${nicknameTrimmed ? 'text-white' : 'text-white/40'}`}>
                     {displayNickname}
                   </p>
                   <p className="text-white/40 text-sm truncate">{user?.email ?? ''}</p>
@@ -309,7 +326,7 @@ export default function AccountPage() {
                   label="昵称"
                   value={displayNickname}
                   icon="badge"
-                  dimValue={!profile.username}
+                  dimValue={!nicknameTrimmed}
                   action={
                     !isEditing ? (
                       <button
@@ -357,7 +374,10 @@ export default function AccountPage() {
                   </div>
                 )}
 
-                <InfoRow label="会员状态" value={displayMembership} icon="card_membership" dimValue={!profile.is_member} />
+                <InfoRow label="会员状态" value={displayMembership} icon="card_membership" dimValue={!memberActive} />
+                {memberActive && (
+                  <InfoRow label="会员到期时间" value={displayMembershipExpires} icon="event" />
+                )}
                 <InfoRow label="注册时间" value={displayDate} icon="calendar_today" />
               </div>
             </div>
@@ -370,6 +390,16 @@ export default function AccountPage() {
               >
                 <span className="material-symbols-outlined text-lg">auto_stories</span>
                 我的占卜记录
+              </Link>
+            </div>
+
+            <div className="mt-3">
+              <Link
+                href="/membership"
+                className="w-full rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-3.5 text-white/70 text-sm font-medium hover:bg-white/[0.06] hover:text-white/90 hover:border-white/20 transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-lg">workspace_premium</span>
+                会员中心
               </Link>
             </div>
 

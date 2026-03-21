@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -101,12 +100,6 @@ export default function OfferDecisionReading() {
         }));
       }
 
-      saveReadingHistory({
-        spreadType: 'career-offer-decision',
-        cards: cards,
-        readingResult: data,
-        resultPath: '/themed-readings/career-study/offer-decision/reading',
-      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {

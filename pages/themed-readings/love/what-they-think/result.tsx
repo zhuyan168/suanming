@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeColsSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { SpreadReading, SpreadCard } from '../../../../types/spread-reading';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -134,12 +133,6 @@ export default function WhatTheyThinkResult() {
         setReading(data.reading);
         saveReading(data.reading);
 
-        saveReadingHistory({
-          spreadType: 'love-what-they-think',
-          cards: result.cards,
-          readingResult: data.reading,
-          resultPath: '/themed-readings/love/what-they-think/result',
-        });
       } else {
         throw new Error('解读数据格式错误');
       }

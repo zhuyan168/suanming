@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import MoneyBlocksSlots from '../../../../components/fortune/MoneyBlocksSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -107,12 +106,6 @@ export default function WealthObstaclesReadingPage() {
         }));
       }
 
-      saveReadingHistory({
-        spreadType: 'wealth-obstacles',
-        cards: cards,
-        readingResult: data,
-        resultPath: '/themed-readings/wealth/wealth-obstacles/reading',
-      });
     } catch (err: any) {
       setError(err.message || '出错了，请稍后重试');
     } finally {

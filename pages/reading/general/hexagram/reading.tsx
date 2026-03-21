@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import HexagramSlots from '../../../../components/fortune/HexagramSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -124,13 +123,6 @@ export default function HexagramReadingPage() {
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
 
-      saveReadingHistory({
-        spreadType: 'hexagram',
-        question: question || undefined,
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/reading/general/hexagram/reading',
-      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');

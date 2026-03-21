@@ -1,7 +1,7 @@
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { getYesNoByCard, getAnswerText } from '../../utils/yesno-tarot-logic';
 
 export default async function handler(req, res) {
-  // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,9 +12,29 @@ export default async function handler(req, res) {
   try {
     const { question, cardName, orientation } = req.body;
 
-    // 验证必需参数
-    if (!question || !cardName || !orientation) {
-      return res.status(400).json({ error: '缺少必需参数' });
+    if (!cardName || !orientation) {
+      return res.status(400).json({ error: '缺少必需参数：cardName, orientation' });
+    }
+
+    // 无问题时走本地规则
+    if (!question || !question.trim()) {
+      const localResult = getYesNoByCard(cardName, orientation);
+      const result = {
+        answer: getAnswerText(localResult.answer),
+        interpretation: localResult.reason,
+      };
+
+      if (accessStatus.userId) {
+        await recordReadingHistory({
+          userId: accessStatus.userId,
+          spreadType: 'yesno-tarot',
+          cards: [{ name: cardName, orientation }],
+          readingResult: { answer: localResult.answer, interpretation: localResult.reason },
+          resultPath: '/fortune/yesno-tarot/result',
+        });
+      }
+
+      return res.status(200).json(result);
     }
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -131,7 +151,7 @@ export default async function handler(req, res) {
         userId: accessStatus.userId,
         spreadType: 'yesno-tarot',
         question,
-        cards: [{ cardName, orientation }],
+        cards: [{ name: cardName, orientation }],
         readingResult: result,
         resultPath: '/fortune/yesno-tarot/result'
       });

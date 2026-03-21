@@ -1,4 +1,5 @@
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
   // 只允许 POST 请求
@@ -107,23 +108,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: '未能获取有效响应' });
     }
 
-    // 解析 JSON 响应
     let fortuneData;
     try {
-      // 尝试提取 JSON（可能被包裹在代码块中）
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        fortuneData = JSON.parse(jsonMatch[0]);
-      } else {
-        fortuneData = JSON.parse(content);
-      }
+      fortuneData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON 解析失败:', parseError);
       console.error('原始内容:', content);
-      return res.status(500).json({ 
-        error: '解析运势数据失败',
-        rawContent: content 
-      });
+      return res.status(500).json({ error: '解析运势数据失败' });
     }
 
     // 验证返回的数据结构

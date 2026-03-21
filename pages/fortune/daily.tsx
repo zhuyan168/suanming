@@ -6,7 +6,6 @@ import CardStrip from '../../components/fortune/CardStrip';
 import ScrollBar from '../../components/fortune/ScrollBar';
 import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
 import { TarotCard } from '../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { useSpreadAccess } from '../../hooks/useSpreadAccess';
 import { getAuthHeaders } from '../../lib/apiHeaders';
@@ -659,10 +658,16 @@ const tarotCards = [
   },
 ];
 
-// 工具函数：获取今日的日期字符串（基于用户时区）
-const getTodayDateString = () => {
-  const today = new Date();
-  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+// 工具函数：获取今日的日期字符串（基于用户浏览器 IANA 时区，与服务端 tz 参数保持一致）
+// en-CA locale 输出 YYYY-MM-DD 格式，与服务端 getTodayStartIso 的 localDateStr 格式相同
+const getTodayDateString = (): string => {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
 };
 
 // 工具函数：随机选择
@@ -883,12 +888,6 @@ export default function DailyFortune() {
       setIsAnimating(false);
       setShowCards(false);
 
-      saveReadingHistory({
-        spreadType: 'fortune-daily',
-        cards: [{ name: card.name, orientation, id: card.id }],
-        readingResult: data.fortune,
-        resultPath: '/fortune/daily',
-      });
     } catch (err: any) {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);

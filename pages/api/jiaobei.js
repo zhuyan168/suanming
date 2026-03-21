@@ -29,9 +29,11 @@ export default async function handler(req, res) {
           userId: accessStatus.userId,
           spreadType: 'divination-jiaobei',
           question: question || null,
+          cards: [],
           readingResult: {
-            interpretation: defaultInterpretations[result] || defaultInterpretations.sheng,
-            result,
+            type: result,
+            title: { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' }[result] || result,
+            description: defaultInterpretations[result] || defaultInterpretations.sheng,
           },
           resultPath: `/divination/jiaobei/result?type=${result}`,
         });
@@ -121,9 +123,12 @@ export default async function handler(req, res) {
         userId: accessStatus.userId,
         spreadType: 'divination-jiaobei',
         question: question || null,
+        cards: [],
         readingResult: {
-          interpretation: content.trim(),
-          result,
+          type: result,
+          title: { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' }[result] || result,
+          description: { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' }[result] || '',
+          aiInterpretation: content.trim(),
         },
         resultPath: `/divination/jiaobei/result?type=${result}`,
       });

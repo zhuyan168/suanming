@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HorseshoeSlots from '../../../../components/fortune/HorseshoeSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -211,13 +210,6 @@ export default function HorseshoeReadingPage() {
       };
       localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(updatedResult));
 
-      saveReadingHistory({
-        spreadType: 'horseshoe',
-        question: question || undefined,
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/reading/general/horseshoe/reading',
-      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');

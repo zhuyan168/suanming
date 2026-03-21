@@ -9,7 +9,6 @@ import {
   generateBasicSummary,
   generateBasicActions,
 } from '../../../../utils/future-lover-interpretation';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -130,12 +129,6 @@ export default function FutureLoverResult() {
       setDeepReading(data);
       saveDeepReading(data);
 
-      saveReadingHistory({
-        spreadType: 'love-future-lover',
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/themed-readings/love/future-lover/result',
-      });
     } catch (err: any) {
       console.error('Failed to generate deep reading:', err);
       setError(err.message || '生成深度解读失败，已显示基础解读');

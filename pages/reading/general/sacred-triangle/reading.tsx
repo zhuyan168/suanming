@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 
@@ -105,13 +104,6 @@ export default function SacredTriangleReadingPage() {
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
 
-      saveReadingHistory({
-        spreadType: 'sacred-triangle',
-        question: question || undefined,
-        cards: result.cards,
-        readingResult: data,
-        resultPath: '/reading/general/sacred-triangle/reading',
-      });
     } catch (err: any) {
       console.error('Error generating reading:', err);
       setError(err.message || '出错了，请稍后重试');

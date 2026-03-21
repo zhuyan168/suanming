@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import CareerDevelopmentSevenSlots from '../../../../components/fortune/CareerDevelopmentSevenSlots';
-import { saveReadingHistory } from '../../../../lib/saveReadingHistory';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
@@ -130,13 +129,6 @@ export default function StayOrLeaveReading() {
           localStorage.setItem(storageKey, JSON.stringify(updated));
           sessionStorage.setItem(storageKey, JSON.stringify(updated));
 
-          saveReadingHistory({
-            spreadType: 'career-stay-or-leave',
-            question: '这份工作是否值得继续做下去？',
-            cards: result.cards,
-            readingResult: data,
-            resultPath: '/themed-readings/career-study/stay-or-leave/reading',
-          });
         }
       } else {
         setError(data.error || '生成解读失败');

@@ -1,4 +1,5 @@
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
   // 只允许 POST 请求
@@ -155,16 +156,9 @@ ${cardsInfo}
       return res.status(500).json({ error: '未能获取有效响应' });
     }
 
-    // 解析 JSON
     let readingData;
     try {
-      // 尝试提取 JSON（移除可能的 Markdown 代码块标记）
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        readingData = JSON.parse(jsonMatch[0]);
-      } else {
-        readingData = JSON.parse(content);
-      }
+      readingData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
       console.error('Raw Content:', content);
