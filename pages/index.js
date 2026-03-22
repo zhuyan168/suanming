@@ -872,6 +872,7 @@ export default function Home() {
   const toastTimerRef = useRef(null);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -944,6 +945,26 @@ export default function Home() {
   const handleFeatureComingSoon = (title) => {
     showToast(title, '该功能正在开发中，敬请期待。');
   };
+
+  const closeMobileNav = () => setMobileNavOpen(false);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [mobileNavOpen]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mobileNavOpen]);
 
   const handleFortuneMessage = (title) => {
     showToast(title, '我们会根据你的反馈优先开放此项占卜服务。');
@@ -1030,12 +1051,109 @@ export default function Home() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleFeatureComingSoon('移动端菜单开发中')}
-                  className="md:hidden flex items-center justify-center rounded-lg h-10 w-10 bg-white/10 text-white hover:bg-white/20 transition-colors"
+                  onClick={() => setMobileNavOpen(true)}
+                  aria-expanded={mobileNavOpen}
+                  aria-controls="mobile-main-nav"
+                  aria-label="打开菜单"
+                  className="md:hidden flex items-center justify-center rounded-lg h-10 w-10 bg-white/10 text-white hover:bg-white/20 transition-colors shrink-0"
                 >
                   <span className="material-symbols-outlined">menu</span>
                 </button>
               </header>
+              {mobileNavOpen && (
+                <div className="fixed inset-0 z-[60] md:hidden" role="presentation">
+                  <button
+                    type="button"
+                    aria-label="关闭菜单"
+                    className="absolute inset-0 bg-black/60"
+                    onClick={closeMobileNav}
+                  />
+                  <nav
+                    id="mobile-main-nav"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="主导航"
+                    className="absolute top-0 right-0 bottom-0 flex w-[min(100vw,18rem)] flex-col border-l border-white/10 bg-background-dark/98 backdrop-blur-md shadow-xl"
+                  >
+                    <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-3">
+                      <span className="text-white text-sm font-semibold tracking-wide">菜单</span>
+                      <button
+                        type="button"
+                        onClick={closeMobileNav}
+                        aria-label="关闭菜单"
+                        className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
+                      >
+                        <span className="material-symbols-outlined">close</span>
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-1 p-4 pt-3">
+                      <Link
+                        href="/"
+                        onClick={closeMobileNav}
+                        className="rounded-lg px-3 py-3 text-white text-base font-medium hover:bg-white/10 transition-colors"
+                      >
+                        首页
+                      </Link>
+                      <a
+                        href="#"
+                        onClick={closeMobileNav}
+                        className="rounded-lg px-3 py-3 text-white/70 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
+                      >
+                        关于
+                      </a>
+                    </div>
+                    <div className="mx-4 h-px bg-white/10 shrink-0" />
+                    <div className="flex flex-col gap-3 p-4 overflow-y-auto flex-1 min-h-0">
+                      {authLoading ? (
+                        <div className="h-24 rounded-lg bg-white/5 animate-pulse" />
+                      ) : user ? (
+                        <>
+                          {user.email && (
+                            <p className="px-1 text-xs text-white/50 truncate" title={user.email}>
+                              {displayEmail(user.email)}
+                            </p>
+                          )}
+                          <Link
+                            href="/account"
+                            onClick={closeMobileNav}
+                            className="flex items-center gap-2 rounded-lg px-3 py-3 text-white/90 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-xl">person</span>
+                            个人中心
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              closeMobileNav();
+                              handleSignOut();
+                            }}
+                            className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors"
+                          >
+                            退出登录
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href="/register"
+                            onClick={closeMobileNav}
+                            className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
+                          >
+                            注册
+                          </Link>
+                          <Link
+                            href="/login"
+                            onClick={closeMobileNav}
+                            className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors"
+                          >
+                            登录
+                          </Link>
+                        </>
+                      )}
+                    </div>
+                  </nav>
+                </div>
+              )}
               <main className="flex-1 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
                 <div className="mx-auto max-w-6xl">
                   <section className="mb-16">
