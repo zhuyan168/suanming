@@ -1004,12 +1004,12 @@ export default function Home() {
                 </div>
                 <div className="hidden md:flex flex-1 justify-end gap-8">
                   <div className="flex items-center gap-9">
-                    <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
+                    <Link className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="/">
                       首页
-                    </a>
-                    <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
+                    </Link>
+                    <Link className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="/about">
                       关于
-                    </a>
+                    </Link>
                   </div>
                   <div className="flex gap-2 items-center">
                     {authLoading ? (
@@ -1094,13 +1094,13 @@ export default function Home() {
                       >
                         首页
                       </Link>
-                      <a
-                        href="#"
+                      <Link
+                        href="/about"
                         onClick={closeMobileNav}
                         className="rounded-lg px-3 py-3 text-white/70 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
                       >
                         关于
-                      </a>
+                      </Link>
                     </div>
                     <div className="mx-4 h-px bg-white/10 shrink-0" />
                     <div className="flex flex-col gap-3 p-4 overflow-y-auto flex-1 min-h-0">
@@ -1169,16 +1169,16 @@ export default function Home() {
                             探索未知，预见未来
                           </h1>
                           <h2 className="text-white/80 text-base sm:text-lg font-normal leading-normal max-w-2xl mx-auto">
-                            Discover profound personal insights and navigate your path with our ancient divination tools.
+                            通过塔罗与占卜工具，帮助你看见当下的能量流动，获得更清晰的指引。
                           </h2>
                         </div>
                         {/* 原 HTML 通过 data-tarot-trigger + 外部脚本触发弹窗，Next.js 中脚本未运行导致无法开启，这里改为 React 事件 */}
                         <button
                           type="button"
                           onClick={handleTarotTrigger}
-                          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105"
+                          className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105"
                         >
-                          <span className="truncate">Start Your Reading</span>
+                          <span className="truncate">开始占卜</span>
                         </button>
                       </div>
                     </div>
@@ -1351,9 +1351,9 @@ export default function Home() {
               </main>
               <footer className="border-t border-solid border-white/10 mt-16">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8 md:px-16 lg:px-24 py-8">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4 text-white/70">
-                      <div className="size-5 text-primary">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-5 text-white/70">
+                      <div className="size-5 shrink-0 text-primary" aria-hidden>
                         <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                           <path
                             d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z"
@@ -1361,19 +1361,37 @@ export default function Home() {
                           ></path>
                         </svg>
                       </div>
-                      <span className="text-sm">© 2024 FateAura. All rights reserved.</span>
+                      <span className="text-sm text-center md:text-left">© 2026 FateAura 版权所有</span>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                        Terms of Service
-                      </a>
-                      <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                        Privacy Policy
-                      </a>
-                      <a className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">
-                        Contact Us
-                      </a>
-                    </div>
+                    <nav
+                      className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2 text-sm"
+                      aria-label="页脚导航"
+                    >
+                      <Link
+                        href="/about"
+                        className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
+                      >
+                        关于我们
+                      </Link>
+                      <Link
+                        href="/privacy"
+                        className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
+                      >
+                        隐私政策
+                      </Link>
+                      <Link
+                        href="/terms"
+                        className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
+                      >
+                        服务条款
+                      </Link>
+                      <Link
+                        href="/contact"
+                        className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
+                      >
+                        联系我们
+                      </Link>
+                    </nav>
                   </div>
                 </div>
               </footer>
