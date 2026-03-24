@@ -19,6 +19,53 @@ function toChineseError(msg: string): string {
   return msg
 }
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'string') return error
+  if (error instanceof Error) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string') return message
+  }
+  return ''
+}
+
+function toFriendlyRegisterError(error: unknown): string {
+  const rawMessage = getErrorMessage(error)
+  const message = rawMessage.toLowerCase()
+
+  if (
+    message.includes('too many requests') ||
+    message.includes('429') ||
+    message.includes('status code 429') ||
+    message.includes('http 429')
+  ) {
+    return '当前注册请求过于频繁，请稍等几分钟后再试，或更换网络后重试。'
+  }
+
+  if (
+    message.includes('failed to fetch') ||
+    message.includes('typeerror: failed to fetch')
+  ) {
+    return '网络连接失败，请检查网络、关闭浏览器拦截插件后重试'
+  }
+
+  if (
+    message.includes('service unavailable') ||
+    message.includes('服务不可用') ||
+    message.includes('status code 503') ||
+    message.includes('http 503') ||
+    message.includes('503')
+  ) {
+    return '服务暂时不可用，请稍后再试'
+  }
+
+  if (rawMessage) {
+    return toChineseError(rawMessage)
+  }
+
+  return '注册失败，请稍后重试'
+}
+
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -68,23 +115,27 @@ export default function RegisterPage() {
     }
 
     setLoading(true)
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        },
+      })
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-      },
-    })
+      if (signUpError) {
+        setError(toChineseError(signUpError.message))
+        return
+      }
 
-    setLoading(false)
-
-    if (signUpError) {
-      setError(toChineseError(signUpError.message))
-      return
+      setSuccess(true)
+    } catch (err) {
+      console.error('注册请求异常:', err)
+      setError(toFriendlyRegisterError(err))
+    } finally {
+      setLoading(false)
     }
-
-    setSuccess(true)
   }
 
   return (
