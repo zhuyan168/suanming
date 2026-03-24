@@ -65,7 +65,13 @@ export default function ChangePasswordPage() {
     if (!user?.email) return
     setSendingVerification(true)
     setVerificationResult(null)
-    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: user.email })
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    })
     setSendingVerification(false)
     if (resendError) {
       setVerificationResult({ type: 'error', text: toChineseError(resendError.message) })

@@ -42,7 +42,13 @@ export default function RegisterPage() {
     if (!email.trim()) return
     setResending(true)
     setResendResult(null)
-    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    })
     setResending(false)
     if (resendError) {
       setResendResult({ type: 'error', text: toChineseError(resendError.message) })
@@ -66,6 +72,9 @@ export default function RegisterPage() {
     const { error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
     })
 
     setLoading(false)

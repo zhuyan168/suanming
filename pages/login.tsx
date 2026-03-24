@@ -49,7 +49,13 @@ export default function LoginPage() {
     if (!email.trim()) return
     setResending(true)
     setResendResult(null)
-    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email: email.trim() })
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    })
     setResending(false)
     if (resendError) {
       setResendResult({ type: 'error', text: toChineseError(resendError.message) })
@@ -98,7 +104,7 @@ export default function LoginPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       },
     })
 

@@ -58,6 +58,9 @@ export function useEmailVerification(): EmailVerificationState {
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email: user.email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
     })
 
     setSending(false)

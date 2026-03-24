@@ -66,7 +66,13 @@ export default function AccountPage() {
   const handleSendVerification = useCallback(async () => {
     if (!user?.email) return
     setSendingVerification(true)
-    const { error } = await supabase.auth.resend({ type: 'signup', email: user.email })
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: user.email,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    })
     setSendingVerification(false)
     if (error) {
       setToast({ type: 'error', text: toChineseResendError(error.message) })
