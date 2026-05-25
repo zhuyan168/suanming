@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "title": "FateAura - 命运占卜与运势指引"
+  },
+  "nav": {
+    "home": "首页",
+    "about": "关于",
+    "account": "个人中心",
+    "signout": "退出登录",
+    "register": "注册",
+    "login": "登录",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "menu": "菜单"
+  },
+  "hero": {
+    "title": "探索未知，预见未来",
+    "subtitle": "通过塔罗与占卜工具，帮助你看见当下的能量流动，获得更清晰的指引。",
+    "cta": "开始占卜"
+  },
+  "section": {
+    "general": {
+      "title": "综合占卜",
+      "desc": "适用于不限定领域的通用牌阵，帮助你在犹豫与选择中，看清当下能量。",
+      "spreads": "通用牌阵",
+      "yesno": "是否塔罗",
+      "oracle": "掷筊占卜"
+    },
+    "fortune": {
+      "title": "运势测算",
+      "desc": "帮你了解当下与一段时间内的运势变化，提前感知节奏，把握属于你的时机。",
+      "daily": "每日运势",
+      "monthly": "月度运势",
+      "seasonal": "四季牌阵",
+      "annual": "年度运势",
+      "membersOnly": "会员专享"
+    },
+    "themed": {
+      "title": "主题占卜",
+      "desc": "聚焦具体的人生主题，在重要关系与选择中，获得更清晰的指引。",
+      "love": "爱情",
+      "career": "事业&学业",
+      "wealth": "财富"
+    }
+  },
+  "tagline": "占卜呈现当下能量的趋势，但未来始终掌握在你手里。",
+  "footer": {
+    "copyright": "© 2026 FateAura 版权所有",
+    "about": "关于我们",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "contact": "联系我们",
+    "nav": "页脚导航"
+  },
+  "lang": {
+    "switch": "EN"
+  }
+}

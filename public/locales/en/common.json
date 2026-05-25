@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "title": "FateAura – Tarot & Divination"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "account": "My Account",
+    "signout": "Sign Out",
+    "register": "Sign Up",
+    "login": "Sign In",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu"
+  },
+  "hero": {
+    "title": "Illuminate the Path Ahead",
+    "subtitle": "Let tarot and intuitive divination help you tune into the energy around you and find your own clarity.",
+    "cta": "Begin Reading"
+  },
+  "section": {
+    "general": {
+      "title": "General Reading",
+      "desc": "Open to any question or theme — draw a spread and let the cards reflect where your energy flows right now.",
+      "spreads": "Tarot Spreads",
+      "yesno": "Yes / No Tarot",
+      "oracle": "Oracle Divination"
+    },
+    "fortune": {
+      "title": "Energy Forecasts",
+      "desc": "Check in with the rhythm of your days, months, and seasons — so you can move with the current instead of against it.",
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "seasonal": "Seasonal",
+      "annual": "Year Ahead",
+      "membersOnly": "Members only"
+    },
+    "themed": {
+      "title": "Themed Readings",
+      "desc": "Go deeper on the moments that matter most — love, purpose, and the flow of abundance in your life.",
+      "love": "Love",
+      "career": "Career & Studies",
+      "wealth": "Wealth"
+    }
+  },
+  "tagline": "The cards reveal the currents — the choices are always yours.",
+  "footer": {
+    "copyright": "© 2026 FateAura. All rights reserved.",
+    "about": "About",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact",
+    "nav": "Footer navigation"
+  },
+  "lang": {
+    "switch": "中文"
+  }
+}

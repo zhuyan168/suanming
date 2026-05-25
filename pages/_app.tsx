@@ -1,13 +1,14 @@
 // pages/_app.tsx
 import type { AppProps } from "next/app";
 import Script from "next/script";
+import { appWithTranslation } from "next-i18next/pages";
 
 // ✅ 关键：全局 Tailwind 样式只需要在这里引入一次
 import "../styles/globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       {GA_ID && (
@@ -34,3 +35,5 @@ export default function MyApp({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+export default appWithTranslation(MyApp);

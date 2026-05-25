@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next/pages';
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
 import { supabase } from '../lib/supabase';
 import FloatingLuna from '../components/luna/FloatingLuna';
 
@@ -866,6 +868,13 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useTranslation('common');
+
+  const switchLocale = () => {
+    const next = router.locale === 'en' ? 'zh' : 'en';
+    router.push(router.asPath, router.asPath, { locale: next });
+  };
+
   const [isTarotOpen, setIsTarotOpen] = useState(false);
   const [toast, setToast] = useState({ title: '', message: '' });
   const [isToastVisible, setIsToastVisible] = useState(false);
@@ -973,7 +982,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>FateAura - 命运占卜与运势指引</title>
+        <title>{t('meta.title')}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -1005,13 +1014,20 @@ export default function Home() {
                 <div className="hidden md:flex flex-1 justify-end gap-8">
                   <div className="flex items-center gap-9">
                     <Link className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="/">
-                      首页
+                      {t('nav.home')}
                     </Link>
                     <Link className="text-white/70 text-sm font-medium leading-normal hover:text-primary transition-colors" href="/about">
-                      关于
+                      {t('nav.about')}
                     </Link>
                   </div>
                   <div className="flex gap-2 items-center">
+                    <button
+                      type="button"
+                      onClick={switchLocale}
+                      className="flex items-center justify-center h-8 px-3 rounded-md border border-white/20 text-white/70 text-xs font-medium hover:border-primary hover:text-primary transition-colors"
+                    >
+                      {t('lang.switch')}
+                    </button>
                     {authLoading ? (
                       <div className="h-10 w-20" />
                     ) : user ? (
@@ -1021,14 +1037,14 @@ export default function Home() {
                           className="flex items-center gap-1.5 text-white/70 text-sm font-medium hover:text-primary transition-colors"
                         >
                           <span className="material-symbols-outlined text-base">person</span>
-                          个人中心
+                          {t('nav.account')}
                         </Link>
                         <button
                           type="button"
                           onClick={handleSignOut}
                           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
                         >
-                          <span className="truncate">退出登录</span>
+                          <span className="truncate">{t('nav.signout')}</span>
                         </button>
                       </>
                     ) : (
@@ -1037,13 +1053,13 @@ export default function Home() {
                           href="/register"
                           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
                         >
-                          <span className="truncate">注册</span>
+                          <span className="truncate">{t('nav.register')}</span>
                         </Link>
                         <Link
                           href="/login"
                           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
                         >
-                          <span className="truncate">登录</span>
+                          <span className="truncate">{t('nav.login')}</span>
                         </Link>
                       </>
                     )}
@@ -1054,7 +1070,7 @@ export default function Home() {
                   onClick={() => setMobileNavOpen(true)}
                   aria-expanded={mobileNavOpen}
                   aria-controls="mobile-main-nav"
-                  aria-label="打开菜单"
+                  aria-label={t('nav.openMenu')}
                   className="md:hidden flex items-center justify-center rounded-lg h-10 w-10 bg-white/10 text-white hover:bg-white/20 transition-colors shrink-0"
                 >
                   <span className="material-symbols-outlined">menu</span>
@@ -1063,24 +1079,24 @@ export default function Home() {
               {mobileNavOpen && (
                 <div className="fixed inset-0 z-[60] md:hidden" role="presentation">
                   <button
-                    type="button"
-                    aria-label="关闭菜单"
-                    className="absolute inset-0 bg-black/60"
-                    onClick={closeMobileNav}
-                  />
+                      type="button"
+                      aria-label={t('nav.closeMenu')}
+                      className="absolute inset-0 bg-black/60"
+                      onClick={closeMobileNav}
+                    />
                   <nav
                     id="mobile-main-nav"
                     role="dialog"
                     aria-modal="true"
-                    aria-label="主导航"
+                    aria-label={t('nav.menu')}
                     className="absolute top-0 right-0 bottom-0 flex w-[min(100vw,18rem)] flex-col border-l border-white/10 bg-background-dark/98 backdrop-blur-md shadow-xl"
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-3">
-                      <span className="text-white text-sm font-semibold tracking-wide">菜单</span>
+                      <span className="text-white text-sm font-semibold tracking-wide">{t('nav.menu')}</span>
                       <button
                         type="button"
                         onClick={closeMobileNav}
-                        aria-label="关闭菜单"
+                        aria-label={t('nav.closeMenu')}
                         className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
                       >
                         <span className="material-symbols-outlined">close</span>
@@ -1092,14 +1108,14 @@ export default function Home() {
                         onClick={closeMobileNav}
                         className="rounded-lg px-3 py-3 text-white text-base font-medium hover:bg-white/10 transition-colors"
                       >
-                        首页
+                        {t('nav.home')}
                       </Link>
                       <Link
                         href="/about"
                         onClick={closeMobileNav}
                         className="rounded-lg px-3 py-3 text-white/70 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
                       >
-                        关于
+                        {t('nav.about')}
                       </Link>
                     </div>
                     <div className="mx-4 h-px bg-white/10 shrink-0" />
@@ -1119,7 +1135,7 @@ export default function Home() {
                             className="flex items-center gap-2 rounded-lg px-3 py-3 text-white/90 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">person</span>
-                            个人中心
+                            {t('nav.account')}
                           </Link>
                           <button
                             type="button"
@@ -1129,7 +1145,7 @@ export default function Home() {
                             }}
                             className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors"
                           >
-                            退出登录
+                            {t('nav.signout')}
                           </button>
                         </>
                       ) : (
@@ -1139,17 +1155,27 @@ export default function Home() {
                             onClick={closeMobileNav}
                             className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                           >
-                            注册
+                            {t('nav.register')}
                           </Link>
                           <Link
                             href="/login"
                             onClick={closeMobileNav}
                             className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors"
                           >
-                            登录
+                            {t('nav.login')}
                           </Link>
                         </>
                       )}
+                    </div>
+                    <div className="mx-4 h-px bg-white/10 shrink-0" />
+                    <div className="p-4">
+                      <button
+                        type="button"
+                        onClick={() => { closeMobileNav(); switchLocale(); }}
+                        className="flex w-full items-center justify-center h-10 rounded-md border border-white/20 text-white/70 text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+                      >
+                        {t('lang.switch')}
+                      </button>
                     </div>
                   </nav>
                 </div>
@@ -1166,10 +1192,10 @@ export default function Home() {
                       <div className="relative z-10 flex flex-col gap-6 items-center">
                         <div className="flex flex-col gap-2">
                           <h1 className="text-white text-4xl sm:text-5xl font-black leading-tight tracking-[-0.033em]">
-                            探索未知，预见未来
+                            {t('hero.title')}
                           </h1>
                           <h2 className="text-white/80 text-base sm:text-lg font-normal leading-normal max-w-2xl mx-auto">
-                            通过塔罗与占卜工具，帮助你看见当下的能量流动，获得更清晰的指引。
+                            {t('hero.subtitle')}
                           </h2>
                         </div>
                         {/* 原 HTML 通过 data-tarot-trigger + 外部脚本触发弹窗，Next.js 中脚本未运行导致无法开启，这里改为 React 事件 */}
@@ -1178,7 +1204,7 @@ export default function Home() {
                           onClick={handleTarotTrigger}
                           className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105"
                         >
-                          <span className="truncate">开始占卜</span>
+                          <span className="truncate">{t('hero.cta')}</span>
                         </button>
                       </div>
                     </div>
@@ -1187,9 +1213,9 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-xl font-bold">综合占卜</p>
+                          <p className="text-primary text-xl font-bold">{t('section.general.title')}</p>
                           <p className="text-white/80 text-base font-normal leading-normal">
-                            适用于不限定领域的通用牌阵，帮助你在犹豫与选择中，看清当下能量。
+                            {t('section.general.desc')}
                           </p>
                         </div>
                         <div className="flex flex-col sm:flex-row lg:flex-col gap-4 mt-auto">
@@ -1199,7 +1225,7 @@ export default function Home() {
                             onClick={() => router.push('/reading/general')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">通用牌阵</span>
+                            <span className="truncate">{t('section.general.spreads')}</span>
                           </button>
                           {/* 同样原因，绑定 onClick 以触发 React 弹窗 */}
                           <button
@@ -1207,14 +1233,14 @@ export default function Home() {
                             onClick={handleTarotTrigger}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">是否塔罗</span>
+                            <span className="truncate">{t('section.general.yesno')}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => router.push('/divination/jiaobei')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">掷筊占卜</span>
+                            <span className="truncate">{t('section.general.oracle')}</span>
                           </button>
                         </div>
                       </div>
@@ -1222,9 +1248,9 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-xl font-bold">运势测算</p>
+                          <p className="text-primary text-xl font-bold">{t('section.fortune.title')}</p>
                           <p className="text-white/80 text-base font-normal leading-normal">
-                            帮你了解当下与一段时间内的运势变化，提前感知节奏，把握属于你的时机。
+                            {t('section.fortune.desc')}
                           </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4 mt-6">
@@ -1233,21 +1259,21 @@ export default function Home() {
                             onClick={() => router.push('/fortune/daily')}
                             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">每日运势</span>
+                            <span className="truncate">{t('section.fortune.daily')}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => router.push('/fortune/monthly')}
                             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="truncate">月度运势</span>
+                            <span className="truncate">{t('section.fortune.monthly')}</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => router.push('/fortune/seasonal')}
                             className="relative flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors group"
                           >
-                            <span className="truncate">四季牌阵</span>
+                            <span className="truncate">{t('section.fortune.seasonal')}</span>
                             {/* 会员角标 - 镂空五角星 */}
                             <svg 
                               className="absolute top-1 right-1 w-4 h-4 text-primary drop-shadow-[0_0_4px_rgba(127,19,236,0.8)]" 
@@ -1260,9 +1286,8 @@ export default function Home() {
                             >
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                             </svg>
-                            {/* Hover提示 */}
                             <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md bg-black/90 text-white/90 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none backdrop-blur-sm">
-                              会员专享
+                              {t('section.fortune.membersOnly')}
                             </span>
                           </button>
                           <button
@@ -1270,7 +1295,7 @@ export default function Home() {
                             onClick={() => router.push('/fortune/annual/year-ahead')}
                             className="relative flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors group"
                           >
-                            <span className="truncate">年度运势</span>
+                            <span className="truncate">{t('section.fortune.annual')}</span>
                             {/* 会员角标 - 镂空五角星 */}
                             <svg 
                               className="absolute top-1 right-1 w-4 h-4 text-primary drop-shadow-[0_0_4px_rgba(127,19,236,0.8)]" 
@@ -1283,9 +1308,8 @@ export default function Home() {
                             >
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                             </svg>
-                            {/* Hover提示 */}
                             <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md bg-black/90 text-white/90 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none backdrop-blur-sm">
-                              会员专享
+                              {t('section.fortune.membersOnly')}
                             </span>
                           </button>
                         </div>
@@ -1294,9 +1318,9 @@ export default function Home() {
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">
-                          <p className="text-primary text-xl font-bold">主题占卜</p>
+                          <p className="text-primary text-xl font-bold">{t('section.themed.title')}</p>
                           <p className="text-white/80 text-base font-normal leading-normal">
-                            聚焦具体的人生主题，在重要关系与选择中，获得更清晰的指引。
+                            {t('section.themed.desc')}
                           </p>
                         </div>
                         <div className="flex flex-col gap-4 mt-auto">
@@ -1306,7 +1330,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">favorite</span>
-                            <span className="truncate">爱情</span>
+                            <span className="truncate">{t('section.themed.love')}</span>
                           </button>
                           <button
                             type="button"
@@ -1314,7 +1338,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">school</span>
-                            <span className="truncate">事业&amp;学业</span>
+                            <span className="truncate">{t('section.themed.career')}</span>
                           </button>
                           <button
                             type="button"
@@ -1322,7 +1346,7 @@ export default function Home() {
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
                             <span className="material-symbols-outlined text-xl">paid</span>
-                            <span className="truncate">财富</span>
+                            <span className="truncate">{t('section.themed.wealth')}</span>
                           </button>
                         </div>
                       </div>
@@ -1340,7 +1364,7 @@ export default function Home() {
                       
                       {/* 文字 */}
                       <p className="relative z-10 text-white/90 text-sm sm:text-lg font-medium text-center tracking-wide leading-relaxed animate-text-glow">
-                        占卜呈现当下能量的趋势，但未来始终掌握在你手里。
+                        {t('tagline')}
                       </p>
                       
                       {/* 右侧装饰星 - 带旋转动画 */}
@@ -1361,35 +1385,35 @@ export default function Home() {
                           ></path>
                         </svg>
                       </div>
-                      <span className="text-sm text-center md:text-left">© 2026 FateAura 版权所有</span>
+                      <span className="text-sm text-center md:text-left">{t('footer.copyright')}</span>
                     </div>
                     <nav
                       className="flex flex-wrap items-center justify-center md:justify-end gap-x-6 gap-y-2 text-sm"
-                      aria-label="页脚导航"
+                      aria-label={t('footer.nav')}
                     >
                       <Link
                         href="/about"
                         className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
                       >
-                        关于我们
+                        {t('footer.about')}
                       </Link>
                       <Link
                         href="/privacy"
                         className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
                       >
-                        隐私政策
+                        {t('footer.privacy')}
                       </Link>
                       <Link
                         href="/terms"
                         className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
                       >
-                        服务条款
+                        {t('footer.terms')}
                       </Link>
                       <Link
                         href="/contact"
                         className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
                       >
-                        联系我们
+                        {t('footer.contact')}
                       </Link>
                     </nav>
                   </div>
@@ -1405,4 +1429,12 @@ export default function Home() {
       <FeatureToast visible={isToastVisible} title={toast.title} message={toast.message} onClose={handleCloseToast} />
     </>
   );
+}
+
+export async function getStaticProps({ locale }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }
