@@ -54,5 +54,37 @@
   },
   "lang": {
     "switch": "中文"
+  },
+  "spreads": {
+    "back": "Back",
+    "beginReading": "Begin Reading",
+    "membersOnly": "Members Only",
+    "unlockTitle": "Members Only",
+    "unlockDesc": "This reading is exclusive to members.\nMembership is coming soon — stay tuned!",
+    "goMembership": "Go Premium",
+    "backButton": "Back",
+    "general": {
+      "metaTitle": "Tarot Spreads – FateAura",
+      "metaDesc": "Open to any theme — draw a spread and find clarity in your current energy.",
+      "title": "Tarot Spreads",
+      "desc": "Open to any theme — let the cards reflect your energy right now.",
+      "tagline": "Readings reflect the energy present — what you do with it is always up to you."
+    },
+    "love": {
+      "metaTitle": "Love Readings – FateAura",
+      "metaDesc": "Explore the mysteries of love and find your answers.",
+      "subtitle": "Choose a reading and gently explore what's stirring in you right now.",
+      "tagline": "The cards reveal the currents — the choices are always yours."
+    },
+    "career": {
+      "metaTitle": "Career & Study Readings – FateAura",
+      "metaDesc": "Explore directions, prepare for key milestones, and make clearer choices.",
+      "tagline": "Readings reflect your current energy — your growth comes from your own clarity and steady effort."
+    },
+    "wealth": {
+      "metaTitle": "Wealth Readings – FateAura",
+      "metaDesc": "See the flow and obstacles of money — make more grounded choices.",
+      "tagline": "Readings reflect the currents of energy — lasting change comes from your choices and daily actions."
+    }
   }
 }

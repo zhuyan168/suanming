@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next/pages';
 
 interface ThemeHeaderProps {
   titleZh: string;
@@ -19,9 +20,13 @@ export default function ThemeHeader({
   showBackButton = true,
 }: ThemeHeaderProps) {
   const router = useRouter();
+  const { t } = useTranslation('common');
+  const isZh = router.locale === 'zh';
+
+  const title = isZh ? titleZh : (titleEn || titleZh);
+  const desc  = isZh ? descZh  : (descEn  || descZh);
 
   const handleBackClick = () => {
-    // 爱情占卜主界面返回首页
     router.push('/');
   };
 
@@ -35,18 +40,18 @@ export default function ThemeHeader({
           <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">
             arrow_back
           </span>
-          <span className="text-xs font-medium">返回</span>
+          <span className="text-xs font-medium">{t('spreads.back')}</span>
         </button>
       )}
       
       <div className="flex flex-col gap-1">
         <h1 className="text-white text-2xl md:text-3xl font-bold leading-tight tracking-[-0.02em]">
-          {titleZh}
+          {title}
         </h1>
         
-        {descZh && (
+        {desc && (
           <p className="text-white/60 text-sm font-normal leading-snug max-w-2xl">
-            {descZh}
+            {desc}
           </p>
         )}
       </div>
@@ -56,4 +61,3 @@ export default function ThemeHeader({
     </div>
   );
 }
-

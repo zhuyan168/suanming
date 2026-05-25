@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next/pages';
 import { SpreadConfig } from '../../config/themedReadings';
 import PaywallBadge from './PaywallBadge';
 
@@ -21,6 +22,11 @@ export default function SpreadCard({
   onClick,
 }: SpreadCardProps) {
   const router = useRouter();
+  const { t } = useTranslation('common');
+  const isZh = router.locale === 'zh';
+
+  const title = isZh ? spread.titleZh : (spread.titleEn || spread.titleZh);
+  const desc  = isZh ? spread.descZh  : (spread.descEn  || spread.descZh);
 
   const spreadAccess = spread.access ?? 'free';
   const showPaywallBadge = spreadAccess === 'member' && !isMember;
@@ -94,13 +100,13 @@ export default function SpreadCard({
       {/* 标题 */}
       <div className="flex flex-col gap-1">
         <h3 className="text-white text-xl font-bold leading-tight">
-          {spread.titleZh}
+          {title}
         </h3>
       </div>
 
       {/* 描述 */}
       <p className="text-white/60 text-sm leading-relaxed flex-1">
-        {spread.descZh}
+        {desc}
       </p>
 
       {/* 底部信息 */}
@@ -108,10 +114,9 @@ export default function SpreadCard({
         <button
           className="px-4 py-2 rounded-lg font-semibold text-sm transition-all bg-primary/20 text-primary hover:bg-primary hover:text-white"
         >
-          开始占卜
+          {t('spreads.beginReading')}
         </button>
       </div>
     </div>
   );
 }
-

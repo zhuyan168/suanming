@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Head from 'next/head';
+import { useTranslation } from 'next-i18next/pages';
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
 import { useMembership } from '../../../hooks/useMembership';
 import { getThemeConfig } from '../../../config/themedReadings';
 import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
@@ -15,6 +17,7 @@ export default function WealthThemePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ visible: false, title: '', message: '' });
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { t } = useTranslation('common');
 
   const themeConfig = getThemeConfig('wealth');
 
@@ -23,18 +26,6 @@ export default function WealthThemePage() {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
-
-  const showComingSoonToast = () => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    setToast({
-      visible: true,
-      title: '功能即将上线',
-      message: '财富牌阵解析正在抓紧开发中，敬请期待。'
-    });
-    toastTimerRef.current = setTimeout(() => {
-      setToast(prev => ({ ...prev, visible: false }));
-    }, 3000);
-  };
 
   if (!themeConfig) {
     return (
@@ -47,30 +38,26 @@ export default function WealthThemePage() {
   return (
     <>
       <Head>
-        <title>财富 Wealth - Mystic Insights</title>
-        <meta name="description" content="看清金钱的流动与阻碍，做更踏实的选择" />
+        <title>{t('spreads.wealth.metaTitle')}</title>
+        <meta name="description" content={t('spreads.wealth.metaDesc')} />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23]">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         </div>
 
-        {/* 主内容 */}
         <div className="relative z-10 min-h-screen">
           <div className="mx-auto max-w-7xl px-4 sm:px-8 md:px-16 lg:px-24 py-3">
-            {/* 头部 */}
             <ThemeHeader
               titleZh={themeConfig.titleZh}
-              titleEn="Wealth Readings"
+              titleEn={themeConfig.titleEn}
               descZh={themeConfig.descZh}
-              descEn=""
+              descEn={themeConfig.descEn}
             />
 
-            {/* 牌阵网格 - 2列布局 */}
             <SpreadsGrid>
               {themeConfig.spreads.map((spread) => (
                 <SpreadCard
@@ -83,13 +70,12 @@ export default function WealthThemePage() {
               ))}
             </SpreadsGrid>
 
-            {/* 底部提示 */}
             <div className="mt-20 mb-12 flex justify-center">
               <div className="relative flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-white/5 border border-white/10 shadow-glow-sm">
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-2xl rounded-full pointer-events-none" />
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse">auto_awesome</span>
                 <p className="relative z-10 text-white/80 text-sm sm:text-base text-center leading-relaxed">
-                  占卜呈现的是当下的能量趋势，但财富的改变，来自你的选择与持续行动。
+                  {t('spreads.wealth.tagline')}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1.5s' }}>auto_awesome</span>
               </div>
@@ -113,10 +99,17 @@ export default function WealthThemePage() {
         </div>
       </div>
 
-      {/* 解锁弹窗 (虽然暂不用，但保留结构一致性) */}
       {isModalOpen && (
         <UnlockModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       )}
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

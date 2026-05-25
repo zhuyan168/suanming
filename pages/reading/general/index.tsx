@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
+import { useTranslation } from 'next-i18next/pages';
+import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
 import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
 import SpreadsGrid from '../../../components/themed-readings/SpreadsGrid';
 import SpreadCard from '../../../components/themed-readings/SpreadCard';
@@ -10,23 +12,13 @@ import { GENERAL_SPREADS } from '../../../data/spreads';
 export default function GeneralReadingPage() {
   const { isMember } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleLockedClick = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const { t } = useTranslation('common');
 
   return (
     <>
       <Head>
-        <title>通用牌阵 - Mystic Insights</title>
-        <meta
-          name="description"
-          content="适用于任何主题的通用牌阵，帮助你在犹豫与选择之间快速获得清晰指引。"
-        />
+        <title>{t('spreads.general.metaTitle')}</title>
+        <meta name="description" content={t('spreads.general.metaDesc')} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23]">
@@ -39,8 +31,9 @@ export default function GeneralReadingPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-8 md:px-16 lg:px-24 py-6">
             <ThemeHeader
               titleZh="通用牌阵"
-              titleEn=""
+              titleEn={t('spreads.general.title')}
               descZh="适用于任何主题，快速获得清晰指引"
+              descEn={t('spreads.general.desc')}
             />
 
             <SpreadsGrid>
@@ -50,7 +43,7 @@ export default function GeneralReadingPage() {
                   spread={spread}
                   theme="general"
                   isMember={isMember}
-                  onLockedClick={handleLockedClick}
+                  onLockedClick={() => setIsModalOpen(true)}
                 />
               ))}
             </SpreadsGrid>
@@ -60,7 +53,7 @@ export default function GeneralReadingPage() {
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-2xl rounded-full pointer-events-none" />
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse">auto_awesome</span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  {t('spreads.general.tagline')}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>auto_awesome</span>
               </div>
@@ -68,8 +61,16 @@ export default function GeneralReadingPage() {
           </div>
         </div>
 
-        <UnlockModal isOpen={isModalOpen} onClose={handleCloseModal} />
+        <UnlockModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

@@ -54,5 +54,37 @@
   },
   "lang": {
     "switch": "EN"
+  },
+  "spreads": {
+    "back": "返回",
+    "beginReading": "开始占卜",
+    "membersOnly": "会员专享",
+    "unlockTitle": "会员专享",
+    "unlockDesc": "此牌阵为会员专享内容。\n会员系统即将上线，敬请期待！",
+    "goMembership": "前往开通会员",
+    "backButton": "返回",
+    "general": {
+      "metaTitle": "通用牌阵 - FateAura",
+      "metaDesc": "适用于任何主题的通用牌阵，帮助你在犹豫与选择之间快速获得清晰指引。",
+      "title": "通用牌阵",
+      "desc": "适用于任何主题，快速获得清晰指引",
+      "tagline": "占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。"
+    },
+    "love": {
+      "metaTitle": "爱情占卜 - FateAura",
+      "metaDesc": "探索感情的奥秘，找到爱的答案",
+      "subtitle": "选择一种方式，温柔地看清你此刻的困惑",
+      "tagline": "占卜呈现当下能量的趋势，但未来始终掌握在你手里"
+    },
+    "career": {
+      "metaTitle": "事业 & 学业 - FateAura",
+      "metaDesc": "探索方向、准备关键节点、做更清醒的选择",
+      "tagline": "占卜仅呈现您当下的能量趋势，但事业与学业的成就，源于您清醒的判断与持续的努力。"
+    },
+    "wealth": {
+      "metaTitle": "财富占卜 - FateAura",
+      "metaDesc": "看清金钱的流动与阻碍，做更踏实的选择",
+      "tagline": "占卜呈现的是当下的能量趋势，但财富的改变，来自你的选择与持续行动。"
+    }
   }
 }
