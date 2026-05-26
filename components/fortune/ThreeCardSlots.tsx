@@ -11,15 +11,18 @@ interface ThreeCardSlotsProps {
   cards: (ShuffledTarotCard | null)[];
   isAnimating: boolean[];
   showLoadingText?: boolean;
-  forceFlipped?: boolean; // 强制显示卡面（用于结果页面）
+  forceFlipped?: boolean;
+  locale?: string;
 }
 
 export default function ThreeCardSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
-  forceFlipped = false
+  forceFlipped = false,
+  locale,
 }: ThreeCardSlotsProps) {
+  const isEn = locale !== 'zh';
   return (
     <div className="three-card-slots w-full flex flex-col justify-center items-center py-8">
       {/* 三张卡牌横向排列 */}
@@ -128,7 +131,7 @@ export default function ThreeCardSlots({
                 >
                   <div className="text-center text-white/30">
                     <div className="text-2xl sm:text-3xl mb-1">🎴</div>
-                    <p className="text-xs sm:text-sm">卡位 {index + 1}</p>
+                    <p className="text-xs sm:text-sm">{isEn ? `Slot ${index + 1}` : `卡位 ${index + 1}`}</p>
                   </div>
                 </motion.div>
               )}
@@ -145,7 +148,7 @@ export default function ThreeCardSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌…</p>
+          <p>{isEn ? '🔮 Please draw the remaining cards…' : '🔮 请继续抽取剩余卡牌…'}</p>
         </motion.div>
       )}
 

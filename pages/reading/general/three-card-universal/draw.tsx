@@ -8,13 +8,14 @@ import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotCards } from '../../../../data/tarotCards';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getThreeCardT } from '../../../../lib/threeCardI18n';
 
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
 }
 
-// Fisher-Yates 洗牌算法
+// Fisher-Yates shuffle
 const shuffleArray = <T,>(array: T[]): T[] => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -24,7 +25,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return newArray;
 };
 
-// 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
 const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   const cardsWithOrientation = cards.map(card => {
     let randomValue: number;
@@ -45,24 +45,20 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   return shuffleArray(cardsWithOrientation);
 };
 
-// LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_three_card_question';
 const RESULT_STORAGE_KEY = 'general_three_card_draw_result';
 
-// 结果数据接口
 interface ThreeCardResult {
   timestamp: number;
   cards: ShuffledTarotCard[];
   question?: string;
 }
 
-// 保存结果到 localStorage
 const saveResult = (data: ThreeCardResult) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(data));
 };
 
-// 从 localStorage 读取结果
 const loadResult = (): ThreeCardResult | null => {
   if (typeof window === 'undefined') return null;
   try {
@@ -77,39 +73,34 @@ const loadResult = (): ThreeCardResult | null => {
 
 export default function ThreeCardDrawPage() {
   const router = useRouter();
+  const t = getThreeCardT(router.locale);
+
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'three-card-general',
     redirectPath: '/reading/general',
   });
 
   const [question, setQuestion] = useState<string>('');
-  
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedResult, setSavedResult] = useState<ThreeCardResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
   
-  // 3张卡槽的状态
   const initialSlots: (ShuffledTarotCard | null)[] = Array(3).fill(null);
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>(initialSlots);
   const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(3).fill(false));
   
-  // deck: 实际剩余可抽的牌
   const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
-  // uiSlots: 用于页面卡背渲染的数组
   const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
   
-  // 卡牌容器引用，用于滚动同步
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const scrollValueRef = useRef(scrollValue);
 
-  // 更新 scrollValueRef
   useEffect(() => {
     scrollValueRef.current = scrollValue;
   }, [scrollValue]);
 
-  // 容器滚动处理
   const handleScroll = () => {
     const container = containerRef.current;
     if (!container || isScrollingRef.current) return;
@@ -153,7 +144,7 @@ export default function ThreeCardDrawPage() {
     if (emptySlotIndex === -1) return;
 
     const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
+    console.log(`🎴 Drew card ${emptySlotIndex + 1}: ${card.name}, orientation: ${orientation}`);
     
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;
@@ -176,7 +167,6 @@ export default function ThreeCardDrawPage() {
     setIsLoading(false);
 
     const updatedCardCount = newSelectedCards.filter(c => c !== null).length;
-    // 当抽满3张时保存并跳转
     if (updatedCardCount === 3) {
       const result: ThreeCardResult = {
         timestamp: Date.now(),
@@ -187,14 +177,12 @@ export default function ThreeCardDrawPage() {
       setSavedResult(result);
       setHasDrawn(true);
       
-      // 等待动画完成后跳转
       setTimeout(() => {
         router.push('/reading/general/three-card-universal/reveal');
       }, 1000);
     }
   };
 
-  // 滚动条拖动处理
   const handleScrollBarChange = (value: number) => {
     const container = containerRef.current;
     if (!container) return;
@@ -210,24 +198,22 @@ export default function ThreeCardDrawPage() {
   };
 
   const handleBack = () => {
-    if (!confirm('确定要返回吗？当前抽牌进度将丢失。')) return;
+    if (!confirm(t.draw.confirmBack)) return;
     router.push('/reading/general/three-card-universal/question');
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(t.draw.confirmReset)) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
     }
     
-    // 重置状态
     setHasDrawn(false);
     setSavedResult(null);
     setSelectedCards(Array(3).fill(null));
     setIsAnimating(Array(3).fill(false));
     
-    // 重新洗牌
     const shuffled = shuffleCards(tarotCards);
     setDeck(shuffled);
     setUiSlots(shuffled);
@@ -236,7 +222,7 @@ export default function ThreeCardDrawPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{t.loading}</div>
       </div>
     );
   }
@@ -244,8 +230,8 @@ export default function ThreeCardDrawPage() {
   return (
     <>
       <Head>
-        <title>三张牌万能牌阵 - 抽牌 | Mystic Insights</title>
-        <meta name="description" content="从78张塔罗牌中选择3张，探索你的指引" />
+        <title>{t.draw.pageTitle}</title>
+        <meta name="description" content={t.draw.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -254,14 +240,13 @@ export default function ThreeCardDrawPage() {
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
-        {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{t.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -275,29 +260,24 @@ export default function ThreeCardDrawPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{t.reset}</span>
           </button>
         </header>
 
-        {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
           <div className="mx-auto max-w-7xl">
-            {/* 标题介绍区域 */}
             <div className="text-center mb-12">
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-4">
                 THREE-CARD UNIVERSAL SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                {hasDrawn ? '抽牌完成' : '抽取三张塔罗牌'}
+                {hasDrawn ? t.draw.h1Done : t.draw.h1Drawing}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                {hasDrawn 
-                  ? '牌已经就位，现在让我们看看它们的指引。' 
-                  : '静心感受，从下方78张牌中选择3张，获得你的指引。'}
+                {hasDrawn ? t.draw.subtitleDone : t.draw.subtitleDrawing}
               </p>
             </div>
 
-            {/* 问题展示区域 */}
             {question && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -310,7 +290,7 @@ export default function ThreeCardDrawPage() {
                       psychology
                     </span>
                     <div className="flex-1">
-                      <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                      <p className="text-white/60 text-xs font-medium mb-1">{t.yourQuestion}</p>
                       <p className="text-white/90 text-sm leading-relaxed">{question}</p>
                     </div>
                   </div>
@@ -326,7 +306,6 @@ export default function ThreeCardDrawPage() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  {/* 牌堆区域 */}
                   <div className="card-container-wrapper w-full mb-4">
                     <div
                       ref={containerRef}
@@ -352,18 +331,17 @@ export default function ThreeCardDrawPage() {
                     <style jsx>{` .card-container::-webkit-scrollbar { display: none; } `}</style>
                   </div>
 
-                  {/* 滚动条 */}
                   <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                   <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                    <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 3</p>
+                    <p>{t.draw.cardCount(selectedCards.filter(c => c !== null).length)}</p>
                   </div>
 
-                  {/* 卡槽区域 */}
                   <ThreeCardSlots
                     cards={selectedCards}
                     isAnimating={isAnimating}
                     showLoadingText={true}
+                    locale={router.locale}
                   />
                 </motion.div>
               )}

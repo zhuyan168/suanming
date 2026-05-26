@@ -1,0 +1,151 @@
+const zh = {
+  loading: '加载中...',
+  back: '返回',
+  backToHistory: '返回我的占卜记录',
+  reset: '重置',
+  redraw: '重新占卜',
+  yourQuestion: '你的问题',
+  noQuestion: '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
+  footer: '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
+  upright: '正位',
+  reversed: '逆位',
+
+  question: {
+    pageTitle: '三张牌万能牌阵 - 问题输入 | Mystic Insights',
+    metaDesc: '输入你的问题，获得更精准的塔罗占卜解读',
+    h1: '三张牌万能牌阵',
+    label: '你的问题（可选）',
+    placeholder: '例如：我该不该接受这个机会？ / 最近的感情状态如何？',
+    hintWithQ: '已输入问题',
+    hintNoQ: '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
+    startBtn: '开始抽牌',
+  },
+
+  draw: {
+    pageTitle: '三张牌万能牌阵 - 抽牌 | Mystic Insights',
+    metaDesc: '从78张塔罗牌中选择3张，探索你的指引',
+    h1Drawing: '抽取三张塔罗牌',
+    h1Done: '抽牌完成',
+    subtitleDrawing: '静心感受，从下方78张牌中选择3张，获得你的指引。',
+    subtitleDone: '牌已经就位，现在让我们看看它们的指引。',
+    cardCount: (n: number) => `已抽牌：${n} / 3`,
+    confirmBack: '确定要返回吗？当前抽牌进度将丢失。',
+    confirmReset: '确定要重新开始吗？当前结果将被清空。',
+    slotLabel: (n: number) => `卡位 ${n}`,
+    drawMore: '🔮 请继续抽取剩余卡牌…',
+  },
+
+  reveal: {
+    pageTitle: '三张牌万能牌阵 - 结果展示 | Mystic Insights',
+    metaDesc: '查看你的塔罗牌占卜结果',
+    h1: '三张牌万能牌阵',
+    subtitle: '牌已就位，以下是你抽到的塔罗牌',
+    keywords: '关键词',
+    meaning: '含义',
+    startReadingBtn: '开始解读',
+    backHome: '返回首页',
+    confirmRedraw: '确定要重新占卜吗？当前结果将被清空。',
+  },
+
+  reading: {
+    pageTitle: '三张牌万能牌阵 · 解读 | Mystic Insights',
+    metaDesc: '查看你的塔罗牌解读结果',
+    h1: '三张牌万能牌阵 · 解读',
+    errorIncomplete: '抽牌数据不完整，请重新抽牌',
+    errorLoad: '加载数据失败，请返回重新抽牌',
+    errorGenerate: '生成解读失败，请重试',
+    errorDefault: '出错了，请稍后重试',
+    btnRedraw: '去抽牌',
+    btnRetry: '重新生成',
+    btnBackList: '返回牌阵列表',
+    scrollHintLoading: '正在生成解读',
+    scrollHintReady: '下滑查看解读内容',
+    loadingTitle: '正在为你解读牌面...',
+    loadingSubtitle: 'AI 正在根据你的牌阵进行深度分析，请稍候',
+    overallTitle: '整体解读',
+    confirmReset: '确定要重新抽牌吗？当前结果将被清空。',
+    backHome: '返回首页',
+    browseMore: '浏览更多牌阵',
+    cardPosition: (n: number) => `第${n}张牌`,
+  },
+};
+
+const en: typeof zh = {
+  loading: 'Loading...',
+  back: 'Back',
+  backToHistory: 'Back to My Readings',
+  reset: 'Reset',
+  redraw: 'Redraw',
+  yourQuestion: 'Your Question',
+  noQuestion: 'No specific question provided. We will read based on your current energy.',
+  footer: 'Tarot reveals the energy trends of your present moment. The real change comes from your choices and actions.',
+  upright: 'Upright',
+  reversed: 'Reversed',
+
+  question: {
+    pageTitle: 'Three-Card Universal Spread - Question | Mystic Insights',
+    metaDesc: 'Enter your question for a more accurate tarot reading',
+    h1: 'Three-Card Universal Spread',
+    label: 'Your Question (Optional)',
+    placeholder: 'e.g. Should I take this opportunity? / What is my current relationship energy?',
+    hintWithQ: 'Question entered',
+    hintNoQ: 'Adding a question helps focus your reading — or skip it and draw directly',
+    startBtn: 'Start Drawing',
+  },
+
+  draw: {
+    pageTitle: 'Three-Card Universal Spread - Draw | Mystic Insights',
+    metaDesc: 'Choose 3 cards from 78 tarot cards to reveal your guidance',
+    h1Drawing: 'Draw Three Tarot Cards',
+    h1Done: 'Cards Drawn',
+    subtitleDrawing: 'Clear your mind and choose 3 cards from the 78 below to receive your guidance.',
+    subtitleDone: "Your cards are set. Let's see what guidance they hold.",
+    cardCount: (n: number) => `Cards drawn: ${n} / 3`,
+    confirmBack: 'Are you sure you want to go back? Your current progress will be lost.',
+    confirmReset: 'Are you sure you want to start over? Your current result will be cleared.',
+    slotLabel: (n: number) => `Slot ${n}`,
+    drawMore: '🔮 Please draw the remaining cards…',
+  },
+
+  reveal: {
+    pageTitle: 'Three-Card Universal Spread - Result | Mystic Insights',
+    metaDesc: 'View your tarot reading result',
+    h1: 'Three-Card Universal Spread',
+    subtitle: 'Your cards are revealed. Here are the tarot cards you drew.',
+    keywords: 'Keywords',
+    meaning: 'Meaning',
+    startReadingBtn: 'Get Reading',
+    backHome: 'Back to Home',
+    confirmRedraw: 'Are you sure you want to redraw? Your current result will be cleared.',
+  },
+
+  reading: {
+    pageTitle: 'Three-Card Universal Spread · Reading | Mystic Insights',
+    metaDesc: 'View your tarot reading',
+    h1: 'Three-Card Universal Spread · Reading',
+    errorIncomplete: 'Card data is incomplete. Please draw again.',
+    errorLoad: 'Failed to load data. Please go back and draw again.',
+    errorGenerate: 'Failed to generate reading. Please try again.',
+    errorDefault: 'Something went wrong. Please try again.',
+    btnRedraw: 'Go Draw',
+    btnRetry: 'Retry',
+    btnBackList: 'Back to Spreads',
+    scrollHintLoading: 'Generating reading',
+    scrollHintReady: 'Scroll down to view your reading',
+    loadingTitle: 'Reading your cards...',
+    loadingSubtitle: 'AI is performing a deep analysis of your spread. Please wait.',
+    overallTitle: 'Overall Reading',
+    confirmReset: 'Are you sure you want to draw again? Your current result will be cleared.',
+    backHome: 'Back to Home',
+    browseMore: 'Explore More Spreads',
+    cardPosition: (n: number) => `Card ${n}`,
+  },
+};
+
+const translations = { zh, en };
+
+export type ThreeCardLocale = keyof typeof translations;
+
+export function getThreeCardT(locale: string | undefined) {
+  return translations[locale === 'zh' ? 'zh' : 'en'];
+}
