@@ -6,6 +6,7 @@ import TwoChoicesSlots from '../../../../components/fortune/TwoChoicesSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getTwoChoicesT } from '../../../../lib/twoChoicesI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -41,109 +42,52 @@ interface ReadingResult {
   rational_reminder: string;
 }
 
-// LocalStorage Keys
+type ErrorType = 'incomplete' | 'load' | 'generate' | 'default' | null;
+
 const QUESTION_STORAGE_KEY = 'general_two_choices_question';
 const OPTION_A_STORAGE_KEY = 'general_two_choices_option_a';
 const OPTION_B_STORAGE_KEY = 'general_two_choices_option_b';
 const RESULT_STORAGE_KEY = 'general_two_choices_draw_result';
 
-// 塔罗牌英文名称到中文名称的映射
 const getChineseCardName = (englishName: string): string => {
   const nameMap: { [key: string]: string } = {
-    // Major Arcana
-    '0. The Fool': '愚者',
-    'I. The Magician': '魔术师',
-    'II. The High Priestess': '女祭司',
-    'III. The Empress': '皇后',
-    'IV. The Emperor': '皇帝',
-    'V. The Hierophant': '教皇',
-    'VI. The Lovers': '恋人',
-    'VII. The Chariot': '战车',
-    'VIII. Strength': '力量',
-    'IX. The Hermit': '隐者',
-    'X. Wheel of Fortune': '命运之轮',
-    'XI. Justice': '正义',
-    'XII. The Hanged Man': '倒吊人',
-    'XIII. Death': '死神',
-    'XIV. Temperance': '节制',
-    'XV. The Devil': '恶魔',
-    'XVI. The Tower': '塔',
-    'XVII. The Star': '星星',
-    'XVIII. The Moon': '月亮',
-    'XIX. The Sun': '太阳',
-    'XX. Judgement': '审判',
+    '0. The Fool': '愚者', 'I. The Magician': '魔术师', 'II. The High Priestess': '女祭司',
+    'III. The Empress': '皇后', 'IV. The Emperor': '皇帝', 'V. The Hierophant': '教皇',
+    'VI. The Lovers': '恋人', 'VII. The Chariot': '战车', 'VIII. Strength': '力量',
+    'IX. The Hermit': '隐者', 'X. Wheel of Fortune': '命运之轮', 'XI. Justice': '正义',
+    'XII. The Hanged Man': '倒吊人', 'XIII. Death': '死神', 'XIV. Temperance': '节制',
+    'XV. The Devil': '恶魔', 'XVI. The Tower': '塔', 'XVII. The Star': '星星',
+    'XVIII. The Moon': '月亮', 'XIX. The Sun': '太阳', 'XX. Judgement': '审判',
     'XXI. The World': '世界',
-    
-    // Cups - 圣杯
-    'Ace of Cups': '圣杯王牌',
-    'Two of Cups': '圣杯二',
-    'Three of Cups': '圣杯三',
-    'Four of Cups': '圣杯四',
-    'Five of Cups': '圣杯五',
-    'Six of Cups': '圣杯六',
-    'Seven of Cups': '圣杯七',
-    'Eight of Cups': '圣杯八',
-    'Nine of Cups': '圣杯九',
-    'Ten of Cups': '圣杯十',
-    'Page of Cups': '圣杯侍者',
-    'Knight of Cups': '圣杯骑士',
-    'Queen of Cups': '圣杯王后',
-    'King of Cups': '圣杯国王',
-    
-    // Pentacles - 星币
-    'Ace of Pentacles': '星币王牌',
-    'Two of Pentacles': '星币二',
-    'Three of Pentacles': '星币三',
-    'Four of Pentacles': '星币四',
-    'Five of Pentacles': '星币五',
-    'Six of Pentacles': '星币六',
-    'Seven of Pentacles': '星币七',
-    'Eight of Pentacles': '星币八',
-    'Nine of Pentacles': '星币九',
-    'Ten of Pentacles': '星币十',
-    'Page of Pentacles': '星币侍者',
-    'Knight of Pentacles': '星币骑士',
-    'Queen of Pentacles': '星币王后',
-    'King of Pentacles': '星币国王',
-    
-    // Swords - 宝剑
-    'Ace of Swords': '宝剑王牌',
-    'Two of Swords': '宝剑二',
-    'Three of Swords': '宝剑三',
-    'Four of Swords': '宝剑四',
-    'Five of Swords': '宝剑五',
-    'Six of Swords': '宝剑六',
-    'Seven of Swords': '宝剑七',
-    'Eight of Swords': '宝剑八',
-    'Nine of Swords': '宝剑九',
-    'Ten of Swords': '宝剑十',
-    'Page of Swords': '宝剑侍者',
-    'Knight of Swords': '宝剑骑士',
-    'Queen of Swords': '宝剑王后',
-    'King of Swords': '宝剑国王',
-    
-    // Wands - 权杖
-    'Ace of Wands': '权杖王牌',
-    'Two of Wands': '权杖二',
-    'Three of Wands': '权杖三',
-    'Four of Wands': '权杖四',
-    'Five of Wands': '权杖五',
-    'Six of Wands': '权杖六',
-    'Seven of Wands': '权杖七',
-    'Eight of Wands': '权杖八',
-    'Nine of Wands': '权杖九',
-    'Ten of Wands': '权杖十',
-    'Page of Wands': '权杖侍者',
-    'Knight of Wands': '权杖骑士',
-    'Queen of Wands': '权杖王后',
-    'King of Wands': '权杖国王',
+    'Ace of Cups': '圣杯王牌', 'Two of Cups': '圣杯二', 'Three of Cups': '圣杯三',
+    'Four of Cups': '圣杯四', 'Five of Cups': '圣杯五', 'Six of Cups': '圣杯六',
+    'Seven of Cups': '圣杯七', 'Eight of Cups': '圣杯八', 'Nine of Cups': '圣杯九',
+    'Ten of Cups': '圣杯十', 'Page of Cups': '圣杯侍者', 'Knight of Cups': '圣杯骑士',
+    'Queen of Cups': '圣杯王后', 'King of Cups': '圣杯国王',
+    'Ace of Pentacles': '星币王牌', 'Two of Pentacles': '星币二', 'Three of Pentacles': '星币三',
+    'Four of Pentacles': '星币四', 'Five of Pentacles': '星币五', 'Six of Pentacles': '星币六',
+    'Seven of Pentacles': '星币七', 'Eight of Pentacles': '星币八', 'Nine of Pentacles': '星币九',
+    'Ten of Pentacles': '星币十', 'Page of Pentacles': '星币侍者', 'Knight of Pentacles': '星币骑士',
+    'Queen of Pentacles': '星币王后', 'King of Pentacles': '星币国王',
+    'Ace of Swords': '宝剑王牌', 'Two of Swords': '宝剑二', 'Three of Swords': '宝剑三',
+    'Four of Swords': '宝剑四', 'Five of Swords': '宝剑五', 'Six of Swords': '宝剑六',
+    'Seven of Swords': '宝剑七', 'Eight of Swords': '宝剑八', 'Nine of Swords': '宝剑九',
+    'Ten of Swords': '宝剑十', 'Page of Swords': '宝剑侍者', 'Knight of Swords': '宝剑骑士',
+    'Queen of Swords': '宝剑王后', 'King of Swords': '宝剑国王',
+    'Ace of Wands': '权杖王牌', 'Two of Wands': '权杖二', 'Three of Wands': '权杖三',
+    'Four of Wands': '权杖四', 'Five of Wands': '权杖五', 'Six of Wands': '权杖六',
+    'Seven of Wands': '权杖七', 'Eight of Wands': '权杖八', 'Nine of Wands': '权杖九',
+    'Ten of Wands': '权杖十', 'Page of Wands': '权杖侍者', 'Knight of Wands': '权杖骑士',
+    'Queen of Wands': '权杖王后', 'King of Wands': '权杖国王',
   };
-  
   return nameMap[englishName] || englishName;
 };
 
 export default function TwoChoicesReadingPage() {
   const router = useRouter();
+  const t = getTwoChoicesT(router.locale);
+  const isZh = router.locale === 'zh';
+
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<TwoChoicesResult | null>(null);
   const [question, setQuestion] = useState<string>('');
@@ -152,10 +96,11 @@ export default function TwoChoicesReadingPage() {
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 加载抽牌结果
     const savedResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (savedResult) {
       try {
@@ -163,7 +108,6 @@ export default function TwoChoicesReadingPage() {
         if (parsed.cards && parsed.cards.length === 5) {
           setResult(parsed);
           
-          // 加载问题和选项
           const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
           const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
           const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
@@ -172,19 +116,19 @@ export default function TwoChoicesReadingPage() {
           if (savedOptionA) setOptionA(savedOptionA);
           if (savedOptionB) setOptionB(savedOptionB);
           
-          // 如果已经有解读结果，直接使用
           if (parsed.reading) {
             setReading(parsed.reading);
           }
         } else {
-          setError('抽牌数据不完整，请重新抽牌');
+          setErrorType('incomplete');
+          setError(t.reading.errorIncomplete);
         }
       } catch (e) {
         console.error('Failed to parse saved result:', e);
-        setError('加载数据失败，请返回重新抽牌');
+        setErrorType('load');
+        setError(t.reading.errorLoad);
       }
     } else {
-      // 如果没有结果，跳转回问题输入页
       router.replace('/reading/general/two-choices/question');
       return;
     }
@@ -195,6 +139,7 @@ export default function TwoChoicesReadingPage() {
 
     setLoading(true);
     setError(null);
+    setErrorType(null);
 
     try {
       const headers = await getAuthHeaders();
@@ -210,28 +155,31 @@ export default function TwoChoicesReadingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('生成解读失败，请重试');
+        throw new Error('generate');
       }
 
       const data = await response.json();
       setReading(data);
       setError(null);
+      setErrorType(null);
 
-      const updatedResult = {
-        ...result,
-        reading: data,
-      };
+      const updatedResult = { ...result, reading: data };
       localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(updatedResult));
 
     } catch (err: any) {
       console.error('Error generating reading:', err);
-      setError(err.message || '出错了，请稍后重试');
+      if (err.message === 'generate') {
+        setErrorType('generate');
+        setError(t.reading.errorGenerate);
+      } else {
+        setErrorType('default');
+        setError(t.reading.errorDefault);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // 自动生成解读
   useEffect(() => {
     if (result && result.cards.length === 5 && !reading && !loading && !error) {
       generateReading();
@@ -243,19 +191,18 @@ export default function TwoChoicesReadingPage() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
-    
+    if (!confirm(t.reading.confirmReset)) return;
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
       localStorage.removeItem(QUESTION_STORAGE_KEY);
       localStorage.removeItem(OPTION_A_STORAGE_KEY);
       localStorage.removeItem(OPTION_B_STORAGE_KEY);
     }
-    
     router.replace('/reading/general/two-choices/question');
   };
 
   if (error) {
+    const isDataError = errorType === 'incomplete' || errorType === 'load';
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex flex-col items-center justify-center p-4">
         <div className="bg-white/5 border border-white/10 p-8 rounded-2xl max-w-md w-full text-center">
@@ -264,23 +211,24 @@ export default function TwoChoicesReadingPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => {
-                if (error.includes('不完整') || error.includes('加载数据失败')) {
+                if (isDataError) {
                   router.push('/reading/general/two-choices/question');
                 } else {
                   setError(null);
+                  setErrorType(null);
                   generateReading();
                 }
               }}
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              {error.includes('不完整') || error.includes('加载数据失败') ? '去抽牌' : '重新生成'}
+              {isDataError ? t.reading.btnRedraw : t.reading.btnRetry}
             </button>
             <button
               onClick={handleReturn}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回牌阵列表
+              {t.reading.btnBackList}
             </button>
           </div>
         </div>
@@ -291,25 +239,23 @@ export default function TwoChoicesReadingPage() {
   return (
     <>
       <Head>
-        <title>二选一牌阵 · 解读 | Mystic Insights</title>
-        <meta name="description" content="查看你的二选一牌阵解读结果" />
+        <title>{t.reading.pageTitle}</title>
+        <meta name="description" content={t.reading.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
-        {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={isFromHistory ? goBackToHistory : handleReturn}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? t.backToHistory : t.back}</span>
           </button>
 
           <div className="flex items-center gap-4">
@@ -323,14 +269,12 @@ export default function TwoChoicesReadingPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{t.redraw}</span>
           </button>
         </header>
 
-        {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
           <div className="mx-auto max-w-5xl">
-            {/* 标题区域 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -341,11 +285,10 @@ export default function TwoChoicesReadingPage() {
                 TWO CHOICES SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                二选一牌阵 · 解读
+                {t.reading.h1}
               </h1>
             </motion.div>
 
-            {/* 问题展示区域（无框） */}
             {question && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -353,14 +296,13 @@ export default function TwoChoicesReadingPage() {
                 transition={{ delay: 0.2 }}
                 className="mb-8 text-center"
               >
-                <p className="text-white/60 text-sm mb-2">你的问题</p>
+                <p className="text-white/60 text-sm mb-2">{t.reading.yourQuestion}</p>
                 <p className="text-white/90 text-lg">
                   {question}
                 </p>
               </motion.div>
             )}
 
-            {/* 卡牌展示区域 */}
             {result && (
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
@@ -370,7 +312,6 @@ export default function TwoChoicesReadingPage() {
               >
                 <div className="bg-white/5 border border-white/10 rounded-3xl py-6 px-4 relative overflow-hidden">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-
                   <div className="max-w-4xl mx-auto">
                     <TwoChoicesSlots
                       cards={result.cards}
@@ -379,6 +320,7 @@ export default function TwoChoicesReadingPage() {
                       forceFlipped={true}
                       optionA={optionA || 'A'}
                       optionB={optionB || 'B'}
+                      locale={router.locale}
                     />
                   </div>
                 </div>
@@ -390,7 +332,7 @@ export default function TwoChoicesReadingPage() {
                     className="flex flex-col items-center gap-1"
                   >
                     <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                      {loading ? '正在生成解读' : '下滑查看解读内容'}
+                      {loading ? t.reading.scrollHintLoading : t.reading.scrollHintReady}
                     </span>
                     <span className="material-symbols-outlined text-white/20 text-xl">
                       keyboard_double_arrow_down
@@ -400,7 +342,6 @@ export default function TwoChoicesReadingPage() {
               </motion.section>
             )}
 
-            {/* 解读内容区域 */}
             <AnimatePresence mode="wait">
               {loading ? (
                 <motion.div
@@ -417,9 +358,9 @@ export default function TwoChoicesReadingPage() {
                       style={{ borderColor: '#7f13ec transparent transparent transparent' }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">正在为你解读牌面...</h3>
+                  <h3 className="text-xl font-bold mb-2">{t.reading.loadingTitle}</h3>
                   <p className="text-white/40 max-w-xs mx-auto text-sm">
-                    AI 正在根据你的牌阵进行深度分析，请稍候
+                    {t.reading.loadingSubtitle}
                   </p>
                 </motion.div>
               ) : reading ? (
@@ -429,13 +370,13 @@ export default function TwoChoicesReadingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-12 max-w-3xl mx-auto"
                 >
-                  {/* 整体解读 */}
+                  {/* Overall reading */}
                   <section className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000" />
                     <div className="relative bg-[#1a1028] border border-white/10 rounded-2xl p-6 sm:p-10">
                       <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                         <span className="material-symbols-outlined">auto_awesome</span>
-                        整体解读
+                        {t.reading.overallTitle}
                       </h3>
                       <p className="text-white/80 leading-relaxed text-lg">
                         {reading.overall_reading}
@@ -443,7 +384,7 @@ export default function TwoChoicesReadingPage() {
                     </div>
                   </section>
 
-                  {/* 五张牌逐张解读 */}
+                  {/* Per-card analysis */}
                   <div className="space-y-10">
                     <div className="flex items-center gap-4 px-4">
                       <div className="h-px flex-1 bg-white/10" />
@@ -474,17 +415,13 @@ export default function TwoChoicesReadingPage() {
                                 : 'bg-green-500/5 border-green-500/20'
                           }`}
                         >
-                          {/* 卡牌图片 */}
                           <div className="w-full md:w-32 flex-shrink-0 flex flex-col items-center">
                             <div className="relative w-24 h-40 mb-3 group overflow-hidden rounded-lg">
                               {cardData?.image ? (
                                 <div
                                   className="w-full h-full"
                                   style={{
-                                    transform:
-                                      cardData.orientation === 'reversed'
-                                        ? 'rotate(180deg)'
-                                        : 'none',
+                                    transform: cardData.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                                   }}
                                 >
                                   <img
@@ -495,9 +432,7 @@ export default function TwoChoicesReadingPage() {
                                 </div>
                               ) : (
                                 <div className="w-full h-full bg-white/10 rounded-lg flex items-center justify-center border border-dashed border-white/20">
-                                  <span className="material-symbols-outlined text-white/20">
-                                    image
-                                  </span>
+                                  <span className="material-symbols-outlined text-white/20">image</span>
                                 </div>
                               )}
                             </div>
@@ -511,15 +446,14 @@ export default function TwoChoicesReadingPage() {
                               {idx + 1}
                             </div>
                             <p className="text-[10px] text-white/40 text-center mt-2 leading-tight">
-                              {cardReading.position_name}
+                              {t.positionNames[idx]}
                             </p>
                           </div>
 
-                          {/* 解读文本 */}
                           <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-3 flex-wrap">
                               <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>
-                                {getChineseCardName(cardData?.name || '')}
+                                {isZh ? getChineseCardName(cardData?.name || '') : (cardData?.name || '')}
                               </span>
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full border ${
@@ -528,11 +462,10 @@ export default function TwoChoicesReadingPage() {
                                     : 'border-emerald-500/50 text-emerald-400'
                                 }`}
                               >
-                                {cardData?.orientation === 'reversed' ? '逆位' : '正位'}
+                                {cardData?.orientation === 'reversed' ? t.reversed : t.upright}
                               </span>
                             </div>
                             
-                            {/* 关键词 */}
                             <div className="flex flex-wrap gap-2">
                               {cardReading.keywords.map((keyword, i) => (
                                 <span
@@ -559,21 +492,20 @@ export default function TwoChoicesReadingPage() {
                     })}
                   </div>
 
-                  {/* A/B 对比与选择建议 */}
+                  {/* Choice comparison */}
                   <section className="space-y-8">
                     <div className="flex items-center gap-4 px-4">
                       <div className="h-px flex-1 bg-white/10" />
                       <h3 className="text-xl font-black text-white/50 tracking-widest uppercase">
-                        Choice Comparison
+                        {t.reading.choiceComparisonTitle}
                       </h3>
                       <div className="h-px flex-1 bg-white/10" />
                     </div>
 
-                    {/* 选项 A 分析 */}
                     <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6">
                       <div className="flex items-center gap-3 mb-4">
                         <span className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 text-sm font-bold">
-                          选项 A
+                          {t.reading.optionASection}
                         </span>
                         {optionA && <span className="text-white/70 text-sm">{optionA}</span>}
                       </div>
@@ -582,11 +514,10 @@ export default function TwoChoicesReadingPage() {
                       </p>
                     </div>
 
-                    {/* 选项 B 分析 */}
                     <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6">
                       <div className="flex items-center gap-3 mb-4">
                         <span className="px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-sm font-bold">
-                          选项 B
+                          {t.reading.optionBSection}
                         </span>
                         {optionB && <span className="text-white/70 text-sm">{optionB}</span>}
                       </div>
@@ -595,13 +526,12 @@ export default function TwoChoicesReadingPage() {
                       </p>
                     </div>
 
-                    {/* 选择建议 */}
                     <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-6">
                       <div className="flex items-center gap-3 mb-4">
                         <span className="material-symbols-outlined text-purple-400">
                           psychology
                         </span>
-                        <h4 className="text-purple-300 font-bold">选择建议</h4>
+                        <h4 className="text-purple-300 font-bold">{t.reading.decisionGuidanceTitle}</h4>
                       </div>
                       <p className="text-white/80 leading-relaxed">
                         {reading.choice_comparison.decision_guidance}
@@ -609,7 +539,7 @@ export default function TwoChoicesReadingPage() {
                     </div>
                   </section>
 
-                  {/* 理性提醒 */}
+                  {/* Closing reminder */}
                   <div className="text-center py-10 space-y-8">
                     <div className="relative inline-block px-8 py-4">
                       <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full" />
@@ -624,7 +554,7 @@ export default function TwoChoicesReadingPage() {
                         className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                       >
                         <span className="material-symbols-outlined text-sm">home</span>
-                        返回首页
+                        {t.reading.backHome}
                       </button>
                       <button
                         onClick={handleReturn}
@@ -632,7 +562,7 @@ export default function TwoChoicesReadingPage() {
                         style={{ backgroundColor: '#7f13ec' }}
                       >
                         <span className="material-symbols-outlined text-sm">explore</span>
-                        浏览更多牌阵
+                        {t.reading.browseMore}
                       </button>
                     </div>
                   </div>

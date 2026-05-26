@@ -8,12 +8,12 @@ import ScrollBar from '../../../../components/fortune/ScrollBar';
 import TwoChoicesSlots from '../../../../components/fortune/TwoChoicesSlots';
 import { tarotCards } from '../../../../data/tarotCards';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getTwoChoicesT } from '../../../../lib/twoChoicesI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
 }
 
-// Fisher-Yates 洗牌算法
 const shuffleArray = <T,>(array: T[]): T[] => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -23,7 +23,6 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return newArray;
 };
 
-// 洗牌函数：打乱卡牌顺序并为每张牌分配正逆位
 const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   const cardsWithOrientation = cards.map(card => {
     let randomValue: number;
@@ -40,17 +39,14 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
       orientation: randomValue >= 0.5 ? 'upright' : 'reversed' as 'upright' | 'reversed',
     };
   });
-  
   return shuffleArray(cardsWithOrientation);
 };
 
-// LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_two_choices_question';
 const OPTION_A_STORAGE_KEY = 'general_two_choices_option_a';
 const OPTION_B_STORAGE_KEY = 'general_two_choices_option_b';
 const RESULT_STORAGE_KEY = 'general_two_choices_draw_result';
 
-// 结果数据接口
 interface TwoChoicesResult {
   timestamp: number;
   cards: ShuffledTarotCard[];
@@ -59,13 +55,11 @@ interface TwoChoicesResult {
   optionB?: string;
 }
 
-// 保存结果到 localStorage
 const saveResult = (data: TwoChoicesResult) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(data));
 };
 
-// 从 localStorage 读取结果
 const loadResult = (): TwoChoicesResult | null => {
   if (typeof window === 'undefined') return null;
   try {
@@ -80,6 +74,8 @@ const loadResult = (): TwoChoicesResult | null => {
 
 export default function TwoChoicesDrawPage() {
   const router = useRouter();
+  const t = getTwoChoicesT(router.locale);
+
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'two-choices',
     redirectPath: '/reading/general',
@@ -94,31 +90,24 @@ export default function TwoChoicesDrawPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
   
-  // 5张卡槽的状态
   const initialSlots: (ShuffledTarotCard | null)[] = Array(5).fill(null);
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>(initialSlots);
   const [isAnimating, setIsAnimating] = useState<boolean[]>(Array(5).fill(false));
   
-  // deck: 实际剩余可抽的牌
   const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
-  // uiSlots: 用于页面卡背渲染的数组
   const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
   
-  // 卡牌容器引用，用于滚动同步
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
   const scrollValueRef = useRef(scrollValue);
 
-  // 更新 scrollValueRef
   useEffect(() => {
     scrollValueRef.current = scrollValue;
   }, [scrollValue]);
 
-  // 容器滚动处理
   const handleScroll = () => {
     const container = containerRef.current;
     if (!container || isScrollingRef.current) return;
-    
     const maxScroll = container.scrollWidth - container.clientWidth;
     const value = maxScroll > 0 ? (container.scrollLeft / maxScroll) * 100 : 0;
     setScrollValue(value);
@@ -160,9 +149,6 @@ export default function TwoChoicesDrawPage() {
     const emptySlotIndex = selectedCards.findIndex(c => c === null);
     if (emptySlotIndex === -1) return;
 
-    const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
-    
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;
     setSelectedCards(newSelectedCards);
@@ -184,7 +170,6 @@ export default function TwoChoicesDrawPage() {
     setIsLoading(false);
 
     const updatedCardCount = newSelectedCards.filter(c => c !== null).length;
-    // 当抽满5张时保存并跳转
     if (updatedCardCount === 5) {
       const result: TwoChoicesResult = {
         timestamp: Date.now(),
@@ -197,47 +182,39 @@ export default function TwoChoicesDrawPage() {
       setSavedResult(result);
       setHasDrawn(true);
       
-      // 等待动画完成后跳转
       setTimeout(() => {
         router.push('/reading/general/two-choices/result');
       }, 1000);
     }
   };
 
-  // 滚动条拖动处理
   const handleScrollBarChange = (value: number) => {
     const container = containerRef.current;
     if (!container) return;
-
     isScrollingRef.current = true;
     const maxScroll = container.scrollWidth - container.clientWidth;
     container.scrollLeft = (value / 100) * maxScroll;
     setScrollValue(value);
-
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 100);
+    setTimeout(() => { isScrollingRef.current = false; }, 100);
   };
 
   const handleBack = () => {
-    if (!confirm('确定要返回吗？当前抽牌进度将丢失。')) return;
+    if (!confirm(t.draw.confirmBack)) return;
     router.push('/reading/general/two-choices/question');
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(t.draw.confirmReset)) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
     }
     
-    // 重置状态
     setHasDrawn(false);
     setSavedResult(null);
     setSelectedCards(Array(5).fill(null));
     setIsAnimating(Array(5).fill(false));
     
-    // 重新洗牌
     const shuffled = shuffleCards(tarotCards);
     setDeck(shuffled);
     setUiSlots(shuffled);
@@ -246,7 +223,7 @@ export default function TwoChoicesDrawPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{t.loading}</div>
       </div>
     );
   }
@@ -254,8 +231,8 @@ export default function TwoChoicesDrawPage() {
   return (
     <>
       <Head>
-        <title>二选一牌阵 - 抽牌 | Mystic Insights</title>
-        <meta name="description" content="从78张塔罗牌中选择5张，探索你的选择指引" />
+        <title>{t.draw.pageTitle}</title>
+        <meta name="description" content={t.draw.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -264,14 +241,13 @@ export default function TwoChoicesDrawPage() {
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
-        {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{t.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -285,25 +261,21 @@ export default function TwoChoicesDrawPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{t.reset}</span>
           </button>
         </header>
 
-        {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
           <div className="mx-auto max-w-7xl">
-            {/* 标题介绍区域 */}
             <div className="text-center mb-8 sm:mb-12">
               <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-4">
                 TWO CHOICES SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                {hasDrawn ? '抽牌完成' : '抽取五张塔罗牌'}
+                {hasDrawn ? t.draw.h1Done : t.draw.h1Drawing}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                {hasDrawn 
-                  ? '牌已经就位，现在让我们看看它们的指引。' 
-                  : '静心感受，从下方78张牌中选择5张，探索你的选择指引。'}
+                {hasDrawn ? t.draw.subtitleDone : t.draw.subtitleDrawing}
               </p>
             </div>
 
@@ -315,7 +287,6 @@ export default function TwoChoicesDrawPage() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  {/* 牌堆区域 */}
                   <div className="card-container-wrapper w-full mb-4">
                     <div
                       ref={containerRef}
@@ -341,20 +312,19 @@ export default function TwoChoicesDrawPage() {
                     <style jsx>{` .card-container::-webkit-scrollbar { display: none; } `}</style>
                   </div>
 
-                  {/* 滚动条 */}
                   <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                   <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                    <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 5</p>
+                    <p>{t.draw.cardCount(selectedCards.filter(c => c !== null).length)}</p>
                   </div>
 
-                  {/* 卡槽区域 */}
                   <TwoChoicesSlots
                     cards={selectedCards}
                     isAnimating={isAnimating}
                     showLoadingText={true}
                     optionA={optionA || 'A'}
                     optionB={optionB || 'B'}
+                    locale={router.locale}
                   />
                 </motion.div>
               )}

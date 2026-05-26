@@ -13,15 +13,23 @@ interface TwoChoicesSlotsProps {
   forceFlipped?: boolean;
   optionA?: string;
   optionB?: string;
+  locale?: string;
 }
 
-// 五张牌的位置名称（按顺序1-5）
-const SLOT_NAMES = [
-  '我目前所处的状态',           // 牌1: 底部中心
-  '选择 A 时我会经历的状态',     // 牌2: 中部左
-  '选择 A 可能带来的发展',       // 牌3: 顶部左
-  '选择 B 时我会经历的状态',     // 牌4: 中部右
-  '选择 B 可能带来的发展',       // 牌5: 顶部右
+const SLOT_NAMES_ZH = [
+  '我目前所处的状态',
+  '选择 A 时我会经历的状态',
+  '选择 A 可能带来的发展',
+  '选择 B 时我会经历的状态',
+  '选择 B 可能带来的发展',
+];
+
+const SLOT_NAMES_EN = [
+  'My Current State',
+  'My Experience Choosing A',
+  'Possible Outcome of Choice A',
+  'My Experience Choosing B',
+  'Possible Outcome of Choice B',
 ];
 
 export default function TwoChoicesSlots({ 
@@ -30,8 +38,11 @@ export default function TwoChoicesSlots({
   showLoadingText = false,
   forceFlipped = false,
   optionA = 'A',
-  optionB = 'B'
+  optionB = 'B',
+  locale,
 }: TwoChoicesSlotsProps) {
+  const isEn = locale !== 'zh';
+  const SLOT_NAMES = isEn ? SLOT_NAMES_EN : SLOT_NAMES_ZH;
   
   // 用于渲染单张卡片的通用函数
   const renderCard = (index: number, label?: string) => {
@@ -203,7 +214,10 @@ export default function TwoChoicesSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-sm sm:text-base mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/5）</p>
+          <p>{isEn
+            ? `🔮 Please draw the remaining cards (${cards.filter(c => c !== null).length}/5)`
+            : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/5）`}
+          </p>
         </motion.div>
       )}
 

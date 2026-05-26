@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { getSacredTriangleT } from '../../../../lib/sacredTriangleI18n';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -17,98 +19,37 @@ interface SacredTriangleResult {
   cards: ShuffledTarotCard[];
 }
 
-// 塔罗牌英文名称到中文名称的映射
 const getChineseCardName = (englishName: string): string => {
   const nameMap: { [key: string]: string } = {
-    // Major Arcana
-    '0. The Fool': '愚者',
-    'I. The Magician': '魔术师',
-    'II. The High Priestess': '女祭司',
-    'III. The Empress': '皇后',
-    'IV. The Emperor': '皇帝',
-    'V. The Hierophant': '教皇',
-    'VI. The Lovers': '恋人',
-    'VII. The Chariot': '战车',
-    'VIII. Strength': '力量',
-    'IX. The Hermit': '隐者',
-    'X. Wheel of Fortune': '命运之轮',
-    'XI. Justice': '正义',
-    'XII. The Hanged Man': '倒吊人',
-    'XIII. Death': '死神',
-    'XIV. Temperance': '节制',
-    'XV. The Devil': '恶魔',
-    'XVI. The Tower': '塔',
-    'XVII. The Star': '星星',
-    'XVIII. The Moon': '月亮',
-    'XIX. The Sun': '太阳',
-    'XX. Judgement': '审判',
+    '0. The Fool': '愚者', 'I. The Magician': '魔术师', 'II. The High Priestess': '女祭司',
+    'III. The Empress': '皇后', 'IV. The Emperor': '皇帝', 'V. The Hierophant': '教皇',
+    'VI. The Lovers': '恋人', 'VII. The Chariot': '战车', 'VIII. Strength': '力量',
+    'IX. The Hermit': '隐者', 'X. Wheel of Fortune': '命运之轮', 'XI. Justice': '正义',
+    'XII. The Hanged Man': '倒吊人', 'XIII. Death': '死神', 'XIV. Temperance': '节制',
+    'XV. The Devil': '恶魔', 'XVI. The Tower': '塔', 'XVII. The Star': '星星',
+    'XVIII. The Moon': '月亮', 'XIX. The Sun': '太阳', 'XX. Judgement': '审判',
     'XXI. The World': '世界',
-    
-    // Cups - 圣杯
-    'Ace of Cups': '圣杯王牌',
-    'Two of Cups': '圣杯二',
-    'Three of Cups': '圣杯三',
-    'Four of Cups': '圣杯四',
-    'Five of Cups': '圣杯五',
-    'Six of Cups': '圣杯六',
-    'Seven of Cups': '圣杯七',
-    'Eight of Cups': '圣杯八',
-    'Nine of Cups': '圣杯九',
-    'Ten of Cups': '圣杯十',
-    'Page of Cups': '圣杯侍者',
-    'Knight of Cups': '圣杯骑士',
-    'Queen of Cups': '圣杯王后',
-    'King of Cups': '圣杯国王',
-    
-    // Pentacles - 星币
-    'Ace of Pentacles': '星币王牌',
-    'Two of Pentacles': '星币二',
-    'Three of Pentacles': '星币三',
-    'Four of Pentacles': '星币四',
-    'Five of Pentacles': '星币五',
-    'Six of Pentacles': '星币六',
-    'Seven of Pentacles': '星币七',
-    'Eight of Pentacles': '星币八',
-    'Nine of Pentacles': '星币九',
-    'Ten of Pentacles': '星币十',
-    'Page of Pentacles': '星币侍者',
-    'Knight of Pentacles': '星币骑士',
-    'Queen of Pentacles': '星币王后',
-    'King of Pentacles': '星币国王',
-    
-    // Swords - 宝剑
-    'Ace of Swords': '宝剑王牌',
-    'Two of Swords': '宝剑二',
-    'Three of Swords': '宝剑三',
-    'Four of Swords': '宝剑四',
-    'Five of Swords': '宝剑五',
-    'Six of Swords': '宝剑六',
-    'Seven of Swords': '宝剑七',
-    'Eight of Swords': '宝剑八',
-    'Nine of Swords': '宝剑九',
-    'Ten of Swords': '宝剑十',
-    'Page of Swords': '宝剑侍者',
-    'Knight of Swords': '宝剑骑士',
-    'Queen of Swords': '宝剑王后',
-    'King of Swords': '宝剑国王',
-    
-    // Wands - 权杖
-    'Ace of Wands': '权杖王牌',
-    'Two of Wands': '权杖二',
-    'Three of Wands': '权杖三',
-    'Four of Wands': '权杖四',
-    'Five of Wands': '权杖五',
-    'Six of Wands': '权杖六',
-    'Seven of Wands': '权杖七',
-    'Eight of Wands': '权杖八',
-    'Nine of Wands': '权杖九',
-    'Ten of Wands': '权杖十',
-    'Page of Wands': '权杖侍者',
-    'Knight of Wands': '权杖骑士',
-    'Queen of Wands': '权杖王后',
-    'King of Wands': '权杖国王',
+    'Ace of Cups': '圣杯王牌', 'Two of Cups': '圣杯二', 'Three of Cups': '圣杯三',
+    'Four of Cups': '圣杯四', 'Five of Cups': '圣杯五', 'Six of Cups': '圣杯六',
+    'Seven of Cups': '圣杯七', 'Eight of Cups': '圣杯八', 'Nine of Cups': '圣杯九',
+    'Ten of Cups': '圣杯十', 'Page of Cups': '圣杯侍者', 'Knight of Cups': '圣杯骑士',
+    'Queen of Cups': '圣杯王后', 'King of Cups': '圣杯国王',
+    'Ace of Pentacles': '星币王牌', 'Two of Pentacles': '星币二', 'Three of Pentacles': '星币三',
+    'Four of Pentacles': '星币四', 'Five of Pentacles': '星币五', 'Six of Pentacles': '星币六',
+    'Seven of Pentacles': '星币七', 'Eight of Pentacles': '星币八', 'Nine of Pentacles': '星币九',
+    'Ten of Pentacles': '星币十', 'Page of Pentacles': '星币侍者', 'Knight of Pentacles': '星币骑士',
+    'Queen of Pentacles': '星币王后', 'King of Pentacles': '星币国王',
+    'Ace of Swords': '宝剑王牌', 'Two of Swords': '宝剑二', 'Three of Swords': '宝剑三',
+    'Four of Swords': '宝剑四', 'Five of Swords': '宝剑五', 'Six of Swords': '宝剑六',
+    'Seven of Swords': '宝剑七', 'Eight of Swords': '宝剑八', 'Nine of Swords': '宝剑九',
+    'Ten of Swords': '宝剑十', 'Page of Swords': '宝剑侍者', 'Knight of Swords': '宝剑骑士',
+    'Queen of Swords': '宝剑王后', 'King of Swords': '宝剑国王',
+    'Ace of Wands': '权杖王牌', 'Two of Wands': '权杖二', 'Three of Wands': '权杖三',
+    'Four of Wands': '权杖四', 'Five of Wands': '权杖五', 'Six of Wands': '权杖六',
+    'Seven of Wands': '权杖七', 'Eight of Wands': '权杖八', 'Nine of Wands': '权杖九',
+    'Ten of Wands': '权杖十', 'Page of Wands': '权杖侍者', 'Knight of Wands': '权杖骑士',
+    'Queen of Wands': '权杖王后', 'King of Wands': '权杖国王',
   };
-  
   return nameMap[englishName] || englishName;
 };
 
@@ -128,6 +69,9 @@ const loadSacredTriangleResult = (): SacredTriangleResult | null => {
 
 export default function SacredTriangleResult() {
   const router = useRouter();
+  const t = getSacredTriangleT(router.locale);
+  const isZh = router.locale === 'zh';
+
   const [result, setResult] = useState<SacredTriangleResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -139,7 +83,6 @@ export default function SacredTriangleResult() {
       router.push('/reading/general/sacred-triangle/question');
       return;
     }
-
     setResult(saved);
     setIsLoading(false);
   }, [router]);
@@ -149,8 +92,7 @@ export default function SacredTriangleResult() {
   };
 
   const handleRedraw = () => {
-    if (!confirm('确定要重新占卜吗？当前结果将被清空。')) return;
-    
+    if (!confirm(t.result.confirmRedraw)) return;
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem('general_sacred_triangle_question');
@@ -169,37 +111,35 @@ export default function SacredTriangleResult() {
   if (isLoading || !result) {
     return (
       <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
-        <div className="text-white text-lg">加载中...</div>
+        <div className="text-white text-lg">{t.loading}</div>
       </div>
     );
   }
 
-  const displayQuestion = result.question.trim() 
-    ? result.question 
-    : '你没有写下具体问题，我们将以你当下的能量趋势进行解读';
+  const displayQuestion = result.question.trim()
+    ? result.question
+    : t.noQuestion;
 
   return (
     <>
       <Head>
-        <title>圣三角牌阵 - 抽牌结果 | Mystic Insights</title>
-        <meta name="description" content="查看你的圣三角牌阵抽牌结果" />
+        <title>{t.result.pageTitle}</title>
+        <meta name="description" content={t.result.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
-        {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{t.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -213,14 +153,12 @@ export default function SacredTriangleResult() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{t.redraw}</span>
           </button>
         </header>
 
-        {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
           <div className="mx-auto max-w-7xl">
-            {/* 标题区域 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -231,28 +169,26 @@ export default function SacredTriangleResult() {
                 SACRED TRIANGLE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                圣三角牌阵
+                {t.result.h1}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                从过去、现在到未来的指引
+                {t.result.subtitle}
               </p>
             </motion.div>
 
-            {/* 问题显示卡片 */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="mb-8 mx-auto max-w-3xl"
             >
-              <div className="rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm p-4"
-            >
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm p-4">
                 <div className="flex items-start gap-3">
                   <span className="material-symbols-outlined text-primary text-xl mt-0.5">
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{t.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
                       {displayQuestion}
                     </p>
@@ -261,7 +197,6 @@ export default function SacredTriangleResult() {
               </div>
             </motion.div>
 
-            {/* 卡牌展示区域 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -273,9 +208,9 @@ export default function SacredTriangleResult() {
                 isAnimating={[false, false, false]}
                 showLoadingText={false}
                 forceFlipped={true}
+                locale={router.locale}
               />
 
-              {/* 卡牌信息列表 */}
               <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
                 {result.cards.map((card, index) => (
                   <motion.div
@@ -290,26 +225,20 @@ export default function SacredTriangleResult() {
                         {index + 1}
                       </div>
                       <h3 className="text-white font-semibold flex-1">
-                        {getChineseCardName(card.name)}
+                        {isZh ? getChineseCardName(card.name) : card.name}
                       </h3>
                     </div>
                     
                     <p className="text-white/90 font-medium mb-2">
-                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                      {card.orientation === 'upright' ? t.upright : t.reversed}
                     </p>
                     
                     <div className="space-y-2 text-sm">
                       <div>
-                        <p className="text-white/50 mb-1">关键词</p>
+                        <p className="text-white/50 mb-1">{t.keywords}</p>
                         <div className="flex flex-wrap gap-2">
-                          {(card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
-                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
-                          ).map((keyword, i) => (
-                            <span
-                              key={i}
-                              className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
-                            >
+                          {getLocalizedKeywords(card, card.orientation, router.locale).map((keyword, i) => (
+                            <span key={i} className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs">
                               {keyword}
                             </span>
                           ))}
@@ -317,12 +246,9 @@ export default function SacredTriangleResult() {
                       </div>
                       
                       <div>
-                        <p className="text-white/50 mb-1">含义</p>
+                        <p className="text-white/50 mb-1">{t.meaning}</p>
                         <p className="text-white/70 leading-relaxed">
-                          {card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
-                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
-                          }
+                          {getLocalizedMeaning(card, card.orientation, router.locale)}
                         </p>
                       </div>
                     </div>
@@ -330,14 +256,12 @@ export default function SacredTriangleResult() {
                 ))}
               </div>
 
-              {/* 操作按钮区域 */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
                 className="mt-12 space-y-4"
               >
-                {/* 操作按钮 */}
                 <div className="flex flex-col sm:flex-row gap-4">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -348,7 +272,7 @@ export default function SacredTriangleResult() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                      开始解读
+                      {t.result.startReadingBtn}
                     </span>
                   </motion.button>
                   
@@ -360,13 +284,12 @@ export default function SacredTriangleResult() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">home</span>
-                      返回首页
+                      {t.result.backHome}
                     </span>
                   </motion.button>
                 </div>
               </motion.div>
 
-              {/* 底部提示 */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -379,7 +302,7 @@ export default function SacredTriangleResult() {
                     auto_awesome
                   </span>
                   <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                    占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                    {t.footer}
                   </p>
                   <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                     auto_awesome

@@ -11,14 +11,17 @@ interface TriangleThreeCardSlotsProps {
   isAnimating: boolean[];
   showLoadingText?: boolean;
   forceFlipped?: boolean;
+  locale?: string;
 }
 
 export default function TriangleThreeCardSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
-  forceFlipped = false
+  forceFlipped = false,
+  locale,
 }: TriangleThreeCardSlotsProps) {
+  const isEn = locale !== 'zh';
   return (
     <div className="triangle-card-slots w-full flex flex-col justify-center items-center py-8">
       {/* 三角形布局：上方1张，下方2张 */}
@@ -122,7 +125,7 @@ export default function TriangleThreeCardSlots({
                 >
                   <div className="text-center text-white/30">
                     <div className="text-2xl sm:text-3xl mb-1">🎴</div>
-                    <p className="text-xs sm:text-sm">卡位 1</p>
+                    <p className="text-xs sm:text-sm">{isEn ? 'Slot 1' : '卡位 1'}</p>
                   </div>
                 </motion.div>
               )}
@@ -230,7 +233,7 @@ export default function TriangleThreeCardSlots({
                 >
                   <div className="text-center text-white/30">
                     <div className="text-2xl sm:text-3xl mb-1">🎴</div>
-                    <p className="text-xs sm:text-sm">卡位 3</p>
+                    <p className="text-xs sm:text-sm">{isEn ? 'Slot 3' : '卡位 3'}</p>
                   </div>
                 </motion.div>
               )}
@@ -335,7 +338,7 @@ export default function TriangleThreeCardSlots({
                 >
                   <div className="text-center text-white/30">
                     <div className="text-2xl sm:text-3xl mb-1">🎴</div>
-                    <p className="text-xs sm:text-sm">卡位 2</p>
+                    <p className="text-xs sm:text-sm">{isEn ? 'Slot 2' : '卡位 2'}</p>
                   </div>
                 </motion.div>
               )}
@@ -352,7 +355,7 @@ export default function TriangleThreeCardSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌…</p>
+          <p>{isEn ? '🔮 Please draw the remaining cards…' : '🔮 请继续抽取剩余卡牌…'}</p>
         </motion.div>
       )}
     </div>

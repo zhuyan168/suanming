@@ -8,15 +8,13 @@ import ScrollBar from '../../../../components/fortune/ScrollBar';
 import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThreeCardSlots';
 import { tarotCards } from '../../../../data/tarotCards';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
-
-// 使用从 data/tarotCards.ts 导入的完整78张塔罗牌数据
+import { getSacredTriangleT } from '../../../../lib/sacredTriangleI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
   positionMeaning: string;
 }
 
-// 牌位含义定义（内部使用，不展示给用户）
 const POSITION_MEANINGS = {
   0: '过去/问题/现状',
   1: '现在/原因/阻碍',
@@ -49,7 +47,6 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
       positionMeaning: ''
     };
   });
-  
   return shuffleArray(cardsWithOrientation);
 };
 
@@ -85,13 +82,14 @@ const loadSacredTriangleResult = (): SacredTriangleResult | null => {
 
 export default function SacredTriangleDraw() {
   const router = useRouter();
+  const t = getSacredTriangleT(router.locale);
+
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'sacred-triangle',
     redirectPath: '/reading/general',
   });
 
   const [sessionId, setSessionId] = useState<string>('');
-  
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedResult, setSavedResult] = useState<SacredTriangleResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,7 +115,6 @@ export default function SacredTriangleDraw() {
   const handleScroll = () => {
     const container = containerRef.current;
     if (!container || isScrollingRef.current) return;
-    
     const maxScroll = container.scrollWidth - container.clientWidth;
     const value = maxScroll > 0 ? (container.scrollLeft / maxScroll) * 100 : 0;
     setScrollValue(value);
@@ -133,7 +130,6 @@ export default function SacredTriangleDraw() {
         router.replace('/reading/general/sacred-triangle/result');
         return;
       }
-      
       setSavedResult(saved);
       setHasDrawn(true);
       setSessionId(saved.sessionId);
@@ -141,7 +137,6 @@ export default function SacredTriangleDraw() {
     } else {
       const newSessionId = generateSessionId();
       setSessionId(newSessionId);
-      
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
@@ -160,15 +155,11 @@ export default function SacredTriangleDraw() {
     const emptySlotIndex = selectedCards.findIndex(c => c === null);
     if (emptySlotIndex === -1) return;
 
-    // 为卡牌添加牌位含义
     const cardWithPosition = {
       ...card,
       positionMeaning: POSITION_MEANINGS[emptySlotIndex as keyof typeof POSITION_MEANINGS]
     };
 
-    const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}, 牌位: ${cardWithPosition.positionMeaning}`);
-    
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = cardWithPosition;
     setSelectedCards(newSelectedCards);
@@ -203,7 +194,6 @@ export default function SacredTriangleDraw() {
       setSavedResult(result);
       setHasDrawn(true);
       
-      // 自动跳转到展示页
       setTimeout(() => {
         router.push('/reading/general/sacred-triangle/result');
       }, 1000);
@@ -213,15 +203,11 @@ export default function SacredTriangleDraw() {
   const handleScrollBarChange = (value: number) => {
     const container = containerRef.current;
     if (!container) return;
-
     isScrollingRef.current = true;
     const maxScroll = container.scrollWidth - container.clientWidth;
     container.scrollLeft = (value / 100) * maxScroll;
     setScrollValue(value);
-
-    setTimeout(() => {
-      isScrollingRef.current = false;
-    }, 100);
+    setTimeout(() => { isScrollingRef.current = false; }, 100);
   };
 
   const handleReturnToList = () => {
@@ -230,7 +216,7 @@ export default function SacredTriangleDraw() {
 
   const handleReset = () => {
     if (typeof window === 'undefined') return;
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(t.draw.confirmReset)) return;
 
     localStorage.removeItem(STORAGE_KEY);
     
@@ -250,7 +236,7 @@ export default function SacredTriangleDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{t.loading}</div>
         </div>
       </div>
     );
@@ -259,8 +245,8 @@ export default function SacredTriangleDraw() {
   return (
     <>
       <Head>
-        <title>圣三角牌阵 - 抽牌 | Mystic Insights</title>
-        <meta name="description" content="从过去、现在到未来，帮助你梳理脉络与下一步方向" />
+        <title>{t.draw.pageTitle}</title>
+        <meta name="description" content={t.draw.metaDesc} />
       </Head>
 
       <div className="dark">
@@ -271,7 +257,7 @@ export default function SacredTriangleDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{t.back}</span>
             </button>
             
             <div className="flex items-center gap-4 text-white">
@@ -283,7 +269,7 @@ export default function SacredTriangleDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
+              <span className="text-sm font-medium hidden sm:inline">{t.reset}</span>
             </button>
           </header>
 
@@ -292,12 +278,10 @@ export default function SacredTriangleDraw() {
               <div className="text-center mb-12">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Sacred Triangle Spread</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '圣三角牌阵已完成' : '抽取三张塔罗牌'}
+                  {hasDrawn ? t.draw.h1Done : t.draw.h1Drawing}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {hasDrawn 
-                    ? '你已完成抽牌，即将进入展示页面。' 
-                    : '静心感受，从下方78张牌中选择3张，探索从过去到未来的指引。'}
+                  {hasDrawn ? t.draw.subtitleDone : t.draw.subtitleDrawing}
                 </p>
               </div>
 
@@ -343,13 +327,14 @@ export default function SacredTriangleDraw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 3</p>
+                      <p>{t.draw.cardCount(selectedCards.filter(c => c !== null).length)}</p>
                     </div>
 
                     <TriangleThreeCardSlots
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
+                      locale={router.locale}
                     />
                   </motion.div>
                 )}

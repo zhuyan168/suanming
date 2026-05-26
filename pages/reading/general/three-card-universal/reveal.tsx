@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { getThreeCardT } from '../../../../lib/threeCardI18n';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -293,10 +294,7 @@ export default function ThreeCardRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">{t.reveal.keywords}</p>
                         <div className="flex flex-wrap gap-2">
-                          {(card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
-                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
-                          ).map((keyword, i) => (
+                          {getLocalizedKeywords(card, card.orientation, router.locale).map((keyword, i) => (
                             <span
                               key={i}
                               className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
@@ -310,10 +308,7 @@ export default function ThreeCardRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">{t.reveal.meaning}</p>
                         <p className="text-white/70 leading-relaxed">
-                          {card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
-                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
-                          }
+                          {getLocalizedMeaning(card, card.orientation, router.locale)}
                         </p>
                       </div>
                     </div>

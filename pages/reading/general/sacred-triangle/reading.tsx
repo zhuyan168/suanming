@@ -6,6 +6,7 @@ import TriangleThreeCardSlots from '../../../../components/fortune/TriangleThree
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getSacredTriangleT } from '../../../../lib/sacredTriangleI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -34,20 +35,25 @@ interface ReadingResult {
   reminder: string;
 }
 
+type ErrorType = 'incomplete' | 'load' | 'generate' | 'default' | null;
+
 const STORAGE_KEY = 'general_sacred_triangle_result';
 
 export default function SacredTriangleReadingPage() {
   const router = useRouter();
+  const t = getSacredTriangleT(router.locale);
+
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<SacredTriangleResult | null>(null);
   const [question, setQuestion] = useState<string>('');
   const [reading, setReading] = useState<ReadingResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 加载抽牌结果
     const savedResult = localStorage.getItem(STORAGE_KEY);
     if (savedResult) {
       try {
@@ -55,19 +61,19 @@ export default function SacredTriangleReadingPage() {
         if (parsed.cards && parsed.cards.length === 3) {
           setResult(parsed);
           setQuestion(parsed.question || '');
-          // 如果已经有解读结果，直接使用
           if (parsed.reading) {
             setReading(parsed.reading);
           }
         } else {
-          setError('抽牌数据不完整，请重新抽牌');
+          setErrorType('incomplete');
+          setError(t.reading.errorIncomplete);
         }
       } catch (e) {
         console.error('Failed to parse saved result:', e);
-        setError('加载数据失败，请返回重新抽牌');
+        setErrorType('load');
+        setError(t.reading.errorLoad);
       }
     } else {
-      // 如果没有结果，跳转回问题输入页
       router.replace('/reading/general/sacred-triangle/question');
       return;
     }
@@ -78,6 +84,7 @@ export default function SacredTriangleReadingPage() {
 
     setLoading(true);
     setError(null);
+    setErrorType(null);
 
     try {
       const headers = await getAuthHeaders();
@@ -91,28 +98,31 @@ export default function SacredTriangleReadingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('生成解读失败，请重试');
+        throw new Error('generate');
       }
 
       const data = await response.json();
       setReading(data);
       setError(null);
+      setErrorType(null);
 
-      const updatedResult = {
-        ...result,
-        reading: data,
-      };
+      const updatedResult = { ...result, reading: data };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedResult));
 
     } catch (err: any) {
       console.error('Error generating reading:', err);
-      setError(err.message || '出错了，请稍后重试');
+      if (err.message === 'generate') {
+        setErrorType('generate');
+        setError(t.reading.errorGenerate);
+      } else {
+        setErrorType('default');
+        setError(t.reading.errorDefault);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // 自动生成解读
   useEffect(() => {
     if (result && result.cards.length === 3 && !reading && !loading && !error) {
       generateReading();
@@ -124,17 +134,16 @@ export default function SacredTriangleReadingPage() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
-    
+    if (!confirm(t.reading.confirmReset)) return;
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem('general_sacred_triangle_question');
     }
-    
     router.replace('/reading/general/sacred-triangle/question');
   };
 
   if (error) {
+    const isDataError = errorType === 'incomplete' || errorType === 'load';
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex flex-col items-center justify-center p-4">
         <div className="bg-white/5 border border-white/10 p-8 rounded-2xl max-w-md w-full text-center">
@@ -143,23 +152,24 @@ export default function SacredTriangleReadingPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => {
-                if (error.includes('不完整') || error.includes('加载数据失败')) {
+                if (isDataError) {
                   router.push('/reading/general/sacred-triangle/question');
                 } else {
                   setError(null);
+                  setErrorType(null);
                   generateReading();
                 }
               }}
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              {error.includes('不完整') || error.includes('加载数据失败') ? '去抽牌' : '重新生成'}
+              {isDataError ? t.reading.btnRedraw : t.reading.btnRetry}
             </button>
             <button
               onClick={handleReturn}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回牌阵列表
+              {t.reading.btnBackList}
             </button>
           </div>
         </div>
@@ -170,25 +180,23 @@ export default function SacredTriangleReadingPage() {
   return (
     <>
       <Head>
-        <title>圣三角牌阵 · 解读 | Mystic Insights</title>
-        <meta name="description" content="查看你的塔罗牌解读结果" />
+        <title>{t.reading.pageTitle}</title>
+        <meta name="description" content={t.reading.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
-        {/* 背景装饰 */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
           <div className="absolute bottom-16 right-1/5 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         </div>
 
-        {/* 顶部导航 */}
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#0f0f23]/80 backdrop-blur-sm">
           <button
             onClick={isFromHistory ? goBackToHistory : handleReturn}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? t.backToHistory : t.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -202,14 +210,12 @@ export default function SacredTriangleReadingPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{t.redraw}</span>
           </button>
         </header>
 
-        {/* 主内容 */}
         <main className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
           <div className="mx-auto max-w-5xl">
-            {/* 标题区域 */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -220,11 +226,10 @@ export default function SacredTriangleReadingPage() {
                 SACRED TRIANGLE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                圣三角牌阵 · 解读
+                {t.reading.h1}
               </h1>
             </motion.div>
 
-            {/* 问题展示区域 */}
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -237,16 +242,15 @@ export default function SacredTriangleReadingPage() {
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{t.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
-                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                      {question || t.noQuestion}
                     </p>
                   </div>
                 </div>
               </div>
             </motion.div>
 
-            {/* 卡牌展示区域 */}
             {result && (
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
@@ -256,13 +260,13 @@ export default function SacredTriangleReadingPage() {
               >
                 <div className="bg-white/5 border border-white/10 rounded-3xl py-6 px-4 relative overflow-hidden">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-
                   <div className="max-w-4xl mx-auto">
                     <TriangleThreeCardSlots
                       cards={result.cards}
                       isAnimating={[false, false, false]}
                       showLoadingText={false}
                       forceFlipped={true}
+                      locale={router.locale}
                     />
                   </div>
                 </div>
@@ -274,7 +278,7 @@ export default function SacredTriangleReadingPage() {
                     className="flex flex-col items-center gap-1"
                   >
                     <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                      {loading ? '正在生成解读' : '下滑查看解读内容'}
+                      {loading ? t.reading.scrollHintLoading : t.reading.scrollHintReady}
                     </span>
                     <span className="material-symbols-outlined text-white/20 text-xl">
                       keyboard_double_arrow_down
@@ -284,7 +288,6 @@ export default function SacredTriangleReadingPage() {
               </motion.section>
             )}
 
-            {/* 解读内容区域 */}
             <AnimatePresence mode="wait">
               {loading ? (
                 <motion.div
@@ -301,9 +304,9 @@ export default function SacredTriangleReadingPage() {
                       style={{ borderColor: '#7f13ec transparent transparent transparent' }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">正在为你解读牌面...</h3>
+                  <h3 className="text-xl font-bold mb-2">{t.reading.loadingTitle}</h3>
                   <p className="text-white/40 max-w-xs mx-auto text-sm">
-                    AI 正在根据你的牌阵进行深度分析，请稍候
+                    {t.reading.loadingSubtitle}
                   </p>
                 </motion.div>
               ) : reading ? (
@@ -313,24 +316,24 @@ export default function SacredTriangleReadingPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-12 max-w-3xl mx-auto"
                 >
-                  {/* 整体解读 */}
                   <section className="relative group">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000" />
                     <div className="relative bg-[#1a1028] border border-white/10 rounded-2xl p-6 sm:p-10">
                       <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                         <span className="material-symbols-outlined">auto_awesome</span>
-                        整体解读
+                        {t.reading.overallTitle}
                       </h3>
                       <p className="text-white/80 leading-relaxed text-lg mb-6">
                         {reading.overall.summary}
                       </p>
-                      {/* 优先级建议 */}
                       <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/10 border border-primary/30">
                         <span className="material-symbols-outlined text-primary text-lg mt-0.5 flex-shrink-0">
                           trending_up
                         </span>
                         <div>
-                          <p className="text-primary/80 text-xs font-semibold mb-1 uppercase tracking-wider">优先建议</p>
+                          <p className="text-primary/80 text-xs font-semibold mb-1 uppercase tracking-wider">
+                            {t.reading.priorityLabel}
+                          </p>
                           <p className="text-white/90 text-sm leading-relaxed">
                             {reading.overall.priority}
                           </p>
@@ -339,7 +342,6 @@ export default function SacredTriangleReadingPage() {
                     </div>
                   </section>
 
-                  {/* 分牌解读 */}
                   <div className="space-y-10">
                     <div className="flex items-center gap-4 px-4">
                       <div className="h-px flex-1 bg-white/10" />
@@ -360,17 +362,13 @@ export default function SacredTriangleReadingPage() {
                           transition={{ delay: idx * 0.1 }}
                           className="flex flex-col md:flex-row gap-6 bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/8 transition-colors"
                         >
-                          {/* 卡牌图片 */}
                           <div className="w-full md:w-32 flex-shrink-0 flex flex-col items-center">
                             <div className="relative w-24 h-40 mb-3 group overflow-hidden rounded-lg">
                               {cardData?.image ? (
                                 <div
                                   className="w-full h-full"
                                   style={{
-                                    transform:
-                                      cardData.orientation === 'reversed'
-                                        ? 'rotate(180deg)'
-                                        : 'none',
+                                    transform: cardData.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                                   }}
                                 >
                                   <img
@@ -381,21 +379,18 @@ export default function SacredTriangleReadingPage() {
                                 </div>
                               ) : (
                                 <div className="w-full h-full bg-white/10 rounded-lg flex items-center justify-center border border-dashed border-white/20">
-                                  <span className="material-symbols-outlined text-white/20">
-                                    image
-                                  </span>
+                                  <span className="material-symbols-outlined text-white/20">image</span>
                                 </div>
                               )}
                             </div>
                             <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-wider">
-                              第{cardReading.index}张
+                              {t.reading.cardPosition(idx + 1)}
                             </p>
                             <p className="text-[9px] text-white/40 text-center mt-1">
-                              {cardReading.role}
+                              {t.reading.cardRoles[idx] ?? cardReading.role}
                             </p>
                           </div>
 
-                          {/* 解读文本 */}
                           <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-3 flex-wrap">
                               <span
@@ -411,7 +406,7 @@ export default function SacredTriangleReadingPage() {
                                     : 'border-emerald-500/50 text-emerald-400'
                                 }`}
                               >
-                                {cardData?.orientation === 'reversed' ? '逆位' : '正位'}
+                                {cardData?.orientation === 'reversed' ? t.reversed : t.upright}
                               </span>
                             </div>
                             <p className="text-white/80 leading-relaxed text-base">
@@ -423,7 +418,6 @@ export default function SacredTriangleReadingPage() {
                     })}
                   </div>
 
-                  {/* 收尾提醒 */}
                   <div className="text-center py-10 space-y-8">
                     <div className="relative inline-block px-8 py-4">
                       <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full" />
@@ -438,7 +432,7 @@ export default function SacredTriangleReadingPage() {
                         className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                       >
                         <span className="material-symbols-outlined text-sm">home</span>
-                        返回首页
+                        {t.reading.backHome}
                       </button>
                       <button
                         onClick={handleReturn}
@@ -446,11 +440,10 @@ export default function SacredTriangleReadingPage() {
                         style={{ backgroundColor: '#7f13ec' }}
                       >
                         <span className="material-symbols-outlined text-sm">explore</span>
-                        浏览更多牌阵
+                        {t.reading.browseMore}
                       </button>
                     </div>
                   </div>
-
                 </motion.div>
               ) : null}
             </AnimatePresence>
