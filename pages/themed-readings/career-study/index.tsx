@@ -13,7 +13,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * 事业 & 学业主题占卜页面
  */
 export default function CareerStudyThemePage() {
-  const { isMember } = useMembership();
+  const { isMember, userId } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation('common');
 
@@ -56,6 +56,7 @@ export default function CareerStudyThemePage() {
                   spread={spread}
                   theme="career-study"
                   isMember={isMember}
+                  userId={userId}
                   onLockedClick={() => setIsModalOpen(true)}
                 />
               ))}

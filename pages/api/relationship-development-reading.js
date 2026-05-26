@@ -63,7 +63,7 @@ async function fixMalformedJSON(apiKey, rawContent) {
   }
 }
 
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'love-relationship-development' });
   if (!accessStatus) return;
 
   try {
@@ -341,15 +341,14 @@ ${cardsInfo}
     }
 
     // 返回成功响应
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'relationship-development',
-        cards,
-        readingResult: readingData,
-        resultPath: '/themed-readings/love/relationship-development/result',
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      spreadType: 'relationship-development',
+      featureKey: 'love-relationship-development',
+      cards,
+      readingResult: readingData,
+      resultPath: '/themed-readings/love/relationship-development/result',
+    });
 
     return res.status(200).json({ ok: true, reading: readingData });
 

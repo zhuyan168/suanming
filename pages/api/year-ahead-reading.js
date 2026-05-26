@@ -1,4 +1,4 @@
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'fortune-yearly' });
   if (!accessStatus) return;
 
   try {
@@ -152,15 +152,14 @@ JSON 结构示例：
       return res.status(500).json({ error: '解析运势数据失败' });
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'year-ahead',
-        cards,
-        readingResult: fortuneData,
-        resultPath: '/fortune/annual/year-ahead/result'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      spreadType: 'year-ahead',
+      featureKey: 'fortune-yearly',
+      cards,
+      readingResult: fortuneData,
+      resultPath: '/fortune/annual/year-ahead/result',
+    });
 
     return res.status(200).json(fortuneData);
 

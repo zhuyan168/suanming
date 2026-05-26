@@ -2,6 +2,8 @@
 import type { AppProps } from "next/app";
 import Script from "next/script";
 import { appWithTranslation } from "next-i18next/pages";
+import { GuestTrialProvider } from "../context/GuestTrialContext";
+import GuestTrialBanner from "../components/guest-trial/GuestTrialBanner";
 
 // ✅ 关键：全局 Tailwind 样式只需要在这里引入一次
 import "../styles/globals.css";
@@ -10,7 +12,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <>
+    <GuestTrialProvider>
       {GA_ID && (
         <>
           <Script
@@ -31,8 +33,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         </>
       )}
 
+      <GuestTrialBanner />
       <Component {...pageProps} />
-    </>
+    </GuestTrialProvider>
   );
 }
 

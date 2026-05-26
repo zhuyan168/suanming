@@ -2,11 +2,14 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next/pages';
 import { SpreadConfig } from '../../config/themedReadings';
 import PaywallBadge from './PaywallBadge';
+import { useGuestTrial } from '../../context/GuestTrialContext';
 
 interface SpreadCardProps {
   spread: SpreadConfig;
   theme: string;
   isMember: boolean;
+  /** 当前登录用户的 ID（null 表示未登录游客）*/
+  userId: string | null;
   onLockedClick: () => void;
   onClick?: (e: React.MouseEvent) => void;
 }
@@ -18,12 +21,14 @@ export default function SpreadCard({
   spread,
   theme,
   isMember,
+  userId,
   onLockedClick,
   onClick,
 }: SpreadCardProps) {
   const router = useRouter();
   const { t } = useTranslation('common');
   const isZh = router.locale === 'zh';
+  const { isActive: isTrialActive } = useGuestTrial();
 
   const title = isZh ? spread.titleZh : (spread.titleEn || spread.titleZh);
   const desc  = isZh ? spread.descZh  : (spread.descEn  || spread.descZh);
@@ -31,13 +36,16 @@ export default function SpreadCard({
   const spreadAccess = spread.access ?? 'free';
   const showPaywallBadge = spreadAccess === 'member' && !isMember;
 
+  // guest trial 绕过仅对未登录游客有效；已登录用户不受影响
+  const guestTrialAllows = isTrialActive && !userId;
+
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);
       return;
     }
 
-    if (showPaywallBadge) {
+    if (showPaywallBadge && !guestTrialAllows) {
       router.push('/membership');
       return;
     }

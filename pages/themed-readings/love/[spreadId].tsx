@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMembership } from '../../../hooks/useMembership';
+import { useGuestTrial } from '../../../context/GuestTrialContext';
 import { getSpreadConfig } from '../../../config/themedReadings';
 import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
 
@@ -12,10 +13,14 @@ import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
 export default function SpreadDetailPage() {
   const router = useRouter();
   const { spreadId } = router.query;
-  const { isMember, loading: membershipLoading } = useMembership();
+  const { isMember, loading: membershipLoading, userId } = useMembership();
+  const { isActive: isTrialActive } = useGuestTrial();
 
   const spreadConfig = spreadId ? getSpreadConfig('love', spreadId as string) : null;
   const isTemporarilyOpen = spreadId === 'relationship-development';
+
+  // guest trial 绕过仅对未登录游客有效
+  const guestTrialAllows = isTrialActive && !userId;
 
   useEffect(() => {
     if (!router.isReady || membershipLoading) return;
@@ -23,10 +28,10 @@ export default function SpreadDetailPage() {
     if (!id) return;
     const cfg = getSpreadConfig('love', id);
     if (!cfg?.isPaid || id === 'relationship-development') return;
-    if (!isMember) {
+    if (!isMember && !guestTrialAllows) {
       void router.replace('/membership');
     }
-  }, [router.isReady, membershipLoading, spreadId, isMember, router]);
+  }, [router.isReady, membershipLoading, spreadId, isMember, guestTrialAllows, router]);
 
   // 如果牌阵不存在
   if (router.isReady && !spreadConfig) {
@@ -124,7 +129,8 @@ export default function SpreadDetailPage() {
     spreadConfig?.isPaid &&
     !isTemporarilyOpen &&
     !membershipLoading &&
-    !isMember
+    !isMember &&
+    !guestTrialAllows
   ) {
     return null;
   }

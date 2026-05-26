@@ -1,4 +1,4 @@
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'love-reconciliation' });
   if (!accessStatus) return;
 
   try {
@@ -184,15 +184,14 @@ ${cardsInfo}
       return res.status(500).json({ error: '解析解读数据失败' });
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'reconciliation',
-        cards,
-        readingResult: readingData,
-        resultPath: '/themed-readings/love/reconciliation/result',
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      spreadType: 'reconciliation',
+      featureKey: 'love-reconciliation',
+      cards,
+      readingResult: readingData,
+      resultPath: '/themed-readings/love/reconciliation/result',
+    });
 
     return res.status(200).json(readingData);
 

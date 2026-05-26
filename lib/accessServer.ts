@@ -2,8 +2,17 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseService } from './supabaseServer';
 import { SpreadAccess } from './spreads';
 import { isUserMember } from './access';
+import { checkGuestTrialAccess, checkGuestTrialSession, recordGuestTrialUsage } from './guestTrialAccess';
 
-export type ApiAccessReason = 'not_logged_in' | 'daily_limit' | 'member_only';
+export type ApiAccessReason =
+  | 'not_logged_in'
+  | 'daily_limit'
+  | 'member_only'
+  | 'allowed_by_guest_trial'
+  | 'guest_trial_invalid'
+  | 'guest_trial_expired'
+  | 'guest_trial_limit_exceeded'
+  | 'feature_trial_limit_exceeded';
 
 export interface ApiAccessStatus {
   allowed: boolean;
@@ -11,6 +20,14 @@ export interface ApiAccessStatus {
   reason?: ApiAccessReason;
   remaining: number;
   userId?: string;
+  /** Set to 'guest_trial' when access is granted via guest trial session */
+  accessType?: 'guest_trial';
+  /** The validated guest session ID, forwarded to reading APIs for future usage tracking */
+  guestSessionId?: string;
+  expiresAt?: string;
+  totalUsed?: number;
+  featureUsed?: number;
+  featureRemaining?: number;
 }
 
 /** Fallback timezone when the client sends nothing or an invalid value. */
@@ -148,8 +165,10 @@ export async function ensureAccessForRequest(params: {
   req: NextApiRequest;
   spreadAccess?: SpreadAccess;
   freeDailyLimit?: number;
+  /** Spread key for per-feature guest trial limit checking */
+  spreadKey?: string;
 }): Promise<ApiAccessStatus> {
-  const { req, spreadAccess = 'free', freeDailyLimit = DEFAULT_FREE_LIMIT } = params;
+  const { req, spreadAccess = 'free', freeDailyLimit = DEFAULT_FREE_LIMIT, spreadKey: paramSpreadKey } = params;
 
   // Extract and validate the IANA timezone sent by the client (?tz=Asia/Shanghai).
   // Falls back to FALLBACK_TIMEZONE ('UTC') when absent or invalid.
@@ -158,11 +177,69 @@ export async function ensureAccessForRequest(params: {
 
   const token = getAccessTokenFromRequest(req);
   if (!token) {
+    // No Supabase token — check for guest trial session
+    const rawGuestHeader = req.headers['x-guest-session-id'];
+    const guestSessionId = Array.isArray(rawGuestHeader) ? rawGuestHeader[0] : (rawGuestHeader ?? null);
+
+    if (!guestSessionId) {
+      return { allowed: false, isMember: false, reason: 'not_logged_in', remaining: freeDailyLimit };
+    }
+
+    // Resolve spreadKey: param > query param
+    const resolvedSpreadKey =
+      paramSpreadKey ||
+      (Array.isArray(req.query.spreadKey) ? req.query.spreadKey[0] : req.query.spreadKey) ||
+      null;
+
+    if (spreadAccess === 'member' && resolvedSpreadKey) {
+      // Full check: session + total limit + per-feature limit
+      const result = await checkGuestTrialAccess({ sessionId: guestSessionId, spreadKey: resolvedSpreadKey });
+      // Use 'in' check for TypeScript to narrow the discriminated union
+      const fullDenyReason = ('reason' in result ? result.reason : '') as string;
+      if (result.allowed) {
+        return {
+          allowed: true,
+          isMember: false,
+          reason: 'allowed_by_guest_trial',
+          accessType: 'guest_trial',
+          guestSessionId: result.sessionId,
+          expiresAt: result.expiresAt,
+          totalUsed: result.totalUsed,
+          featureUsed: result.featureUsed,
+          featureRemaining: result.featureRemaining,
+          remaining: result.totalRemaining,
+        };
+      }
+      return {
+        allowed: false,
+        isMember: false,
+        reason: GUEST_TRIAL_DENY_REASON_MAP[fullDenyReason] ?? 'not_logged_in',
+        remaining: 0,
+        guestSessionId,
+      };
+    }
+
+    // Member spread without spreadKey, or free spread: lightweight session check
+    const sessionResult = await checkGuestTrialSession(guestSessionId);
+    const sessionDenyReason = ('reason' in sessionResult ? sessionResult.reason : '') as string;
+    if (sessionResult.valid) {
+      return {
+        allowed: true,
+        isMember: false,
+        reason: 'allowed_by_guest_trial',
+        accessType: 'guest_trial',
+        guestSessionId: sessionResult.sessionId,
+        expiresAt: sessionResult.expiresAt,
+        totalUsed: sessionResult.totalUsed,
+        remaining: sessionResult.totalRemaining,
+      };
+    }
     return {
       allowed: false,
       isMember: false,
-      reason: 'not_logged_in',
-      remaining: freeDailyLimit
+      reason: GUEST_TRIAL_DENY_REASON_MAP[sessionDenyReason] ?? 'not_logged_in',
+      remaining: 0,
+      guestSessionId,
     };
   }
 
@@ -229,10 +306,24 @@ export async function ensureAccessForRequest(params: {
   };
 }
 
+/** Maps GuestTrialDenyReason → ApiAccessReason */
+const GUEST_TRIAL_DENY_REASON_MAP: Record<string, ApiAccessReason> = {
+  missing_session: 'not_logged_in',
+  invalid_session: 'guest_trial_invalid',
+  expired: 'guest_trial_expired',
+  total_limit_exceeded: 'guest_trial_limit_exceeded',
+  feature_limit_exceeded: 'feature_trial_limit_exceeded',
+};
+
 const ACCESS_DENIED_MESSAGES: Record<ApiAccessReason | 'unknown', { status: number; message: string }> = {
   not_logged_in: { status: 401, message: '请先登录以继续占卜' },
   daily_limit: { status: 403, message: '今日免费次数已用完，请明天或开通会员' },
   member_only: { status: 403, message: '该牌阵为会员专属，请开通会员后使用' },
+  allowed_by_guest_trial: { status: 200, message: '' },
+  guest_trial_invalid: { status: 401, message: '游客试用会话无效，请重新开始试用' },
+  guest_trial_expired: { status: 403, message: '游客试用已过期，注册账号后可继续使用' },
+  guest_trial_limit_exceeded: { status: 403, message: '72 小时免费试用次数已用完，注册账号后可继续使用' },
+  feature_trial_limit_exceeded: { status: 403, message: '该功能的试用次数已用完，注册账号后可继续使用' },
   unknown: { status: 403, message: '权限校验未通过' },
 };
 
@@ -241,12 +332,15 @@ export async function requireAccessOrRespond(params: {
   res: NextApiResponse;
   spreadAccess?: SpreadAccess;
   freeDailyLimit?: number;
+  /** Pass the spread key to enable per-feature guest trial limit checking */
+  spreadKey?: string;
 }): Promise<ApiAccessStatus | null> {
-  const { req, res, spreadAccess, freeDailyLimit } = params;
+  const { req, res, spreadAccess, freeDailyLimit, spreadKey } = params;
   const status = await ensureAccessForRequest({
     req,
     spreadAccess,
     freeDailyLimit,
+    spreadKey,
   });
 
   if (status.allowed) {
@@ -255,6 +349,53 @@ export async function requireAccessOrRespond(params: {
 
   const reason = status.reason ?? 'unknown';
   const meta = ACCESS_DENIED_MESSAGES[reason] || ACCESS_DENIED_MESSAGES.unknown;
-  res.status(meta.status).json({ error: meta.message });
+  // Include machine-readable `code` alongside human `error` so the frontend
+  // can distinguish guest trial denial reasons from generic auth failures.
+  res.status(meta.status).json({ error: meta.message, code: reason });
   return null;
+}
+
+/**
+ * Called ONCE after a successful AI reading generation.
+ *
+ * - Logged-in user  → records to reading_history (existing behaviour).
+ * - Guest trial user → increments guest_trial_usage for the feature key.
+ *
+ * Free spread callers may omit `featureKey`; guest trial usage is only
+ * recorded when both `featureKey` and `accessType === 'guest_trial'` are present.
+ */
+export async function recordSuccessfulReading(params: {
+  accessStatus: ApiAccessStatus;
+  spreadType: string;
+  /** Spread key from lib/spreads.ts — required for guest trial usage counting */
+  featureKey?: string;
+  question?: string | null;
+  cards?: unknown;
+  readingResult?: unknown;
+  resultPath: string;
+}): Promise<void> {
+  const { accessStatus, spreadType, featureKey, question, cards, readingResult, resultPath } = params;
+
+  if (accessStatus.userId) {
+    await recordReadingHistory({
+      userId: accessStatus.userId,
+      spreadType,
+      question: question ?? null,
+      cards: cards ?? null,
+      readingResult: readingResult ?? null,
+      resultPath,
+    });
+    return;
+  }
+
+  if (
+    accessStatus.accessType === 'guest_trial' &&
+    accessStatus.guestSessionId &&
+    featureKey
+  ) {
+    await recordGuestTrialUsage({
+      sessionId: accessStatus.guestSessionId,
+      featureKey,
+    });
+  }
 }

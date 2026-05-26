@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 /**
@@ -14,7 +14,7 @@ async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'wealth-obstacles' });
   if (!accessStatus) return;
 
   const { cards } = req.body;
@@ -119,15 +119,14 @@ async function handler(
     const data = await response.json();
     const content = parseAIJson(data.choices[0].message.content);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'wealth-obstacles',
-        cards,
-        readingResult: content,
-        resultPath: '/themed-readings/wealth/wealth-obstacles/reading'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      spreadType: 'wealth-obstacles',
+      featureKey: 'wealth-obstacles',
+      cards,
+      readingResult: content,
+      resultPath: '/themed-readings/wealth/wealth-obstacles/reading',
+    });
 
     return res.status(200).json(content);
   } catch (error: any) {

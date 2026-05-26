@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson, AIJsonParseError } from '../../../lib/parseAIJson';
 
 export default async function handler(
@@ -10,7 +10,7 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'celtic-cross' });
   if (!accessStatus) return;
 
   const { cards, question } = req.body;
@@ -213,16 +213,15 @@ ${cardsDescription}
     
     try {
       const reading = parseAIJson(content);
-      if (accessStatus.userId) {
-        await recordReadingHistory({
-          userId: accessStatus.userId,
-          spreadType: 'celtic-cross',
-          question: question || null,
-          cards,
-          readingResult: reading,
-          resultPath: '/reading/general/celtic-cross/reading'
-        });
-      }
+      await recordSuccessfulReading({
+        accessStatus,
+        spreadType: 'celtic-cross',
+        featureKey: 'celtic-cross',
+        question: question || null,
+        cards,
+        readingResult: reading,
+        resultPath: '/reading/general/celtic-cross/reading',
+      });
       return res.status(200).json(reading);
     } catch (parseError: unknown) {
       if (parseError instanceof AIJsonParseError) {

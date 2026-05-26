@@ -13,7 +13,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * 爱情主题占卜页面
  */
 export default function LoveThemePage() {
-  const { isMember } = useMembership();
+  const { isMember, userId } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation('common');
 
@@ -63,6 +63,7 @@ export default function LoveThemePage() {
                   spread={spread}
                   theme="love"
                   isMember={isMember}
+                  userId={userId}
                   onLockedClick={() => setIsModalOpen(true)}
                 />
               ))}

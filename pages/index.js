@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next/pages';
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
 import { supabase } from '../lib/supabase';
 import FloatingLuna from '../components/luna/FloatingLuna';
+import { useGuestTrial } from '../context/GuestTrialContext';
 
 // 完整的78张塔罗牌数据
 const tarotCards = [
@@ -882,6 +883,14 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [startTrialError, setStartTrialError] = useState(false);
+
+  const {
+    isActive: isTrialActive,
+    hoursLeft: trialHoursLeft,
+    isLoading: isTrialLoading,
+    startTrial,
+  } = useGuestTrial();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -945,6 +954,24 @@ export default function Home() {
 
   const handleTarotTrigger = () => {
     setIsTarotOpen(true);
+  };
+
+  const scrollToReadingOptions = () => {
+    document.getElementById('reading-options')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleHeroCtaClick = async () => {
+    setStartTrialError(false);
+    if (user || isTrialActive) {
+      scrollToReadingOptions();
+      return;
+    }
+    const ok = await startTrial();
+    if (ok) {
+      scrollToReadingOptions();
+    } else {
+      setStartTrialError(true);
+    }
   };
 
   const handleTarotClose = () => {
@@ -1198,18 +1225,45 @@ export default function Home() {
                             {t('hero.subtitle')}
                           </h2>
                         </div>
-                        {/* 原 HTML 通过 data-tarot-trigger + 外部脚本触发弹窗，Next.js 中脚本未运行导致无法开启，这里改为 React 事件 */}
-                        <button
-                          type="button"
-                          onClick={handleTarotTrigger}
-                          className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105"
-                        >
-                          <span className="truncate">{t('hero.cta')}</span>
-                        </button>
+                        {/* Hero CTA: 已登录 → Begin Reading；未登录无trial → Try Free for 72 Hours；active trial → Continue Free Trial */}
+                        <div className="flex flex-col items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={handleHeroCtaClick}
+                            disabled={isTrialLoading}
+                            className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                          >
+                            {isTrialLoading ? (
+                              <span className="truncate">Starting…</span>
+                            ) : user ? (
+                              <span className="truncate">{t('hero.cta')}</span>
+                            ) : isTrialActive ? (
+                              <span className="truncate">Continue Free Trial</span>
+                            ) : (
+                              <span className="truncate">Try Free for 72 Hours</span>
+                            )}
+                          </button>
+
+                          {/* 按钮下方小字 */}
+                          {!user && !isTrialLoading && (
+                            <p className="text-white/55 text-xs leading-tight">
+                              {isTrialActive
+                                ? `Your trial ends in ${trialHoursLeft} hour${trialHoursLeft !== 1 ? 's' : ''}`
+                                : 'No login required'}
+                            </p>
+                          )}
+
+                          {/* startTrial 失败时的轻量提示 */}
+                          {startTrialError && (
+                            <p className="text-red-400/90 text-xs leading-tight">
+                              Unable to start your free trial. Please try again.
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </section>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 @container">
+                  <div id="reading-options" className="grid grid-cols-1 lg:grid-cols-3 gap-8 @container">
                     <div className="group relative flex flex-col gap-6 rounded-xl bg-white/5 p-8 transition-all duration-300 hover:bg-white/15 hover:scale-[1.02] animate-pulse-glow">
                       <div className="relative z-10 flex h-full flex-col gap-6">
                         <div className="flex flex-col gap-2">

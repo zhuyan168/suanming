@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 async function handler(
@@ -10,7 +10,7 @@ async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'career-offer-decision' });
   if (!accessStatus) return;
 
   const { cards } = req.body;
@@ -187,15 +187,14 @@ ${cards[5].name}（${cards[5].orientation === 'upright' ? '正位' : '逆位'}�
     const data = await response.json();
     const reading = parseAIJson(data.choices[0].message.content);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'offer-decision',
-        cards,
-        readingResult: reading,
-        resultPath: '/themed-readings/career-study/offer-decision/reading'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      spreadType: 'offer-decision',
+      featureKey: 'career-offer-decision',
+      cards,
+      readingResult: reading,
+      resultPath: '/themed-readings/career-study/offer-decision/reading',
+    });
 
     return res.status(200).json(reading);
   } catch (error: any) {

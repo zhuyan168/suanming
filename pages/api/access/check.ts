@@ -6,15 +6,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { spreadAccess, freeDailyLimit } = req.query;
+  const { spreadAccess, freeDailyLimit, spreadKey } = req.query;
   const normalizedSpreadAccess = spreadAccess === 'member' ? 'member' : 'free';
   const limit = typeof freeDailyLimit === 'string' ? Number(freeDailyLimit) : undefined;
+  const normalizedSpreadKey = typeof spreadKey === 'string' ? spreadKey : undefined;
 
   try {
     const result = await ensureAccessForRequest({
       req,
       spreadAccess: normalizedSpreadAccess,
-      freeDailyLimit: isNaN(limit ?? 0) ? undefined : limit
+      freeDailyLimit: isNaN(limit ?? 0) ? undefined : limit,
+      spreadKey: normalizedSpreadKey,
     });
     return res.status(200).json(result);
   } catch (error) {

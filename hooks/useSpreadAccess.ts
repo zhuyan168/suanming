@@ -9,7 +9,13 @@ import { supabase } from '../lib/supabase';
 export interface SpreadAccessState {
   loading: boolean;
   allowed: boolean;
-  reason?: 'member_only' | 'daily_limit' | 'not_logged_in';
+  reason?:
+    | 'member_only'
+    | 'daily_limit'
+    | 'not_logged_in'
+    | 'guest_trial_expired'
+    | 'guest_trial_limit_exceeded'
+    | 'feature_trial_limit_exceeded';
   isMember: boolean;
   userId: string | null;
   remaining?: number;
@@ -25,6 +31,11 @@ const BUSINESS_DENIAL_CODES = new Set([
   'daily_limit',
   'forbidden',
   'unauthorized',
+  // Guest trial denial codes
+  'guest_trial_invalid',
+  'guest_trial_expired',
+  'guest_trial_limit_exceeded',
+  'feature_trial_limit_exceeded',
 ]);
 
 function resolveReason(
@@ -46,6 +57,11 @@ function resolveReason(
     // "forbidden" without further detail: use spread type to pick the right copy.
     return spreadAccess === 'member' ? 'member_only' : 'daily_limit';
   }
+  // Guest trial denial codes
+  if (code === 'guest_trial_expired') return 'guest_trial_expired';
+  if (code === 'guest_trial_limit_exceeded') return 'guest_trial_limit_exceeded';
+  if (code === 'feature_trial_limit_exceeded') return 'feature_trial_limit_exceeded';
+  if (code === 'guest_trial_invalid') return 'not_logged_in';
 
   // No semantic code — fall back on HTTP status + spread context.
   if (httpStatus === 401) {
@@ -67,7 +83,7 @@ interface UseSpreadAccessOptions {
   /** 通用牌阵使用：直接传 spreadKey（lib/spreads.ts 中的 key）*/
   spreadKey?: string;
   /** 拒绝时的回调 */
-  onDenied?: (reason: 'member_only' | 'daily_limit' | 'not_logged_in') => void;
+  onDenied?: (reason: NonNullable<SpreadAccessState['reason']>) => void;
   /** 拒绝时是否自动重定向，默认为 true */
   redirectOnDenied?: boolean;
   /** 重定向目标路径，默认根据 theme / spreadKey 推断 */
@@ -108,6 +124,32 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
 
     if (reason === 'member_only') {
       router.replace('/membership');
+      return;
+    }
+
+    // Guest trial exhausted — guide toward registration
+    if (
+      reason === 'guest_trial_expired' ||
+      reason === 'guest_trial_limit_exceeded' ||
+      reason === 'feature_trial_limit_exceeded'
+    ) {
+      const isEn = router.locale === 'en';
+      const guestDenialMessages: Record<
+        'guest_trial_expired' | 'guest_trial_limit_exceeded' | 'feature_trial_limit_exceeded',
+        string
+      > = {
+        guest_trial_expired: isEn
+          ? 'Your free trial has ended. Sign up to save your readings and continue.'
+          : '您的免费试用已结束。注册账号即可保存解读记录并继续使用。',
+        guest_trial_limit_exceeded: isEn
+          ? "You've used all 8 free trial readings. Sign up to continue and save your readings."
+          : '您的 8 次免费试用解读已用完。注册账号即可继续使用并保存解读记录。',
+        feature_trial_limit_exceeded: isEn
+          ? "You've used your free trial for this spread. Sign up to unlock more readings and save your results."
+          : '这个牌阵的免费体验次数已用完。注册或开通会员后，可继续使用并保存解读记录。',
+      };
+      alert(guestDenialMessages[reason as 'guest_trial_expired' | 'guest_trial_limit_exceeded' | 'feature_trial_limit_exceeded']);
+      router.replace('/register');
       return;
     }
 
@@ -163,6 +205,9 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       // Send the browser's IANA timezone so the server can compute "today"
       // relative to the user's local clock rather than a fixed server timezone.
       params.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
+      // Send spread key for per-feature guest trial limit checking
+      const resolvedKey = spreadKey || (theme && spreadId ? `${theme}-${spreadId}` : null);
+      if (resolvedKey) params.set('spreadKey', resolvedKey);
 
       const response = await fetch(`/api/access/check?${params.toString()}`, {
         headers,
