@@ -6,6 +6,7 @@ import CareerDevelopmentSevenSlots from '../../../../components/fortune/CareerDe
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 interface ShuffledTarotCard {
   id: number;
@@ -77,6 +78,7 @@ const SLOT_CONFIG = [
 
 export default function StayOrLeaveReading() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const { key } = router.query;
 
@@ -96,7 +98,7 @@ export default function StayOrLeaveReading() {
     const rawData = sessionStorage.getItem(storageKey) || localStorage.getItem(storageKey);
 
     if (!rawData) {
-      setError('没有找到你的抽牌结果，请返回重新抽牌。');
+      setError(texts.errorNotFound);
       return;
     }
 
@@ -105,7 +107,7 @@ export default function StayOrLeaveReading() {
       setResult(parsed);
       if (parsed.interpretation) setInterpretation(parsed.interpretation);
     } catch (e) {
-      setError('数据解析失败，请尝试重新抽牌。');
+      setError(texts.errorParseFailed);
     }
   }, [router.isReady, key]);
 
@@ -131,10 +133,10 @@ export default function StayOrLeaveReading() {
 
         }
       } else {
-        setError(data.error || '生成解读失败');
+        setError(data.error || texts.errorGenerate);
       }
     } catch (err) {
-      setError('网络异常，请重试');
+      setError(texts.errorNetwork);
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +161,7 @@ export default function StayOrLeaveReading() {
       <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center px-4">
         <div className="text-center">
           <p className="mb-6 text-white/60">{error}</p>
-          <button onClick={() => router.push('/themed-readings/career-study/stay-or-leave/draw')} className="px-8 py-3 bg-primary rounded-xl font-bold">返回抽牌页</button>
+          <button onClick={() => router.push('/themed-readings/career-study/stay-or-leave/draw')} className="px-8 py-3 bg-primary rounded-xl font-bold">{texts.btnDrawAgain}</button>
         </div>
       </div>
     );
@@ -172,12 +174,12 @@ export default function StayOrLeaveReading() {
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
         <button onClick={isFromHistory ? goBackToHistory : () => router.push('/themed-readings/career-study')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span className="text-sm">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+          <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
         <h2 className="text-base sm:text-lg font-bold tracking-widest uppercase">Interpretation</h2>
         <button 
           onClick={() => {
-            if (confirm('确定要重新抽牌吗？当前结果将被清空。')) {
+            if (confirm(texts.confirmReset)) {
               const storageKey = (key as string) || 'career_spread_should_i_stay_v1';
               localStorage.removeItem(storageKey);
               sessionStorage.removeItem(storageKey);
@@ -187,7 +189,7 @@ export default function StayOrLeaveReading() {
           className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors"
         >
           <span className="material-symbols-outlined text-lg">refresh</span>
-          <span className="text-xs font-medium">重新抽牌</span>
+          <span className="text-xs font-medium">{texts.btnDrawAgain}</span>
         </button>
       </header>
 

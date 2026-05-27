@@ -890,6 +890,7 @@ interface SeasonalRecords {
 
 export default function SeasonalFortune() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-seasonal',
@@ -1060,7 +1061,9 @@ export default function SeasonalFortune() {
     // 🔒 如果是第一次抽牌，显示强提醒
     if (currentCardCount === 0 && !hasConfirmedOnce) {
       const confirmed = window.confirm(
-        `⚠️ 重要提醒 ⚠️\n\n每个季度只能抽取一次四季牌阵，一旦开始抽牌，本季度（${getCurrentQuarterDateRange()}）将无法重新抽取。\n\n请确保你已做好准备，在安静的环境中专注于你的问题。\n\n确定要开始抽牌吗？`
+        isEn
+          ? `⚠️ Important Reminder ⚠️\n\nYou can draw the Seasonal Spread only once per quarter. Once you begin, this quarter's draw (${getCurrentQuarterDateRange()}) cannot be restarted.\n\nPlease make sure you are ready and in a quiet environment, focused on your question.\n\nAre you sure you want to start drawing?`
+          : `⚠️ 重要提醒 ⚠️\n\n每个季度只能抽取一次四季牌阵，一旦开始抽牌，本季度（${getCurrentQuarterDateRange()}）将无法重新抽取。\n\n请确保你已做好准备，在安静的环境中专注于你的问题。\n\n确定要开始抽牌吗？`
       );
       
       if (!confirmed) {
@@ -1344,9 +1347,15 @@ export default function SeasonalFortune() {
                       <div className="flex items-start gap-3">
                         <span className="text-2xl">🔒</span>
                         <div className="flex-1">
-                          <p className="text-red-200 font-bold text-base mb-2">重要提醒：本季度（{getCurrentQuarterDateRange()}）只能抽一次</p>
+                          <p className="text-red-200 font-bold text-base mb-2">
+                            {isEn
+                              ? `Important: This quarter (${getCurrentQuarterDateRange()}) you can only draw once`
+                              : `重要提醒：本季度（${getCurrentQuarterDateRange()}）只能抽一次`}
+                          </p>
                           <p className="text-white/70 text-sm leading-relaxed">
-                            四季牌阵每个季度仅能抽取一次，一旦开始抽牌即无法重来。请在安静的环境中，专注于你想要了解的问题后再开始抽牌。抽牌前系统会再次确认。
+                            {isEn
+                              ? "The Seasonal Spread can only be drawn once per quarter. Once you begin, you won't be able to restart this draw. Please find a quiet environment and focus on your question before drawing. The system will ask for your confirmation once more before you begin."
+                              : '四季牌阵每个季度仅能抽取一次，一旦开始抽牌即无法重来。请在安静的环境中，专注于你想要了解的问题后再开始抽牌。抽牌前系统会再次确认。'}
                           </p>
                         </div>
                       </div>

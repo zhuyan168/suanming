@@ -6,6 +6,7 @@ import MoneyBlocksSlots from '../../../../components/fortune/MoneyBlocksSlots';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 const STORAGE_KEY = 'wealth_obstacles_result';
 
@@ -41,6 +42,7 @@ interface ReadingResult {
 
 export default function WealthObstaclesReadingPage() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -64,11 +66,11 @@ export default function WealthObstaclesReadingPage() {
             setReading(data.reading);
           }
         } else {
-          setError('抽牌数据不完整，请重新抽牌');
+          setError(texts.errorIncomplete);
         }
       } catch (e) {
         console.error('Failed to parse saved data:', e);
-        setError('加载数据失败，请返回重新抽牌');
+        setError(texts.errorLoad);
       }
     } else {
       router.push('/themed-readings/wealth/wealth-obstacles/draw');
@@ -91,7 +93,7 @@ export default function WealthObstaclesReadingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('生成解读失败，请重试');
+        throw new Error(texts.errorGenerateRetry);
       }
 
       const data = await response.json();
@@ -124,7 +126,7 @@ export default function WealthObstaclesReadingPage() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmReset)) return;
     localStorage.removeItem(STORAGE_KEY);
     router.replace('/themed-readings/wealth/wealth-obstacles/draw');
   };
@@ -146,7 +148,7 @@ export default function WealthObstaclesReadingPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => {
-                if (error.includes('不完整')) {
+                if (error.includes('不完整') || error.includes('incomplete')) {
                   router.push('/themed-readings/wealth/wealth-obstacles/draw');
                 } else {
                   generateReading();
@@ -155,13 +157,13 @@ export default function WealthObstaclesReadingPage() {
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:scale-[1.02] transition-all shadow-glow"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              {error.includes('不完整') ? '去抽牌' : '重新生成'}
+              {(error.includes('不完整') || error.includes('incomplete')) ? texts.btnDrawAgain : texts.btnRetry}
             </button>
             <button
               onClick={handleReturn}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回财富列表
+              {texts.btnBackList}
             </button>
           </div>
         </div>
@@ -179,12 +181,12 @@ export default function WealthObstaclesReadingPage() {
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
         <button onClick={isFromHistory ? goBackToHistory : handleReturn} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span className="text-sm">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+          <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
         <h2 className="text-lg font-bold">财富阻碍解读</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
-          <span className="text-sm font-medium">重新抽牌</span>
+          <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
         </button>
       </header>
 
@@ -244,9 +246,13 @@ export default function WealthObstaclesReadingPage() {
                 <div className="absolute inset-4 border-4 border-purple-400/20 rounded-full"></div>
                 <div className="absolute inset-4 border-4 border-purple-400 border-b-transparent rounded-full animate-spin-slow" style={{ borderColor: 'transparent transparent #a855f7 transparent' }}></div>
               </div>
-              <h3 className="text-2xl font-bold mb-3">正在深度洞察你的财富能量…</h3>
+              <h3 className="text-2xl font-bold mb-3">
+                {router.locale === 'en' ? 'Reading your wealth energy in depth…' : '正在深度洞察你的财富能量…'}
+              </h3>
               <p className="text-white/40 max-w-sm mx-auto text-base leading-relaxed">
-                AI 正在根据你的 5 张牌面进行细致分析，识别潜在阻碍并寻找突破路径，请耐心稍候。
+                {router.locale === 'en'
+                  ? 'AI is carefully analyzing your 5 cards to identify hidden blocks and find breakthrough paths. Please wait a moment.'
+                  : 'AI 正在根据你的 5 张牌面进行细致分析，识别潜在阻碍并寻找突破路径，请耐心稍候。'}
               </p>
             </motion.div>
           ) : reading ? (

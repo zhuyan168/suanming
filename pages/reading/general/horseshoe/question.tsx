@@ -10,6 +10,14 @@ const RESULT_STORAGE_KEY = 'general_horseshoe_draw_result';
 
 export default function HorseshoeQuestionPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const texts = {
+    hint: isEn
+      ? 'For a more focused reading, enter your question below. You can also start without a question.'
+      : '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
+    hintWithQ: isEn ? 'Question entered' : '已输入问题',
+    startBtn: isEn ? 'Start Reading' : '开始抽牌',
+  };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
   const maxChars = 200;
@@ -150,7 +158,7 @@ export default function HorseshoeQuestionPage() {
                 />
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
-                    {question.trim() ? '已输入问题' : '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌'}
+                    {question.trim() ? texts.hintWithQ : texts.hint}
                   </span>
                   <span className={`text-xs ${charCount > maxChars * 0.9 ? 'text-primary' : 'text-white/50'}`}>
                     {charCount} / {maxChars}
@@ -158,7 +166,6 @@ export default function HorseshoeQuestionPage() {
                 </div>
               </div>
 
-              {/* 开始抽牌按钮 */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -166,7 +173,7 @@ export default function HorseshoeQuestionPage() {
                 className="w-full px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)] mt-6"
                 style={{ backgroundColor: '#7f13ec' }}
               >
-                开始抽牌
+                {texts.startBtn}
               </motion.button>
             </motion.div>
 

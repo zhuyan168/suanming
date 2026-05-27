@@ -128,12 +128,12 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
     }
 
     // Guest trial exhausted — guide toward registration
+    const isEn = router.locale === 'en';
     if (
       reason === 'guest_trial_expired' ||
       reason === 'guest_trial_limit_exceeded' ||
       reason === 'feature_trial_limit_exceeded'
     ) {
-      const isEn = router.locale === 'en';
       const guestDenialMessages: Record<
         'guest_trial_expired' | 'guest_trial_limit_exceeded' | 'feature_trial_limit_exceeded',
         string
@@ -153,9 +153,13 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       return;
     }
 
-    let message = '请先登录账号以继续占卜';
+    let message = isEn
+      ? 'Please sign in to continue your reading.'
+      : '请先登录账号以继续占卜';
     if (reason === 'daily_limit') {
-      message = '今日免费次数已用完，开通会员后可继续使用';
+      message = isEn
+        ? "You've used your free readings for today. Upgrade to continue."
+        : '今日免费次数已用完，开通会员后可继续使用';
     }
 
     alert(message);

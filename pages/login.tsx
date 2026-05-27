@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 
-const authErrorMap: Record<string, string> = {
+const authErrorMapZh: Record<string, string> = {
   'Invalid login credentials': '邮箱或密码错误',
   'User not found': '该用户不存在',
   'Too many requests': '请求过于频繁，请稍后再试',
@@ -14,20 +14,36 @@ const authErrorMap: Record<string, string> = {
   'Password should be at least 6 characters': '密码至少需要 6 个字符',
 }
 
+const authErrorMapEn: Record<string, string> = {
+  'Invalid login credentials': 'Incorrect email or password.',
+  'User not found': 'User not found.',
+  'Too many requests': 'Too many requests. Please try again later.',
+  'Email rate limit exceeded': 'Too many emails sent. Please try again later.',
+  'User already registered': 'This email is already registered.',
+  'Signup requires a valid password': 'Please enter a valid password.',
+  'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+}
+
 function isEmailNotConfirmedError(msg: string): boolean {
   return msg.toLowerCase().includes('email not confirmed')
 }
 
-function toChineseError(msg: string): string {
-  if (isEmailNotConfirmedError(msg)) return '邮箱尚未验证，请先前往邮箱完成验证后再登录'
-  for (const [en, zh] of Object.entries(authErrorMap)) {
-    if (msg.toLowerCase().includes(en.toLowerCase())) return zh
+function toLocalizedError(msg: string, isEn: boolean): string {
+  if (isEmailNotConfirmedError(msg)) {
+    return isEn
+      ? 'Your email is not verified. Please check your inbox and complete verification before signing in.'
+      : '邮箱尚未验证，请先前往邮箱完成验证后再登录'
+  }
+  const map = isEn ? authErrorMapEn : authErrorMapZh
+  for (const [key, val] of Object.entries(map)) {
+    if (msg.toLowerCase().includes(key.toLowerCase())) return val
   }
   return msg
 }
 
 export default function LoginPage() {
   const router = useRouter()
+  const isEn = router.locale === 'en'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -38,10 +54,60 @@ export default function LoginPage() {
   const [resending, setResending] = useState(false)
   const [resendResult, setResendResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const texts = isEn ? {
+    title: 'Sign In — FateAura',
+    metaDesc: 'Sign in to your FateAura account',
+    back: 'Back to Home',
+    heading: 'Welcome Back',
+    successTitle: 'Signed in successfully.',
+    successSub: 'Redirecting to home…',
+    labelEmail: 'Email',
+    labelPassword: 'Password',
+    forgotPassword: 'Forgot password?',
+    placeholderPassword: 'Enter your password',
+    resending: 'Sending…',
+    resendBtn: 'Resend Verification Email',
+    resendSuccess: 'Verification email sent. Please check your inbox.',
+    submitting: 'Signing in…',
+    submit: 'Sign In',
+    divider: 'or',
+    googleLoading: 'Redirecting…',
+    googleBtn: 'Sign in with Google',
+    noAccount: "Don't have an account yet?",
+    register: 'Sign Up',
+    validateEmail: 'Please enter your email.',
+    validateEmailFormat: 'Please enter a valid email address.',
+    validatePassword: 'Please enter your password.',
+  } : {
+    title: '登录 - FateAura',
+    metaDesc: '登录你的 FateAura 账号',
+    back: '返回首页',
+    heading: '欢迎回来',
+    successTitle: '登录成功',
+    successSub: '正在跳转到首页…',
+    labelEmail: '邮箱',
+    labelPassword: '密码',
+    forgotPassword: '忘记密码？',
+    placeholderPassword: '请输入密码',
+    resending: '发送中...',
+    resendBtn: '重新发送验证邮件',
+    resendSuccess: '验证邮件已发送，请前往邮箱查看',
+    submitting: '登录中...',
+    submit: '登录',
+    divider: '或',
+    googleLoading: '跳转中...',
+    googleBtn: '使用 Google 登录',
+    noAccount: '还没有账号？',
+    register: '去注册',
+    validateEmail: '请输入邮箱地址',
+    validateEmailFormat: '邮箱格式不正确',
+    validatePassword: '请输入密码',
+  }
+
   function validate(): string | null {
-    if (!email.trim()) return '请输入邮箱地址'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return '邮箱格式不正确'
-    if (!password) return '请输入密码'
+    if (!email.trim()) return texts.validateEmail
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return texts.validateEmailFormat
+    if (!password) return texts.validatePassword
     return null
   }
 
@@ -58,11 +124,11 @@ export default function LoginPage() {
     })
     setResending(false)
     if (resendError) {
-      setResendResult({ type: 'error', text: toChineseError(resendError.message) })
+      setResendResult({ type: 'error', text: toLocalizedError(resendError.message, isEn) })
     } else {
-      setResendResult({ type: 'success', text: '验证邮件已发送，请前往邮箱查看' })
+      setResendResult({ type: 'success', text: texts.resendSuccess })
     }
-  }, [email])
+  }, [email, isEn, texts.resendSuccess])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -89,7 +155,7 @@ export default function LoginPage() {
       if (isEmailNotConfirmedError(signInError.message)) {
         setEmailNotConfirmed(true)
       }
-      setError(toChineseError(signInError.message))
+      setError(toLocalizedError(signInError.message, isEn))
       return
     }
 
@@ -110,15 +176,15 @@ export default function LoginPage() {
 
     if (oauthError) {
       setGoogleLoading(false)
-      setError(toChineseError(oauthError.message))
+      setError(toLocalizedError(oauthError.message, isEn))
     }
   }
 
   return (
     <>
       <Head>
-        <title>登录 - FateAura</title>
-        <meta name="description" content="登录你的 FateAura 账号" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -132,13 +198,15 @@ export default function LoginPage() {
               className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-white/70 transition-colors"
             >
               <span className="material-symbols-outlined text-base">arrow_back</span>
-              返回首页
+              {texts.back}
             </Link>
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white tracking-wide">欢迎回来</h1>
-            <p className="mt-2 text-white/50 text-sm">登录以继续你的神秘洞察之旅</p>
+            <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
+            <p className="mt-2 text-white/50 text-sm">
+              {isEn ? 'Sign in to continue your mystical insight journey.' : '登录以继续你的神秘洞察之旅'}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">
@@ -147,14 +215,14 @@ export default function LoginPage() {
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
                   check_circle
                 </span>
-                <h2 className="text-xl font-semibold text-white mb-2">登录成功</h2>
-                <p className="text-white/60 text-sm">正在跳转到首页…</p>
+                <h2 className="text-xl font-semibold text-white mb-2">{texts.successTitle}</h2>
+                <p className="text-white/60 text-sm">{texts.successSub}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="email" className="block text-sm text-white/70 mb-1.5">
-                    邮箱
+                    {texts.labelEmail}
                   </label>
                   <input
                     id="email"
@@ -170,20 +238,20 @@ export default function LoginPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label htmlFor="password" className="block text-sm text-white/70">
-                      密码
+                      {texts.labelPassword}
                     </label>
                     <Link
                       href="/forgot-password"
                       className="text-xs text-white/40 hover:text-secondary transition-colors"
                     >
-                      忘记密码？
+                      {texts.forgotPassword}
                     </Link>
                   </div>
                   <input
                     id="password"
                     type="password"
                     autoComplete="current-password"
-                    placeholder="请输入密码"
+                    placeholder={texts.placeholderPassword}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
@@ -205,7 +273,7 @@ export default function LoginPage() {
                           className="inline-flex items-center gap-1.5 rounded-md bg-white/5 border border-white/10 px-3 py-1.5 text-white/60 text-xs font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           <span className="material-symbols-outlined text-sm">send</span>
-                          {resending ? '发送中...' : '重新发送验证邮件'}
+                          {resending ? texts.resending : texts.resendBtn}
                         </button>
                         {resendResult && (
                           <p className={`text-xs ${resendResult.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -222,12 +290,12 @@ export default function LoginPage() {
                   disabled={loading || googleLoading}
                   className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? '登录中...' : '登录'}
+                  {loading ? texts.submitting : texts.submit}
                 </button>
 
                 <div className="relative flex items-center gap-3 my-1">
                   <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-xs text-white/30">或</span>
+                  <span className="text-xs text-white/30">{texts.divider}</span>
                   <div className="flex-1 h-px bg-white/10" />
                 </div>
 
@@ -238,7 +306,7 @@ export default function LoginPage() {
                   className="w-full flex items-center justify-center gap-2.5 rounded-lg border border-white/10 bg-white/5 py-3 text-white text-sm font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {googleLoading ? (
-                    '跳转中...'
+                    texts.googleLoading
                   ) : (
                     <>
                       <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -247,7 +315,7 @@ export default function LoginPage() {
                         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" />
                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                       </svg>
-                      使用 Google 登录
+                      {texts.googleBtn}
                     </>
                   )}
                 </button>
@@ -257,9 +325,9 @@ export default function LoginPage() {
 
           {!success && (
             <p className="mt-6 text-center text-sm text-white/40">
-              还没有账号？
+              {texts.noAccount}
               <Link href="/register" className="text-secondary hover:text-accent ml-1 transition-colors">
-                去注册
+                {texts.register}
               </Link>
             </p>
           )}

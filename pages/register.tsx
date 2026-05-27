@@ -1,9 +1,10 @@
 import { type FormEvent, useCallback, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 
-const signUpErrorMap: Record<string, string> = {
+const signUpErrorMapZh: Record<string, string> = {
   'User already registered': '该邮箱已被注册',
   'Email rate limit exceeded': '发送邮件次数过多，请稍后再试',
   'Too many requests': '请求过于频繁，请稍后再试',
@@ -11,10 +12,19 @@ const signUpErrorMap: Record<string, string> = {
   'Password should be at least 6 characters': '密码至少需要 6 个字符',
 }
 
-function toChineseError(msg: string): string {
+const signUpErrorMapEn: Record<string, string> = {
+  'User already registered': 'This email is already registered.',
+  'Email rate limit exceeded': 'Too many emails sent. Please try again later.',
+  'Too many requests': 'Too many requests. Please try again later.',
+  'Signup requires a valid password': 'Please enter a valid password.',
+  'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+}
+
+function toLocalizedError(msg: string, isEn: boolean): string {
   const lower = msg.toLowerCase()
-  for (const [en, zh] of Object.entries(signUpErrorMap)) {
-    if (lower.includes(en.toLowerCase())) return zh
+  const map = isEn ? signUpErrorMapEn : signUpErrorMapZh
+  for (const [key, val] of Object.entries(map)) {
+    if (lower.includes(key.toLowerCase())) return val
   }
   return msg
 }
@@ -29,7 +39,7 @@ function getErrorMessage(error: unknown): string {
   return ''
 }
 
-function toFriendlyRegisterError(error: unknown): string {
+function toFriendlyRegisterError(error: unknown, isEn: boolean): string {
   const rawMessage = getErrorMessage(error)
   const message = rawMessage.toLowerCase()
 
@@ -39,14 +49,18 @@ function toFriendlyRegisterError(error: unknown): string {
     message.includes('status code 429') ||
     message.includes('http 429')
   ) {
-    return '当前注册请求过于频繁，请稍等几分钟后再试，或更换网络后重试。'
+    return isEn
+      ? 'Too many registration attempts. Please wait a few minutes and try again, or switch networks.'
+      : '当前注册请求过于频繁，请稍等几分钟后再试，或更换网络后重试。'
   }
 
   if (
     message.includes('failed to fetch') ||
     message.includes('typeerror: failed to fetch')
   ) {
-    return '网络连接失败，请检查网络、关闭浏览器拦截插件后重试'
+    return isEn
+      ? 'Network error. Please check your connection and disable any browser extensions that may block requests.'
+      : '网络连接失败，请检查网络、关闭浏览器拦截插件后重试'
   }
 
   if (
@@ -56,17 +70,21 @@ function toFriendlyRegisterError(error: unknown): string {
     message.includes('http 503') ||
     message.includes('503')
   ) {
-    return '服务暂时不可用，请稍后再试'
+    return isEn
+      ? 'Service temporarily unavailable. Please try again later.'
+      : '服务暂时不可用，请稍后再试'
   }
 
   if (rawMessage) {
-    return toChineseError(rawMessage)
+    return toLocalizedError(rawMessage, isEn)
   }
 
-  return '注册失败，请稍后重试'
+  return isEn ? 'Registration failed. Please try again.' : '注册失败，请稍后重试'
 }
 
 export default function RegisterPage() {
+  const router = useRouter()
+  const isEn = router.locale === 'en'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -76,12 +94,70 @@ export default function RegisterPage() {
   const [resending, setResending] = useState(false)
   const [resendResult, setResendResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  const texts = isEn ? {
+    title: 'Sign Up — FateAura',
+    metaDesc: 'Create your FateAura account',
+    back: 'Back to Home',
+    heading: 'Create Account',
+    subtitle: 'Begin your mystical insight journey.',
+    successTitle: 'Account created! Please verify your email.',
+    successBody1: "We've sent a verification email to",
+    successBody2: '. Please open it and click the link to complete registration.',
+    successNote: 'Once verified, you can sign in and access your history, profile, and more.',
+    backToLogin: 'Back to Sign In',
+    resending: 'Sending…',
+    resendBtn: 'Resend Verification Email',
+    resendSuccess: 'Verification email resent. Please check your inbox.',
+    labelEmail: 'Email',
+    labelPassword: 'Password',
+    placeholderPassword: 'At least 6 characters',
+    labelConfirm: 'Confirm Password',
+    placeholderConfirm: 'Re-enter your password',
+    submitting: 'Creating account…',
+    submit: 'Sign Up',
+    hasAccount: 'Already have an account?',
+    login: 'Sign In',
+    validateEmail: 'Please enter your email.',
+    validateEmailFormat: 'Please enter a valid email address.',
+    validatePassword: 'Please enter your password.',
+    validatePasswordLen: 'Password must be at least 6 characters.',
+    validatePasswordMatch: 'Passwords do not match.',
+  } : {
+    title: '注册 - FateAura',
+    metaDesc: '创建你的 FateAura 账号',
+    back: '返回首页',
+    heading: '创建账号',
+    subtitle: '开启你的神秘洞察之旅',
+    successTitle: '注册成功，请验证邮箱',
+    successBody1: '我们已向',
+    successBody2: ' 发送了一封验证邮件，请前往邮箱点击验证链接完成注册。',
+    successNote: '验证完成后即可登录，使用历史记录、个人中心等账号功能。',
+    backToLogin: '返回登录',
+    resending: '发送中...',
+    resendBtn: '重新发送验证邮件',
+    resendSuccess: '验证邮件已重新发送，请查收',
+    labelEmail: '邮箱',
+    labelPassword: '密码',
+    placeholderPassword: '至少 6 位',
+    labelConfirm: '确认密码',
+    placeholderConfirm: '再次输入密码',
+    submitting: '注册中...',
+    submit: '注册',
+    hasAccount: '已有账号？',
+    login: '去登录',
+    validateEmail: '请输入邮箱地址',
+    validateEmailFormat: '邮箱格式不正确',
+    validatePassword: '请输入密码',
+    validatePasswordLen: '密码至少需要 6 位',
+    validatePasswordMatch: '两次输入的密码不一致',
+  }
+
   function validate(): string | null {
-    if (!email.trim()) return '请输入邮箱地址'
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return '邮箱格式不正确'
-    if (!password) return '请输入密码'
-    if (password.length < 6) return '密码至少需要 6 位'
-    if (password !== confirmPassword) return '两次输入的密码不一致'
+    if (!email.trim()) return texts.validateEmail
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return texts.validateEmailFormat
+    if (!password) return texts.validatePassword
+    if (password.length < 6) return texts.validatePasswordLen
+    if (password !== confirmPassword) return texts.validatePasswordMatch
     return null
   }
 
@@ -98,11 +174,11 @@ export default function RegisterPage() {
     })
     setResending(false)
     if (resendError) {
-      setResendResult({ type: 'error', text: toChineseError(resendError.message) })
+      setResendResult({ type: 'error', text: toLocalizedError(resendError.message, isEn) })
     } else {
-      setResendResult({ type: 'success', text: '验证邮件已重新发送，请查收' })
+      setResendResult({ type: 'success', text: texts.resendSuccess })
     }
-  }, [email])
+  }, [email, isEn, texts.resendSuccess])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -125,14 +201,14 @@ export default function RegisterPage() {
       })
 
       if (signUpError) {
-        setError(toChineseError(signUpError.message))
+        setError(toLocalizedError(signUpError.message, isEn))
         return
       }
 
       setSuccess(true)
     } catch (err) {
       console.error('注册请求异常:', err)
-      setError(toFriendlyRegisterError(err))
+      setError(toFriendlyRegisterError(err, isEn))
     } finally {
       setLoading(false)
     }
@@ -141,8 +217,8 @@ export default function RegisterPage() {
   return (
     <>
       <Head>
-        <title>注册 - FateAura</title>
-        <meta name="description" content="创建你的 FateAura 账号" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -156,13 +232,13 @@ export default function RegisterPage() {
               className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-white/70 transition-colors"
             >
               <span className="material-symbols-outlined text-base">arrow_back</span>
-              返回首页
+              {texts.back}
             </Link>
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white tracking-wide">创建账号</h1>
-            <p className="mt-2 text-white/50 text-sm">开启你的神秘洞察之旅</p>
+            <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
+            <p className="mt-2 text-white/50 text-sm">{texts.subtitle}</p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">
@@ -171,12 +247,12 @@ export default function RegisterPage() {
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
                   mark_email_read
                 </span>
-                <h2 className="text-xl font-semibold text-white mb-2">注册成功，请验证邮箱</h2>
+                <h2 className="text-xl font-semibold text-white mb-2">{texts.successTitle}</h2>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  我们已向 <span className="text-white/80">{email}</span> 发送了一封验证邮件，请前往邮箱点击验证链接完成注册。
+                  {texts.successBody1} <span className="text-white/80">{email}</span>{texts.successBody2}
                 </p>
                 <p className="text-white/40 text-xs leading-relaxed mt-3">
-                  验证完成后即可登录，使用历史记录、个人中心等账号功能。
+                  {texts.successNote}
                 </p>
 
                 <div className="mt-6 space-y-3">
@@ -184,14 +260,14 @@ export default function RegisterPage() {
                     href="/login"
                     className="inline-block w-full px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/80 text-white text-sm font-medium transition-colors"
                   >
-                    返回登录
+                    {texts.backToLogin}
                   </Link>
                   <button
                     onClick={handleResend}
                     disabled={resending}
                     className="w-full px-6 py-2.5 rounded-lg border border-white/10 bg-white/5 text-white/60 text-sm font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {resending ? '发送中...' : '重新发送验证邮件'}
+                    {resending ? texts.resending : texts.resendBtn}
                   </button>
                 </div>
 
@@ -212,7 +288,7 @@ export default function RegisterPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="email" className="block text-sm text-white/70 mb-1.5">
-                    邮箱
+                    {texts.labelEmail}
                   </label>
                   <input
                     id="email"
@@ -227,13 +303,13 @@ export default function RegisterPage() {
 
                 <div>
                   <label htmlFor="password" className="block text-sm text-white/70 mb-1.5">
-                    密码
+                    {texts.labelPassword}
                   </label>
                   <input
                     id="password"
                     type="password"
                     autoComplete="new-password"
-                    placeholder="至少 6 位"
+                    placeholder={texts.placeholderPassword}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
@@ -242,13 +318,13 @@ export default function RegisterPage() {
 
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm text-white/70 mb-1.5">
-                    确认密码
+                    {texts.labelConfirm}
                   </label>
                   <input
                     id="confirmPassword"
                     type="password"
                     autoComplete="new-password"
-                    placeholder="再次输入密码"
+                    placeholder={texts.placeholderConfirm}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
@@ -267,7 +343,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? '注册中...' : '注册'}
+                  {loading ? texts.submitting : texts.submit}
                 </button>
               </form>
             )}
@@ -275,9 +351,9 @@ export default function RegisterPage() {
 
           {!success && (
             <p className="mt-6 text-center text-sm text-white/40">
-              已有账号？
+              {texts.hasAccount}
               <Link href="/login" className="text-secondary hover:text-accent ml-1 transition-colors">
-                去登录
+                {texts.login}
               </Link>
             </p>
           )}

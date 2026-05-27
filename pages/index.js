@@ -696,6 +696,7 @@ const FeatureToast = ({ visible, title, message, onClose }) => {
 
 const TarotReadingModal = ({ isOpen, onRequestClose }) => {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const [question, setQuestion] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -832,10 +833,10 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
               maxLength={160}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder="请在心中默念你的问题，深呼吸三次后开始抽牌。也可以在此输入问题获得更详细的解读。"
+              placeholder={isEn ? 'Hold your question in mind, take three deep breaths, then begin your reading...' : '请在心中默念你的问题，深呼吸三次后开始抽牌。也可以在此输入问题获得更详细的解读。'}
             ></textarea>
             <div className="mt-2 flex items-center justify-between text-xs text-white/50">
-              <span>最多 160 字</span>
+              <span>{isEn ? 'Up to 160 characters' : '最多 160 字'}</span>
               <span>{question.length}/160</span>
             </div>
             {error ? <p className="mt-2 text-sm text-orange-300">{error}</p> : null}

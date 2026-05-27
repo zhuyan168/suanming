@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -55,6 +56,7 @@ const SLOT_CONFIG = [
 
 export default function ReconciliationResultPage() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -125,7 +127,7 @@ export default function ReconciliationResultPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '生成解读失败');
+        throw new Error(errorData.error || texts.errorGenerate);
       }
 
       const data: DeepReading = await response.json();
@@ -134,7 +136,7 @@ export default function ReconciliationResultPage() {
 
     } catch (err: any) {
       console.error('Failed to generate deep reading:', err);
-      setError(err.message || '生成解读失败，请稍后重试');
+      setError(err.message || texts.errorGenerateRetry);
     } finally {
       setIsGeneratingDeep(false);
     }
@@ -168,7 +170,7 @@ export default function ReconciliationResultPage() {
   };
 
   const handleDrawAgain = () => {
-    if (confirm('确定要重新抽牌吗？当前结果将被清空。')) {
+    if (confirm(texts.confirmReset)) {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(DEEP_READING_KEY);
       router.push('/themed-readings/love/reconciliation/draw');
@@ -194,12 +196,12 @@ export default function ReconciliationResultPage() {
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={isFromHistory ? goBackToHistory : handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.back}</span>
           </button>
           <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Mystic Insights</h2>
           <button onClick={handleDrawAgain} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新抽牌</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.btnDrawAgain}</span>
           </button>
         </header>
 
@@ -427,7 +429,7 @@ export default function ReconciliationResultPage() {
                     onClick={handleDrawAgain}
                     className="w-full sm:w-auto px-10 py-4 rounded-xl border border-white/20 text-white/60 hover:text-white hover:border-primary transition-all text-sm font-medium tracking-widest"
                   >
-                    重新抽牌
+                    {texts.btnDrawAgain}
                   </button>
                   <button 
                     onClick={handleReturnToList}

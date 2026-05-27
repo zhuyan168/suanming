@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -14,19 +15,34 @@ interface CelticCrossSlotsProps {
   forceFlipped?: boolean; // 强制显示卡面（用于结果页面）
 }
 
-// 牌位名称
-const POSITION_NAMES = [
-  '现状',     // 1
-  '阻碍',     // 2
-  '重点',     // 3
-  '过去',     // 4
-  '优势',     // 5
-  '近期',     // 6
-  '应对',     // 7
-  '提醒',     // 8
-  '期待恐惧', // 9
-  '走向',     // 10
-];
+function getPositionNames(isEn: boolean): string[] {
+  if (isEn) {
+    return [
+      'Present',
+      'Challenge',
+      'Focus',
+      'Past',
+      'Advantage',
+      'Near Future',
+      'How to Approach',
+      'Advice',
+      'Hopes & Fears',
+      'Outcome',
+    ];
+  }
+  return [
+    '现状',     // 1
+    '阻碍',     // 2
+    '重点',     // 3
+    '过去',     // 4
+    '优势',     // 5
+    '近期',     // 6
+    '应对',     // 7
+    '提醒',     // 8
+    '期待恐惧', // 9
+    '走向',     // 10
+  ];
+}
 
 // 单张卡牌渲染组件
 function CardSlot({
@@ -38,6 +54,7 @@ function CardSlot({
   size = 'normal',
   hideLabel = false,
   hideNumber = false,
+  name,
 }: {
   card: ShuffledTarotCard | null;
   index: number;
@@ -47,6 +64,7 @@ function CardSlot({
   size?: 'small' | 'normal';
   hideLabel?: boolean;
   hideNumber?: boolean;
+  name?: string;
 }) {
   const sizeClasses = size === 'small' 
     ? 'w-14 h-20 sm:w-16 sm:h-24 md:w-20 md:h-28'
@@ -171,7 +189,7 @@ function CardSlot({
       {/* 牌位名称 */}
       {!hideLabel && (
         <p className={`text-white/50 text-[10px] sm:text-xs text-center ${isHorizontal ? 'mt-6 sm:mt-8 md:mt-10' : 'mt-1'}`}>
-          {POSITION_NAMES[index]}
+          {name}
         </p>
       )}
     </div>
@@ -184,6 +202,10 @@ export default function CelticCrossSlots({
   showLoadingText = false,
   forceFlipped = false
 }: CelticCrossSlotsProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+  const names = getPositionNames(isEn);
+
   return (
     <div className="celtic-cross-slots w-full flex flex-col justify-center items-center py-4 sm:py-8">
       <div className="flex flex-row gap-4 sm:gap-8 md:gap-12 items-center justify-center">
@@ -198,6 +220,7 @@ export default function CelticCrossSlots({
               index={4}
               isAnimating={isAnimating[4]}
               forceFlipped={forceFlipped}
+              name={names[4]}
             />
             <div className="w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36" /> {/* 占位 */}
             
@@ -207,6 +230,7 @@ export default function CelticCrossSlots({
               index={3}
               isAnimating={isAnimating[3]}
               forceFlipped={forceFlipped}
+              name={names[3]}
             />
             
             {/* 中心位置：牌1和牌2叠加 */}
@@ -218,6 +242,7 @@ export default function CelticCrossSlots({
                   index={0}
                   isAnimating={isAnimating[0]}
                   forceFlipped={forceFlipped}
+                  name={names[0]}
                 />
               </div>
               
@@ -230,10 +255,11 @@ export default function CelticCrossSlots({
                   forceFlipped={forceFlipped}
                   isHorizontal={true}
                   hideLabel={true}
+                  name={names[1]}
                 />
               </div>
               
-              {/* 牌2的标签：阻碍（竖向，在左侧） */}
+              {/* 牌2的标签（竖向，在左侧） */}
               <div 
                 className="absolute z-30 text-white/50 text-[10px] sm:text-xs"
                 style={{ 
@@ -244,7 +270,7 @@ export default function CelticCrossSlots({
                   letterSpacing: '0.3em',
                 }}
               >
-                阻碍
+                {names[1]}
               </div>
             </div>
             
@@ -253,6 +279,7 @@ export default function CelticCrossSlots({
               index={5}
               isAnimating={isAnimating[5]}
               forceFlipped={forceFlipped}
+              name={names[5]}
             />
             
             {/* 第三行：空 - 3重点 - 空 */}
@@ -262,6 +289,7 @@ export default function CelticCrossSlots({
               index={2}
               isAnimating={isAnimating[2]}
               forceFlipped={forceFlipped}
+              name={names[2]}
             />
             <div className="w-16 h-24 sm:w-20 sm:h-28 md:w-24 md:h-36" /> {/* 占位 */}
           </div>
@@ -276,6 +304,7 @@ export default function CelticCrossSlots({
             isAnimating={isAnimating[6]}
             forceFlipped={forceFlipped}
             size="small"
+            name={names[6]}
           />
           {/* Card 8 */}
           <CardSlot
@@ -284,6 +313,7 @@ export default function CelticCrossSlots({
             isAnimating={isAnimating[7]}
             forceFlipped={forceFlipped}
             size="small"
+            name={names[7]}
           />
           {/* Card 9 */}
           <CardSlot
@@ -292,6 +322,7 @@ export default function CelticCrossSlots({
             isAnimating={isAnimating[8]}
             forceFlipped={forceFlipped}
             size="small"
+            name={names[8]}
           />
           {/* Card 10 (最上) */}
           <CardSlot
@@ -300,6 +331,7 @@ export default function CelticCrossSlots({
             isAnimating={isAnimating[9]}
             forceFlipped={forceFlipped}
             size="small"
+            name={names[9]}
           />
         </div>
       </div>
@@ -312,7 +344,7 @@ export default function CelticCrossSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌…</p>
+          <p>{isEn ? '🔮 Keep drawing the remaining cards…' : '🔮 请继续抽取剩余卡牌…'}</p>
         </motion.div>
       )}
 

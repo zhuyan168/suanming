@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -19,16 +20,28 @@ export default function HorseshoeSlots({
   showLoadingText = false,
   forceFlipped = false
 }: HorseshoeSlotsProps) {
-  // 牌位名称
-  const positionNames = [
-    '过去的影响',          // 1
-    '当下的状态',          // 2
-    '隐藏的影响',          // 3
-    '阻碍与挑战',          // 4 (核心位)
-    '潜在的发展',          // 5
-    '行动建议',            // 6
-    '可能的结果',          // 7
-  ];
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const positionNames = isEn
+    ? [
+        'Past Influences',
+        'Present State',
+        'Hidden Influences',
+        'Obstacle',
+        'External Environment',
+        'Advice',
+        'Outcome',
+      ]
+    : [
+        '过去的影响',          // 1
+        '当下的状态',          // 2
+        '隐藏的影响',          // 3
+        '阻碍与挑战',          // 4 (核心位)
+        '潜在的发展',          // 5
+        '行动建议',            // 6
+        '可能的结果',          // 7
+      ];
 
   // 马蹄铁 U 形布局：左侧竖列(1-3) + 底部中心(4) + 右侧竖列(5-7)
   const positions = [
@@ -163,7 +176,7 @@ export default function HorseshoeSlots({
       {/* Loading text centered at bottom if needed */}
       {showLoadingText && cards.filter(c => c !== null).length < 7 && (
         <div className="absolute -bottom-12 sm:-bottom-20 left-0 right-0 text-center text-white/50 text-xs sm:text-sm">
-          <p>请继续抽取卡牌...</p>
+          <p>{isEn ? 'Keep drawing the remaining cards...' : '请继续抽取卡牌...'}</p>
         </div>
       )}
 

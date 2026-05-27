@@ -8,6 +8,7 @@ import { SpreadCard } from '../../../../types/spread-reading';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -146,6 +147,7 @@ const validateReading = (reading: any): boolean => {
 
 export default function RelationshipDev8Result() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -189,7 +191,7 @@ export default function RelationshipDev8Result() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '生成解读失败');
+        throw new Error(errorData.error || texts.errorGenerate);
       }
 
       const data = await response.json();
@@ -213,7 +215,7 @@ export default function RelationshipDev8Result() {
       }
     } catch (err: any) {
       console.error('Failed to generate reading:', err);
-      setError(err.message || '生成解读失败，请重试');
+      setError(err.message || texts.errorGenerateRetry);
     } finally {
       setIsGenerating(false);
     }
@@ -275,7 +277,7 @@ export default function RelationshipDev8Result() {
   };
 
   const handleDrawAgain = () => {
-    if (confirm('确定要重新抽牌吗？当前结果将被清空。')) {
+    if (confirm(texts.confirmReset)) {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(READING_KEY);
       router.push('/themed-readings/love/relationship-development/draw');
@@ -390,7 +392,7 @@ export default function RelationshipDev8Result() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+                <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.back}</span>
               </button>
               
               <div className="flex items-center gap-4 text-white">
@@ -662,7 +664,7 @@ export default function RelationshipDev8Result() {
                       onClick={handleDrawAgain}
                       className="flex-1 py-4 rounded-xl bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-all duration-300"
                     >
-                      重新抽牌
+                      {texts.btnDrawAgain}
                     </button>
                     <button
                       onClick={handleReturnToList}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -17,6 +18,9 @@ export default function SelectedCardSlot({
   showLoadingText = false,
   forceFlipped = false
 }: SelectedCardSlotProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   // 判断是否应该显示翻牌状态（当动画完成且不是动画中时，或强制翻牌）
   // 如果强制翻牌，直接返回 true，否则检查动画状态
   const isFlipped = forceFlipped ? true : (!isAnimating && selectedCard !== null);
@@ -124,7 +128,7 @@ export default function SelectedCardSlot({
           >
             <div className="text-center text-white/30">
               <div className="text-4xl mb-2">🎴</div>
-              <p className="text-sm">选择一张卡牌</p>
+              <p className="text-sm">{isEn ? 'Select a card' : '选择一张卡牌'}</p>
             </div>
           </motion.div>
         )}
@@ -138,7 +142,7 @@ export default function SelectedCardSlot({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-lg mt-8 font-medium"
         >
-          <p>🔮 正在解析今日塔罗能量…</p>
+          <p>{isEn ? '🔮 Reading today\'s tarot energy…' : '🔮 正在解析今日塔罗能量…'}</p>
         </motion.div>
       )}
 

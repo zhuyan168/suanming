@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -13,15 +14,24 @@ interface HexagramSlotsProps {
   forceFlipped?: boolean;
 }
 
-// 六芒星牌位标题
-const POSITION_TITLES = [
+const POSITION_TITLES_ZH = [
   '过去｜问题的根源',
   '现在｜问题的真实状态',
   '未来｜问题的发展趋势',
   '内在｜情绪与心态的影响',
   '外在｜环境与他人的影响',
   '行动｜你对问题的态度与对策',
-  '指引牌｜对整体局势的总结与提醒'
+  '指引牌｜对整体局势的总结与提醒',
+];
+
+const POSITION_TITLES_EN = [
+  'Past | Root of the Issue',
+  'Present | Current Situation',
+  'Future | Likely Development',
+  'Inner | Emotional & Mental Influence',
+  'Outer | Environmental & Social Influence',
+  'Action | Your Approach & Response',
+  'Guide Card | Overall Summary & Reminder',
 ];
 
 export default function HexagramSlots({ 
@@ -30,7 +40,10 @@ export default function HexagramSlots({
   showLoadingText = false,
   forceFlipped = false
 }: HexagramSlotsProps) {
-  
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+  const POSITION_TITLES = isEn ? POSITION_TITLES_EN : POSITION_TITLES_ZH;
+
   const renderCard = (card: ShuffledTarotCard | null, index: number, positionTitle: string) => (
     <div key={index} className="flex flex-col items-center">
       <AnimatePresence mode="wait">
@@ -288,7 +301,7 @@ export default function HexagramSlots({
                 >
                   <div className="text-center text-white/40">
                     <div className="text-2xl sm:text-3xl mb-1">✨</div>
-                    <p className="text-xs">指引</p>
+                    <p className="text-xs">{isEn ? 'Guide' : '指引'}</p>
                   </div>
                 </motion.div>
               )}
@@ -335,9 +348,9 @@ export default function HexagramSlots({
           className="text-center text-white/70 text-base sm:text-lg mt-8 font-medium"
         >
           <p>
-            🔮 {cards.filter(c => c !== null).length < 6 
-              ? '请继续抽取外围牌位…' 
-              : '最后，抽取中心的指引牌…'}
+            🔮 {cards.filter(c => c !== null).length < 6
+              ? (isEn ? 'Keep drawing the outer cards…' : '请继续抽取外围牌位…')
+              : (isEn ? 'Last card — draw the central Guide Card…' : '最后，抽取中心的指引牌…')}
           </p>
         </motion.div>
       )}

@@ -46,6 +46,22 @@ const QUESTION_STORAGE_KEY = 'general_hexagram_question';
 
 export default function HexagramReadingPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const texts = {
+    errorIncomplete: isEn ? 'Card data is incomplete. Please draw again.' : '抽牌数据不完整，请重新抽牌',
+    errorLoad: isEn ? 'Failed to load data. Please go back and draw again.' : '加载数据失败，请返回重新抽牌',
+    errorGenerate: isEn ? 'Failed to generate the reading. Please try again.' : '生成解读失败，请重试',
+    confirmReset: isEn ? 'Are you sure you want to draw again? Your current result will be cleared.' : '确定要重新抽牌吗？当前结果将被清空。',
+    scrollHintLoading: isEn ? 'Generating your reading' : '正在生成解读',
+    scrollHintReady: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
+    loadingTitle: isEn ? 'Reading your cards...' : '正在整理牌面信息...',
+    loadingLine1: isEn ? '✨ Analyzing the meaning and connections of 7 cards' : '✨ 正在分析7张牌的含义与关系',
+    loadingLine2: isEn ? '✨ Generating your overall insight and guidance' : '✨ 正在生成整体解读与建议',
+    redraw: isEn ? 'Draw Again' : '重新占卜',
+    btnRedraw: isEn ? 'Go Draw' : '去抽牌',
+    btnRetry: isEn ? 'Retry' : '重新生成',
+    btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -73,11 +89,11 @@ export default function HexagramReadingPage() {
             setReading(parsed.reading);
           }
         } else {
-          setError('抽牌数据不完整，请重新抽牌');
+          setError(texts.errorIncomplete);
         }
       } catch (e) {
         console.error('Failed to parse saved result:', e);
-        setError('加载数据失败，请返回重新抽牌');
+        setError(texts.errorLoad);
       }
     } else {
       // 如果没有结果，跳转回问题输入页
@@ -110,7 +126,7 @@ export default function HexagramReadingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('生成解读失败，请重试');
+        throw new Error(texts.errorGenerate);
       }
 
       const data = await response.json();
@@ -143,7 +159,7 @@ export default function HexagramReadingPage() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmReset)) return;
     
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORAGE_KEY);
@@ -170,7 +186,7 @@ export default function HexagramReadingPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => {
-                if (error.includes('不完整') || error.includes('加载数据失败')) {
+                if (error.includes('不完整') || error.includes('incomplete') || error.includes('加载数据失败') || error.includes('Failed to load')) {
                   router.push('/reading/general/hexagram/question');
                 } else {
                   setError(null);
@@ -180,13 +196,13 @@ export default function HexagramReadingPage() {
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              {error.includes('不完整') || error.includes('加载数据失败') ? '去抽牌' : '重新生成'}
+              {(error.includes('不完整') || error.includes('incomplete') || error.includes('加载数据失败') || error.includes('Failed to load')) ? texts.btnRedraw : texts.btnRetry}
             </button>
             <button
               onClick={handleReturn}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回牌阵列表
+              {texts.btnBackList}
             </button>
           </div>
         </div>
@@ -215,7 +231,7 @@ export default function HexagramReadingPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? (isEn ? 'Back to My Readings' : '返回我的占卜记录') : (isEn ? 'Back' : '返回')}</span>
           </button>
 
           <div className="flex items-center gap-4">
@@ -229,7 +245,7 @@ export default function HexagramReadingPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.redraw}</span>
           </button>
         </header>
 
@@ -301,7 +317,7 @@ export default function HexagramReadingPage() {
                     className="flex flex-col items-center gap-1"
                   >
                     <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                      {loading ? '正在生成解读' : '下滑查看解读内容'}
+                      {loading ? texts.scrollHintLoading : texts.scrollHintReady}
                     </span>
                     <span className="material-symbols-outlined text-white/20 text-xl">
                       keyboard_double_arrow_down
@@ -328,13 +344,13 @@ export default function HexagramReadingPage() {
                       style={{ borderColor: '#7f13ec transparent transparent transparent' }}
                     />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">正在整理牌面信息...</h3>
+                  <h3 className="text-xl font-bold mb-2">{texts.loadingTitle}</h3>
                   <p className="text-white/40 max-w-xs mx-auto text-sm mb-4">
-                    AI 正在根据你的牌阵进行深度分析
+                    {isEn ? 'AI is analyzing your spread in depth. Please wait a moment.' : 'AI 正在根据你的牌阵进行深度分析'}
                   </p>
                   <div className="flex flex-col gap-2 text-white/30 text-xs">
-                    <p>✨ 正在分析7张牌的含义与关系</p>
-                    <p>✨ 正在生成整体解读与建议</p>
+                    <p>{texts.loadingLine1}</p>
+                    <p>{texts.loadingLine2}</p>
                   </div>
                 </motion.div>
               ) : reading ? (

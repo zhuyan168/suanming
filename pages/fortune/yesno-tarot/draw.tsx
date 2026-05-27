@@ -175,6 +175,7 @@ const loadYesNoTarotQuestion = (): string => {
 
 export default function YesNoTarotDraw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'divination-yesno',
     redirectPath: '/',
@@ -291,7 +292,7 @@ export default function YesNoTarotDraw() {
 
   const handleReturnToQuestion = () => {
     if (hasDrawn) {
-      if (!confirm('返回将需要重新抽牌，确定要返回吗？')) return;
+      if (!confirm(isEn ? 'Going back will require you to draw again. Are you sure you want to go back?' : '返回将需要重新抽牌，确定要返回吗？')) return;
       // 清除抽牌数据，但保留问题
       localStorage.removeItem(STORAGE_KEY_DRAW);
     }

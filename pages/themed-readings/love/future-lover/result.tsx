@@ -11,6 +11,7 @@ import {
 } from '../../../../utils/future-lover-interpretation';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -87,6 +88,7 @@ const loadDeepReading = (): DeepReading | null => {
 
 export default function FutureLoverResult() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<FutureLoverResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,7 +124,7 @@ export default function FutureLoverResult() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '生成解读失败');
+        throw new Error(errorData.error || texts.errorGenerate);
       }
 
       const data: DeepReading = await response.json();
@@ -180,7 +182,7 @@ export default function FutureLoverResult() {
   };
 
   const handleDrawAgain = () => {
-    if (confirm('确定要重新抽牌吗？当前结果将被清空。')) {
+    if (confirm(texts.confirmReset)) {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(DEEP_READING_KEY);
       router.push('/themed-readings/love/future-lover/draw');
@@ -277,7 +279,7 @@ export default function FutureLoverResult() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="hidden sm:inline">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+                <span className="hidden sm:inline">{isFromHistory ? texts.backToHistory : texts.back}</span>
               </button>
               
               <div className="text-center">
@@ -348,8 +350,8 @@ export default function FutureLoverResult() {
                     <div className="flex items-center gap-3">
                       <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
                       <div className="flex-1">
-                        <p className="text-white text-sm font-medium">✨ AI 正在为你生成深度解读...</p>
-                        <p className="text-white/60 text-xs mt-1">请稍候，解读内容生成后将自动展示</p>
+                        <p className="text-white text-sm font-medium">{texts.loadingTopHint}</p>
+                        <p className="text-white/60 text-xs mt-1">{texts.loadingWaitHint}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -513,9 +515,9 @@ export default function FutureLoverResult() {
                       <div className="mt-8 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/30 p-8 text-center">
                         <div className="flex flex-col items-center gap-4">
                           <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                          <p className="text-white text-lg font-semibold">✨ AI 正在为你生成深度解读...</p>
+                          <p className="text-white text-lg font-semibold">{texts.loadingTopHint}</p>
                           <p className="text-white/60 text-sm">
-                            这可能需要 10-30 秒，请稍候
+                            {texts.loadingTimeHint}
                           </p>
                         </div>
                       </div>
@@ -545,7 +547,7 @@ export default function FutureLoverResult() {
                     onClick={handleDrawAgain}
                     className="flex-1 py-4 rounded-lg bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-colors"
                   >
-                    重新抽牌
+                    {texts.btnDrawAgain}
                   </button>
                   <button
                     onClick={handleReturnToList}

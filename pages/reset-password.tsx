@@ -4,22 +4,31 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 
-const errorMap: Record<string, string> = {
+const errorMapZh: Record<string, string> = {
   'New password should be different from the old password': '新密码不能与旧密码相同',
   'Password should be at least 6 characters': '密码至少需要 6 个字符',
   'Auth session missing': '重置链接已过期，请重新申请',
   'Token has expired or is invalid': '重置链接已过期，请重新申请',
 }
 
-function toChineseError(msg: string): string {
-  for (const [en, zh] of Object.entries(errorMap)) {
-    if (msg.toLowerCase().includes(en.toLowerCase())) return zh
+const errorMapEn: Record<string, string> = {
+  'New password should be different from the old password': 'New password must be different from your current password.',
+  'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+  'Auth session missing': 'Reset link has expired. Please request a new one.',
+  'Token has expired or is invalid': 'Reset link has expired. Please request a new one.',
+}
+
+function toLocalizedError(msg: string, isEn: boolean): string {
+  const map = isEn ? errorMapEn : errorMapZh
+  for (const [key, val] of Object.entries(map)) {
+    if (msg.toLowerCase().includes(key.toLowerCase())) return val
   }
   return msg
 }
 
 export default function ResetPasswordPage() {
   const router = useRouter()
+  const isEn = router.locale === 'en'
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
@@ -27,6 +36,50 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [sessionReady, setSessionReady] = useState(false)
   const [sessionError, setSessionError] = useState(false)
+
+  const texts = isEn ? {
+    title: 'Reset Password — FateAura',
+    metaDesc: 'Set your new password',
+    invalidTitle: 'Invalid Link — FateAura',
+    invalidHeading: 'Reset link is invalid or has expired.',
+    invalidSub: 'Please request a new password reset.',
+    invalidBtn: 'Request New Reset',
+    verifyingText: 'Verifying reset link…',
+    heading: 'Reset Password',
+    subtitle: 'Enter your new password below.',
+    successTitle: 'Password reset successfully.',
+    successSub: 'Redirecting to sign in…',
+    labelPassword: 'New Password',
+    placeholderPassword: 'At least 6 characters',
+    labelConfirm: 'Confirm New Password',
+    placeholderConfirm: 'Re-enter new password',
+    submitting: 'Resetting…',
+    submit: 'Confirm Reset',
+    validatePassword: 'Please enter your new password.',
+    validatePasswordLen: 'Password must be at least 6 characters.',
+    validatePasswordMatch: 'Passwords do not match.',
+  } : {
+    title: '重置密码 - FateAura',
+    metaDesc: '设置你的新密码',
+    invalidTitle: '链接无效 - FateAura',
+    invalidHeading: '重置链接无效或已过期',
+    invalidSub: '请重新申请密码重置',
+    invalidBtn: '重新申请',
+    verifyingText: '正在验证重置链接…',
+    heading: '重置密码',
+    subtitle: '请输入你的新密码',
+    successTitle: '密码重置成功',
+    successSub: '正在跳转到登录页…',
+    labelPassword: '新密码',
+    placeholderPassword: '至少 6 位',
+    labelConfirm: '确认新密码',
+    placeholderConfirm: '再次输入新密码',
+    submitting: '重置中...',
+    submit: '确认重置',
+    validatePassword: '请输入新密码',
+    validatePasswordLen: '密码至少需要 6 位',
+    validatePasswordMatch: '两次输入的密码不一致',
+  }
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -55,9 +108,9 @@ export default function ResetPasswordPage() {
   }, [])
 
   function validate(): string | null {
-    if (!password) return '请输入新密码'
-    if (password.length < 6) return '密码至少需要 6 位'
-    if (password !== confirmPassword) return '两次输入的密码不一致'
+    if (!password) return texts.validatePassword
+    if (password.length < 6) return texts.validatePasswordLen
+    if (password !== confirmPassword) return texts.validatePasswordMatch
     return null
   }
 
@@ -80,7 +133,7 @@ export default function ResetPasswordPage() {
     setLoading(false)
 
     if (updateError) {
-      setError(toChineseError(updateError.message))
+      setError(toLocalizedError(updateError.message, isEn))
       return
     }
 
@@ -92,18 +145,18 @@ export default function ResetPasswordPage() {
     return (
       <>
         <Head>
-          <title>链接无效 - FateAura</title>
+          <title>{texts.invalidTitle}</title>
         </Head>
         <div className="min-h-screen bg-background flex items-center justify-center px-4">
           <div className="text-center">
             <span className="material-symbols-outlined text-red-400 text-5xl mb-4 block">link_off</span>
-            <h1 className="text-xl font-semibold text-white mb-2">重置链接无效或已过期</h1>
-            <p className="text-white/60 text-sm mb-6">请重新申请密码重置</p>
+            <h1 className="text-xl font-semibold text-white mb-2">{texts.invalidHeading}</h1>
+            <p className="text-white/60 text-sm mb-6">{texts.invalidSub}</p>
             <Link
               href="/forgot-password"
               className="inline-block px-6 py-2.5 rounded-lg bg-primary hover:bg-primary/80 text-white text-sm font-medium transition-colors"
             >
-              重新申请
+              {texts.invalidBtn}
             </Link>
           </div>
         </div>
@@ -115,12 +168,12 @@ export default function ResetPasswordPage() {
     return (
       <>
         <Head>
-          <title>重置密码 - FateAura</title>
+          <title>{texts.title}</title>
         </Head>
         <div className="min-h-screen bg-background flex items-center justify-center px-4">
           <div className="text-center">
             <span className="material-symbols-outlined text-primary text-5xl mb-4 block animate-spin">progress_activity</span>
-            <p className="text-white/60 text-sm">正在验证重置链接…</p>
+            <p className="text-white/60 text-sm">{texts.verifyingText}</p>
           </div>
         </div>
       </>
@@ -130,8 +183,8 @@ export default function ResetPasswordPage() {
   return (
     <>
       <Head>
-        <title>重置密码 - FateAura</title>
-        <meta name="description" content="设置你的新密码" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -140,8 +193,8 @@ export default function ResetPasswordPage() {
 
         <div className="relative z-10 w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white tracking-wide">重置密码</h1>
-            <p className="mt-2 text-white/50 text-sm">请输入你的新密码</p>
+            <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
+            <p className="mt-2 text-white/50 text-sm">{texts.subtitle}</p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">
@@ -150,20 +203,20 @@ export default function ResetPasswordPage() {
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
                   check_circle
                 </span>
-                <h2 className="text-xl font-semibold text-white mb-2">密码重置成功</h2>
-                <p className="text-white/60 text-sm">正在跳转到登录页…</p>
+                <h2 className="text-xl font-semibold text-white mb-2">{texts.successTitle}</h2>
+                <p className="text-white/60 text-sm">{texts.successSub}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="password" className="block text-sm text-white/70 mb-1.5">
-                    新密码
+                    {texts.labelPassword}
                   </label>
                   <input
                     id="password"
                     type="password"
                     autoComplete="new-password"
-                    placeholder="至少 6 位"
+                    placeholder={texts.placeholderPassword}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
@@ -172,13 +225,13 @@ export default function ResetPasswordPage() {
 
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm text-white/70 mb-1.5">
-                    确认新密码
+                    {texts.labelConfirm}
                   </label>
                   <input
                     id="confirmPassword"
                     type="password"
                     autoComplete="new-password"
-                    placeholder="再次输入新密码"
+                    placeholder={texts.placeholderConfirm}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
@@ -197,7 +250,7 @@ export default function ResetPasswordPage() {
                   disabled={loading}
                   className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? '重置中...' : '确认重置'}
+                  {loading ? texts.submitting : texts.submit}
                 </button>
               </form>
             )}

@@ -144,6 +144,8 @@ function RecordCard({
   record: ReadingRecord
   onView: (r: ReadingRecord) => void
 }) {
+  const { locale } = useRouter()
+  const isEn = locale === 'en'
   const canonicalKey = resolveDisplayKey(record.spread_type)
   const spreadName = getSpreadName(canonicalKey)
   const meta = getSpreadByKey(canonicalKey)
@@ -176,7 +178,7 @@ function RecordCard({
         onClick={() => onView(record)}
         className="shrink-0 rounded-lg bg-primary/20 border border-primary/30 text-primary text-xs font-medium px-3 py-1.5 hover:bg-primary/30 transition-colors"
       >
-        查看结果
+        {isEn ? 'View Result' : '查看结果'}
       </button>
     </div>
   )
@@ -206,30 +208,38 @@ function LoadingState() {
 }
 
 function UnauthState() {
+  const { locale } = useRouter()
+  const isEn = locale === 'en'
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <span className="material-symbols-outlined text-white/20 text-5xl">lock</span>
-      <p className="text-white/50 text-sm">请先登录后查看你的占卜记录</p>
+      <p className="text-white/50 text-sm">
+        {isEn ? 'Please sign in to view your tarot reading history.' : '请先登录后查看你的占卜记录'}
+      </p>
       <Link
         href="/login"
         className="rounded-lg bg-primary/20 border border-primary/30 text-primary text-sm font-medium px-5 py-2 hover:bg-primary/30 transition-colors"
       >
-        去登录
+        {isEn ? 'Sign In' : '去登录'}
       </Link>
     </div>
   )
 }
 
 function EmptyState() {
+  const { locale } = useRouter()
+  const isEn = locale === 'en'
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <span className="material-symbols-outlined text-white/20 text-5xl">auto_stories</span>
-      <p className="text-white/50 text-sm">暂无占卜记录</p>
+      <p className="text-white/50 text-sm">
+        {isEn ? 'No reading history yet.' : '暂无占卜记录'}
+      </p>
       <Link
         href="/"
         className="rounded-lg bg-white/5 border border-white/10 text-white/60 text-sm font-medium px-5 py-2 hover:bg-white/10 transition-colors"
       >
-        去占一卦
+        {isEn ? 'Start a Reading' : '去占一卦'}
       </Link>
     </div>
   )

@@ -6,6 +6,7 @@ import TwoRowsThreeColsSlots from '../../../../components/fortune/TwoRowsThreeCo
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getReadingUiText } from '../../../../lib/readingUiText';
 
 const STORAGE_KEY = 'offer_decision_result';
 
@@ -39,6 +40,7 @@ interface ReadingResult {
 
 export default function OfferDecisionReading() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -62,7 +64,7 @@ export default function OfferDecisionReading() {
         }
       } catch (e) {
         console.error('Failed to parse saved data:', e);
-        setError('加载数据失败，请返回重新抽牌');
+        setError(texts.errorLoad);
       }
     } else {
       setError('你还没有完成抽牌');
@@ -85,7 +87,7 @@ export default function OfferDecisionReading() {
       });
 
       if (!response.ok) {
-        throw new Error('生成解读失败，请重试');
+        throw new Error(texts.errorGenerateRetry);
       }
 
       const data = await response.json();
@@ -122,7 +124,7 @@ export default function OfferDecisionReading() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新抽牌吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmReset)) return;
     localStorage.removeItem(STORAGE_KEY);
     router.push('/themed-readings/career-study/offer-decision/draw');
   };
@@ -208,12 +210,12 @@ export default function OfferDecisionReading() {
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
         <button onClick={isFromHistory ? goBackToHistory : handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-xl">arrow_back</span>
-          <span className="text-sm">{isFromHistory ? '返回我的占卜记录' : '返回'}</span>
+          <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
         <h2 className="text-lg font-bold">Offer 决策解读</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
-          <span className="text-sm font-medium">重新抽牌</span>
+          <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
         </button>
       </header>
 
@@ -276,8 +278,8 @@ export default function OfferDecisionReading() {
                 <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" style={{ borderColor: '#7f13ec transparent transparent transparent' }}></div>
               </div>
-              <h3 className="text-xl font-bold mb-2">正在生成解读...</h3>
-              <p className="text-white/40 max-w-xs mx-auto text-sm">AI 正在根据你的牌阵进行深度解析，请稍候</p>
+              <h3 className="text-xl font-bold mb-2">{texts.loadingTitle}</h3>
+              <p className="text-white/40 max-w-xs mx-auto text-sm">{texts.loadingSubtitle}</p>
             </motion.div>
           ) : reading ? (
             <motion.div

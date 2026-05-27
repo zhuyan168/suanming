@@ -3,6 +3,7 @@
  * 用于展示单张牌的详细信息
  */
 
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { TarotCard } from '../../types/annual-fortune';
 
@@ -20,6 +21,9 @@ interface CardDetailModalProps {
 }
 
 export default function CardDetailModal({ card, monthLabel, onClose }: CardDetailModalProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   if (!card) return null;
 
   // 点击背景关闭
@@ -102,14 +106,16 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
                     : 'bg-green-400/20 text-green-300 border border-green-400/30'
                 }`}
               >
-                {card.isReversed ? '逆位 Reversed' : '正位 Upright'}
+                {card.isReversed
+                  ? (isEn ? 'Reversed' : '逆位 Reversed')
+                  : (isEn ? 'Upright' : '正位 Upright')}
               </span>
             </div>
 
             {/* 关键词 */}
             {card.keywords && card.keywords.length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-white/70 mb-2">关键词</h3>
+                <h3 className="text-sm font-semibold text-white/70 mb-2">{isEn ? 'Keywords' : '关键词'}</h3>
                 <div className="flex flex-wrap gap-2">
                   {card.keywords.map((keyword, index) => (
                     <span
@@ -127,14 +133,14 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
             <div className="space-y-3">
               {card.upright && (
                 <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                  <h3 className="text-sm font-semibold text-green-300 mb-1">正位含义</h3>
+                  <h3 className="text-sm font-semibold text-green-300 mb-1">{isEn ? 'Upright Meaning' : '正位含义'}</h3>
                   <p className="text-white/80 text-sm leading-relaxed">{getMeaning(card.upright)}</p>
                 </div>
               )}
 
               {card.reversed && (
                 <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  <h3 className="text-sm font-semibold text-amber-300 mb-1">逆位含义</h3>
+                  <h3 className="text-sm font-semibold text-amber-300 mb-1">{isEn ? 'Reversed Meaning' : '逆位含义'}</h3>
                   <p className="text-white/80 text-sm leading-relaxed">{getMeaning(card.reversed)}</p>
                 </div>
               )}
@@ -143,8 +149,8 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
             {/* 卡牌信息 */}
             <div className="mt-4 pt-4 border-t border-white/10 text-center">
               <p className="text-white/50 text-xs">
-                {card.suit && <span className="mr-2">花色: {card.suit}</span>}
-                {card.number && <span>编号: {card.number}</span>}
+                {card.suit && <span className="mr-2">{isEn ? 'Suit:' : '花色:'} {card.suit}</span>}
+                {card.number && <span>{isEn ? 'No.:' : '编号:'} {card.number}</span>}
               </p>
             </div>
           </div>

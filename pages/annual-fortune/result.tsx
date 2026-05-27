@@ -12,9 +12,16 @@ import AnnualInterpretationPanel from '../../components/fortune/AnnualInterpreta
 import type { AnnualFortuneReading, AnnualInterpretation, PageState } from '../../types/annual-fortune';
 import { getAnnualFortuneReading, saveReadingToLocal } from '../../utils/annual-fortune-storage';
 import { generateAnnualReading, validateInterpretation } from '../../utils/annual-interpretation';
+import { getReadingUiText } from '../../lib/readingUiText';
 
 export default function AnnualFortuneResultPage() {
   const router = useRouter();
+  const texts = getReadingUiText(router.locale);
+  const isEn = router.locale === 'en';
+  const pageTexts = {
+    linkCopied: isEn ? 'Link copied to clipboard!' : '链接已复制到剪贴板！',
+    downloadSoon: isEn ? 'Download feature is coming soon.' : '下载功能开发中...',
+  };
   const { readingId, sessionId } = router.query;
   
   const [pageState, setPageState] = useState<PageState>('loading');
@@ -97,7 +104,7 @@ export default function AnnualFortuneResultPage() {
 
     } catch (err: any) {
       console.error('❌ Failed to generate interpretation:', err);
-      setError(err.message || '生成解读失败');
+      setError(err.message || texts.errorGenerate);
       setPageState('error');
     } finally {
       setIsGenerating(false);
@@ -156,7 +163,7 @@ export default function AnnualFortuneResultPage() {
     
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-      alert('链接已复制到剪贴板！');
+      alert(pageTexts.linkCopied);
     }).catch(err => {
       console.error('Failed to copy:', err);
     });
@@ -282,7 +289,7 @@ export default function AnnualFortuneResultPage() {
           {/* TODO: 会员功能 - 下载图片 */}
           {/* 当前阶段：功能未实现，按钮禁用 */}
           <button
-            onClick={() => alert('下载功能开发中...')}
+            onClick={() => alert(pageTexts.downloadSoon)}
             className="px-4 py-2 rounded-lg bg-white/10 text-white/50 text-sm font-medium cursor-not-allowed flex items-center gap-2"
             disabled
             title="功能开发中"
@@ -311,7 +318,7 @@ export default function AnnualFortuneResultPage() {
       {isGenerating ? (
         <div className="flex flex-col items-center justify-center py-20 gap-6">
           <LoadingSpinner />
-          <p className="text-white/70 text-lg">正在生成解读...</p>
+          <p className="text-white/70 text-lg">{texts.loadingTitle}</p>
         </div>
       ) : (
         <AnnualInterpretationPanel
