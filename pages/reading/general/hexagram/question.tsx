@@ -17,6 +17,24 @@ export default function HexagramQuestionPage() {
       : '输入问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
     hintWithQ: isEn ? 'Question entered' : '已输入问题',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Hexagram Spread — Enter Your Question | Mystic Insights' : '六芒星牌阵 - 问题输入 | Mystic Insights',
+    metaDesc: isEn ? 'Enter your question and let the Hexagram Spread map the forces at play.' : '输入你的问题，让六芒星牌阵帮你梳理局势与方向',
+    back: isEn ? 'Back' : '返回',
+    spreadName: isEn ? 'Hexagram Spread' : '六芒星牌阵',
+    subtitle: isEn ? 'Enter your question (optional) and let the spread help you see the full picture.' : '可输入你的问题（可选），让牌阵帮你梳理局势与方向',
+    questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
+    placeholder: isEn ? 'e.g. How is this situation likely to develop? / How should I approach this challenge?' : '例如：目前这个项目的发展局面如何？ / 我该如何应对当前的复杂状况？',
+    aboutTitle: isEn ? 'About the Hexagram Spread' : '关于六芒星牌阵',
+    aboutDesc: isEn ? 'The Hexagram Spread uses 6 outer cards and 1 central Guide Card to explore a situation from multiple angles.' : '六芒星牌阵由外围6张牌和中心1张指引牌组成，能够从多个维度全面解读复杂局面。',
+    pos1: isEn ? 'Past: root of the issue' : '过去：问题的根源',
+    pos2: isEn ? 'Present: the true state of things' : '现在：问题的真实状态',
+    pos3: isEn ? 'Future: how things may develop' : '未来：问题的发展趋势',
+    pos4: isEn ? 'Inner: emotional & mental influence' : '内在：情绪与心态的影响',
+    pos5: isEn ? 'Outer: environmental & social influence' : '外在：环境与他人的影响',
+    pos6: isEn ? 'Action: your approach & response' : '行动：你对问题的态度与对策',
+    guideCardNote: isEn ? '✨ The central Guide Card drawn last offers an overall summary and reminder for the whole spread.' : '✨ 最后抽取的中心指引牌，将为整体局势提供总结与提醒',
+    disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -75,7 +93,7 @@ export default function HexagramQuestionPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -83,11 +101,8 @@ export default function HexagramQuestionPage() {
   return (
     <>
       <Head>
-        <title>六芒星牌阵 - 问题输入 | Mystic Insights</title>
-        <meta
-          name="description"
-          content="输入你的问题，让六芒星牌阵帮你梳理局势与方向"
-        />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -104,7 +119,7 @@ export default function HexagramQuestionPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -130,10 +145,10 @@ export default function HexagramQuestionPage() {
                 HEXAGRAM SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                六芒星牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-lg leading-relaxed">
-                可输入你的问题（可选），让牌阵帮你梳理局势与方向
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -147,12 +162,12 @@ export default function HexagramQuestionPage() {
               {/* 输入框 */}
               <div className="mb-4">
                 <label className="block text-white/90 font-semibold mb-3">
-                  你的问题（可选）
+                  {texts.questionLabel}
                 </label>
                 <textarea
                   value={question}
                   onChange={handleQuestionChange}
-                  placeholder="例如：目前这个项目的发展局面如何？ / 我该如何应对当前的复杂状况？"
+                  placeholder={texts.placeholder}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
@@ -186,40 +201,38 @@ export default function HexagramQuestionPage() {
             >
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">info</span>
-                关于六芒星牌阵
+                {texts.aboutTitle}
               </h3>
               <div className="space-y-3 text-sm text-white/70 leading-relaxed">
-                <p>
-                  六芒星牌阵由外围6张牌和中心1张指引牌组成，能够从多个维度全面解读复杂局面。
-                </p>
+                <p>{texts.aboutDesc}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>过去：问题的根源</span>
+                    <span>{texts.pos1}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>现在：问题的真实状态</span>
+                    <span>{texts.pos2}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>未来：问题的发展趋势</span>
+                    <span>{texts.pos3}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>内在：情绪与心态的影响</span>
+                    <span>{texts.pos4}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>外在：环境与他人的影响</span>
+                    <span>{texts.pos5}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary">•</span>
-                    <span>行动：你对问题的态度与对策</span>
+                    <span>{texts.pos6}</span>
                   </div>
                 </div>
                 <p className="mt-4 text-primary/90">
-                  ✨ 最后抽取的中心指引牌，将为整体局势提供总结与提醒
+                  {texts.guideCardNote}
                 </p>
               </div>
             </motion.div>
@@ -237,7 +250,7 @@ export default function HexagramQuestionPage() {
                   auto_awesome
                 </span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  {texts.disclaimer}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                   auto_awesome

@@ -18,9 +18,50 @@ export default function AnnualFortuneResultPage() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
   const isEn = router.locale === 'en';
+
+  const ui = isEn ? {
+    loadingTitle: 'Loading...',
+    loadingText: 'Loading your yearly fortune...',
+    emptyPageTitle: 'Reading Not Found',
+    emptyHeading: 'Reading Not Found',
+    emptyDesc: 'Please complete the yearly fortune draw first.',
+    emptyBtn: 'Go Draw',
+    errorPageTitle: 'Failed to Load',
+    errorHeading: 'Failed to Load',
+    errorUnknown: 'Unknown error',
+    retry: 'Try Again',
+    back: 'Back',
+    redraw: 'Redraw',
+    copyLink: 'Copy Link',
+    downloadImage: 'Download Image',
+    downloadTip: 'Download feature is coming soon.',
+    linkCopied: 'Link copied to clipboard!',
+    errorLoad: 'Failed to load. Please try again.',
+    footer: (year: number) => `✨ May your ${year} be filled with light and growth.`,
+  } : {
+    loadingTitle: '加载中...',
+    loadingText: '正在加载年度运势...',
+    emptyPageTitle: '未找到抽牌记录',
+    emptyHeading: '未找到抽牌记录',
+    emptyDesc: '请先完成年度运势抽牌',
+    emptyBtn: '去抽牌',
+    errorPageTitle: '加载失败',
+    errorHeading: '加载失败',
+    errorUnknown: '未知错误',
+    retry: '重试',
+    back: '返回',
+    redraw: '重新抽取',
+    copyLink: '复制链接',
+    downloadImage: '下载图片',
+    downloadTip: '下载功能开发中...',
+    linkCopied: '链接已复制到剪贴板！',
+    errorLoad: '加载失败，请稍后重试',
+    footer: (year: number) => `✨ 愿你的 ${year} 年充满光明与成长`,
+  };
+
   const pageTexts = {
-    linkCopied: isEn ? 'Link copied to clipboard!' : '链接已复制到剪贴板！',
-    downloadSoon: isEn ? 'Download feature is coming soon.' : '下载功能开发中...',
+    linkCopied: ui.linkCopied,
+    downloadSoon: ui.downloadTip,
   };
   const { readingId, sessionId } = router.query;
   
@@ -66,7 +107,7 @@ export default function AnnualFortuneResultPage() {
       }
     } catch (err: any) {
       console.error('❌ Failed to load reading:', err);
-      setError(err.message || '加载失败，请稍后重试');
+      setError(err.message || ui.errorLoad);
       setPageState('error');
     }
   };
@@ -88,7 +129,7 @@ export default function AnnualFortuneResultPage() {
 
       // 验证生成结果
       if (!validateInterpretation(localInterpretation)) {
-        throw new Error('生成的解读数据不完整');
+        throw new Error(isEn ? 'Generated reading data is incomplete.' : '生成的解读数据不完整');
       }
 
       setInterpretation(localInterpretation);
@@ -181,10 +222,10 @@ export default function AnnualFortuneResultPage() {
    */
   if (pageState === 'loading') {
     return (
-      <PageLayout title="加载中...">
+      <PageLayout title={ui.loadingTitle} isEn={isEn}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
           <LoadingSpinner />
-          <p className="text-white/70 text-lg">正在加载年度运势...</p>
+          <p className="text-white/70 text-lg">{ui.loadingText}</p>
         </div>
       </PageLayout>
     );
@@ -192,17 +233,17 @@ export default function AnnualFortuneResultPage() {
 
   if (pageState === 'empty') {
     return (
-      <PageLayout title="未找到抽牌记录">
+      <PageLayout title={ui.emptyPageTitle} isEn={isEn}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
           <span className="material-symbols-outlined text-white/30 text-8xl">search_off</span>
           <div>
-            <h2 className="text-2xl font-bold text-white mb-3">未找到抽牌记录</h2>
-            <p className="text-white/60 mb-6">请先完成年度运势抽牌</p>
+            <h2 className="text-2xl font-bold text-white mb-3">{ui.emptyHeading}</h2>
+            <p className="text-white/60 mb-6">{ui.emptyDesc}</p>
             <button
               onClick={handleBackToDrawing}
               className="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
             >
-              去抽牌
+              {ui.emptyBtn}
             </button>
           </div>
         </div>
@@ -212,24 +253,24 @@ export default function AnnualFortuneResultPage() {
 
   if (pageState === 'error') {
     return (
-      <PageLayout title="加载失败">
+      <PageLayout title={ui.errorPageTitle} isEn={isEn}>
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
           <span className="material-symbols-outlined text-red-400 text-8xl">error</span>
           <div>
-            <h2 className="text-2xl font-bold text-white mb-3">加载失败</h2>
-            <p className="text-white/60 mb-6">{error || '未知错误'}</p>
+            <h2 className="text-2xl font-bold text-white mb-3">{ui.errorHeading}</h2>
+            <p className="text-white/60 mb-6">{error || ui.errorUnknown}</p>
             <div className="flex gap-3">
               <button
                 onClick={loadReading}
                 className="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
               >
-                重试
+                {ui.retry}
               </button>
               <button
                 onClick={handleBackToDrawing}
                 className="px-6 py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors"
               >
-                返回
+                {ui.back}
               </button>
             </div>
           </div>
@@ -245,14 +286,14 @@ export default function AnnualFortuneResultPage() {
 
   const displayYear = reading.meta?.year || currentYear;
   const createdDate = new Date(reading.createdAt);
-  const formattedDate = createdDate.toLocaleDateString('zh-CN', {
+  const formattedDate = createdDate.toLocaleDateString(isEn ? 'en-US' : 'zh-CN', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
 
   return (
-    <PageLayout title={`${displayYear} 年度运势`}>
+    <PageLayout title={isEn ? `${displayYear} Yearly Fortune` : `${displayYear} 年度运势`} isEn={isEn}>
       {/* A. 顶部信息区 */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -264,10 +305,10 @@ export default function AnnualFortuneResultPage() {
           Annual Fortune
         </p>
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
-          {displayYear} 年度运势结果
+          {isEn ? `${displayYear} Yearly Fortune Reading` : `${displayYear} 年度运势结果`}
         </h1>
         <p className="text-white/60 text-sm sm:text-base">
-          生成时间：{formattedDate}
+          {isEn ? `Generated on: ${formattedDate}` : `生成时间：${formattedDate}`}
         </p>
 
         {/* 操作按钮 */}
@@ -277,14 +318,14 @@ export default function AnnualFortuneResultPage() {
             className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-lg">refresh</span>
-            重新抽取
+            {ui.redraw}
           </button>
           <button
             onClick={handleCopyLink}
             className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
           >
             <span className="material-symbols-outlined text-lg">share</span>
-            复制链接
+            {ui.copyLink}
           </button>
           {/* TODO: 会员功能 - 下载图片 */}
           {/* 当前阶段：功能未实现，按钮禁用 */}
@@ -292,10 +333,10 @@ export default function AnnualFortuneResultPage() {
             onClick={() => alert(pageTexts.downloadSoon)}
             className="px-4 py-2 rounded-lg bg-white/10 text-white/50 text-sm font-medium cursor-not-allowed flex items-center gap-2"
             disabled
-            title="功能开发中"
+            title={ui.downloadTip}
           >
             <span className="material-symbols-outlined text-lg">download</span>
-            下载图片
+            {ui.downloadImage}
           </button>
         </div>
       </motion.div>
@@ -311,6 +352,7 @@ export default function AnnualFortuneResultPage() {
           themeCard={reading.themeCard}
           monthCards={reading.monthCards}
           showLabels={true}
+          isEn={isEn}
         />
       </motion.div>
 
@@ -325,6 +367,7 @@ export default function AnnualFortuneResultPage() {
           interpretation={interpretation}
           themeCard={reading.themeCard}
           monthCards={reading.monthCards}
+          isEn={isEn}
         />
       )}
 
@@ -335,7 +378,7 @@ export default function AnnualFortuneResultPage() {
         transition={{ delay: 1 }}
         className="text-center text-white/40 text-sm mt-16 pt-8 border-t border-white/10"
       >
-        <p>✨ 愿你的 {displayYear} 年充满光明与成长</p>
+        <p>{ui.footer(displayYear)}</p>
       </motion.div>
     </PageLayout>
   );
@@ -344,7 +387,7 @@ export default function AnnualFortuneResultPage() {
 /**
  * 页面布局组件
  */
-function PageLayout({ title, children }: { title: string; children: React.ReactNode }) {
+function PageLayout({ title, children, isEn = false }: { title: string; children: React.ReactNode; isEn?: boolean }) {
   return (
     <>
       <Head>
@@ -412,7 +455,7 @@ function PageLayout({ title, children }: { title: string; children: React.ReactN
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{isEn ? 'Back' : '返回'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">

@@ -739,6 +739,56 @@ interface DrawResult {
 
 export default function DailyFortune() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const texts = isEn ? {
+    pageTitle: 'Daily Fortune — Mystic Insights',
+    loading: 'Loading...',
+    back: 'Back',
+    backToHistory: 'Back to My Readings',
+    sectionLabel: 'DAILY FORTUNE',
+    headingDraw: 'Draw Your Daily Card',
+    headingResult: "Today's Reading",
+    subtitleDraw: 'Take a quiet moment and choose one card from below to reveal today\'s guidance.',
+    subtitleResult: 'May this reading bring you clarity and light for the day ahead.',
+    drawHint: '💫 One draw per day — choose with intention.',
+    errorFetch: 'Failed to get your reading. Please try again.',
+    errorDraw: 'Draw failed. Please try again.',
+    footerHint: '✨ Come back tomorrow for a new reading.',
+    fortune: {
+      overall: 'Overall',
+      love: 'Love',
+      career: 'Career & Study',
+      wealth: 'Wealth',
+      health: 'Health',
+      luckyColor: 'Lucky Color',
+      luckyNumber: 'Lucky Number',
+    },
+  } : {
+    pageTitle: '每日运势 - Mystic Insights',
+    loading: '加载中...',
+    back: '返回首页',
+    backToHistory: '返回我的占卜记录',
+    sectionLabel: '每日运势',
+    headingDraw: '抽取今日塔罗牌',
+    headingResult: '今日运势解读',
+    subtitleDraw: '静心感受，从下方卡牌中选择一张，揭示你今天的运势指引。',
+    subtitleResult: '愿这份指引为你的今日带来光明与力量。',
+    drawHint: '💫 每天只能抽取一次，请用心选择',
+    errorFetch: '获取运势失败',
+    errorDraw: '抽牌失败，请稍后重试',
+    footerHint: '✨ 明天再来抽取新的运势吧',
+    fortune: {
+      overall: '综合运势',
+      love: '爱情运势',
+      career: '事业 & 学业',
+      wealth: '财运',
+      health: '健康',
+      luckyColor: '幸运色',
+      luckyNumber: '幸运数字',
+    },
+  };
+
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-daily',
@@ -863,7 +913,7 @@ export default function DailyFortune() {
       }
 
       if (!response.ok) {
-        throw new Error(data.error || '获取运势失败');
+        throw new Error(data.error || texts.errorFetch);
       }
 
       // 提取基本卡牌信息（不包含 orientation，因为它在 DrawResult 中单独存储）
@@ -891,7 +941,7 @@ export default function DailyFortune() {
     } catch (err: any) {
       console.error('❌ 抽牌错误:', err);
       console.error('错误详情:', err.message);
-      setError(err.message || '抽牌失败，请稍后重试');
+      setError(err.message || texts.errorDraw);
       // 如果出错，恢复卡牌状态
       if (card) {
         // 从 drawnCards 中移除
@@ -919,7 +969,7 @@ export default function DailyFortune() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{texts.loading}</div>
         </div>
       </div>
     );
@@ -928,7 +978,7 @@ export default function DailyFortune() {
   return (
     <>
       <Head>
-        <title>每日运势 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -1029,7 +1079,7 @@ export default function DailyFortune() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
+              <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.back}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -1050,14 +1100,12 @@ export default function DailyFortune() {
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">每日运势</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {showCards && !hasDrawnToday ? '抽取今日塔罗牌' : '今日运势解读'}
+                  {showCards && !hasDrawnToday ? texts.headingDraw : texts.headingResult}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {showCards && !hasDrawnToday 
-                    ? '静心感受，从下方卡牌中选择一张，揭示你今天的运势指引。' 
-                    : '愿这份指引为你的今日带来光明与力量。'}
+                  {showCards && !hasDrawnToday ? texts.subtitleDraw : texts.subtitleResult}
                 </p>
               </div>
 
@@ -1103,7 +1151,7 @@ export default function DailyFortune() {
 
                     {!selectedCard && (
                       <div className="text-center text-white/50 text-sm mt-6">
-                        <p>💫 每天只能抽取一次，请用心选择</p>
+                        <p>{texts.drawHint}</p>
                       </div>
                     )}
                   </motion.div>
@@ -1142,7 +1190,7 @@ export default function DailyFortune() {
                         <div className="text-center">
                           <h3 className="text-2xl font-bold text-white mb-1">{todayResult.card.name}</h3>
                           <p className="text-sm text-white/60 mb-3">
-                            {todayResult.orientation === 'upright' ? '正位' : '逆位'} · 
+                            {todayResult.orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')} · 
                             {todayResult.orientation === 'upright' ? getMeaning(todayResult.card.upright) : getMeaning(todayResult.card.reversed)}
                           </p>
                           <div className="flex flex-wrap gap-2 justify-center">
@@ -1174,45 +1222,45 @@ export default function DailyFortune() {
                         <div className="grid sm:grid-cols-2 gap-4">
                           <FortuneCard
                             icon="wb_sunny"
-                            title="综合运势"
+                            title={texts.fortune.overall}
                             content={todayResult.fortune.overall}
                             delay={0.5}
                           />
                           <FortuneCard
                             icon="favorite"
-                            title="爱情运势"
+                            title={texts.fortune.love}
                             content={todayResult.fortune.love}
                             delay={0.6}
                           />
                           <FortuneCard
                             icon="school"
-                            title="事业 & 学业"
+                            title={texts.fortune.career}
                             content={todayResult.fortune.career}
                             delay={0.7}
                           />
                           <FortuneCard
                             icon="paid"
-                            title="财运"
+                            title={texts.fortune.wealth}
                             content={todayResult.fortune.wealth}
                             delay={0.8}
                           />
                           <FortuneCard
                             icon="healing"
-                            title="健康"
+                            title={texts.fortune.health}
                             content={todayResult.fortune.health}
                             delay={0.9}
                           />
                           <div className="grid grid-cols-2 gap-4">
                             <FortuneCard
                               icon="palette"
-                              title="幸运色"
+                              title={texts.fortune.luckyColor}
                               content={todayResult.fortune.luckyColor}
                               delay={1.0}
                               compact
                             />
                             <FortuneCard
                               icon="casino"
-                              title="幸运数字"
+                              title={texts.fortune.luckyNumber}
                               content={String(todayResult.fortune.luckyNumber)}
                               delay={1.1}
                               compact
@@ -1230,7 +1278,7 @@ export default function DailyFortune() {
                       transition={{ delay: 1.2 }}
                       className="text-center text-white/50 text-sm mt-8"
                     >
-                      <p>✨ 明天再来抽取新的运势吧</p>
+                      <p>{texts.footerHint}</p>
                     </motion.div>
                   </motion.div>
                 )}

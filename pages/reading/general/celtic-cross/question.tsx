@@ -16,6 +16,19 @@ export default function CelticCrossQuestionPage() {
       ? 'For a more focused reading, enter your question below. You can also start without a question.'
       : '输入问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Celtic Cross Spread — Enter Your Question | Mystic Insights' : '凯尔特十字牌阵 - 问题输入 | Mystic Insights',
+    metaDesc: isEn ? 'Enter your question and begin your Celtic Cross Spread deep reading.' : '输入你的问题，开启凯尔特十字牌阵的深度解读',
+    back: isEn ? 'Back' : '返回',
+    spreadName: isEn ? 'Celtic Cross Spread' : '凯尔特十字牌阵',
+    subtitle: isEn ? 'Ideal for mapping the full picture of a situation: present, obstacles, past, resources, near future, and your inner hopes and fears.' : '适合用来梳理一件事的全局：现状、阻碍、过去、资源、近期走向，以及你内在的期待与担忧。',
+    questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
+    placeholder: isEn ? 'e.g. What is my position and direction in this relationship? / What obstacles am I facing in my career right now?' : '例如：我在这段关系中的位置与未来走向是什么？ / 我目前的职业发展遇到了哪些阻碍？',
+    aboutTitle: isEn ? 'About the Celtic Cross Spread' : '关于凯尔特十字牌阵',
+    aboutPara1: isEn ? 'The Celtic Cross is a classic deep-dive spread, ideal for fully exploring a complex or important situation.' : '凯尔特十字是一种经典的深度牌阵，适合用来全面梳理一件复杂或重要的事情。',
+    aboutPara2: isEn ? 'The spread unfolds layer by layer — from the present situation, obstacles, past, advantages, and near-term developments, to your inner hopes and fears — helping you see the full picture and your place within it.' : '牌阵将从现状、阻碍、过去、优势、近期发展，到你内在的期待与担忧，逐层展开，帮助你看清事情的整体脉络，以及自己在其中所处的位置。',
+    aboutNote: isEn ? '✨ If you\'re facing a difficult decision or a question that requires long-term reflection, the Celtic Cross is the right choice.' : '✨ 如果你正面对一个难以取舍、需要长期思考的问题，凯尔特十字会更适合你。',
+    disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -74,7 +87,7 @@ export default function CelticCrossQuestionPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -82,11 +95,8 @@ export default function CelticCrossQuestionPage() {
   return (
     <>
       <Head>
-        <title>凯尔特十字牌阵 - 问题输入 | Mystic Insights</title>
-        <meta
-          name="description"
-          content="输入你的问题，开启凯尔特十字牌阵的深度解读"
-        />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -103,7 +113,7 @@ export default function CelticCrossQuestionPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -129,10 +139,10 @@ export default function CelticCrossQuestionPage() {
                 CELTIC CROSS SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                凯尔特十字牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto leading-relaxed">
-                适合用来梳理一件事的全局：现状、阻碍、过去、资源、近期走向，以及你内在的期待与担忧。
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -146,12 +156,12 @@ export default function CelticCrossQuestionPage() {
               {/* 输入框 */}
               <div className="mb-4">
                 <label className="block text-white/90 font-semibold mb-3">
-                  你的问题（可选）
+                  {texts.questionLabel}
                 </label>
                 <textarea
                   value={question}
                   onChange={handleQuestionChange}
-                  placeholder="例如：我在这段关系中的位置与未来走向是什么？ / 我目前的职业发展遇到了哪些阻碍？"
+                  placeholder={texts.placeholder}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
@@ -185,17 +195,13 @@ export default function CelticCrossQuestionPage() {
             >
               <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">info</span>
-                关于凯尔特十字牌阵
+                {texts.aboutTitle}
               </h3>
               <div className="space-y-3 text-sm text-white/70 leading-relaxed">
-                <p>
-                  凯尔特十字是一种经典的深度牌阵，适合用来全面梳理一件复杂或重要的事情。
-                </p>
-                <p>
-                  牌阵将从现状、阻碍、过去、优势、近期发展，到你内在的期待与担忧，逐层展开，帮助你看清事情的整体脉络，以及自己在其中所处的位置。
-                </p>
+                <p>{texts.aboutPara1}</p>
+                <p>{texts.aboutPara2}</p>
                 <p className="mt-4 text-primary/90">
-                  ✨ 如果你正面对一个难以取舍、需要长期思考的问题，凯尔特十字会更适合你。
+                  {texts.aboutNote}
                 </p>
               </div>
             </motion.div>
@@ -213,7 +219,7 @@ export default function CelticCrossQuestionPage() {
                   auto_awesome
                 </span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  {texts.disclaimer}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                   auto_awesome

@@ -31,7 +31,7 @@ interface ReadingResult {
 }
 
 // 六芒星牌位标题
-const POSITION_TITLES = [
+const POSITION_TITLES_ZH = [
   '过去｜问题的根源',
   '现在｜问题的真实状态',
   '未来｜问题的发展趋势',
@@ -40,6 +40,15 @@ const POSITION_TITLES = [
   '行动｜你对问题的态度与对策',
   '指引牌｜对整体局势的总结与提醒',
 ];
+const POSITION_TITLES_EN = [
+  'Past | Root of the Issue',
+  'Present | Current Situation',
+  'Future | Likely Development',
+  'Inner | Emotional & Mental Influence',
+  'Outer | Environmental & Social Influence',
+  'Action | Your Approach & Response',
+  'Guide Card | Overall Summary & Reminder',
+];
 
 const STORAGE_KEY = 'general_hexagram_draw_result';
 const QUESTION_STORAGE_KEY = 'general_hexagram_question';
@@ -47,20 +56,35 @@ const QUESTION_STORAGE_KEY = 'general_hexagram_question';
 export default function HexagramReadingPage() {
   const router = useRouter();
   const isEn = router.locale === 'en';
+  const POSITION_TITLES = isEn ? POSITION_TITLES_EN : POSITION_TITLES_ZH;
   const texts = {
     errorIncomplete: isEn ? 'Card data is incomplete. Please draw again.' : '抽牌数据不完整，请重新抽牌',
     errorLoad: isEn ? 'Failed to load data. Please go back and draw again.' : '加载数据失败，请返回重新抽牌',
     errorGenerate: isEn ? 'Failed to generate the reading. Please try again.' : '生成解读失败，请重试',
+    errorFallback: isEn ? 'Something went wrong. Please try again.' : '出错了，请稍后重试',
     confirmReset: isEn ? 'Are you sure you want to draw again? Your current result will be cleared.' : '确定要重新抽牌吗？当前结果将被清空。',
     scrollHintLoading: isEn ? 'Generating your reading' : '正在生成解读',
     scrollHintReady: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
     loadingTitle: isEn ? 'Reading your cards...' : '正在整理牌面信息...',
+    loadingSubtitle: isEn ? 'AI is analyzing your spread in depth. Please wait a moment.' : 'AI 正在根据你的牌阵进行深度分析',
     loadingLine1: isEn ? '✨ Analyzing the meaning and connections of 7 cards' : '✨ 正在分析7张牌的含义与关系',
     loadingLine2: isEn ? '✨ Generating your overall insight and guidance' : '✨ 正在生成整体解读与建议',
     redraw: isEn ? 'Draw Again' : '重新占卜',
     btnRedraw: isEn ? 'Go Draw' : '去抽牌',
     btnRetry: isEn ? 'Retry' : '重新生成',
     btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Hexagram Spread Reading | Mystic Insights' : '六芒星牌阵解读 | Mystic Insights',
+    metaDesc: isEn ? 'Your Hexagram Spread tarot reading.' : '查看你的塔罗牌解读结果',
+    spreadTitle: isEn ? 'Hexagram Spread Reading' : '六芒星牌阵解读',
+    yourQuestion: isEn ? 'Your Question' : '你的问题',
+    noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
+    overallReading: isEn ? 'Overall Guidance' : '整体解读',
+    guideCard: isEn ? 'Guide Card' : '指引牌',
+    reminderFallbackQ: isEn ? 'These cards reflect the energy and possibilities of this moment. The power to create change always lies in your own choices and actions.' : '这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。',
+    reminderFallbackNoQ: isEn ? 'Take your time — these cards are simply reflecting the current flow of energy. What truly brings change is your own choices and actions.' : '慢慢来，这些牌只是提醒你当下的能量流动，真正能带来改变的，是你自己的选择和行动。',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    browseMore: isEn ? 'Explore More Spreads' : '浏览更多牌阵',
   };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
@@ -141,7 +165,7 @@ export default function HexagramReadingPage() {
 
     } catch (err: any) {
       console.error('Error generating reading:', err);
-      setError(err.message || '出错了，请稍后重试');
+      setError(err.message || texts.errorFallback);
     } finally {
       setLoading(false);
     }
@@ -172,7 +196,7 @@ export default function HexagramReadingPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -213,8 +237,8 @@ export default function HexagramReadingPage() {
   return (
     <>
       <Head>
-        <title>六芒星牌阵解读 | Mystic Insights</title>
-        <meta name="description" content="查看你的塔罗牌解读结果" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -263,7 +287,7 @@ export default function HexagramReadingPage() {
                 HEXAGRAM SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                六芒星牌阵解读
+                {texts.spreadTitle}
               </h1>
             </motion.div>
 
@@ -280,9 +304,9 @@ export default function HexagramReadingPage() {
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{texts.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
-                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                      {question || texts.noQuestion}
                     </p>
                   </div>
                 </div>
@@ -346,7 +370,7 @@ export default function HexagramReadingPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">{texts.loadingTitle}</h3>
                   <p className="text-white/40 max-w-xs mx-auto text-sm mb-4">
-                    {isEn ? 'AI is analyzing your spread in depth. Please wait a moment.' : 'AI 正在根据你的牌阵进行深度分析'}
+                    {texts.loadingSubtitle}
                   </p>
                   <div className="flex flex-col gap-2 text-white/30 text-xs">
                     <p>{texts.loadingLine1}</p>
@@ -366,7 +390,7 @@ export default function HexagramReadingPage() {
                     <div className="relative bg-[#1a1028] border border-white/10 rounded-2xl p-6 sm:p-10">
                       <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                         <span className="material-symbols-outlined">auto_awesome</span>
-                        整体解读
+                        {texts.overallReading}
                       </h3>
                       <p className="text-white/80 leading-relaxed text-lg whitespace-pre-wrap">
                         {reading.overall}
@@ -436,7 +460,7 @@ export default function HexagramReadingPage() {
                             {isGuidanceCard && (
                               <div className="flex items-center gap-1 text-yellow-400 text-xs">
                                 <span className="material-symbols-outlined text-sm">star</span>
-                                <span>指引牌</span>
+                                <span>{texts.guideCard}</span>
                               </div>
                             )}
                           </div>
@@ -479,9 +503,9 @@ export default function HexagramReadingPage() {
                         {reading.reminder ? (
                           `「${reading.reminder}」`
                         ) : question ? (
-                          `「这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。」`
+                          `「${texts.reminderFallbackQ}」`
                         ) : (
-                          `「慢慢来，这些牌只是提醒你当下的能量流动，真正能带来改变的，是你自己的选择和行动。」`
+                          `「${texts.reminderFallbackNoQ}」`
                         )}
                       </p>
                     </div>
@@ -492,7 +516,7 @@ export default function HexagramReadingPage() {
                         className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                       >
                         <span className="material-symbols-outlined text-sm">home</span>
-                        返回首页
+                        {texts.backHome}
                       </button>
                       <button
                         onClick={handleReturn}
@@ -500,7 +524,7 @@ export default function HexagramReadingPage() {
                         style={{ backgroundColor: '#7f13ec' }}
                       >
                         <span className="material-symbols-outlined text-sm">explore</span>
-                        浏览更多牌阵
+                        {texts.browseMore}
                       </button>
                     </div>
                   </div>

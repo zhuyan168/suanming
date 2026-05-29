@@ -11,19 +11,63 @@ interface AnnualInterpretationPanelProps {
   interpretation: AnnualInterpretation;
   themeCard: TarotCard;
   monthCards: Record<number, TarotCard>;
+  isEn?: boolean;
 }
 
-const MONTH_LABELS = [
-  '一月', '二月', '三月', '四月', '五月', '六月',
-  '七月', '八月', '九月', '十月', '十一月', '十二月'
-];
+const MONTH_LABELS_ZH = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+const MONTH_LABELS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function AnnualInterpretationPanel({
   interpretation,
   themeCard,
-  monthCards
+  monthCards,
+  isEn = false,
 }: AnnualInterpretationPanelProps) {
   const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
+
+  const MONTH_LABELS = isEn ? MONTH_LABELS_EN : MONTH_LABELS_ZH;
+
+  const ui = isEn ? {
+    yearlyFortune: 'Yearly Fortune',
+    yearKeywords: 'Yearly Keywords',
+    yearOverview: 'Yearly Theme',
+    yearWarnings: 'Points to Note',
+    monthlyFortune: 'Monthly Fortune',
+    yearSummary: 'Year in Review',
+    highlights: 'Peak Months',
+    highlightsDesc: 'These months carry positive energy — ideal for advancing important plans and making key decisions.',
+    lowlights: 'Challenging Months',
+    lowlightsDesc: 'These months call for extra patience. Focus on foundational work and building your reserves.',
+    actionList: 'Yearly Action Plan',
+    highlightBadge: '✨ Peak',
+    lowlightBadge: '⚠️ Low',
+    focusAreas: 'Focus Areas',
+    advice: '💡 Advice',
+    riskAlert: '⚠️ Risk Alert',
+    monthlyNote: '📌 Monthly Note',
+    upright: 'Upright',
+    reversed: 'Reversed',
+  } : {
+    yearlyFortune: '年度总运',
+    yearKeywords: '年度关键词',
+    yearOverview: '年度主线',
+    yearWarnings: '需要注意',
+    monthlyFortune: '月度运势',
+    yearSummary: '全年总结',
+    highlights: '高光月份',
+    highlightsDesc: '这些月份能量积极，适合推进重要计划和做出关键决定',
+    lowlights: '低潮月份',
+    lowlightsDesc: '这些月份需要更多耐心，专注于基础工作和能量储备',
+    actionList: '年度行动清单',
+    highlightBadge: '✨ 高光',
+    lowlightBadge: '⚠️ 低潮',
+    focusAreas: '重点领域',
+    advice: '💡 建议',
+    riskAlert: '⚠️ 风险提示',
+    monthlyNote: '📌 本月注意',
+    upright: '正位',
+    reversed: '逆位',
+  };
 
   const toggleMonth = (month: number) => {
     setExpandedMonth(expandedMonth === month ? null : month);
@@ -40,12 +84,12 @@ export default function AnnualInterpretationPanel({
       >
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-primary flex items-center gap-3">
           <span className="material-symbols-outlined text-3xl">stars</span>
-          年度总运
+          {ui.yearlyFortune}
         </h2>
 
         {/* 年度关键词 */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white/90 mb-3">年度关键词</h3>
+          <h3 className="text-lg font-semibold text-white/90 mb-3">{ui.yearKeywords}</h3>
           <div className="flex flex-wrap gap-2">
             {interpretation.yearKeywords.map((keyword, index) => (
               <motion.span
@@ -63,7 +107,7 @@ export default function AnnualInterpretationPanel({
 
         {/* 年度主线 */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-white/90 mb-3">年度主线</h3>
+          <h3 className="text-lg font-semibold text-white/90 mb-3">{ui.yearOverview}</h3>
           <div className="space-y-2">
             {interpretation.yearOverview.map((text, index) => (
               <motion.p
@@ -81,7 +125,7 @@ export default function AnnualInterpretationPanel({
 
         {/* 需要注意 */}
         <div>
-          <h3 className="text-lg font-semibold text-white/90 mb-3">需要注意</h3>
+          <h3 className="text-lg font-semibold text-white/90 mb-3">{ui.yearWarnings}</h3>
           <div className="space-y-2">
             {interpretation.yearWarnings.map((warning, index) => (
               <motion.div
@@ -109,7 +153,7 @@ export default function AnnualInterpretationPanel({
       >
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white flex items-center gap-3">
           <span className="material-symbols-outlined text-3xl">calendar_month</span>
-          月度运势
+          {ui.monthlyFortune}
         </h2>
 
         <div className="space-y-3">
@@ -165,10 +209,10 @@ export default function AnnualInterpretationPanel({
 
                     {/* 高光/低潮标记 */}
                     {isHighlight && (
-                      <span className="text-green-400 text-xs font-medium">✨ 高光</span>
+                      <span className="text-green-400 text-xs font-medium">{ui.highlightBadge}</span>
                     )}
                     {isLowlight && (
-                      <span className="text-amber-400 text-xs font-medium">⚠️ 低潮</span>
+                      <span className="text-amber-400 text-xs font-medium">{ui.lowlightBadge}</span>
                     )}
                   </div>
 
@@ -211,7 +255,7 @@ export default function AnnualInterpretationPanel({
                               <p className={`text-xs ${
                                 card.isReversed ? 'text-amber-400' : 'text-green-400'
                               }`}>
-                                {card.isReversed ? '逆位' : '正位'}
+                                {card.isReversed ? ui.reversed : ui.upright}
                               </p>
                             </div>
                           </div>
@@ -219,7 +263,7 @@ export default function AnnualInterpretationPanel({
 
                         {/* 重点领域 */}
                         <div>
-                          <h4 className="text-sm font-semibold text-white/70 mb-2">重点领域</h4>
+                          <h4 className="text-sm font-semibold text-white/70 mb-2">{ui.focusAreas}</h4>
                           <div className="flex flex-wrap gap-2">
                             {monthData.focusAreas.map((area, aidx) => (
                               <span
@@ -234,14 +278,14 @@ export default function AnnualInterpretationPanel({
 
                         {/* 建议 */}
                         <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                          <h4 className="text-sm font-semibold text-green-300 mb-1">💡 建议</h4>
+                          <h4 className="text-sm font-semibold text-green-300 mb-1">{ui.advice}</h4>
                           <p className="text-white/80 text-sm leading-relaxed">{monthData.advice}</p>
                         </div>
 
                         {/* 风险提示（如果有） */}
                         {monthData.risk && (
                           <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                            <h4 className="text-sm font-semibold text-amber-300 mb-1">⚠️ 风险提示</h4>
+                            <h4 className="text-sm font-semibold text-amber-300 mb-1">{ui.riskAlert}</h4>
                             <p className="text-white/80 text-sm leading-relaxed">{monthData.risk}</p>
                           </div>
                         )}
@@ -249,7 +293,7 @@ export default function AnnualInterpretationPanel({
                         {/* 本月注意事项（如果有） */}
                         {monthData.monthlyNote && (
                           <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                            <h4 className="text-sm font-semibold text-blue-300 mb-1">📌 本月注意</h4>
+                            <h4 className="text-sm font-semibold text-blue-300 mb-1">{ui.monthlyNote}</h4>
                             <p className="text-white/80 text-sm leading-relaxed">{monthData.monthlyNote}</p>
                           </div>
                         )}
@@ -272,7 +316,7 @@ export default function AnnualInterpretationPanel({
       >
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white flex items-center gap-3">
           <span className="material-symbols-outlined text-3xl">insights</span>
-          全年总结
+          {ui.yearSummary}
         </h2>
 
         <div className="space-y-6">
@@ -280,7 +324,7 @@ export default function AnnualInterpretationPanel({
           <div>
             <h3 className="text-lg font-semibold text-green-400 mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined">trending_up</span>
-              高光月份
+              {ui.highlights}
             </h3>
             <div className="flex flex-wrap gap-2">
               {interpretation.highlights.map((month) => (
@@ -292,16 +336,14 @@ export default function AnnualInterpretationPanel({
                 </span>
               ))}
             </div>
-            <p className="mt-2 text-white/60 text-sm">
-              这些月份能量积极，适合推进重要计划和做出关键决定
-            </p>
+            <p className="mt-2 text-white/60 text-sm">{ui.highlightsDesc}</p>
           </div>
 
           {/* 低潮月份 */}
           <div>
             <h3 className="text-lg font-semibold text-amber-400 mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined">trending_down</span>
-              低潮月份
+              {ui.lowlights}
             </h3>
             <div className="flex flex-wrap gap-2">
               {interpretation.lowlights.map((month) => (
@@ -313,16 +355,14 @@ export default function AnnualInterpretationPanel({
                 </span>
               ))}
             </div>
-            <p className="mt-2 text-white/60 text-sm">
-              这些月份需要更多耐心，专注于基础工作和能量储备
-            </p>
+            <p className="mt-2 text-white/60 text-sm">{ui.lowlightsDesc}</p>
           </div>
 
           {/* 年度行动清单 */}
           <div>
             <h3 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined">checklist</span>
-              年度行动清单
+              {ui.actionList}
             </h3>
             <div className="space-y-3">
               {interpretation.actionList.map((action, index) => (

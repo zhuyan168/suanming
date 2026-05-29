@@ -688,13 +688,19 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   return shuffleArray(cardsWithOrientation);
 };
 
-// 获取当前季节名称（中文）
-const getCurrentSeason = (): string => {
-  const month = new Date().getMonth() + 1; // getMonth() 返回 0-11
+// 获取当前季节名称
+const getCurrentSeason = (isEn = false): string => {
+  const month = new Date().getMonth() + 1;
+  if (isEn) {
+    if (month >= 3 && month <= 5) return 'Spring';
+    if (month >= 6 && month <= 8) return 'Summer';
+    if (month >= 9 && month <= 11) return 'Autumn';
+    return 'Winter';
+  }
   if (month >= 3 && month <= 5) return '春季';
   if (month >= 6 && month <= 8) return '夏季';
   if (month >= 9 && month <= 11) return '秋季';
-  return '冬季'; // 12, 1, 2月
+  return '冬季';
 };
 
 // 获取当前季度标识（用于存储和区分）
@@ -747,8 +753,31 @@ const getUserSessionId = (quarter: string): string => {
 };
 
 // 获取当前季度的推荐抽牌节气
-const getSeasonalSolarTerm = (): { term: string; date: string; description: string } => {
+const getSeasonalSolarTerm = (isEn = false): { term: string; date: string; description: string } => {
   const month = new Date().getMonth() + 1;
+
+  if (isEn) {
+    if (month >= 3 && month <= 5) return {
+      term: 'Spring Equinox',
+      date: 'March 20–21',
+      description: 'On the Spring Equinox, yin and yang are in balance and all things awaken — the ideal moment to sense the energy of spring.',
+    };
+    if (month >= 6 && month <= 8) return {
+      term: 'Summer Solstice',
+      date: 'June 21–22',
+      description: 'On the Summer Solstice, yang energy peaks and vitality reaches its height — the best time to explore your summer fortune.',
+    };
+    if (month >= 9 && month <= 11) return {
+      term: 'Autumnal Equinox',
+      date: 'September 22–23',
+      description: 'On the Autumnal Equinox, day and night are equal — a time of harvest and reflection, perfect for reading the autumn ahead.',
+    };
+    return {
+      term: 'Winter Solstice',
+      date: 'December 21–22',
+      description: 'On the Winter Solstice, yin peaks and yang is reborn — a key moment to glimpse the hidden currents of winter.',
+    };
+  }
   
   if (month >= 3 && month <= 5) {
     return {
@@ -778,11 +807,21 @@ const getSeasonalSolarTerm = (): { term: string; date: string; description: stri
 };
 
 // 获取当前季度的日期范围（用于显示）
-const getCurrentQuarterDateRange = (): string => {
+const getCurrentQuarterDateRange = (isEn = false): string => {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
-  
+  const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
+  const febEnd = isLeapYear ? 29 : 28;
+
+  if (isEn) {
+    if (currentMonth >= 3 && currentMonth <= 5) return `March 1 – May 31, ${currentYear}`;
+    if (currentMonth >= 6 && currentMonth <= 8) return `June 1 – August 31, ${currentYear}`;
+    if (currentMonth >= 9 && currentMonth <= 11) return `September 1 – November 30, ${currentYear}`;
+    if (currentMonth === 12) return `December 1, ${currentYear} – February ${febEnd}, ${currentYear + 1}`;
+    return `December 1, ${currentYear - 1} – February ${febEnd}, ${currentYear}`;
+  }
+
   // 春季 (3-5月)
   if (currentMonth >= 3 && currentMonth <= 5) {
     return `${currentYear}年3月1日至5月31日`;
@@ -797,10 +836,6 @@ const getCurrentQuarterDateRange = (): string => {
   }
   // 冬季 (12, 1, 2月)
   else {
-    // 判断当前年份是否为闰年
-    const isLeapYear = (currentYear % 4 === 0 && currentYear % 100 !== 0) || (currentYear % 400 === 0);
-    const febEnd = isLeapYear ? 29 : 28;
-    
     // 如果是12月，显示当年12月到次年2月
     if (currentMonth === 12) {
       return `${currentYear}年12月1日至${currentYear + 1}年2月${febEnd}日`;
@@ -864,6 +899,31 @@ const getNextQuarterDateRange = (): { startMonth: number; startDay: number; endM
       year: targetYear
     };
   }
+};
+
+// 格式化下个季度的日期范围文字
+const MONTH_NAMES_EN = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+const formatNextQuarterRange = (isEn = false): string => {
+  const { startMonth, startDay, endMonth, endDay, year } = getNextQuarterDateRange();
+  const currentYear = new Date().getFullYear();
+  if (isEn) {
+    if (startMonth === 12) {
+      return `${MONTH_NAMES_EN[startMonth]} ${startDay}, ${year} – ${MONTH_NAMES_EN[endMonth]} ${endDay}, ${year + 1}`;
+    }
+    if (year > currentYear) {
+      return `${MONTH_NAMES_EN[startMonth]} ${startDay} – ${MONTH_NAMES_EN[endMonth]} ${endDay}, ${year}`;
+    }
+    return `${MONTH_NAMES_EN[startMonth]} ${startDay} – ${MONTH_NAMES_EN[endMonth]} ${endDay}`;
+  }
+  if (startMonth === 12) {
+    return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
+  }
+  if (year > currentYear) {
+    return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+  }
+  return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
 };
 
 // 四季牌阵单次结果接口
@@ -1062,7 +1122,7 @@ export default function SeasonalFortune() {
     if (currentCardCount === 0 && !hasConfirmedOnce) {
       const confirmed = window.confirm(
         isEn
-          ? `⚠️ Important Reminder ⚠️\n\nYou can draw the Seasonal Spread only once per quarter. Once you begin, this quarter's draw (${getCurrentQuarterDateRange()}) cannot be restarted.\n\nPlease make sure you are ready and in a quiet environment, focused on your question.\n\nAre you sure you want to start drawing?`
+          ? `⚠️ Important Reminder ⚠️\n\nYou can draw the Seasonal Spread only once per quarter. Once you begin, this quarter's draw (${getCurrentQuarterDateRange(true)}) cannot be restarted.\n\nPlease make sure you are ready and in a quiet environment, focused on your question.\n\nAre you sure you want to start drawing?`
           : `⚠️ 重要提醒 ⚠️\n\n每个季度只能抽取一次四季牌阵，一旦开始抽牌，本季度（${getCurrentQuarterDateRange()}）将无法重新抽取。\n\n请确保你已做好准备，在安静的环境中专注于你的问题。\n\n确定要开始抽牌吗？`
       );
       
@@ -1112,7 +1172,7 @@ export default function SeasonalFortune() {
       });
 
       if (!response.ok) {
-        throw new Error('抽牌失败，请重试');
+        throw new Error(isEn ? 'Draw failed. Please try again.' : '抽牌失败，请重试');
       }
 
       const data = await response.json();
@@ -1193,7 +1253,7 @@ export default function SeasonalFortune() {
       }
     } catch (err) {
       console.error('抽牌错误:', err);
-      setError(err instanceof Error ? err.message : '抽牌失败，请稍后重试');
+      setError(err instanceof Error ? err.message : (isEn ? 'Draw failed. Please try again later.' : '抽牌失败，请稍后重试'));
       setIsLoading(false);
     }
   };
@@ -1213,7 +1273,7 @@ export default function SeasonalFortune() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{isEn ? 'Loading...' : '加载中...'}</div>
         </div>
       </div>
     );
@@ -1222,7 +1282,7 @@ export default function SeasonalFortune() {
   return (
     <>
       <Head>
-        <title>{getCurrentSeason()}运势 - Mystic Insights</title>
+        <title>{isEn ? `${getCurrentSeason(true)} Fortune - Mystic Insights` : `${getCurrentSeason()}运势 - Mystic Insights`}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -1308,7 +1368,7 @@ export default function SeasonalFortune() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{isEn ? 'Back' : '返回首页'}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -1329,14 +1389,22 @@ export default function SeasonalFortune() {
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">四季牌阵</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">
+                  {isEn ? 'Seasonal Spread' : '四季牌阵'}
+                </p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? `${getCurrentSeason()}运势已抽取` : '抽取五张塔罗牌'}
+                  {hasDrawn
+                    ? isEn ? `${getCurrentSeason(true)} Fortune Drawn` : `${getCurrentSeason()}运势已抽取`
+                    : isEn ? 'Draw Five Tarot Cards' : '抽取五张塔罗牌'}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto mb-6">
-                  {hasDrawn 
-                    ? `你已抽取${getCurrentSeason()}运势，点击下方按钮查看详细解析。` 
-                    : `探索你在${getCurrentSeason()}这三个月的行动力、情感、思维、事业与整体运势走向。`}
+                  {hasDrawn
+                    ? isEn
+                      ? `You have drawn your ${getCurrentSeason(true)} fortune. Click below to view your reading.`
+                      : `你已抽取${getCurrentSeason()}运势，点击下方按钮查看详细解析。`
+                    : isEn
+                      ? `Explore the energy of action, emotion, mind, career, and overall fortune for ${getCurrentSeason(true)}.`
+                      : `探索你在${getCurrentSeason()}这三个月的行动力、情感、思维、事业与整体运势走向。`}
                 </p>
                 
                 {/* 节气提示和重要提醒 */}
@@ -1349,7 +1417,7 @@ export default function SeasonalFortune() {
                         <div className="flex-1">
                           <p className="text-red-200 font-bold text-base mb-2">
                             {isEn
-                              ? `Important: This quarter (${getCurrentQuarterDateRange()}) you can only draw once`
+                              ? `Important: This quarter (${getCurrentQuarterDateRange(true)}) you can only draw once`
                               : `重要提醒：本季度（${getCurrentQuarterDateRange()}）只能抽一次`}
                           </p>
                           <p className="text-white/70 text-sm leading-relaxed">
@@ -1364,31 +1432,31 @@ export default function SeasonalFortune() {
                     {/* 节气建议 */}
                     <div className="max-w-3xl mx-auto mt-4 p-4 rounded-xl bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20">
                       <p className="text-white/60 text-sm leading-relaxed">
-                        <span className="text-primary font-semibold">✨ 占卜建议：</span>
-                        本季度内任何时间均可抽牌，但我们建议在
-                        <span className="text-white font-semibold mx-1">{getSeasonalSolarTerm().term}</span>
-                        （{getSeasonalSolarTerm().date}）抽取，
-                        {getSeasonalSolarTerm().description}。
+                        {isEn ? (
+                          <>
+                            <span className="text-primary font-semibold">✨ Reading Tip: </span>
+                            You may draw anytime this quarter, but we recommend drawing around the{' '}
+                            <span className="text-white font-semibold mx-1">{getSeasonalSolarTerm(true).term}</span>
+                            ({getSeasonalSolarTerm(true).date}). {getSeasonalSolarTerm(true).description}
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-primary font-semibold">✨ 占卜建议：</span>
+                            本季度内任何时间均可抽牌，但我们建议在
+                            <span className="text-white font-semibold mx-1">{getSeasonalSolarTerm().term}</span>
+                            （{getSeasonalSolarTerm().date}）抽取，
+                            {getSeasonalSolarTerm().description}。
+                          </>
+                        )}
                       </p>
                     </div>
                   </>
                 ) : (
                   <div className="max-w-3xl mx-auto mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
                     <p className="text-white/50 text-sm">
-                      🔒 本季度牌阵已抽取，下个季度 {(() => {
-                        const nextQuarter = getNextQuarterDateRange();
-                        const { startMonth, startDay, endMonth, endDay, year } = nextQuarter;
-                        const currentYear = new Date().getFullYear();
-                        
-                        // 如果跨年，显示年份
-                        if (startMonth === 12) {
-                          return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
-                        } else if (year > currentYear) {
-                          return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
-                        } else {
-                          return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
-                        }
-                      })()} 可抽取新的牌阵
+                      {isEn
+                        ? `🔒 This quarter's spread has been drawn. A new draw opens next quarter (${formatNextQuarterRange(true)}).`
+                        : `🔒 本季度牌阵已抽取，下个季度 ${formatNextQuarterRange()} 可抽取新的牌阵`}
                     </p>
                   </div>
                 )}
@@ -1456,11 +1524,14 @@ export default function SeasonalFortune() {
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
+                      isEn={isEn}
                     />
 
                     {selectedCards.filter(c => c !== null).length < 5 && (
                       <div className="text-center text-white/50 text-sm mt-6">
-                        <p>💫 请依次抽取五张卡牌（{selectedCards.filter(c => c !== null).length}/5）</p>
+                        <p>{isEn
+                        ? `💫 Draw five cards one by one (${selectedCards.filter(c => c !== null).length}/5)`
+                        : `💫 请依次抽取五张卡牌（${selectedCards.filter(c => c !== null).length}/5）`}</p>
                       </div>
                     )}
                   </motion.div>
@@ -1480,6 +1551,7 @@ export default function SeasonalFortune() {
                     isAnimating={[false, false, false, false, false]}
                     showLoadingText={false}
                     forceFlipped={true}
+                    isEn={isEn}
                   />
 
                   <div className="text-center mt-8">
@@ -1489,12 +1561,12 @@ export default function SeasonalFortune() {
                       onClick={handleViewResult}
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     >
-                      查看{getCurrentSeason()}解析
+                      {isEn ? `View ${getCurrentSeason(true)} Reading` : `查看${getCurrentSeason()}解析`}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已保存你的{getCurrentSeason()}牌阵</p>
+                    <p>{isEn ? `✨ Your ${getCurrentSeason(true)} spread has been saved` : `✨ 已保存你的${getCurrentSeason()}牌阵`}</p>
                   </div>
                 </motion.div>
               )}
@@ -1513,7 +1585,7 @@ export default function SeasonalFortune() {
                     onClick={handleViewResult}
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                   >
-                    开始测算
+                    {isEn ? 'Start Reading' : '开始测算'}
                   </motion.button>
                 </motion.div>
               )}

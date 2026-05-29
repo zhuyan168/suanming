@@ -17,6 +17,22 @@ export default function HorseshoeQuestionPage() {
       : '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
     hintWithQ: isEn ? 'Question entered' : '已输入问题',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Horseshoe Spread — Enter Your Question | Mystic Insights' : '马蹄铁牌阵 - 问题输入 | Mystic Insights',
+    metaDesc: isEn ? 'Enter your question for a focused Horseshoe Spread reading.' : '输入你的问题，获得更精准的塔罗占卜解读',
+    back: isEn ? 'Back' : '返回',
+    spreadName: isEn ? 'Horseshoe Spread' : '马蹄铁牌阵',
+    subtitle: isEn ? 'Trace the journey of an unfolding situation and find the key turning point.' : '梳理事件的来龙去脉与发展轨迹，找到关键转折点',
+    questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
+    placeholder: isEn ? 'e.g. If nothing changes, how might this situation unfold?' : '例如：如果我什么都不改变，事情接下来可能会怎么发展？',
+    aboutTitle: isEn ? 'About the Horseshoe Spread' : '关于马蹄铁牌阵',
+    aboutPara1: isEn
+      ? 'The Horseshoe Spread is ideal for tracing an evolving situation.\nIt doesn\'t just give you a conclusion — it helps you see how things got here, what\'s truly driving the situation now, and where things may head if nothing changes.'
+      : '马蹄铁牌阵适合用来梳理一件正在发展的事情。\n它不会只给你一个结论，而是帮助你看清事情是如何一步步走到现在的、当前真正起作用的因素是什么，以及在不做改变的情况下，事情可能会朝哪个方向继续发展。',
+    aboutPara2: isEn
+      ? 'If the situation feels complicated or tangled and you can\'t quite pinpoint the issue,\nthe Horseshoe Spread can break it down and help you see where you truly stand.'
+      : '如果你感到局势复杂、线索交织，却又说不清问题出在哪里，\n马蹄铁牌阵可以帮你把过程拆解开来，让你更清楚自己正站在什么位置。',
+    disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -75,7 +91,7 @@ export default function HorseshoeQuestionPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -83,11 +99,8 @@ export default function HorseshoeQuestionPage() {
   return (
     <>
       <Head>
-        <title>马蹄铁牌阵 - 问题输入 | Mystic Insights</title>
-        <meta
-          name="description"
-          content="输入你的问题，获得更精准的塔罗占卜解读"
-        />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -104,7 +117,7 @@ export default function HorseshoeQuestionPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -130,10 +143,10 @@ export default function HorseshoeQuestionPage() {
                 HORSESHOE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                马蹄铁牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-base max-w-xl mx-auto">
-                梳理事件的来龙去脉与发展轨迹，找到关键转折点
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -147,12 +160,12 @@ export default function HorseshoeQuestionPage() {
               {/* 输入框 */}
               <div className="mb-4">
                 <label className="block text-white/90 font-semibold mb-3">
-                  你的问题（可选）
+                  {texts.questionLabel}
                 </label>
                 <textarea
                   value={question}
                   onChange={handleQuestionChange}
-                  placeholder="例如：如果我什么都不改变，事情接下来可能会怎么发展？"
+                  placeholder={texts.placeholder}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
@@ -191,20 +204,14 @@ export default function HorseshoeQuestionPage() {
                     info
                   </span>
                   <h3 className="text-white font-semibold text-lg">
-                    关于马蹄铁牌阵
+                    {texts.aboutTitle}
                   </h3>
                 </div>
                 
                 {/* 内容 */}
                 <div className="text-white/70 text-sm leading-relaxed space-y-3">
-                  <p>
-                    马蹄铁牌阵适合用来梳理一件正在发展的事情。<br />
-                    它不会只给你一个结论，而是帮助你看清事情是如何一步步走到现在的、当前真正起作用的因素是什么，以及在不做改变的情况下，事情可能会朝哪个方向继续发展。
-                  </p>
-                  <p>
-                    如果你感到局势复杂、线索交织，却又说不清问题出在哪里，<br />
-                    马蹄铁牌阵可以帮你把过程拆解开来，让你更清楚自己正站在什么位置。
-                  </p>
+                  <p style={{ whiteSpace: 'pre-line' }}>{texts.aboutPara1}</p>
+                  <p style={{ whiteSpace: 'pre-line' }}>{texts.aboutPara2}</p>
                 </div>
               </div>
             </motion.div>
@@ -222,7 +229,7 @@ export default function HorseshoeQuestionPage() {
                   auto_awesome
                 </span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                  {texts.disclaimer}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                   auto_awesome

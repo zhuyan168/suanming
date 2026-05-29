@@ -315,16 +315,27 @@ const GUEST_TRIAL_DENY_REASON_MAP: Record<string, ApiAccessReason> = {
   feature_limit_exceeded: 'feature_trial_limit_exceeded',
 };
 
-const ACCESS_DENIED_MESSAGES: Record<ApiAccessReason | 'unknown', { status: number; message: string }> = {
-  not_logged_in: { status: 401, message: '请先登录以继续占卜' },
-  daily_limit: { status: 403, message: '今日免费次数已用完，请明天或开通会员' },
-  member_only: { status: 403, message: '该牌阵为会员专属，请开通会员后使用' },
-  allowed_by_guest_trial: { status: 200, message: '' },
-  guest_trial_invalid: { status: 401, message: '游客试用会话无效，请重新开始试用' },
-  guest_trial_expired: { status: 403, message: '游客试用已过期，注册账号后可继续使用' },
-  guest_trial_limit_exceeded: { status: 403, message: '72 小时免费试用次数已用完，注册账号后可继续使用' },
-  feature_trial_limit_exceeded: { status: 403, message: '该功能的试用次数已用完，注册账号后可继续使用' },
-  unknown: { status: 403, message: '权限校验未通过' },
+/** Returns true when the request's Accept-Language header prefers English. */
+function isEnglishRequest(req: NextApiRequest): boolean {
+  const al = req.headers['accept-language'];
+  if (!al || typeof al !== 'string') return false;
+  // Accept-Language examples: "en-US,en;q=0.9,zh;q=0.8" / "zh-CN,zh;q=0.9"
+  const first = al.split(',')[0].trim().toLowerCase();
+  return first.startsWith('en');
+}
+
+type DenialMessages = Record<ApiAccessReason | 'unknown', { status: number; zh: string; en: string }>;
+
+const ACCESS_DENIED_MESSAGES: DenialMessages = {
+  not_logged_in:              { status: 401, zh: '请先登录以继续占卜',                            en: 'Please log in first.' },
+  daily_limit:                { status: 403, zh: '今日免费次数已用完，请明天或开通会员',              en: "You've used all free readings for today. Please come back tomorrow or upgrade to continue." },
+  member_only:                { status: 403, zh: '该牌阵为会员专属，请开通会员后使用',               en: 'This reading is available to members only.' },
+  allowed_by_guest_trial:     { status: 200, zh: '',                                              en: '' },
+  guest_trial_invalid:        { status: 401, zh: '游客试用会话无效，请重新开始试用',                 en: 'Guest trial session is invalid. Please start a new trial.' },
+  guest_trial_expired:        { status: 403, zh: '游客试用已过期，注册账号后可继续使用',              en: 'Your free trial has ended. Sign up to continue.' },
+  guest_trial_limit_exceeded: { status: 403, zh: '72 小时免费试用次数已用完，注册账号后可继续使用',   en: "You've used all free trial readings. Sign up to continue." },
+  feature_trial_limit_exceeded: { status: 403, zh: '该功能的试用次数已用完，注册账号后可继续使用',   en: "You've used your free trial for this spread. Sign up or upgrade to continue." },
+  unknown:                    { status: 403, zh: '权限校验未通过',                                 en: 'Unable to verify access. Please try again later.' },
 };
 
 export async function requireAccessOrRespond(params: {
@@ -349,9 +360,11 @@ export async function requireAccessOrRespond(params: {
 
   const reason = status.reason ?? 'unknown';
   const meta = ACCESS_DENIED_MESSAGES[reason] || ACCESS_DENIED_MESSAGES.unknown;
+  const isEn = isEnglishRequest(req);
+  const message = isEn ? meta.en : meta.zh;
   // Include machine-readable `code` alongside human `error` so the frontend
   // can distinguish guest trial denial reasons from generic auth failures.
-  res.status(meta.status).json({ error: meta.message, code: reason });
+  res.status(meta.status).json({ error: message, code: reason });
   return null;
 }
 

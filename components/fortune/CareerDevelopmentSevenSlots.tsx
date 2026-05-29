@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -27,6 +28,9 @@ export default function CareerDevelopmentSevenSlots({
   forceFlipped = false,
   slotConfig
 }: CareerDevelopmentSevenSlotsProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   // 7张牌布局（参考图示）：
   // 上排3张: 2-1-3 (左中右)
   // 中间1张: 6 (正中)
@@ -124,7 +128,7 @@ export default function CareerDevelopmentSevenSlots({
 
       {showLoadingText && cards.filter(c => c !== null).length < 7 && (
         <div className="text-center text-white/50 text-sm mt-8">
-          <p>请继续抽取卡牌...</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/7)` : '请继续抽取卡牌...'}</p>
         </div>
       )}
 

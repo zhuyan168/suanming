@@ -3,7 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
-import { getSpreadName, getSpreadByKey, resolveSpreadKey } from '../lib/spreads'
+import { getSpreadDisplayName, getSpreadByKey, resolveSpreadKey } from '../lib/spreads'
 
 // Extra aliases not covered by spreads.ts legacyId
 const EXTRA_ALIASES: Record<string, string> = {
@@ -38,6 +38,7 @@ function formatTime(iso: string): string {
 
 export default function HistoryPage() {
   const router = useRouter()
+  const isEn = router.locale === 'en'
   const [records, setRecords] = useState<ReadingRecord[]>([])
   const [state, setState] = useState<PageState>('loading')
   const [errorMsg, setErrorMsg] = useState('')
@@ -81,8 +82,8 @@ export default function HistoryPage() {
   return (
     <>
       <Head>
-        <title>我的占卜记录 - FateAura</title>
-        <meta name="description" content="查看你的历史占卜记录" />
+        <title>{isEn ? 'My Readings - FateAura' : '我的占卜记录 - FateAura'}</title>
+        <meta name="description" content={isEn ? 'View your saved tarot readings and revisit past guidance.' : '查看你的历史占卜记录'} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23]">
@@ -102,15 +103,15 @@ export default function HistoryPage() {
                 <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">
                   arrow_back
                 </span>
-                <span className="text-xs font-medium">返回</span>
+                <span className="text-xs font-medium">{isEn ? 'Back' : '返回'}</span>
               </button>
 
               <div className="flex flex-col gap-1">
                 <h1 className="text-white text-2xl md:text-3xl font-bold leading-tight tracking-[-0.02em]">
-                  我的占卜记录
+                  {isEn ? 'My Readings' : '我的占卜记录'}
                 </h1>
                 <p className="text-white/60 text-sm font-normal leading-snug">
-                  回顾你过去的每一次问卜与指引
+                  {isEn ? 'View your saved tarot readings and revisit past guidance.' : '回顾你过去的每一次问卜与指引'}
                 </p>
               </div>
               <div className="mt-2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -147,7 +148,7 @@ function RecordCard({
   const { locale } = useRouter()
   const isEn = locale === 'en'
   const canonicalKey = resolveDisplayKey(record.spread_type)
-  const spreadName = getSpreadName(canonicalKey)
+  const spreadName = getSpreadDisplayName(canonicalKey, isEn)
   const meta = getSpreadByKey(canonicalKey)
   const icon = meta?.icon ?? '🔮'
 
@@ -162,7 +163,7 @@ function RecordCard({
           <span className="text-white text-sm font-medium">{spreadName}</span>
           {meta?.category && (
             <span className="text-[10px] text-white/40 border border-white/10 rounded px-1.5 py-0.5 leading-none">
-              {categoryLabel(meta.category)}
+              {categoryLabel(meta.category, isEn)}
             </span>
           )}
         </div>
@@ -184,7 +185,18 @@ function RecordCard({
   )
 }
 
-function categoryLabel(cat: string): string {
+function categoryLabel(cat: string, isEn?: boolean): string {
+  if (isEn) {
+    const enMap: Record<string, string> = {
+      general: 'General',
+      love: 'Love',
+      career: 'Career',
+      wealth: 'Wealth',
+      fortune: 'Fortune',
+      divination: 'Divination',
+    }
+    return enMap[cat] ?? cat
+  }
   const map: Record<string, string> = {
     general: '通用',
     love: '爱情',
@@ -197,12 +209,14 @@ function categoryLabel(cat: string): string {
 }
 
 function LoadingState() {
+  const { locale } = useRouter()
+  const isEn = locale === 'en'
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3">
       <span className="material-symbols-outlined text-primary/60 text-3xl animate-spin">
         progress_activity
       </span>
-      <p className="text-white/40 text-sm">加载中…</p>
+      <p className="text-white/40 text-sm">{isEn ? 'Loading your readings...' : '加载中…'}</p>
     </div>
   )
 }
@@ -246,10 +260,12 @@ function EmptyState() {
 }
 
 function ErrorState({ message }: { message: string }) {
+  const { locale } = useRouter()
+  const isEn = locale === 'en'
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-3">
       <span className="material-symbols-outlined text-red-400/60 text-4xl">error</span>
-      <p className="text-white/50 text-sm">加载失败，请稍后重试</p>
+      <p className="text-white/50 text-sm">{isEn ? 'Failed to load reading history. Please try again.' : '加载失败，请稍后重试'}</p>
       {message && <p className="text-white/30 text-xs">{message}</p>}
     </div>
   )

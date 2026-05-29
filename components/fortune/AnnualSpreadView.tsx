@@ -11,20 +11,21 @@ import CardDetailModal from './CardDetailModal';
 interface AnnualSpreadViewProps {
   themeCard: TarotCard;
   monthCards: Record<number, TarotCard>;
-  showLabels?: boolean;  // 是否显示月份标签
+  showLabels?: boolean;
+  isEn?: boolean;
 }
 
-const MONTH_LABELS = [
-  '一月', '二月', '三月', '四月', '五月', '六月',
-  '七月', '八月', '九月', '十月', '十一月', '十二月'
-];
+const MONTH_LABELS_ZH = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+const MONTH_LABELS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 export default function AnnualSpreadView({ 
   themeCard, 
   monthCards, 
-  showLabels = true 
+  showLabels = true,
+  isEn = false,
 }: AnnualSpreadViewProps) {
   const [selectedCard, setSelectedCard] = useState<{ card: TarotCard; label: string } | null>(null);
+  const MONTH_LABELS = isEn ? MONTH_LABELS_EN : MONTH_LABELS_ZH;
 
   // 计算月份牌的环形位置（12个点围绕中心）
   const getMonthCardPosition = (month: number) => {
@@ -57,7 +58,7 @@ export default function AnnualSpreadView({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-            onClick={() => handleCardClick(themeCard, '年度主题')}
+            onClick={() => handleCardClick(themeCard, isEn ? 'Yearly Theme' : '年度主题')}
           >
             <div className="relative">
               {/* 发光圆环背景 */}
@@ -94,7 +95,7 @@ export default function AnnualSpreadView({
               {showLabels && (
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
                   <span className="inline-block px-3 py-1 rounded-full bg-primary text-white text-xs sm:text-sm font-bold shadow-lg">
-                    年度主题
+                    {isEn ? 'Yearly Theme' : '年度主题'}
                   </span>
                 </div>
               )}

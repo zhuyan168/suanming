@@ -6,6 +6,12 @@ import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { tarotImagesFlat } from '../../utils/tarotimages'
 import { getAnswerText, YesNoAnswer } from '../../utils/yesno-tarot-logic'
+import { getSpreadByKey as getSpreadMetaByKey } from '../../lib/spreads'
+
+function useIsEn(): boolean {
+  const { locale } = useRouter()
+  return locale === 'en'
+}
 
 // ---- DB record ----
 interface HistoryRecord {
@@ -79,9 +85,12 @@ const SPREAD_NAME: Record<string, string> = {
   'wealth-obstacles': '财富阻碍',
 }
 
-function getSpreadDisplayName(raw: string): string {
+function getSpreadDisplayName(raw: string, isEn?: boolean): string {
   const canonical = normalizeKey(raw)
-  return SPREAD_NAME[canonical] ?? SPREAD_NAME[raw] ?? raw
+  const meta = getSpreadMetaByKey(canonical) ?? getSpreadMetaByKey(raw)
+  if (meta) return isEn ? (meta.nameEn ?? meta.name) : meta.name
+  const zh = SPREAD_NAME[canonical] ?? SPREAD_NAME[raw] ?? raw
+  return zh
 }
 
 // ---- Tarot image lookup ----
@@ -153,30 +162,35 @@ function formatTime(iso: string): string {
 // ============================================================
 
 function QuestionBlock({ question }: { question: string | null }) {
+  const isEn = useIsEn()
   if (!question) return null
   return (
     <div className="mb-6 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5">
-      <p className="text-[11px] font-semibold text-primary/70 uppercase tracking-wider mb-1.5">你的问题</p>
+      <p className="text-[11px] font-semibold text-primary/70 uppercase tracking-wider mb-1.5">{isEn ? 'Your Question' : '你的问题'}</p>
       <p className="text-white/90 text-sm leading-relaxed">{question}</p>
     </div>
   )
 }
 
-function OverallBlock({ text, label = '整体解读' }: { text: string; label?: string }) {
+function OverallBlock({ text, label }: { text: string; label?: string }) {
+  const isEn = useIsEn()
+  const displayLabel = label !== undefined ? label : (isEn ? 'Overall Guidance' : '整体解读')
   if (!text) return null
   return (
     <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5 mb-4">
-      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{label}</p>
+      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{displayLabel}</p>
       <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{text}</p>
     </div>
   )
 }
 
-function ClosingBlock({ text, label = '提醒' }: { text: string; label?: string }) {
+function ClosingBlock({ text, label }: { text: string; label?: string }) {
+  const isEn = useIsEn()
+  const displayLabel = label !== undefined ? label : (isEn ? 'Reminder' : '提醒')
   if (!text) return null
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-4 mt-2">
-      <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-1.5">{label}</p>
+      <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-1.5">{displayLabel}</p>
       <p className="text-white/75 text-sm leading-relaxed whitespace-pre-line">{text}</p>
     </div>
   )
@@ -187,6 +201,7 @@ function CardRow({
 }: {
   card: any; positionLabel: string; interpretation: string; index: number
 }) {
+  const isEn = useIsEn()
   const imageUrl = getCardImage(card)
   const orientation = getCardOrientation(card)
   const cardName = getCardDisplayName(card)
@@ -226,7 +241,7 @@ function CardRow({
               ? 'border-amber-500/40 text-amber-400/80'
               : 'border-emerald-500/40 text-emerald-400/80'
           }`}>
-            {orientation === 'upright' ? '正位' : '逆位'}
+            {orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}
           </span>
         </div>
         {interpretation && (
@@ -275,6 +290,7 @@ function FortuneCard({ icon, title, content, compact = false }: {
 // View: Daily Fortune
 // ============================================================
 function DailyFortuneView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const cardRef = Array.isArray(record.cards) ? record.cards[0] : null
   const r = record.reading_result ?? {}
   const imageUrl = cardRef ? getCardImage(cardRef) : null
@@ -292,13 +308,13 @@ function DailyFortuneView({ record }: { record: HistoryRecord }) {
             </div>
           ) : (
             <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-              <span className="text-white/20 text-sm">无图片</span>
+              <span className="text-white/20 text-sm">{isEn ? 'No image' : '无图片'}</span>
             </div>
           )}
           {cardRef?.name && (
             <div className="text-center">
               <p className="text-white font-bold text-lg">{cardRef.name}</p>
-              <p className="text-white/50 text-sm mt-0.5">{orientation === 'upright' ? '正位' : '逆位'}</p>
+              <p className="text-white/50 text-sm mt-0.5">{orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}</p>
             </div>
           )}
         </div>
@@ -312,17 +328,17 @@ function DailyFortuneView({ record }: { record: HistoryRecord }) {
           )}
           {/* Fortune grid */}
           <div className="grid sm:grid-cols-2 gap-3">
-            <FortuneCard icon="wb_sunny" title="综合运势" content={r.overall} />
-            <FortuneCard icon="favorite" title="爱情运势" content={r.love} />
-            <FortuneCard icon="school" title="事业 & 学业" content={r.career} />
-            <FortuneCard icon="paid" title="财运" content={r.wealth} />
-            <FortuneCard icon="healing" title="健康" content={r.health} />
+            <FortuneCard icon="wb_sunny" title={isEn ? 'Overall Fortune' : '综合运势'} content={r.overall} />
+            <FortuneCard icon="favorite" title={isEn ? 'Love & Relationships' : '爱情运势'} content={r.love} />
+            <FortuneCard icon="school" title={isEn ? 'Career & Study' : '事业 & 学业'} content={r.career} />
+            <FortuneCard icon="paid" title={isEn ? 'Wealth' : '财运'} content={r.wealth} />
+            <FortuneCard icon="healing" title={isEn ? 'Health' : '健康'} content={r.health} />
           </div>
           {(r.luckyColor || r.luckyNumber !== undefined) && (
             <div className="grid grid-cols-2 gap-3">
-              <FortuneCard icon="palette" title="幸运色" content={r.luckyColor} compact />
+              <FortuneCard icon="palette" title={isEn ? 'Lucky Color' : '幸运色'} content={r.luckyColor} compact />
               {r.luckyNumber !== undefined && (
-                <FortuneCard icon="casino" title="幸运数字" content={String(r.luckyNumber)} compact />
+                <FortuneCard icon="casino" title={isEn ? 'Lucky Number' : '幸运数字'} content={String(r.luckyNumber)} compact />
               )}
             </div>
           )}
@@ -336,10 +352,11 @@ function DailyFortuneView({ record }: { record: HistoryRecord }) {
 // View: Monthly Basic Fortune (3 cards, fortune grid + card meanings)
 // ============================================================
 function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const cards: any[] = Array.isArray(record.cards) ? record.cards : []
   const cardMeanings = [r.card1Meaning, r.card2Meaning, r.card3Meaning]
-  const cardLabels = ['第 1 张牌', '第 2 张牌', '第 3 张牌']
+  const cardLabels = isEn ? ['Card 1', 'Card 2', 'Card 3'] : ['第 1 张牌', '第 2 张牌', '第 3 张牌']
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
@@ -369,7 +386,7 @@ function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
                 )}
                 <p className="text-white/80 text-xs text-center leading-tight font-medium">{card.name ?? ''}</p>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${card.orientation === 'reversed' ? 'border-amber-500/40 text-amber-400/80' : 'border-emerald-500/40 text-emerald-400/80'}`}>
-                  {card.orientation === 'upright' ? '正位' : '逆位'}
+                  {card.orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}
                 </span>
                 {cardMeanings[i] && (
                   <p className="text-white/60 text-xs leading-relaxed text-center">{cardMeanings[i]}</p>
@@ -383,12 +400,12 @@ function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
       {/* Fortune grid */}
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="sm:col-span-2">
-          <FortuneCard icon="wb_sunny" title="综合运势" content={r.overall} />
+          <FortuneCard icon="wb_sunny" title={isEn ? 'Overall Fortune' : '综合运势'} content={r.overall} />
         </div>
-        <FortuneCard icon="favorite" title="爱情运势" content={r.love} />
-        <FortuneCard icon="school" title="事业 & 学业" content={r.career} />
-        <FortuneCard icon="paid" title="财运" content={r.wealth} />
-        <FortuneCard icon="healing" title="健康" content={r.health} />
+        <FortuneCard icon="favorite" title={isEn ? 'Love & Relationships' : '爱情运势'} content={r.love} />
+        <FortuneCard icon="school" title={isEn ? 'Career & Study' : '事业 & 学业'} content={r.career} />
+        <FortuneCard icon="paid" title={isEn ? 'Wealth' : '财运'} content={r.wealth} />
+        <FortuneCard icon="healing" title={isEn ? 'Health' : '健康'} content={r.health} />
       </div>
     </div>
   )
@@ -398,6 +415,7 @@ function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
 // View: Monthly Member Fortune (7 cards + position readings)
 // ============================================================
 function FortuneMonthlyMemberView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const resultCards: any[] = Array.isArray(r.cards) ? r.cards : []
@@ -409,7 +427,7 @@ function FortuneMonthlyMemberView({ record }: { record: HistoryRecord }) {
       )}
       {r.summary && (
         <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">本月总览</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{isEn ? 'Monthly Overview' : '本月总览'}</p>
           <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{r.summary}</p>
         </div>
       )}
@@ -424,7 +442,7 @@ function FortuneMonthlyMemberView({ record }: { record: HistoryRecord }) {
           />
         ))}
         {resultCards.length === 0 && rawCards.length > 0 && rawCards.map((card: any, i: number) => (
-          <CardRow key={i} card={card} positionLabel={`位置 ${i + 1}`} interpretation="" index={i} />
+          <CardRow key={i} card={card} positionLabel={isEn ? `Position ${i + 1}` : `位置 ${i + 1}`} interpretation="" index={i} />
         ))}
       </div>
     </div>
@@ -434,9 +452,12 @@ function FortuneMonthlyMemberView({ record }: { record: HistoryRecord }) {
 // ============================================================
 // View: Seasonal Fortune (5 cards, 6 dimensions)
 // ============================================================
-const SEASONAL_SLOT_LABELS = ['行动力', '情感与人际', '思维与计划', '事业与财运', '整体运势']
+const SEASONAL_SLOT_LABELS_ZH = ['行动力', '情感与人际', '思维与计划', '事业与财运', '整体运势']
+const SEASONAL_SLOT_LABELS_EN = ['Action', 'Emotion & Relationships', 'Mind & Planning', 'Career & Wealth', 'Overall Fortune']
 
 function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
+  const SEASONAL_SLOT_LABELS = isEn ? SEASONAL_SLOT_LABELS_EN : SEASONAL_SLOT_LABELS_ZH
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const hasReading = !!(r.coreEnergy || r.action || r.emotion || r.mind || r.material)
@@ -469,22 +490,21 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
       {!hasReading && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center">
           <span className="material-symbols-outlined text-white/20 text-4xl mb-3 block">auto_stories</span>
-          <p className="text-white/40 text-sm">该记录暂无 AI 解读数据</p>
+          <p className="text-white/40 text-sm">{isEn ? 'No AI interpretation available for this record.' : '该记录暂无 AI 解读数据'}</p>
         </div>
       )}
 
       {hasReading && (
         <div className="flex flex-col gap-5">
-          {/* 整体运势（Overall）*/}
           {r.coreEnergy && (
             <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-primary text-2xl mt-0.5">auto_awesome</span>
                 <div>
-                  <h3 className="text-lg font-bold text-white">✧ 整体运势（Overall）</h3>
+                  <h3 className="text-lg font-bold text-white">{isEn ? '✧ Overall Fortune' : '✧ 整体运势（Overall）'}</h3>
                   {rawCards[4]?.name && (
                     <p className="text-xs text-primary/70 mt-0.5">
-                      {rawCards[4].name}（{rawCards[4].orientation === 'upright' ? '正位' : '逆位'}）
+                      {rawCards[4].name}（{rawCards[4].orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}）
                     </p>
                   )}
                 </div>
@@ -492,16 +512,15 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.coreEnergy}</p>
             </div>
           )}
-          {/* 行动力（Action）*/}
           {r.action && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-yellow-400 text-2xl mt-0.5">bolt</span>
                 <div>
-                  <h3 className="text-lg font-bold text-white">⚡ 行动力（Action）</h3>
+                  <h3 className="text-lg font-bold text-white">{isEn ? '⚡ Action' : '⚡ 行动力（Action）'}</h3>
                   {rawCards[0]?.name && (
                     <p className="text-xs text-white/50 mt-0.5">
-                      {rawCards[0].name}（{rawCards[0].orientation === 'upright' ? '正位' : '逆位'}）
+                      {rawCards[0].name}（{rawCards[0].orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}）
                     </p>
                   )}
                 </div>
@@ -509,16 +528,15 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.action}</p>
             </div>
           )}
-          {/* 情感与人际关系（Emotion）*/}
           {r.emotion && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-pink-400 text-2xl mt-0.5">favorite</span>
                 <div>
-                  <h3 className="text-lg font-bold text-white">♡ 情感与人际关系（Emotion）</h3>
+                  <h3 className="text-lg font-bold text-white">{isEn ? '♡ Emotion & Relationships' : '♡ 情感与人际关系（Emotion）'}</h3>
                   {rawCards[1]?.name && (
                     <p className="text-xs text-white/50 mt-0.5">
-                      {rawCards[1].name}（{rawCards[1].orientation === 'upright' ? '正位' : '逆位'}）
+                      {rawCards[1].name}（{rawCards[1].orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}）
                     </p>
                   )}
                 </div>
@@ -526,16 +544,15 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.emotion}</p>
             </div>
           )}
-          {/* 思维与计划（Thinking）*/}
           {r.mind && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-blue-400 text-2xl mt-0.5">psychology</span>
                 <div>
-                  <h3 className="text-lg font-bold text-white">THINKING 思维与计划</h3>
+                  <h3 className="text-lg font-bold text-white">{isEn ? 'Mind & Planning' : 'THINKING 思维与计划'}</h3>
                   {rawCards[2]?.name && (
                     <p className="text-xs text-white/50 mt-0.5">
-                      {rawCards[2].name}（{rawCards[2].orientation === 'upright' ? '正位' : '逆位'}）
+                      {rawCards[2].name}（{rawCards[2].orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}）
                     </p>
                   )}
                 </div>
@@ -543,16 +560,15 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.mind}</p>
             </div>
           )}
-          {/* 事业与财运（Wealth）*/}
           {r.material && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-green-400 text-2xl mt-0.5">account_balance_wallet</span>
                 <div>
-                  <h3 className="text-lg font-bold text-white">$ 事业与财运（Wealth）</h3>
+                  <h3 className="text-lg font-bold text-white">{isEn ? '$ Career & Wealth' : '$ 事业与财运（Wealth）'}</h3>
                   {rawCards[3]?.name && (
                     <p className="text-xs text-white/50 mt-0.5">
-                      {rawCards[3].name}（{rawCards[3].orientation === 'upright' ? '正位' : '逆位'}）
+                      {rawCards[3].name}（{rawCards[3].orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}）
                     </p>
                   )}
                 </div>
@@ -560,12 +576,11 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.material}</p>
             </div>
           )}
-          {/* 综合建议 */}
           {r.synthesis && (
             <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 sm:p-6">
               <div className="flex items-start gap-3 mb-3">
                 <span className="material-symbols-outlined text-primary text-2xl mt-0.5">explore</span>
-                <h3 className="text-lg font-bold text-white">综合建议</h3>
+                <h3 className="text-lg font-bold text-white">{isEn ? 'Overall Advice' : '综合建议'}</h3>
               </div>
               <p className="text-white/85 text-sm leading-relaxed whitespace-pre-line">{r.synthesis}</p>
             </div>
@@ -579,9 +594,12 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
 // ============================================================
 // View: Yearly Fortune (13 cards, monthly readings)
 // ============================================================
-const MONTH_LABELS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月', '年度主题牌']
+const MONTH_LABELS_ZH = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月', '年度主题牌']
+const MONTH_LABELS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'Annual Theme Card']
 
 function FortuneYearlyView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
+  const MONTH_LABELS = isEn ? MONTH_LABELS_EN : MONTH_LABELS_ZH
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const resultCards: any[] = Array.isArray(r.cards) ? r.cards : []
@@ -592,23 +610,23 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
   return (
     <div className="flex flex-col gap-6 max-w-3xl mx-auto">
       {year && (
-        <p className="text-center text-primary font-semibold text-base uppercase tracking-wider">{year} 年度指引</p>
+        <p className="text-center text-primary font-semibold text-base uppercase tracking-wider">{isEn ? `${year} Annual Guidance` : `${year} 年度指引`}</p>
       )}
       {summary && (
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">年度能量概览</p>
+          <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">{isEn ? 'Annual Energy Overview' : '年度能量概览'}</p>
           <p className="text-white/90 text-base leading-relaxed whitespace-pre-line">{summary}</p>
         </div>
       )}
 
       {resultCards.length > 0 && (
-        <p className="text-lg font-bold text-white text-center">月度详细指引</p>
+        <p className="text-lg font-bold text-white text-center">{isEn ? 'Monthly Guidance' : '月度详细指引'}</p>
       )}
 
       <div className="flex flex-col gap-4">
         {resultCards.map((rc: any, i: number) => {
           const card = rawCards[i]
-          const posLabel = rc.position ?? rc.month ?? MONTH_LABELS[i] ?? `第${i + 1}张`
+          const posLabel = rc.position ?? rc.month ?? MONTH_LABELS[i] ?? (isEn ? `Card ${i + 1}` : `第${i + 1}张`)
           const interpretation = rc.meaning ?? rc.reading ?? rc.interpretation ?? ''
           const isTheme = i === 12
           const cardKeywords: string[] = Array.isArray(card?.keywords) ? card.keywords : []
@@ -631,7 +649,7 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
                   <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${isTheme ? 'bg-primary text-white' : 'bg-white/10 text-white/60'}`}>{posLabel}</span>
                   {card?.orientation && (
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full border ${card.orientation === 'reversed' ? 'border-amber-500/40 text-amber-400/80' : 'border-emerald-500/40 text-emerald-400/80'}`}>
-                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                      {card.orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}
                     </span>
                   )}
                 </div>
@@ -653,7 +671,7 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
         {resultCards.length === 0 && rawCards.length > 0 && (
           <div className="flex flex-col gap-3">
             {rawCards.map((card: any, i: number) => (
-              <CardRow key={i} card={card} positionLabel={MONTH_LABELS[i] ?? `第${i + 1}张`} interpretation="" index={i} />
+              <CardRow key={i} card={card} positionLabel={MONTH_LABELS[i] ?? (isEn ? `Card ${i + 1}` : `第${i + 1}张`)} interpretation="" index={i} />
             ))}
           </div>
         )}
@@ -677,7 +695,7 @@ interface NormalizedCardReading {
   interpretation: string
 }
 
-function normalizePatternA(record: HistoryRecord): {
+function normalizePatternA(record: HistoryRecord, isEn?: boolean): {
   overall: string; perCards: NormalizedCardReading[]; closing: string; extras: {label: string; content: string}[]
 } {
   const r = record.reading_result ?? {}
@@ -694,14 +712,14 @@ function normalizePatternA(record: HistoryRecord): {
   } else if (spreadType === 'horseshoe') {
     perCards = rcards.map((c: any) => ({ positionLabel: c.position_name ?? c.position ?? '', interpretation: c.interpretation ?? '' }))
     if (Array.isArray(r.tips) && r.tips.length > 0) {
-      extras.push({ label: '重点提示', content: r.tips.join('\n') })
+      extras.push({ label: isEn ? 'Key Reminders' : '重点提示', content: r.tips.join('\n') })
     }
   } else if (spreadType === 'celtic-cross') {
     perCards = rcards.map((c: any) => ({ positionLabel: c.positionTitle ?? c.position ?? '', interpretation: c.interpretation ?? '' }))
-    if (r.actionAdvice) extras.push({ label: '行动建议', content: r.actionAdvice })
+    if (r.actionAdvice) extras.push({ label: isEn ? 'Action Advice' : '行动建议', content: r.actionAdvice })
   } else if (spreadType === 'sacred-triangle') {
     perCards = rcards.map((c: any) => ({ positionLabel: c.positionMeaning ?? c.role ?? '', interpretation: c.interpretation ?? '' }))
-    if (r.overall?.priority) extras.push({ label: '核心优先事项', content: r.overall.priority })
+    if (r.overall?.priority) extras.push({ label: isEn ? 'Core Priority' : '核心优先事项', content: r.overall.priority })
   } else {
     // Generic fallback - try multiple field patterns
     perCards = rcards.map((c: any) => ({
@@ -717,8 +735,9 @@ function normalizePatternA(record: HistoryRecord): {
 }
 
 function MultiCardReadingView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
-  const { overall, perCards, closing, extras } = normalizePatternA(record)
+  const { overall, perCards, closing, extras } = normalizePatternA(record, isEn)
 
   return (
     <div className="flex flex-col gap-4 max-w-3xl mx-auto">
@@ -739,6 +758,7 @@ function MultiCardReadingView({ record }: { record: HistoryRecord }) {
 // View: Two Choices (special Pattern A with comparison block)
 // ============================================================
 function TwoChoicesView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const rcards: any[] = Array.isArray(r.cards) ? r.cards : []
@@ -762,18 +782,18 @@ function TwoChoicesView({ record }: { record: HistoryRecord }) {
         <div className="flex flex-col gap-3">
           {r.choice_comparison.option_a_analysis && (
             <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
-              <p className="text-xs font-semibold text-blue-400/70 uppercase tracking-wider mb-1.5">选项 A 分析</p>
+              <p className="text-xs font-semibold text-blue-400/70 uppercase tracking-wider mb-1.5">{isEn ? 'Option A Analysis' : '选项 A 分析'}</p>
               <p className="text-white/80 text-sm leading-relaxed">{r.choice_comparison.option_a_analysis}</p>
             </div>
           )}
           {r.choice_comparison.option_b_analysis && (
             <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-4">
-              <p className="text-xs font-semibold text-purple-400/70 uppercase tracking-wider mb-1.5">选项 B 分析</p>
+              <p className="text-xs font-semibold text-purple-400/70 uppercase tracking-wider mb-1.5">{isEn ? 'Option B Analysis' : '选项 B 分析'}</p>
               <p className="text-white/80 text-sm leading-relaxed">{r.choice_comparison.option_b_analysis}</p>
             </div>
           )}
           {r.choice_comparison.decision_guidance && (
-            <OverallBlock text={r.choice_comparison.decision_guidance} label="决策指引" />
+            <OverallBlock text={r.choice_comparison.decision_guidance} label={isEn ? 'Decision Guidance' : '决策指引'} />
           )}
         </div>
       )}
@@ -786,6 +806,7 @@ function TwoChoicesView({ record }: { record: HistoryRecord }) {
 // View: Wealth Current Status (3 positions with title)
 // ============================================================
 function WealthCurrentStatusView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const positions: any[] = Array.isArray(r.positions) ? r.positions : []
@@ -805,7 +826,7 @@ function WealthCurrentStatusView({ record }: { record: HistoryRecord }) {
         ))}
       </div>
       {Array.isArray(r.actions) && r.actions.length > 0 && (
-        <ActionList items={r.actions} label="行动建议" />
+        <ActionList items={r.actions} label={isEn ? 'Action Suggestions' : '行动建议'} />
       )}
       <ClosingBlock text={r.closing ?? ''} />
     </div>
@@ -816,6 +837,7 @@ function WealthCurrentStatusView({ record }: { record: HistoryRecord }) {
 // View: Wealth Obstacles (5 cards)
 // ============================================================
 function WealthObstaclesView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const rcards: any[] = Array.isArray(r.cards) ? r.cards : []
@@ -834,7 +856,7 @@ function WealthObstaclesView({ record }: { record: HistoryRecord }) {
           />
         ))}
       </div>
-      <ClosingBlock text={r.disclaimer ?? ''} label="说明" />
+      <ClosingBlock text={r.disclaimer ?? ''} label={isEn ? 'Note' : '说明'} />
     </div>
   )
 }
@@ -843,6 +865,7 @@ function WealthObstaclesView({ record }: { record: HistoryRecord }) {
 // View: Career Detail (skills-direction, interview-exam — with action_plan)
 // ============================================================
 function CareerDetailView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const positions: any[] = Array.isArray(r.positions) ? r.positions : []
@@ -876,11 +899,11 @@ function CareerDetailView({ record }: { record: HistoryRecord }) {
       {/* Action plan */}
       {(ap.fit_directions?.length || ap.next_7_days?.length || ap.next_30_days?.length || ap.avoid?.length) && (
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">行动方案</p>
-          {ap.fit_directions?.length > 0 && <ActionList items={ap.fit_directions} label="适合的方向" />}
-          {ap.next_7_days?.length > 0 && <ActionList items={ap.next_7_days} label="接下来 7 天" />}
-          {ap.next_30_days?.length > 0 && <ActionList items={ap.next_30_days} label="接下来 30 天" />}
-          {ap.avoid?.length > 0 && <ActionList items={ap.avoid} label="需要避免的" />}
+          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">{isEn ? 'Action Plan' : '行动方案'}</p>
+          {ap.fit_directions?.length > 0 && <ActionList items={ap.fit_directions} label={isEn ? 'Suitable Directions' : '适合的方向'} />}
+          {ap.next_7_days?.length > 0 && <ActionList items={ap.next_7_days} label={isEn ? 'Next 7 Days' : '接下来 7 天'} />}
+          {ap.next_30_days?.length > 0 && <ActionList items={ap.next_30_days} label={isEn ? 'Next 30 Days' : '接下来 30 天'} />}
+          {ap.avoid?.length > 0 && <ActionList items={ap.avoid} label={isEn ? 'Things to Avoid' : '需要避免的'} />}
         </div>
       )}
       <ClosingBlock text={r.closing ?? ''} />
@@ -919,6 +942,7 @@ function OfferDecisionView({ record }: { record: HistoryRecord }) {
 // View: Stay or Leave
 // ============================================================
 function StayOrLeaveView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const details: any[] = Array.isArray(r.cardDetails) ? r.cardDetails : []
@@ -938,9 +962,9 @@ function StayOrLeaveView({ record }: { record: HistoryRecord }) {
         ))}
       </div>
       {Array.isArray(r.actionSuggestions) && r.actionSuggestions.length > 0 && (
-        <ActionList items={r.actionSuggestions} label="行动建议" />
+        <ActionList items={r.actionSuggestions} label={isEn ? 'Action Suggestions' : '行动建议'} />
       )}
-      <ClosingBlock text={r.realityReminder ?? r.reminder ?? ''} label="现实提醒" />
+      <ClosingBlock text={r.realityReminder ?? r.reminder ?? ''} label={isEn ? 'Reality Check' : '现实提醒'} />
     </div>
   )
 }
@@ -949,6 +973,7 @@ function StayOrLeaveView({ record }: { record: HistoryRecord }) {
 // View: Pattern B — sections + summary + actions (future-lover, reconciliation)
 // ============================================================
 function SectionedReadingView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const sections: any[] = Array.isArray(r.sections) ? r.sections : []
@@ -973,7 +998,7 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
                   </div>
                 )}
                 <span className={`text-[9px] ${getCardOrientation(card) === 'reversed' ? 'text-amber-400/60' : 'text-emerald-400/60'}`}>
-                  {getCardOrientation(card) === 'upright' ? '正' : '逆'}
+                  {getCardOrientation(card) === 'upright' ? (isEn ? 'U' : '正') : (isEn ? 'R' : '逆')}
                 </span>
               </div>
             )
@@ -997,7 +1022,7 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
       {/* Actions */}
       {actions.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">建议行动</p>
+          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{isEn ? 'Suggested Actions' : '建议行动'}</p>
           <ul className="space-y-1.5">
             {actions.map((a: any, i: number) => (
               <li key={i} className="flex items-start gap-2 text-sm text-white/75">
@@ -1016,6 +1041,7 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
 // View: What They Think (SpreadReading format)
 // ============================================================
 function WhatTheyThinkView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const positions: any[] = Array.isArray(r.positions) ? r.positions : []
@@ -1042,11 +1068,11 @@ function WhatTheyThinkView({ record }: { record: HistoryRecord }) {
       </div>
       {shortTerm.trend && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">短期走向</p>
+          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{isEn ? 'Short-Term Outlook' : '短期走向'}</p>
           <p className="text-white/80 text-sm leading-relaxed">{shortTerm.trend}</p>
           {shortTerm.advice?.length > 0 && (
             <div className="mt-3">
-              <p className="text-[11px] text-white/40 mb-1.5">建议</p>
+              <p className="text-[11px] text-white/40 mb-1.5">{isEn ? 'Suggestions' : '建议'}</p>
               <ul className="space-y-1">
                 {shortTerm.advice.map((a: string, i: number) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-white/65">
@@ -1059,7 +1085,7 @@ function WhatTheyThinkView({ record }: { record: HistoryRecord }) {
           )}
           {shortTerm.watchFor?.length > 0 && (
             <div className="mt-3">
-              <p className="text-[11px] text-white/40 mb-1.5">需要留意</p>
+              <p className="text-[11px] text-white/40 mb-1.5">{isEn ? 'Watch Out For' : '需要留意'}</p>
               <ul className="space-y-1">
                 {shortTerm.watchFor.map((w: string, i: number) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-white/65">
@@ -1072,7 +1098,7 @@ function WhatTheyThinkView({ record }: { record: HistoryRecord }) {
           )}
         </div>
       )}
-      {r.disclaimer && <ClosingBlock text={r.disclaimer} label="说明" />}
+      {r.disclaimer && <ClosingBlock text={r.disclaimer} label={isEn ? 'Note' : '说明'} />}
     </div>
   )
 }
@@ -1081,6 +1107,7 @@ function WhatTheyThinkView({ record }: { record: HistoryRecord }) {
 // View: Relationship Development (5-module structure)
 // ============================================================
 function RelationshipDevView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const r = record.reading_result ?? {}
   const rawCards: any[] = Array.isArray(record.cards) ? record.cards : []
   const cardReadings: any[] = Array.isArray(r.cardReadings) ? r.cardReadings : []
@@ -1090,7 +1117,7 @@ function RelationshipDevView({ record }: { record: HistoryRecord }) {
     <div className="flex flex-col gap-4 max-w-3xl mx-auto">
       {r.spreadExplanation && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-1.5">牌阵说明</p>
+          <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-1.5">{isEn ? 'Spread Overview' : '牌阵说明'}</p>
           <p className="text-white/70 text-sm leading-relaxed">{r.spreadExplanation}</p>
         </div>
       )}
@@ -1107,22 +1134,22 @@ function RelationshipDevView({ record }: { record: HistoryRecord }) {
       </div>
       {(integration.theme || integration.drivingForce || integration.tension) && (
         <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">关系动力分析</p>
+          <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">{isEn ? 'Relationship Dynamics' : '关系动力分析'}</p>
           {integration.theme && (
             <div className="mb-2">
-              <p className="text-[11px] text-white/50 mb-0.5">主旋律</p>
+              <p className="text-[11px] text-white/50 mb-0.5">{isEn ? 'Core Theme' : '主旋律'}</p>
               <p className="text-white/85 text-sm leading-relaxed">{integration.theme}</p>
             </div>
           )}
           {integration.drivingForce && (
             <div className="mb-2">
-              <p className="text-[11px] text-white/50 mb-0.5">驱动力</p>
+              <p className="text-[11px] text-white/50 mb-0.5">{isEn ? 'Driving Force' : '驱动力'}</p>
               <p className="text-white/85 text-sm leading-relaxed">{integration.drivingForce}</p>
             </div>
           )}
           {integration.tension && (
             <div>
-              <p className="text-[11px] text-white/50 mb-0.5">张力与卡点</p>
+              <p className="text-[11px] text-white/50 mb-0.5">{isEn ? 'Tension & Blocks' : '张力与卡点'}</p>
               <p className="text-white/85 text-sm leading-relaxed">{integration.tension}</p>
             </div>
           )}
@@ -1130,7 +1157,7 @@ function RelationshipDevView({ record }: { record: HistoryRecord }) {
       )}
       {r.shortTermTrend && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">短期发展趋势</p>
+          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">{isEn ? 'Short-Term Development' : '短期发展趋势'}</p>
           <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{r.shortTermTrend}</p>
         </div>
       )}
@@ -1152,6 +1179,7 @@ function normalizeYesNo(raw: unknown): YesNoAnswer | null {
 }
 
 function YesNoView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const cardData = Array.isArray(record.cards) ? record.cards[0] : null
   const result = record.reading_result ?? {}
   const answer: YesNoAnswer | null = normalizeYesNo(result.answer)
@@ -1171,13 +1199,13 @@ function YesNoView({ record }: { record: HistoryRecord }) {
             </div>
           ) : (
             <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-              <span className="text-white/30 text-sm">无图片</span>
+              <span className="text-white/30 text-sm">{isEn ? 'No image' : '无图片'}</span>
             </div>
           )}
           {cardData?.name && (
             <div className="text-center">
               <p className="text-white font-bold text-lg">{cardData.name}</p>
-              <p className="text-white/50 text-sm">{cardData.orientation === 'upright' ? '正位' : '逆位'}</p>
+              <p className="text-white/50 text-sm">{cardData.orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')}</p>
             </div>
           )}
         </div>
@@ -1189,7 +1217,7 @@ function YesNoView({ record }: { record: HistoryRecord }) {
                   {answer === 'YES' ? 'check_circle' : answer === 'NO' ? 'cancel' : 'help'}
                 </span>
                 <div>
-                  <p className="text-sm font-medium text-white/60 uppercase tracking-wider">答案</p>
+                  <p className="text-sm font-medium text-white/60 uppercase tracking-wider">{isEn ? 'Answer' : '答案'}</p>
                   <p className={`text-4xl font-black ${answerColor}`}>{getAnswerText(answer)}</p>
                 </div>
               </div>
@@ -1197,13 +1225,15 @@ function YesNoView({ record }: { record: HistoryRecord }) {
           )}
           {interpretation && (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">解读</p>
+              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">{isEn ? 'Interpretation' : '解读'}</p>
               <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">{interpretation}</p>
             </div>
           )}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <p className="text-sm text-white/50 leading-relaxed">
-              塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。
+              {isEn
+                ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.'
+                : '塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。'}
             </p>
           </div>
         </div>
@@ -1223,11 +1253,12 @@ const jiaobeiData: Record<JiaobeiType, { title: string; subtitle: string; emoji:
 }
 
 function JiaobeiView({ record }: { record: HistoryRecord }) {
+  const isEn = useIsEn()
   const result = record.reading_result ?? {}
   const type: JiaobeiType | null = result.type ?? null
   const meta = type ? jiaobeiData[type] : null
 
-  const displayTitle = meta?.title ?? result.title ?? '筊杯结果'
+  const displayTitle = isEn ? (meta?.subtitle ?? result.title ?? 'Jiaobei Result') : (meta?.title ?? result.title ?? '筊杯结果')
   const displaySubtitle = meta?.subtitle ?? ''
   const displayEmoji = meta?.emoji ?? '🌕🌑'
   const displayColor = meta?.color ?? '#a78bfa'
@@ -1238,7 +1269,7 @@ function JiaobeiView({ record }: { record: HistoryRecord }) {
     return (
       <div className="text-center py-16">
         <span className="material-symbols-outlined text-white/20 text-5xl mb-3 block">help_outline</span>
-        <p className="text-white/40 text-sm">无法解析掷筊结果数据</p>
+        <p className="text-white/40 text-sm">{isEn ? 'Unable to parse the Jiaobei result data.' : '无法解析掷筊结果数据'}</p>
       </div>
     )
   }
@@ -1261,12 +1292,26 @@ function JiaobeiView({ record }: { record: HistoryRecord }) {
           <div className="max-w-xl mx-auto rounded-2xl border border-primary/30 bg-primary/10 p-5 sm:p-6 text-left">
             <div className="flex items-center gap-2 mb-3">
               <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
-              <span className="text-sm font-semibold text-primary uppercase tracking-wider">AI 解读</span>
+              <span className="text-sm font-semibold text-primary uppercase tracking-wider">{isEn ? 'AI Interpretation' : 'AI 解读'}</span>
             </div>
             <p className="text-white/85 text-sm sm:text-base leading-relaxed">{result.aiInterpretation}</p>
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+// ============================================================
+// Unsupported spread type fallback
+// ============================================================
+function UnsupportedView({ spreadType }: { spreadType: string }) {
+  const isEn = useIsEn()
+  return (
+    <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+      <span className="material-symbols-outlined text-white/20 text-5xl">history_toggle_off</span>
+      <p className="text-white/50 text-sm">{isEn ? 'This reading type is not yet supported for display.' : '该类型历史结果暂不支持展示'}</p>
+      <p className="text-white/25 text-xs">{spreadType}</p>
     </div>
   )
 }
@@ -1299,13 +1344,7 @@ function renderContent(record: HistoryRecord) {
   if (key === 'love-relationship-development') return <RelationshipDevView record={record} />
 
   // Unsupported (career-job, wealth-status, unknown legacy)
-  return (
-    <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-      <span className="material-symbols-outlined text-white/20 text-5xl">history_toggle_off</span>
-      <p className="text-white/50 text-sm">该类型历史结果暂不支持展示</p>
-      <p className="text-white/25 text-xs">{record.spread_type}</p>
-    </div>
-  )
+  return <UnsupportedView spreadType={record.spread_type} />
 }
 
 // ============================================================
@@ -1313,6 +1352,7 @@ function renderContent(record: HistoryRecord) {
 // ============================================================
 export default function HistoryDetailPage() {
   const router = useRouter()
+  const isEn = router.locale === 'en'
   const { id } = router.query
   const [record, setRecord] = useState<HistoryRecord | null>(null)
   const [state, setState] = useState<PageState>('loading')
@@ -1345,17 +1385,17 @@ export default function HistoryDetailPage() {
       setState('ready')
     }
     load().catch((err) => {
-      setErrorMsg(err?.message ?? '未知错误')
+      setErrorMsg(err?.message ?? (isEn ? 'Unknown error' : '未知错误'))
       setState('error')
     })
   }, [id, router])
 
-  const displayName = record ? getSpreadDisplayName(record.spread_type) : ''
+  const displayName = record ? getSpreadDisplayName(record.spread_type, isEn) : ''
 
   return (
     <>
       <Head>
-        <title>{displayName ? `${displayName} · 历史记录` : '历史记录详情'} - FateAura</title>
+        <title>{displayName ? `${displayName} · ${isEn ? 'Reading History' : '历史记录'}` : (isEn ? 'Reading Detail' : '历史记录详情')} - FateAura</title>
       </Head>
       <div className="min-h-screen bg-[#0f0f23]">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -1368,7 +1408,7 @@ export default function HistoryDetailPage() {
             <div className="mb-6">
               <Link href="/history" className="mb-3 flex items-center gap-2 text-white/70 hover:text-primary transition-colors group w-fit">
                 <span className="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
-                <span className="text-xs font-medium">返回占卜记录</span>
+                <span className="text-xs font-medium">{isEn ? 'Back to My Readings' : '返回占卜记录'}</span>
               </Link>
               {state === 'ready' && record && (
                 <div className="flex flex-col gap-1">
@@ -1384,27 +1424,27 @@ export default function HistoryDetailPage() {
               {state === 'loading' && (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                   <span className="material-symbols-outlined text-primary/60 text-3xl animate-spin">progress_activity</span>
-                  <p className="text-white/40 text-sm">加载中…</p>
+                  <p className="text-white/40 text-sm">{isEn ? 'Loading reading detail...' : '加载中…'}</p>
                 </div>
               )}
               {state === 'not_found' && (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <span className="material-symbols-outlined text-white/20 text-5xl">search_off</span>
-                  <p className="text-white/50 text-sm">找不到该记录</p>
-                  <Link href="/history" className="rounded-lg bg-white/5 border border-white/10 text-white/60 text-sm font-medium px-5 py-2 hover:bg-white/10 transition-colors">返回列表</Link>
+                  <p className="text-white/50 text-sm">{isEn ? 'Reading not found. It may have been deleted or is no longer available.' : '找不到该记录'}</p>
+                  <Link href="/history" className="rounded-lg bg-white/5 border border-white/10 text-white/60 text-sm font-medium px-5 py-2 hover:bg-white/10 transition-colors">{isEn ? 'Back to History' : '返回列表'}</Link>
                 </div>
               )}
               {state === 'forbidden' && (
                 <div className="flex flex-col items-center justify-center py-24 gap-4">
                   <span className="material-symbols-outlined text-white/20 text-5xl">lock</span>
-                  <p className="text-white/50 text-sm">你没有权限查看此记录</p>
-                  <Link href="/history" className="rounded-lg bg-white/5 border border-white/10 text-white/60 text-sm font-medium px-5 py-2 hover:bg-white/10 transition-colors">返回列表</Link>
+                  <p className="text-white/50 text-sm">{isEn ? 'You do not have permission to view this reading.' : '你没有权限查看此记录'}</p>
+                  <Link href="/history" className="rounded-lg bg-white/5 border border-white/10 text-white/60 text-sm font-medium px-5 py-2 hover:bg-white/10 transition-colors">{isEn ? 'Back to History' : '返回列表'}</Link>
                 </div>
               )}
               {state === 'error' && (
                 <div className="flex flex-col items-center justify-center py-24 gap-3">
                   <span className="material-symbols-outlined text-red-400/60 text-4xl">error</span>
-                  <p className="text-white/50 text-sm">加载失败，请稍后重试</p>
+                  <p className="text-white/50 text-sm">{isEn ? 'Failed to load this reading. Please try again.' : '加载失败，请稍后重试'}</p>
                   {errorMsg && <p className="text-white/30 text-xs">{errorMsg}</p>}
                 </div>
               )}

@@ -103,6 +103,46 @@ const getCardKeyFromUrl = (url: string) => {
   return match ? match[1] : null;
 };
 
+// 季节名称双语映射
+const getSeasonLabel = (season: string, isEn: boolean): string => {
+  if (!isEn) return season;
+  const map: Record<string, string> = {
+    '春季': 'Spring',
+    '夏季': 'Summer',
+    '秋季': 'Autumn',
+    '冬季': 'Winter',
+  };
+  return map[season] || season;
+};
+
+const MONTHS_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+// 下一季度日期范围双语格式化
+const formatNextQuarterRange = (isEn: boolean): string => {
+  const { startMonth, startDay, endMonth, endDay, year } = getNextQuarterDateRange();
+  const currentYear = new Date().getFullYear();
+  if (isEn) {
+    if (startMonth === 12) {
+      return `${MONTHS_EN[startMonth - 1]} ${startDay}, ${year} – ${MONTHS_EN[endMonth - 1]} ${endDay}, ${year + 1}`;
+    } else if (year > currentYear) {
+      return `${MONTHS_EN[startMonth - 1]} ${startDay} – ${MONTHS_EN[endMonth - 1]} ${endDay}, ${year}`;
+    } else {
+      return `${MONTHS_EN[startMonth - 1]} ${startDay} – ${MONTHS_EN[endMonth - 1]} ${endDay}`;
+    }
+  } else {
+    if (startMonth === 12) {
+      return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
+    } else if (year > currentYear) {
+      return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+    } else {
+      return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
+    }
+  }
+};
+
 // 扩展的卡牌类型，包含预设的正逆位
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -159,6 +199,13 @@ const SLOT_DESCRIPTIONS = [
 
 export default function SeasonalResult() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const getOrientationText = (orientation: 'upright' | 'reversed') =>
+    orientation === 'reversed'
+      ? (isEn ? 'Reversed' : '逆位')
+      : (isEn ? 'Upright' : '正位');
+
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -175,6 +222,47 @@ export default function SeasonalResult() {
   
   // 获取当前季节
   const currentSeason = getCurrentSeason();
+  const displaySeason = getSeasonLabel(currentSeason, isEn);
+
+  const texts = isEn ? {
+    pageTitle: `${displaySeason} Fortune Reading — Mystic Insights`,
+    loading: 'Loading...',
+    errorRetry: 'Try Again',
+    errorFetch: 'Failed to load your reading. Please try again.',
+    backToHistory: 'Back to My Readings',
+    backHome: 'Back',
+    sectionLabel: 'SEASONAL READING',
+    h1: `${displaySeason} Fortune`,
+    subtitle: 'Here are the five cards drawn for you, revealing the energy across different dimensions of your life.',
+    generating: '🔮 Reading the cards for your seasonal guidance...',
+    slotOverall: 'Overall Fortune',
+    slotAction: 'Action',
+    slotEmotion: 'Emotion & Relationships',
+    slotMind: 'Mind & Planning',
+    slotWealth: 'Career & Wealth',
+    synthesis: 'Overall Guidance',
+    backHomeBtn: 'Back Home',
+    nextQuarterHint: `🔒 This season's reading is complete. Your next reading will be available ${formatNextQuarterRange(true)}.`,
+  } : {
+    pageTitle: `${currentSeason}运势解析 - Mystic Insights`,
+    loading: '加载中...',
+    errorRetry: '重试',
+    errorFetch: '获取解读失败，请稍后重试',
+    backToHistory: '返回我的占卜记录',
+    backHome: '返回首页',
+    sectionLabel: '四季牌阵',
+    h1: `${currentSeason}运势已抽取`,
+    subtitle: '以下是你抽取的五张塔罗牌，它们揭示了你在不同维度的能量状态',
+    generating: '🔮 塔罗正在为你解读本季度的运势......',
+    slotOverall: '整体运势（Overall）',
+    slotAction: '行动力（Action）',
+    slotEmotion: '情感与人际关系（Emotion）',
+    slotMind: '思维与计划（Thinking）',
+    slotWealth: '事业与财运（Wealth）',
+    synthesis: '综合建议',
+    backHomeBtn: '返回首页',
+    nextQuarterHint: `🔒 本季度牌阵已抽取，下个季度 ${formatNextQuarterRange(false)} 可抽取新的牌阵`,
+  };
 
   // 获取 DeepSeek 解读
   const fetchReading = useCallback(async (cardsData: ShuffledTarotCard[]) => {
@@ -199,7 +287,7 @@ export default function SeasonalResult() {
       });
 
       if (!response.ok) {
-        throw new Error('获取解读失败');
+        throw new Error(isEn ? 'Failed to load your reading.' : '获取解读失败');
       }
 
       const readingData = await response.json();
@@ -226,11 +314,11 @@ export default function SeasonalResult() {
       }
     } catch (error) {
       console.error('Error fetching reading:', error);
-      setReadingError(error instanceof Error ? error.message : '获取解读失败，请稍后重试');
+      setReadingError(error instanceof Error ? error.message : (isEn ? 'Failed to load your reading. Please try again.' : '获取解读失败，请稍后重试'));
     } finally {
       setIsLoadingReading(false);
     }
-  }, []);
+  }, [isEn]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -300,7 +388,7 @@ export default function SeasonalResult() {
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-white/70">加载中...</p>
+            <p className="text-white/70">{texts.loading}</p>
           </div>
         </div>
       </div>
@@ -310,7 +398,7 @@ export default function SeasonalResult() {
   return (
     <>
       <Head>
-        <title>{currentSeason}运势解析 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -385,7 +473,7 @@ export default function SeasonalResult() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
+              <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.backHome}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -412,13 +500,13 @@ export default function SeasonalResult() {
                 className="text-center mb-12"
               >
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">
-                  四季牌阵
+                  {texts.sectionLabel}
                 </p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {currentSeason}运势已抽取
+                  {texts.h1}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  以下是你抽取的五张塔罗牌，它们揭示了你在不同维度的能量状态
+                  {texts.subtitle}
                 </p>
               </motion.div>
 
@@ -434,6 +522,7 @@ export default function SeasonalResult() {
                   isAnimating={[false, false, false, false, false]}
                   showLoadingText={false}
                   forceFlipped={true}
+                  isEn={isEn}
                 />
               </motion.div>
 
@@ -447,7 +536,7 @@ export default function SeasonalResult() {
                 >
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-white/70">🔮 塔罗正在为你解读本季度的运势......</p>
+                    <p className="text-white/70">{texts.generating}</p>
                   </div>
                 </motion.div>
               ) : readingError ? (
@@ -463,7 +552,7 @@ export default function SeasonalResult() {
                       onClick={() => fetchReading(cards)}
                       className="px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90"
                     >
-                      重试
+                      {texts.errorRetry}
                     </button>
                   </div>
                 </motion.div>
@@ -482,10 +571,10 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          整体运势（Overall）
+                          {texts.slotOverall}
                         </h3>
                         <p className="text-sm text-primary/80 font-medium mb-2">
-                          {cards[4]?.name} ({cards[4]?.orientation === 'upright' ? '正位' : '逆位'})
+                          {cards[4]?.name} ({cards[4]?.orientation ? getOrientationText(cards[4].orientation) : ''})
                         </p>
                       </div>
                     </div>
@@ -502,10 +591,10 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          行动力（Action）
+                          {texts.slotAction}
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[0]?.name} ({cards[0]?.orientation === 'upright' ? '正位' : '逆位'})
+                          {cards[0]?.name} ({cards[0]?.orientation ? getOrientationText(cards[0].orientation) : ''})
                         </p>
                       </div>
                     </div>
@@ -522,10 +611,10 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          情感与人际关系（Emotion）
+                          {texts.slotEmotion}
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[1]?.name} ({cards[1]?.orientation === 'upright' ? '正位' : '逆位'})
+                          {cards[1]?.name} ({cards[1]?.orientation ? getOrientationText(cards[1].orientation) : ''})
                         </p>
                       </div>
                     </div>
@@ -542,10 +631,10 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          思维与计划（Thinking）
+                          {texts.slotMind}
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[2]?.name} ({cards[2]?.orientation === 'upright' ? '正位' : '逆位'})
+                          {cards[2]?.name} ({cards[2]?.orientation ? getOrientationText(cards[2].orientation) : ''})
                         </p>
                       </div>
                     </div>
@@ -562,10 +651,10 @@ export default function SeasonalResult() {
                       </span>
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2">
-                          事业与财运（Wealth）
+                          {texts.slotWealth}
                         </h3>
                         <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[3]?.name} ({cards[3]?.orientation === 'upright' ? '正位' : '逆位'})
+                          {cards[3]?.name} ({cards[3]?.orientation ? getOrientationText(cards[3].orientation) : ''})
                         </p>
                       </div>
                     </div>
@@ -581,7 +670,7 @@ export default function SeasonalResult() {
                         explore
                       </span>
                       <h3 className="text-2xl font-bold text-white">
-                        综合建议
+                        {texts.synthesis}
                       </h3>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -602,28 +691,13 @@ export default function SeasonalResult() {
                   onClick={handleBackToHome}
                   className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                 >
-                  返回首页
+                  {texts.backHomeBtn}
                 </button>
               </motion.div>
 
               {/* 提示文字 */}
               <div className="mt-8 text-center text-white/50 text-sm">
-                <p>
-                  🔒 本季度牌阵已抽取，下个季度 {(() => {
-                    const nextQuarter = getNextQuarterDateRange();
-                    const { startMonth, startDay, endMonth, endDay, year } = nextQuarter;
-                    const currentYear = new Date().getFullYear();
-                    
-                    // 如果跨年，显示年份
-                    if (startMonth === 12) {
-                      return `${year}年${startMonth}月${startDay}日至${year + 1}年${endMonth}月${endDay}日`;
-                    } else if (year > currentYear) {
-                      return `${year}年${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
-                    } else {
-                      return `${startMonth}月${startDay}日至${endMonth}月${endDay}日`;
-                    }
-                  })()} 可抽取新的牌阵
-                </p>
+                <p>{texts.nextQuarterHint}</p>
               </div>
             </div>
           </main>

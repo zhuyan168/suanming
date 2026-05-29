@@ -367,6 +367,13 @@ export function getSpreadName(key: string): string {
   return SPREAD_MAP[key]?.name ?? key;
 }
 
+/** 根据 spread_type key 获取展示名（isEn=true 时返回英文，否则返回中文） */
+export function getSpreadDisplayName(key: string, isEn?: boolean): string {
+  const meta = SPREAD_MAP[key];
+  if (!meta) return key;
+  return isEn ? (meta.nameEn ?? meta.name) : meta.name;
+}
+
 /** 根据 spread_type key 获取页面路径 */
 export function getSpreadPath(key: string): string | undefined {
   return SPREAD_MAP[key]?.path;

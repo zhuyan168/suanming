@@ -176,6 +176,39 @@ const loadYesNoTarotQuestion = (): string => {
 export default function YesNoTarotDraw() {
   const router = useRouter();
   const isEn = router.locale === 'en';
+
+  const texts = isEn ? {
+    title: 'Yes or No Tarot - Draw',
+    metaDesc: 'Take a quiet moment and draw your guidance.',
+    loading: 'Loading...',
+    back: 'Back',
+    reset: 'Reset',
+    h1Drawn: 'Drawing Complete',
+    h1Drawing: 'Draw Your Guidance',
+    subtitleDrawn: 'Your card is ready. Continue to reveal the message behind it.',
+    subtitleDrawing: 'Take a deep breath, focus on your question, and choose one card for a simple yes-or-no guidance.',
+    progressDone: 'Card drawn: 1 / 1',
+    progressEmpty: 'Please select one card from the deck',
+    startReading: 'Start Reading',
+    completedHint: '✨ Your card has been drawn. Ready to reveal your guidance.',
+    confirmReset: 'Are you sure you want to start over? Your current result will be cleared.',
+  } : {
+    title: '是否塔罗 - 抽牌',
+    metaDesc: '静心抽取你的指引',
+    loading: '加载中...',
+    back: '返回',
+    reset: '重置',
+    h1Drawn: '抽牌已完成',
+    h1Drawing: '抽取你的指引',
+    subtitleDrawn: '你已完成抽牌，点击下方按钮查看解读。',
+    subtitleDrawing: '静心感受，从下方78张牌中选择1张，让塔罗为你指引方向。',
+    progressDone: '已抽牌：1 / 1',
+    progressEmpty: '请从牌堆中选择一张牌',
+    startReading: '开始解读',
+    completedHint: '✨ 已完成抽牌，准备查看指引',
+    confirmReset: '确定要重新开始吗？当前结果将被清空。',
+  };
+
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'divination-yesno',
     redirectPath: '/',
@@ -301,7 +334,7 @@ export default function YesNoTarotDraw() {
 
   const handleReset = () => {
     if (typeof window === 'undefined') return;
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmReset)) return;
 
     localStorage.removeItem(STORAGE_KEY_DRAW);
     
@@ -319,7 +352,7 @@ export default function YesNoTarotDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{texts.loading}</div>
         </div>
       </div>
     );
@@ -328,8 +361,8 @@ export default function YesNoTarotDraw() {
   return (
     <>
       <Head>
-        <title>是否塔罗 - 抽牌</title>
-        <meta name="description" content="静心抽取你的指引" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="dark">
@@ -341,7 +374,7 @@ export default function YesNoTarotDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{texts.back}</span>
             </button>
             
             <div className="flex items-center gap-4 text-white">
@@ -353,7 +386,7 @@ export default function YesNoTarotDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
+              <span className="text-sm font-medium hidden sm:inline">{texts.reset}</span>
             </button>
           </header>
 
@@ -364,7 +397,7 @@ export default function YesNoTarotDraw() {
               <div className="text-center mb-12">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Yes/No Tarot</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '抽牌已完成' : '抽取你的指引'}
+                  {hasDrawn ? texts.h1Drawn : texts.h1Drawing}
                 </h1>
                 {question && (
                   <div className="mb-6 mt-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 text-center max-w-2xl mx-auto">
@@ -373,9 +406,7 @@ export default function YesNoTarotDraw() {
                   </div>
                 )}
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {hasDrawn 
-                    ? '你已完成抽牌，点击下方按钮查看解读。' 
-                    : '静心感受，从下方78张牌中选择1张，让塔罗为你指引方向。'}
+                  {hasDrawn ? texts.subtitleDrawn : texts.subtitleDrawing}
                 </p>
               </div>
 
@@ -417,7 +448,7 @@ export default function YesNoTarotDraw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>{selectedCard ? '已抽牌：1 / 1' : '请从牌堆中选择一张牌'}</p>
+                      <p>{selectedCard ? texts.progressDone : texts.progressEmpty}</p>
                     </div>
 
                     {/* 卡槽区域 */}
@@ -455,12 +486,12 @@ export default function YesNoTarotDraw() {
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      开始解读
+                      {texts.startReading}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已完成抽牌，准备查看指引</p>
+                    <p>{texts.completedHint}</p>
                   </div>
                 </motion.div>
               )}

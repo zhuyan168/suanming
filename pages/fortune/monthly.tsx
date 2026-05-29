@@ -12,7 +12,38 @@ interface User {
 
 export default function MonthlyFortune() {
   const router = useRouter();
-  
+  const isEn = router.locale === 'en';
+
+  const texts = isEn ? {
+    pageTitle: 'Monthly Fortune — Mystic Insights',
+    back: 'Back',
+    sectionLabel: 'MONTHLY FORTUNE',
+    h1: 'What does this month have in store for you?',
+    subtitle: 'Choose a spread to begin your reading.',
+    basicTitle: 'Three-Card Monthly Reading (Free)',
+    basicSubtitle: 'A quick look at the overall energy of your month.',
+    basicButton: 'Start Reading',
+    memberTitle: 'Monthly Deep Dive (Members)',
+    memberSubtitle: 'Career / Wealth / Love / Connections / Energy — fully explored.',
+    memberButtonUnlocked: 'Start Deep Reading',
+    memberButtonLocked: 'Unlock Full Reading',
+    memberBadge: 'Member',
+  } : {
+    pageTitle: '月度运势 - Mystic Insights',
+    back: '返回首页',
+    sectionLabel: '月度运势',
+    h1: '本月你的命运走向如何？',
+    subtitle: '选择一种牌阵开始占卜。',
+    basicTitle: '三张牌月度运势（免费）',
+    basicSubtitle: '快速了解你本月的整体走向。',
+    basicButton: '开始占卜',
+    memberTitle: '月度运势深层解析（会员）',
+    memberSubtitle: '事业 / 财运 / 感情 / 人际 / 能量全方面解析。',
+    memberButtonUnlocked: '开始深度占卜',
+    memberButtonLocked: '解锁完整占卜',
+    memberBadge: '会员',
+  };
+
   // 用户状态（后续从全局状态管理或 API 获取）
   const [user, setUser] = useState<User | null>(null);
   const [isPaid, setIsPaid] = useState(false);
@@ -59,7 +90,7 @@ export default function MonthlyFortune() {
   return (
     <>
       <Head>
-        <title>月度运势 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -145,7 +176,7 @@ export default function MonthlyFortune() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{texts.back}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -171,12 +202,12 @@ export default function MonthlyFortune() {
                 transition={{ duration: 0.5 }}
                 className="text-center mb-12"
               >
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">月度运势</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  本月你的命运走向如何？
+                  {texts.h1}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  选择一种牌阵开始占卜。
+                  {texts.subtitle}
                 </p>
               </motion.div>
 
@@ -191,9 +222,9 @@ export default function MonthlyFortune() {
 
                 >
                   <CardEntry
-                    title="三张牌月度运势（免费）"
-                    subtitle="快速了解你本月的整体走向。"
-                    buttonText="开始占卜"
+                    title={texts.basicTitle}
+                    subtitle={texts.basicSubtitle}
+                    buttonText={texts.basicButton}
                     cardCount={3}
                     layout="horizontal"
                     onClick={() => handleCardClick('/fortune/monthly/basic', false)}
@@ -208,13 +239,14 @@ export default function MonthlyFortune() {
                   className="flex-1 md:w-1/2 min-h-[400px]"
                 >
                   <CardEntry
-                    title="月度运势深层解析（会员）"
-                    subtitle="事业 / 财运 / 感情 / 人际 / 能量全方面解析。"
-                    buttonText={isMember ? '开始深度占卜' : '解锁完整占卜'}
+                    title={texts.memberTitle}
+                    subtitle={texts.memberSubtitle}
+                    buttonText={isMember ? texts.memberButtonUnlocked : texts.memberButtonLocked}
                     cardCount={7}
                     layout="grid"
                     onClick={() => handleCardClick('/fortune/monthly/member', true)}
                     isPremium={true}
+                    memberBadge={texts.memberBadge}
                   />
                 </motion.div>
               </div>
@@ -235,9 +267,10 @@ interface CardEntryProps {
   layout: 'horizontal' | 'grid';
   onClick: () => void;
   isPremium?: boolean;
+  memberBadge?: string;
 }
 
-function CardEntry({ title, subtitle, buttonText, cardCount, layout, onClick, isPremium = false }: CardEntryProps) {
+function CardEntry({ title, subtitle, buttonText, cardCount, layout, onClick, isPremium = false, memberBadge = '会员' }: CardEntryProps) {
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -478,7 +511,7 @@ function CardEntry({ title, subtitle, buttonText, cardCount, layout, onClick, is
         <div className="absolute top-4 right-4">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-medium">
             <span className="material-symbols-outlined text-xs">workspace_premium</span>
-            会员
+            {memberBadge}
           </span>
         </div>
       )}

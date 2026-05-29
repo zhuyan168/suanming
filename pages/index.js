@@ -822,7 +822,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
 
           <div>
             <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="tarot-question">
-              你的问题（可选）
+              {isEn ? 'Your Question (Optional)' : '你的问题（可选）'}
             </label>
             <textarea
               id="tarot-question"
@@ -851,12 +851,12 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
               {isLoading ? (
                 <>
                   <span className="material-symbols-outlined text-xl animate-spin">refresh</span>
-                  准备中...
+                  {isEn ? 'Preparing...' : '准备中...'}
                 </>
               ) : (
                 <>
                   <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                  抽牌
+                  {isEn ? 'Draw Card' : '抽牌'}
                 </>
               )}
             </button>

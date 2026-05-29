@@ -210,6 +210,19 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
 
 export default function YearAheadFortune() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const texts = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    drawnTitle: (year: string) => isEn ? `${year} Yearly Fortune — Cards Drawn` : `${year}年度运势已抽取`,
+    notDrawnTitle: isEn ? 'Draw Your Yearly Tarot Cards' : '抽取年度塔罗牌',
+    drawnSubtitle: (year: string) => isEn ? `You've completed your ${year} yearly fortune draw. View your full monthly guidance below.` : `你已抽取${year}年的年度运势，点击下方按钮查看详细月度指引。`,
+    notDrawnSubtitle: isEn ? 'Breathe and center yourself, then choose 13 cards from the 78 below to reveal your year ahead.' : '静心感受，从下方78张牌中选择13张，揭示未来一年的运势。',
+    drawnCount: (n: number) => isEn ? `Cards drawn: ${n} / 13` : `已抽牌：${n} / 13`,
+    viewReading: isEn ? 'View Reading' : '查看运势',
+    oncePer: isEn ? '✨ You can draw one yearly reading per year. Come back next year!' : '✨ 每年只能抽取一次，明年再来吧',
+  };
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-yearly',
@@ -379,7 +392,7 @@ export default function YearAheadFortune() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{texts.loading}</div>
         </div>
       </div>
     );
@@ -388,7 +401,7 @@ export default function YearAheadFortune() {
   return (
     <>
       <Head>
-        <title>Year Ahead Spread - 年度运势 - Mystic Insights</title>
+        <title>{isEn ? 'Year Ahead Spread | Mystic Insights' : 'Year Ahead Spread - 年度运势 - Mystic Insights'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -434,7 +447,7 @@ export default function YearAheadFortune() {
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button onClick={handleBackToAnnual} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回首页</span>
+              <span className="text-sm font-medium">{texts.backHome}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -447,12 +460,10 @@ export default function YearAheadFortune() {
               <div className="text-center mb-8 sm:mb-12 px-2">
                 <p className="text-sm sm:text-base font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-primary mb-3 sm:mb-4">Year Ahead Spread</p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
-                  {hasDrawnThisYear ? `${currentYear}年度运势已抽取` : '抽取年度塔罗牌'}
+                  {hasDrawnThisYear ? texts.drawnTitle(currentYear) : texts.notDrawnTitle}
                 </h1>
                 <p className="text-white/70 text-base sm:text-lg max-w-2xl mx-auto px-2">
-                  {hasDrawnThisYear 
-                    ? `你已抽取${currentYear}年的年度运势，点击下方按钮查看详细月度指引。` 
-                    : '静心感受，从下方78张牌中选择13张，揭示未来一年的运势。'}
+                  {hasDrawnThisYear ? texts.drawnSubtitle(currentYear) : texts.notDrawnSubtitle}
                 </p>
               </div>
 
@@ -491,13 +502,14 @@ export default function YearAheadFortune() {
                     <ScrollBar value={scrollValue} onChange={setScrollValue} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 13</p>
+                      <p>{texts.drawnCount(selectedCards.filter(c => c !== null).length)}</p>
                     </div>
 
                     <YearAheadSlots
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
+                      isEn={isEn}
                     />
                   </motion.div>
                 )}
@@ -515,6 +527,7 @@ export default function YearAheadFortune() {
                     isAnimating={Array(13).fill(false)}
                     showLoadingText={false}
                     forceFlipped={true}
+                    isEn={isEn}
                   />
 
                   <div className="text-center mt-8">
@@ -524,12 +537,12 @@ export default function YearAheadFortune() {
                       onClick={handleViewResult}
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     >
-                      查看运势
+                      {texts.viewReading}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 每年只能抽取一次，明年再来吧</p>
+                    <p>{texts.oncePer}</p>
                   </div>
                 </motion.div>
               )}
@@ -544,12 +557,12 @@ export default function YearAheadFortune() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={handleViewResult}
-                    className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
-                  >
-                    查看运势
-                  </motion.button>
-                </motion.div>
+                  onClick={handleViewResult}
+                      className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
+                    >
+                      {texts.viewReading}
+                    </motion.button>
+                  </motion.div>
               )}
             </div>
           </main>

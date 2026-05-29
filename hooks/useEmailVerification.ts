@@ -13,21 +13,28 @@ export interface EmailVerificationState {
   refresh: () => Promise<void>
 }
 
-const resendErrorMap: Record<string, string> = {
+const resendErrorMapZh: Record<string, string> = {
   'Email rate limit exceeded': '发送邮件次数过多，请稍后再试',
   'Too many requests': '请求过于频繁，请稍后再试',
   'For security purposes, you can only request this after': '操作过于频繁，请稍后再试',
 }
 
-function toChineseResendError(msg: string): string {
-  const lower = msg.toLowerCase()
-  for (const [en, zh] of Object.entries(resendErrorMap)) {
-    if (lower.includes(en.toLowerCase())) return zh
-  }
-  return `发送失败：${msg}`
+const resendErrorMapEn: Record<string, string> = {
+  'Email rate limit exceeded': 'Too many requests. Please wait a moment and try again.',
+  'Too many requests': 'Too many requests. Please wait a moment and try again.',
+  'For security purposes, you can only request this after': 'Too many requests. Please wait a moment and try again.',
 }
 
-export function useEmailVerification(): EmailVerificationState {
+function toLocalizedResendError(msg: string, isEn: boolean): string {
+  const lower = msg.toLowerCase()
+  const map = isEn ? resendErrorMapEn : resendErrorMapZh
+  for (const [key, val] of Object.entries(map)) {
+    if (lower.includes(key.toLowerCase())) return val
+  }
+  return isEn ? `Failed to send verification email. Please try again.` : `发送失败：${msg}`
+}
+
+export function useEmailVerification(isEn = false): EmailVerificationState {
   const [user, setUser] = useState<User | null>(null)
   const [isVerified, setIsVerified] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
@@ -66,11 +73,16 @@ export function useEmailVerification(): EmailVerificationState {
     setSending(false)
 
     if (error) {
-      setSendResult({ type: 'error', text: toChineseResendError(error.message) })
+      setSendResult({ type: 'error', text: toLocalizedResendError(error.message, isEn) })
     } else {
-      setSendResult({ type: 'success', text: '验证邮件已发送，请前往邮箱查看' })
+      setSendResult({
+        type: 'success',
+        text: isEn
+          ? 'Verification email sent. Please check your inbox.'
+          : '验证邮件已发送，请前往邮箱查看',
+      })
     }
-  }, [user?.email])
+  }, [user?.email, isEn])
 
   return {
     user,

@@ -131,6 +131,30 @@ const loadResult = (): HorseshoeResult | null => {
 
 export default function HorseshoeRevealPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const texts = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Horseshoe Spread — Cards Revealed | Mystic Insights' : '马蹄铁牌阵 - 结果展示 | Mystic Insights',
+    metaDesc: isEn ? 'View your Horseshoe Spread tarot results.' : '查看你的塔罗牌占卜结果',
+    back: isEn ? 'Back' : '返回',
+    redraw: isEn ? 'Redraw' : '重新占卜',
+    spreadName: isEn ? 'Horseshoe Spread' : '马蹄铁牌阵',
+    subtitle: isEn ? 'Your cards are set. Here are the 7 tarot cards you drew.' : '牌已就位，以下是你抽到的塔罗牌',
+    yourQuestion: isEn ? 'Your Question' : '你的问题',
+    noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    keywords: isEn ? 'Keywords' : '关键词',
+    meaning: isEn ? 'Meaning' : '含义',
+    memberTitle: isEn ? 'Member Reading Required' : '解读需开通会员',
+    memberDesc: isEn ? 'This spread\'s full reading is a member-only feature. You can explore the card meanings below on your own. Unlock the full reading by becoming a member.' : '这个牌阵的解读属于付费内容。你可以先根据牌面含义自行理解；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。',
+    memberComingSoon: isEn ? 'Membership coming soon — stay tuned.' : '会员系统即将上线，敬请期待',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    memberBadge: isEn ? 'Member' : '会员',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
+    confirmRedraw: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新占卜吗？当前结果将被清空。',
+  };
 
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
     spreadKey: 'horseshoe',
@@ -141,15 +165,9 @@ export default function HorseshoeRevealPage() {
   const [question, setQuestion] = useState<string>('');
 
   // 牌位名称
-  const positionNames = [
-    '过去的影响',          // 1
-    '当下的状态',          // 2
-    '隐藏的影响',          // 3
-    '阻碍与挑战',          // 4 (核心位)
-    '潜在的发展',          // 5
-    '行动建议',            // 6
-    '可能的结果',          // 7
-  ];
+  const positionNames = isEn
+    ? ['Past Influences', 'Present State', 'Hidden Influences', 'Obstacle', 'External Environment', 'Advice', 'Outcome']
+    : ['过去的影响', '当下的状态', '隐藏的影响', '阻碍与挑战', '潜在的发展', '行动建议', '可能的结果'];
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -172,7 +190,7 @@ export default function HorseshoeRevealPage() {
   }, [router]);
 
   const handleRedraw = () => {
-    if (!confirm('确定要重新占卜吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmRedraw)) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
@@ -200,7 +218,7 @@ export default function HorseshoeRevealPage() {
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-white/70">加载中...</p>
+          <p className="text-white/70">{texts.loading}</p>
         </div>
       </div>
     );
@@ -209,8 +227,8 @@ export default function HorseshoeRevealPage() {
   return (
     <>
       <Head>
-        <title>马蹄铁牌阵 - 结果展示 | Mystic Insights</title>
-        <meta name="description" content="查看你的塔罗牌占卜结果" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -227,7 +245,7 @@ export default function HorseshoeRevealPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -241,7 +259,7 @@ export default function HorseshoeRevealPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.redraw}</span>
           </button>
         </header>
 
@@ -259,10 +277,10 @@ export default function HorseshoeRevealPage() {
                 HORSESHOE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                马蹄铁牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                牌已就位，以下是你抽到的塔罗牌
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -279,9 +297,9 @@ export default function HorseshoeRevealPage() {
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{texts.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
-                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                      {question || texts.noQuestion}
                     </p>
                   </div>
                 </div>
@@ -331,18 +349,18 @@ export default function HorseshoeRevealPage() {
                           {positionNames[index]}
                         </p>
                         <h3 className="text-white font-semibold">
-                          {getChineseCardName(card.name)}
+                          {isEn ? card.name : getChineseCardName(card.name)}
                         </h3>
                       </div>
                     </div>
                     
                     <p className="text-white/90 font-medium mb-2">
-                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                      {card.orientation === 'upright' ? texts.upright : texts.reversed}
                     </p>
                     
                     <div className="space-y-2 text-sm">
                       <div>
-                        <p className="text-white/50 mb-1">关键词</p>
+                        <p className="text-white/50 mb-1">{texts.keywords}</p>
                         <div className="flex flex-wrap gap-2">
                           {(card.orientation === 'upright' 
                             ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
@@ -359,7 +377,7 @@ export default function HorseshoeRevealPage() {
                       </div>
                       
                       <div>
-                        <p className="text-white/50 mb-1">含义</p>
+                        <p className="text-white/50 mb-1">{texts.meaning}</p>
                         <p className="text-white/70 leading-relaxed">
                           {card.orientation === 'upright' 
                             ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
@@ -386,14 +404,14 @@ export default function HorseshoeRevealPage() {
                     </span>
                     <div className="flex-1">
                       <h3 className="text-white font-semibold mb-2 text-lg">
-                        解读需开通会员
+                        {texts.memberTitle}
                       </h3>
                       <p className="text-white/80 text-sm leading-relaxed mb-3">
-                        这个牌阵的解读属于付费内容。你可以先根据牌面含义自行理解；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。
+                        {texts.memberDesc}
                       </p>
                       <div className="flex items-center gap-2 text-amber-400/90 text-xs">
                         <span className="material-symbols-outlined text-sm">info</span>
-                        <span>会员系统即将上线，敬请期待</span>
+                        <span>{texts.memberComingSoon}</span>
                       </div>
                     </div>
                   </div>
@@ -418,9 +436,9 @@ export default function HorseshoeRevealPage() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                      开始解读
+                      {texts.startReading}
                       <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
-                        会员
+                        {texts.memberBadge}
                       </span>
                     </span>
                   </motion.button>
@@ -433,7 +451,7 @@ export default function HorseshoeRevealPage() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">home</span>
-                      返回首页
+                      {texts.backHome}
                     </span>
                   </motion.button>
                 </div>
@@ -452,7 +470,7 @@ export default function HorseshoeRevealPage() {
                     auto_awesome
                   </span>
                   <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                    占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                    {texts.disclaimer}
                   </p>
                   <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                     auto_awesome

@@ -11,6 +11,7 @@ interface YearAheadSlotsProps {
   isAnimating: boolean[];
   showLoadingText?: boolean;
   forceFlipped?: boolean;
+  isEn?: boolean;
 }
 
 interface CardPosition {
@@ -20,19 +21,20 @@ interface CardPosition {
   label: string;
 }
 
+const MONTH_LABELS_ZH = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+const MONTH_LABELS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 export default function YearAheadSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
-  forceFlipped = false
+  forceFlipped = false,
+  isEn = false,
 }: YearAheadSlotsProps) {
   const orbitRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<CardPosition[]>([]);
   
-  const monthLabels = [
-    "一月", "二月", "三月", "四月", "五月", "六月",
-    "七月", "八月", "九月", "十月", "十一月", "十二月"
-  ];
+  const monthLabels = isEn ? MONTH_LABELS_EN : MONTH_LABELS_ZH;
 
   // 使用极坐标算法计算卡牌位置（以圆环容器为参照系，保证贴合圆弧）
   useEffect(() => {
@@ -113,7 +115,7 @@ export default function YearAheadSlots({
         id: 13,
         x: centerX,
         y: themeCardY,
-        label: "年度主题牌"
+        label: isEn ? "Yearly Theme" : "年度主题牌"
       });
 
       setPositions(newPositions);
@@ -269,7 +271,7 @@ export default function YearAheadSlots({
       {/* 抽牌进度提示 */}
       {showLoadingText && cards.filter(c => c !== null).length < 13 && (
         <div className="mt-6 text-center text-white/50 text-sm">
-          <p>请继续抽取卡牌... ({cards.filter(c => c !== null).length}/13)</p>
+          <p>{isEn ? `Keep drawing cards... (${cards.filter(c => c !== null).length}/13)` : `请继续抽取卡牌... (${cards.filter(c => c !== null).length}/13)`}</p>
         </div>
       )}
 

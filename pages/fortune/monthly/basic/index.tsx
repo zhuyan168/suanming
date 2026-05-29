@@ -771,6 +771,36 @@ interface MonthlyBasicResult {
 
 export default function MonthlyBasicFortune() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const texts = isEn ? {
+    pageTitle: 'Monthly Fortune — Mystic Insights',
+    loading: 'Loading...',
+    back: 'Back to Monthly Fortune',
+    sectionLabel: 'MONTHLY FORTUNE',
+    headingDrawn: "This Month's Reading Has Been Drawn",
+    headingDraw: 'Draw Three Tarot Cards',
+    subtitleDrawn: 'Your monthly reading is ready. Tap below to view your full interpretation.',
+    subtitleDraw: 'Take a quiet moment and choose three cards to reveal this month\'s guidance.',
+    drawHint: (n: number) => `💫 Draw three cards one at a time (${n}/3)`,
+    viewResult: 'View Monthly Reading',
+    monthlyHint: '✨ One reading per month — come back next month for a new one.',
+    startReading: 'Start Reading',
+  } : {
+    pageTitle: '三张牌月度运势 - Mystic Insights',
+    loading: '加载中...',
+    back: '返回月度运势',
+    sectionLabel: '月度运势',
+    headingDrawn: '本月运势已抽取',
+    headingDraw: '抽取三张塔罗牌',
+    subtitleDrawn: '你已抽取本月运势，点击下方按钮查看详细解析。',
+    subtitleDraw: '静心感受，从下方卡牌中选择三张，揭示你本月的运势指引。',
+    drawHint: (n: number) => `💫 请依次抽取三张卡牌（${n}/3）`,
+    viewResult: '查看本月解析',
+    monthlyHint: '✨ 每月只能抽取一次，下个月再来吧',
+    startReading: '开始测算',
+  };
+
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-monthly',
     redirectPath: '/',
@@ -1035,7 +1065,7 @@ export default function MonthlyBasicFortune() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{texts.loading}</div>
         </div>
       </div>
     );
@@ -1044,7 +1074,7 @@ export default function MonthlyBasicFortune() {
   return (
     <>
       <Head>
-        <title>三张牌月度运势 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -1130,7 +1160,7 @@ export default function MonthlyBasicFortune() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回月度运势</span>
+              <span className="text-sm font-medium">{texts.back}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -1151,14 +1181,12 @@ export default function MonthlyBasicFortune() {
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">月度运势</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawnThisMonth ? '本月运势已抽取' : '抽取三张塔罗牌'}
+                  {hasDrawnThisMonth ? texts.headingDrawn : texts.headingDraw}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {hasDrawnThisMonth 
-                    ? '你已抽取本月运势，点击下方按钮查看详细解析。' 
-                    : '静心感受，从下方卡牌中选择三张，揭示你本月的运势指引。'}
+                  {hasDrawnThisMonth ? texts.subtitleDrawn : texts.subtitleDraw}
                 </p>
               </div>
 
@@ -1229,7 +1257,7 @@ export default function MonthlyBasicFortune() {
 
                     {selectedCards.filter(c => c !== null).length < 3 && (
                       <div className="text-center text-white/50 text-sm mt-6">
-                        <p>💫 请依次抽取三张卡牌（{selectedCards.filter(c => c !== null).length}/3）</p>
+                        <p>{texts.drawHint(selectedCards.filter(c => c !== null).length)}</p>
                       </div>
                     )}
                   </motion.div>
@@ -1259,12 +1287,12 @@ export default function MonthlyBasicFortune() {
                       onClick={handleViewResult}
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     >
-                      查看本月解析
+                      {texts.viewResult}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 每月只能抽取一次，下个月再来吧</p>
+                    <p>{texts.monthlyHint}</p>
                   </div>
                 </motion.div>
               )}
@@ -1283,7 +1311,7 @@ export default function MonthlyBasicFortune() {
                     onClick={handleViewResult}
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                   >
-                    开始测算
+                    {texts.startReading}
                   </motion.button>
                 </motion.div>
               )}

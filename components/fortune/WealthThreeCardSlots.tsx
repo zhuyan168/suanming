@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -21,7 +22,9 @@ export default function WealthThreeCardSlots({
   forceFlipped = false,
   slotConfig
 }: WealthThreeCardSlotsProps) {
-  
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   const renderCard = (index: number) => {
     const card = cards[index];
     const config = slotConfig[index];
@@ -129,7 +132,7 @@ export default function WealthThreeCardSlots({
           animate={{ opacity: 1, y: 0 }}
           className="text-center text-white/70 text-base sm:text-lg mt-12 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/3）</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/3)` : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/3）`}</p>
         </motion.div>
       )}
 

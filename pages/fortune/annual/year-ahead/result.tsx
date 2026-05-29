@@ -183,7 +183,7 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
 };
 
 // Loading组件
-function MagicalLoading() {
+function MagicalLoading({ isEn = false }: { isEn?: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center gap-8">
       {/* 3D 翻转塔罗牌 */}
@@ -287,7 +287,7 @@ function MagicalLoading() {
           animate={{ opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          正在为你揭示命运指引...
+          {isEn ? 'Revealing your cosmic guidance...' : '正在为你揭示命运指引...'}
         </motion.p>
         <motion.div
           className="flex items-center justify-center gap-2"
@@ -295,7 +295,7 @@ function MagicalLoading() {
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <span className="text-primary/70 text-sm">✦</span>
-          <span className="text-white/50 text-sm">连接宇宙能量</span>
+          <span className="text-white/50 text-sm">{isEn ? 'Connecting cosmic energy' : '连接宇宙能量'}</span>
           <span className="text-primary/70 text-sm">✦</span>
         </motion.div>
       </div>
@@ -305,8 +305,26 @@ function MagicalLoading() {
 
 export default function YearAheadResultPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentYear = getCurrentYear();
+
+  const texts = {
+    loadingTitle: isEn ? 'Year Ahead Reading | Mystic Insights' : 'Year Ahead 解析 - Mystic Insights',
+    pageTitle: (year: string) => isEn ? `${year} Yearly Fortune Reading | Mystic Insights` : `Year Ahead 解析 - Mystic Insights`,
+    errorFetch: isEn ? 'Failed to load reading. Please try again.' : '获取运势失败',
+    errorGenerate: isEn ? 'Failed to generate reading. Please try again.' : '生成运势失败，请稍后重试',
+    backHistory: isEn ? 'Back to My Readings' : '返回我的占卜记录',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    yearGuide: (year: string) => isEn ? `${year} Yearly Guidance` : `${year} 年度指引`,
+    subtitle: isEn ? 'Explore the energy flow of the year ahead — discover key themes for each month.' : '洞察未来一年的能量流向，把握每月命运关键。',
+    yearOverview: isEn ? 'Yearly Energy Overview' : '年度能量概览',
+    monthlyGuide: isEn ? 'Monthly Guidance' : '月度详细指引',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    oncePer: isEn ? '✨ You can draw one yearly reading per year.' : '✨ 每年只能抽取一次年度运势',
+    blessing: (year: string) => isEn ? `May your ${year} be full of opportunity and growth.` : `祝你${year}年一切顺利，充满机遇与成长`,
+  };
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-yearly',
@@ -361,7 +379,7 @@ export default function YearAheadResultPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || '获取运势失败');
+        throw new Error(data.error || texts.errorFetch);
       }
 
       const data = await response.json();
@@ -377,7 +395,7 @@ export default function YearAheadResultPage() {
 
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
-      setError(err.message || '生成运势失败，请稍后重试');
+      setError(err.message || texts.errorGenerate);
     } finally {
       setIsGenerating(false);
       setIsLoading(false);
@@ -392,12 +410,12 @@ export default function YearAheadResultPage() {
     return (
       <>
         <Head>
-          <title>Year Ahead 解析 - Mystic Insights</title>
+          <title>{texts.loadingTitle}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         <div className="dark">
           <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">
-            <MagicalLoading />
+            <MagicalLoading isEn={isEn} />
           </div>
         </div>
       </>
@@ -421,16 +439,18 @@ export default function YearAheadResultPage() {
     };
   });
 
-  const monthLabels = [
-    "一月", "二月", "三月", "四月", "五月", "六月",
-    "七月", "八月", "九月", "十月", "十一月", "十二月",
-    "年度主题牌"
-  ];
+  const monthLabels = isEn
+    ? ["January", "February", "March", "April", "May", "June",
+       "July", "August", "September", "October", "November", "December",
+       "Yearly Theme"]
+    : ["一月", "二月", "三月", "四月", "五月", "六月",
+       "七月", "八月", "九月", "十月", "十一月", "十二月",
+       "年度主题牌"];
 
   return (
     <>
       <Head>
-        <title>Year Ahead 解析 - Mystic Insights</title>
+        <title>{texts.pageTitle(currentYear)}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -520,7 +540,7 @@ export default function YearAheadResultPage() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回首页'}</span>
+              <span className="text-sm font-medium">{isFromHistory ? texts.backHistory : texts.backHome}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -535,10 +555,10 @@ export default function YearAheadResultPage() {
               <div className="text-center mb-8 sm:mb-12 px-2">
                 <p className="text-sm sm:text-base font-semibold uppercase tracking-[0.25em] sm:tracking-[0.35em] text-primary mb-3 sm:mb-4">Year Ahead Spread</p>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight mb-3 sm:mb-4">
-                  {savedResult.result?.year || `${currentYear}年`} 年度指引
+                  {texts.yearGuide(savedResult.result?.year || currentYear)}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  洞察未来一年的能量流向，把握每月命运关键。
+                  {texts.subtitle}
                 </p>
               </div>
 
@@ -556,13 +576,14 @@ export default function YearAheadResultPage() {
                   isAnimating={Array(13).fill(false)}
                   showLoadingText={false}
                   forceFlipped={true}
+                  isEn={isEn}
                 />
               </div>
 
               {/* 解析内容 */}
               {isGenerating ? (
                 <div className="flex items-center justify-center py-20">
-                  <MagicalLoading />
+                  <MagicalLoading isEn={isEn} />
                 </div>
               ) : savedResult.result ? (
                 <motion.div
@@ -573,7 +594,7 @@ export default function YearAheadResultPage() {
                 >
                   {/* 年度总结 */}
                   <div className="p-6 sm:p-8 rounded-3xl border border-primary/30 bg-primary/5 backdrop-blur-sm">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">年度能量概览</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-primary">{texts.yearOverview}</h2>
                     <p className="text-white/90 text-lg leading-relaxed whitespace-pre-line">
                       {savedResult.result.summary}
                     </p>
@@ -581,7 +602,7 @@ export default function YearAheadResultPage() {
 
                   {/* 各月详细解析 */}
                   <div className="space-y-6">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-8">月度详细指引</h2>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-8">{texts.monthlyGuide}</h2>
                     {savedResult.result.cards.map((cardResult, index) => {
                       const card = savedResult.cards[index];
                       const isYearTheme = index === 12; // 第13张是年度主题牌
@@ -632,7 +653,7 @@ export default function YearAheadResultPage() {
                                 <span className={`text-sm font-medium ${
                                   card.orientation === 'upright' ? 'text-green-400' : 'text-amber-400'
                                 }`}>
-                                  {card.orientation === 'upright' ? '正位' : '逆位'}
+                                  {card.orientation === 'upright' ? texts.upright : texts.reversed}
                                 </span>
                               </div>
                               
@@ -665,8 +686,8 @@ export default function YearAheadResultPage() {
 
                   {/* 底部提示 */}
                   <div className="text-center text-white/50 text-sm mt-12 pt-8 border-t border-white/10">
-                    <p>✨ 每年只能抽取一次年度运势</p>
-                    <p className="mt-2">祝你{currentYear}年一切顺利，充满机遇与成长</p>
+                    <p>{texts.oncePer}</p>
+                    <p className="mt-2">{texts.blessing(currentYear)}</p>
                   </div>
                 </motion.div>
               ) : null}

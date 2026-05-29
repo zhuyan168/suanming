@@ -137,6 +137,7 @@ export default function HorseshoeReadingPage() {
     errorIncomplete: isEn ? 'Card data is incomplete. Please draw again.' : '抽牌数据不完整，请重新抽牌',
     errorLoad: isEn ? 'Failed to load data. Please go back and draw again.' : '加载数据失败，请返回重新抽牌',
     errorGenerate: isEn ? 'Failed to generate the reading. Please try again.' : '生成解读失败，请重试',
+    errorFallback: isEn ? 'Something went wrong. Please try again.' : '出错了，请稍后重试',
     confirmReset: isEn ? 'Are you sure you want to draw again? Your current result will be cleared.' : '确定要重新抽牌吗？当前结果将被清空。',
     scrollHintLoading: isEn ? 'Generating your reading' : '正在生成解读',
     scrollHintReady: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
@@ -146,6 +147,19 @@ export default function HorseshoeReadingPage() {
     btnRedraw: isEn ? 'Go Draw' : '去抽牌',
     btnRetry: isEn ? 'Retry' : '重新生成',
     btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Horseshoe Spread Reading | Mystic Insights' : '马蹄铁牌阵 · 解读 | Mystic Insights',
+    metaDesc: isEn ? 'Your Horseshoe Spread tarot reading.' : '查看你的塔罗牌解读结果',
+    spreadTitle: isEn ? 'Horseshoe Spread Reading' : '马蹄铁牌阵解读',
+    yourQuestion: isEn ? 'Your Question' : '你的问题',
+    noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
+    overallReading: isEn ? 'Overall Guidance' : '整体解读',
+    corePosition: isEn ? 'Key Position' : '核心位',
+    tipsTitle: isEn ? 'Practical Reminders & Action Advice' : '现实提醒与行动建议',
+    reminderFallbackQ: isEn ? 'These cards reflect the energy and possibilities of this moment. The power to create change always lies in your own choices and actions.' : '这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。',
+    reminderFallbackNoQ: isEn ? 'Tarot reflects the current flow of energy. What truly brings change is your own choices and actions.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    browseMore: isEn ? 'Explore More Spreads' : '浏览更多牌阵',
   };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
@@ -227,7 +241,7 @@ export default function HorseshoeReadingPage() {
 
     } catch (err: any) {
       console.error('Error generating reading:', err);
-      setError(err.message || '出错了，请稍后重试');
+      setError(err.message || texts.errorFallback);
     } finally {
       setLoading(false);
     }
@@ -258,7 +272,7 @@ export default function HorseshoeReadingPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -301,8 +315,8 @@ export default function HorseshoeReadingPage() {
   return (
     <>
       <Head>
-        <title>马蹄铁牌阵 · 解读 | Mystic Insights</title>
-        <meta name="description" content="查看你的塔罗牌解读结果" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -351,7 +365,7 @@ export default function HorseshoeReadingPage() {
                 HORSESHOE SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                马蹄铁牌阵解读
+                {texts.spreadTitle}
               </h1>
             </motion.div>
 
@@ -369,9 +383,9 @@ export default function HorseshoeReadingPage() {
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{texts.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
-                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                      {question || texts.noQuestion}
                     </p>
                   </div>
                 </div>
@@ -451,7 +465,7 @@ export default function HorseshoeReadingPage() {
                     <div className="relative bg-[#1a1028] border border-white/10 rounded-2xl p-6 sm:p-10">
                       <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                         <span className="material-symbols-outlined">auto_awesome</span>
-                        整体解读
+                        {texts.overallReading}
                       </h3>
                       <p className="text-white/80 leading-relaxed text-lg">
                         {reading.overall}
@@ -545,7 +559,7 @@ export default function HorseshoeReadingPage() {
                               </span>
                               {isKeyPosition && (
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 border border-primary/50 text-primary">
-                                  核心位
+                                  {texts.corePosition}
                                 </span>
                               )}
                             </div>
@@ -563,7 +577,7 @@ export default function HorseshoeReadingPage() {
                     <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-6 sm:p-8">
                       <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-purple-300">
                         <span className="material-symbols-outlined">lightbulb</span>
-                        现实提醒与行动建议
+                        {texts.tipsTitle}
                       </h3>
                       <div className="space-y-3">
                         {reading.tips.map((tip, idx) => (
@@ -588,9 +602,9 @@ export default function HorseshoeReadingPage() {
                         {reading.reminder ? (
                           `「${reading.reminder}」`
                         ) : question ? (
-                          `「这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。」`
+                          `「${texts.reminderFallbackQ}」`
                         ) : (
-                          `「占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。」`
+                          `「${texts.reminderFallbackNoQ}」`
                         )}
                       </p>
                     </div>
@@ -601,7 +615,7 @@ export default function HorseshoeReadingPage() {
                         className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                       >
                         <span className="material-symbols-outlined text-sm">home</span>
-                        返回首页
+                        {texts.backHome}
                       </button>
                       <button
                         onClick={handleReturn}
@@ -609,7 +623,7 @@ export default function HorseshoeReadingPage() {
                         style={{ backgroundColor: '#7f13ec' }}
                       >
                         <span className="material-symbols-outlined text-sm">explore</span>
-                        浏览更多牌阵
+                        {texts.browseMore}
                       </button>
                     </div>
                   </div>

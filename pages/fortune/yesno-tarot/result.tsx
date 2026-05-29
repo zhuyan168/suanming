@@ -118,7 +118,47 @@ const rehydrateTarotCard = (card: ShuffledTarotCard): ShuffledTarotCard => {
 
 export default function YesNoTarotResult() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
+
+  const texts = isEn ? {
+    titleLoading: 'Yes or No Tarot - Reading',
+    titleResult: 'Yes or No Tarot - Result',
+    metaDesc: 'View your tarot guidance',
+    loading: 'Reading your card...',
+    h1: 'Your Tarot Guidance',
+    upright: 'Upright',
+    reversed: 'Reversed',
+    answerLabel: 'Answer',
+    unknown: 'Unknown',
+    interpretationLabel: 'Interpretation',
+    disclaimer: '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.',
+    backToHistory: 'Back to My Readings',
+    home: 'Home',
+    newReading: 'New Reading',
+    askAnother: 'Ask Another',
+    backToHome: 'Back to Home',
+    fallbackNote: '\n\n(AI interpretation is temporarily unavailable. This is a brief reading based on traditional card meanings.)',
+  } : {
+    titleLoading: '是否塔罗 - 解读中',
+    titleResult: '是否塔罗 - 解读结果',
+    metaDesc: '查看你的塔罗指引',
+    loading: '正在解读中...',
+    h1: '你的塔罗指引',
+    upright: '正位',
+    reversed: '逆位',
+    answerLabel: '答案',
+    unknown: '未知',
+    interpretationLabel: '解读',
+    disclaimer: '✨ 塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。',
+    backToHistory: '返回我的占卜记录',
+    home: '首页',
+    newReading: '新占卜',
+    askAnother: '再问一个',
+    backToHome: '返回首页',
+    fallbackNote: '\n\n（解读暂时不可用，这是基于牌意的简要判断）',
+  };
+
   const [question, setQuestion] = useState('');
   const [card, setCard] = useState<ShuffledTarotCard | null>(null);
   const [answer, setAnswer] = useState<YesNoAnswer | null>(null);
@@ -182,7 +222,7 @@ export default function YesNoTarotResult() {
       console.error('获取解读失败:', error);
       const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
       setAnswer(result.answer);
-      setInterpretation(result.reason + '\n\n（解读暂时不可用，这是基于牌意的简要判断）');
+      setInterpretation(result.reason + texts.fallbackNote);
       setIsLoading(false);
     }
   };
@@ -200,7 +240,7 @@ export default function YesNoTarotResult() {
     return (
       <div className="dark">
         <Head>
-          <title>是否塔罗 - 解读中</title>
+          <title>{texts.titleLoading}</title>
         </Head>
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
           <div className="text-center">
@@ -215,7 +255,7 @@ export default function YesNoTarotResult() {
               />
               <div className="absolute inset-0 rounded-full bg-[#191022]" style={{ margin: '4px' }} />
             </div>
-            <p className="text-white/70 text-lg">正在解读中...</p>
+            <p className="text-white/70 text-lg">{texts.loading}</p>
           </div>
         </div>
       </div>
@@ -230,8 +270,8 @@ export default function YesNoTarotResult() {
   return (
     <div className="dark">
       <Head>
-        <title>是否塔罗 - 解读结果</title>
-        <meta name="description" content="查看你的塔罗指引" />
+        <title>{texts.titleResult}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white">
@@ -242,7 +282,7 @@ export default function YesNoTarotResult() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">{isFromHistory ? 'arrow_back' : 'home'}</span>
-            <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '首页'}</span>
+            <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.home}</span>
           </button>
           
           <h2 className="text-lg font-bold">Mystic Insights</h2>
@@ -252,7 +292,7 @@ export default function YesNoTarotResult() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">auto_awesome</span>
-            <span className="text-sm font-medium hidden sm:inline">新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.newReading}</span>
           </button>
         </header>
 
@@ -263,7 +303,7 @@ export default function YesNoTarotResult() {
             <div className="text-center mb-12">
               <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Yes/No Tarot</p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                你的塔罗指引
+                {texts.h1}
               </h1>
             </div>
 
@@ -299,7 +339,7 @@ export default function YesNoTarotResult() {
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-white mb-1">{card.name}</h3>
                   <p className="text-sm text-white/60">
-                    {card.orientation === 'upright' ? '正位' : '逆位'} · {card.orientation === 'upright' ? card.upright : card.reversed}
+                    {card.orientation === 'upright' ? texts.upright : texts.reversed} · {card.orientation === 'upright' ? card.upright : card.reversed}
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center mt-3">
                     {card.keywords.map((keyword) => (
@@ -329,9 +369,9 @@ export default function YesNoTarotResult() {
                           {answer === 'YES' ? 'check_circle' : answer === 'NO' ? 'cancel' : 'help'}
                         </span>
                         <div>
-                          <p className="text-sm font-medium text-white/70 uppercase tracking-wider">答案</p>
+                          <p className="text-sm font-medium text-white/70 uppercase tracking-wider">{texts.answerLabel}</p>
                           <p className={`text-4xl font-black ${answerColor}`}>
-                            {answer ? getAnswerText(answer) : '未知'}
+                            {answer ? getAnswerText(answer) : texts.unknown}
                           </p>
                         </div>
                       </div>
@@ -339,7 +379,7 @@ export default function YesNoTarotResult() {
 
                     {/* 解读 */}
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                      <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">解读</p>
+                      <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">{texts.interpretationLabel}</p>
                       <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
                         {interpretation}
                       </p>
@@ -348,7 +388,7 @@ export default function YesNoTarotResult() {
                     {/* 温馨提示 */}
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
                       <p className="text-sm text-white/60 leading-relaxed">
-                        ✨ 塔罗牌只是工具，它反映的是当下的能量和可能性。最终的选择权在你手中，请结合自身情况和内心感受做出决定。
+                        {texts.disclaimer}
                       </p>
                     </div>
                   </>
@@ -360,13 +400,13 @@ export default function YesNoTarotResult() {
                     className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    再问一个
+                    {texts.askAnother}
                   </button>
                   <button
                     onClick={() => router.push('/')}
                     className="flex-1 px-6 py-3 rounded-xl border border-white/20 bg-white/5 text-white font-semibold transition-all hover:bg-white/10"
                   >
-                    返回首页
+                    {texts.backToHome}
                   </button>
                 </div>
               </motion.div>

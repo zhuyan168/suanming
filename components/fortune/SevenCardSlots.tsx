@@ -11,13 +11,35 @@ interface SevenCardSlotsProps {
   isAnimating: boolean[];
   showLoadingText?: boolean;
   forceFlipped?: boolean;
+  isEn?: boolean;
 }
+
+const POSITION_LABELS_ZH = [
+  '月初状态',
+  '本月爱情/桃花',
+  '本月事业',
+  '本月财运',
+  '本月人际关系',
+  '月末状态',
+  '本月建议',
+];
+
+const POSITION_LABELS_EN = [
+  'Early Month',
+  'Love & Romance',
+  'Career',
+  'Wealth',
+  'Relationships',
+  'Late Month',
+  'Monthly Advice',
+];
 
 export default function SevenCardSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
-  forceFlipped = false
+  forceFlipped = false,
+  isEn = false,
 }: SevenCardSlotsProps) {
   // Define positions for the Hexagon + Center layout
   // 1: Top, 2: Top-Left, 3: Top-Right, 4: Bottom-Left, 5: Bottom-Right, 6: Bottom, 7: Center
@@ -63,7 +85,7 @@ export default function SevenCardSlots({
              <div className="flex flex-col items-center">
                {/* Position Label */}
                <div className="mb-2 text-xs text-white/50 uppercase tracking-wider font-bold">
-                 {index === 0 ? "月初状态" : index === 1 ? "本月爱情/桃花" : index === 2 ? "本月事业" : index === 3 ? "本月财运" : index === 4 ? "本月人际关系" : index === 5 ? "月末状态" : index === 6 ? "本月建议" : index + 1}
+                 {(isEn ? POSITION_LABELS_EN : POSITION_LABELS_ZH)[index] ?? index + 1}
                </div>
 
               <AnimatePresence mode="wait">
@@ -163,7 +185,7 @@ export default function SevenCardSlots({
       {/* Loading text centered at bottom if needed */}
        {showLoadingText && cards.filter(c => c !== null).length < 7 && (
         <div className="absolute -bottom-12 left-0 right-0 text-center text-white/50 text-sm">
-          <p>请继续抽取卡牌...</p>
+          <p>{isEn ? 'Keep drawing cards...' : '请继续抽取卡牌...'}</p>
         </div>
       )}
 

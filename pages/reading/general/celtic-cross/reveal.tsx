@@ -106,7 +106,7 @@ const getChineseCardName = (englishName: string): string => {
 };
 
 // 牌位名称与含义
-const POSITION_INFO = [
+const POSITION_INFO_ZH = [
   { name: '现状', desc: '代表你当前面对的核心情况' },
   { name: '阻碍', desc: '阻挡你前进的挑战或障碍' },
   { name: '重点', desc: '这个问题的焦点或意识层面的关键' },
@@ -117,6 +117,18 @@ const POSITION_INFO = [
   { name: '提醒', desc: '外部环境或周围人对你的影响' },
   { name: '期待恐惧', desc: '你内心深处的希望或担忧' },
   { name: '走向', desc: '最终可能的结果或发展方向' },
+];
+const POSITION_INFO_EN = [
+  { name: 'Present', desc: 'The core of your current situation' },
+  { name: 'Challenge', desc: 'The obstacle or challenge blocking your path' },
+  { name: 'Focus', desc: 'The key theme or conscious awareness around the issue' },
+  { name: 'Past', desc: 'Past events or roots influencing the present' },
+  { name: 'Advantage', desc: 'Resources, possibilities, or your best potential' },
+  { name: 'Near Future', desc: 'The direction of upcoming developments' },
+  { name: 'How to Approach', desc: 'The attitude or action you can take' },
+  { name: 'Advice', desc: 'External environment or how others affect you' },
+  { name: 'Hopes & Fears', desc: 'Your deep inner hopes or worries' },
+  { name: 'Outcome', desc: 'The likely final result or direction' },
 ];
 
 // LocalStorage Keys
@@ -152,6 +164,7 @@ function MembershipModal({
   onClose: () => void;
 }) {
   const router = useRouter();
+  const isEn = router.locale === 'en';
 
   if (!isOpen) return null;
 
@@ -185,12 +198,12 @@ function MembershipModal({
 
             {/* 标题 */}
             <h3 className="text-white text-2xl font-bold text-center mb-4">
-              会员专属解读
+              {isEn ? 'Member-Only Reading' : '会员专属解读'}
             </h3>
 
             {/* 说明 */}
             <p className="text-white/70 text-center leading-relaxed mb-8">
-              这是会员专属解读功能。<br />开通会员后即可开始解读（功能即将上线）。
+              {isEn ? 'This is a member-only reading feature. Unlock full readings by becoming a member (coming soon).' : '这是会员专属解读功能。\n开通会员后即可开始解读（功能即将上线）。'}
             </p>
 
             {/* 按钮 */}
@@ -199,13 +212,13 @@ function MembershipModal({
                 onClick={handleGoToMembership}
                 className="w-full py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
               >
-                去开通会员
+                {isEn ? 'Become a Member' : '去开通会员'}
               </button>
               <button
                 onClick={onClose}
                 className="w-full py-3 rounded-lg bg-white/10 text-white/70 font-semibold hover:bg-white/20 transition-colors"
               >
-                我知道了
+                {isEn ? 'Got it' : '我知道了'}
               </button>
             </div>
           </div>
@@ -247,6 +260,29 @@ function MembershipModal({
 
 export default function CelticCrossRevealPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const POSITION_INFO = isEn ? POSITION_INFO_EN : POSITION_INFO_ZH;
+  const texts = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Celtic Cross Spread — Cards Revealed | Mystic Insights' : '凯尔特十字牌阵 - 结果展示 | Mystic Insights',
+    metaDesc: isEn ? 'View your Celtic Cross Spread tarot results.' : '查看你的凯尔特十字牌阵占卜结果',
+    back: isEn ? 'Back' : '返回',
+    redraw: isEn ? 'Redraw' : '重新占卜',
+    spreadName: isEn ? 'Celtic Cross Spread' : '凯尔特十字牌阵',
+    subtitle: isEn ? 'Your cards are set. Here are the 10 tarot cards you drew.' : '牌已就位，以下是你抽到的十张塔罗牌',
+    yourQuestion: isEn ? 'Your Question' : '你的问题',
+    noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    memberTitle: isEn ? 'Member Reading Required' : '解读需开通会员',
+    memberDesc: isEn ? 'The Celtic Cross is a deep-dive spread with a more detailed and time-intensive reading. You can explore the card meanings below on your own. Unlock the full reading by becoming a member.' : '凯尔特十字属于深度牌阵，解读会更详细也更耗时。你可以先根据牌位含义自行阅读牌面；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。',
+    memberComingSoon: isEn ? 'Membership coming soon — stay tuned.' : '会员系统即将上线，敬请期待',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    memberBadge: isEn ? 'Member' : '会员',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
+    confirmRedraw: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新占卜吗？当前结果将被清空。',
+  };
 
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
     spreadKey: 'celtic-cross',
@@ -278,7 +314,7 @@ export default function CelticCrossRevealPage() {
   }, [router]);
 
   const handleRedraw = () => {
-    if (!confirm('确定要重新占卜吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmRedraw)) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
@@ -315,7 +351,7 @@ export default function CelticCrossRevealPage() {
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-white/70">加载中...</p>
+          <p className="text-white/70">{texts.loading}</p>
         </div>
       </div>
     );
@@ -324,8 +360,8 @@ export default function CelticCrossRevealPage() {
   return (
     <>
       <Head>
-        <title>凯尔特十字牌阵 - 结果展示 | Mystic Insights</title>
-        <meta name="description" content="查看你的凯尔特十字牌阵占卜结果" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -342,7 +378,7 @@ export default function CelticCrossRevealPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -356,7 +392,7 @@ export default function CelticCrossRevealPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重新占卜</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.redraw}</span>
           </button>
         </header>
 
@@ -374,10 +410,10 @@ export default function CelticCrossRevealPage() {
                 CELTIC CROSS SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                凯尔特十字牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                牌已就位，以下是你抽到的十张塔罗牌
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -394,9 +430,9 @@ export default function CelticCrossRevealPage() {
                     psychology
                   </span>
                   <div className="flex-1">
-                    <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                    <p className="text-white/60 text-xs font-medium mb-1">{texts.yourQuestion}</p>
                     <p className="text-white/90 text-sm leading-relaxed">
-                      {question || '你没有写下具体问题，我们将以你当下的能量趋势进行解读'}
+                      {question || texts.noQuestion}
                     </p>
                   </div>
                 </div>
@@ -439,11 +475,11 @@ export default function CelticCrossRevealPage() {
                     </div>
                     
                     <h3 className="text-white font-semibold text-sm mb-1">
-                      {getChineseCardName(card.name)}
+                      {isEn ? card.name : getChineseCardName(card.name)}
                     </h3>
                     
                     <p className="text-white/70 text-xs mb-2">
-                      {card.orientation === 'upright' ? '正位' : '逆位'}
+                      {card.orientation === 'upright' ? texts.upright : texts.reversed}
                     </p>
                     
                     <p className="text-white/50 text-xs leading-relaxed">
@@ -466,14 +502,14 @@ export default function CelticCrossRevealPage() {
                   </span>
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-2 text-lg">
-                      解读需开通会员
+                      {texts.memberTitle}
                     </h3>
                     <p className="text-white/80 text-sm leading-relaxed mb-3">
-                      凯尔特十字属于深度牌阵，解读会更详细也更耗时。你可以先根据牌位含义自行阅读牌面；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。
+                      {texts.memberDesc}
                     </p>
                     <div className="flex items-center gap-2 text-amber-400/90 text-xs">
                       <span className="material-symbols-outlined text-sm">info</span>
-                      <span>会员系统即将上线，敬请期待</span>
+                      <span>{texts.memberComingSoon}</span>
                     </div>
                   </div>
                 </div>
@@ -497,9 +533,9 @@ export default function CelticCrossRevealPage() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                      开始解读
+                      {texts.startReading}
                       <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
-                        会员
+                        {texts.memberBadge}
                       </span>
                     </span>
                   </motion.button>
@@ -512,7 +548,7 @@ export default function CelticCrossRevealPage() {
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">home</span>
-                      返回首页
+                      {texts.backHome}
                     </span>
                   </motion.button>
                 </div>
@@ -531,7 +567,7 @@ export default function CelticCrossRevealPage() {
                     auto_awesome
                   </span>
                   <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                    占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。
+                    {texts.disclaimer}
                   </p>
                   <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                     auto_awesome

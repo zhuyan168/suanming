@@ -32,6 +32,7 @@ const MOCK_TAROT_CARDS = [
 
 export default function AnnualFortuneEntryPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const [isGenerating, setIsGenerating] = useState(false);
 
   /**
@@ -84,7 +85,7 @@ export default function AnnualFortuneEntryPage() {
   return (
     <>
       <Head>
-        <title>年度运势 - Mystic Insights</title>
+        <title>{isEn ? 'Yearly Fortune - Mystic Insights' : '年度运势 - Mystic Insights'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link
           rel="stylesheet"
@@ -162,10 +163,10 @@ export default function AnnualFortuneEntryPage() {
                   Annual Fortune
                 </p>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight tracking-tight mb-4">
-                  年度运势占卜
+                  {isEn ? 'Yearly Fortune Reading' : '年度运势占卜'}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  探索未来一年的运势走向，获取每月的能量指引
+                  {isEn ? 'Explore the themes and energy guidance for the year ahead.' : '探索未来一年的运势走向，获取每月的能量指引'}
                 </p>
               </motion.div>
 
@@ -182,16 +183,16 @@ export default function AnnualFortuneEntryPage() {
                     <span className="material-symbols-outlined text-6xl text-primary mb-4 block">
                       auto_awesome
                     </span>
-                    <h2 className="text-2xl font-bold mb-3">快速测试</h2>
+                    <h2 className="text-2xl font-bold mb-3">{isEn ? 'Quick Test' : '快速测试'}</h2>
                     <p className="text-white/60 mb-6">
-                      自动生成测试数据，快速体验结果页面
+                      {isEn ? 'Auto-generate test data to quickly preview the result page.' : '自动生成测试数据，快速体验结果页面'}
                     </p>
                     <button
                       onClick={handleGenerateMockReading}
                       disabled={isGenerating}
                       className="px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full"
                     >
-                      {isGenerating ? '生成中...' : '生成测试数据'}
+                      {isGenerating ? (isEn ? 'Generating...' : '生成中...') : (isEn ? 'Generate Test Data' : '生成测试数据')}
                     </button>
                   </div>
                 </motion.div>
@@ -207,15 +208,15 @@ export default function AnnualFortuneEntryPage() {
                     <span className="material-symbols-outlined text-6xl text-white/70 mb-4 block">
                       style
                     </span>
-                    <h2 className="text-2xl font-bold mb-3">完整抽牌</h2>
+                    <h2 className="text-2xl font-bold mb-3">{isEn ? 'Full Draw' : '完整抽牌'}</h2>
                     <p className="text-white/60 mb-6">
-                      前往完整的抽牌页面，亲自选择 13 张牌
+                      {isEn ? 'Go to the full draw page and personally choose 13 cards.' : '前往完整的抽牌页面，亲自选择 13 张牌'}
                     </p>
                     <button
                       onClick={() => router.push('/fortune/annual/year-ahead')}
                       className="px-6 py-3 rounded-xl bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors w-full"
                     >
-                      去抽牌
+                      {isEn ? 'Go Draw' : '去抽牌'}
                     </button>
                   </div>
                 </motion.div>
@@ -228,7 +229,7 @@ export default function AnnualFortuneEntryPage() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="space-y-4"
               >
-                <h3 className="text-xl font-bold text-center mb-6">其他功能</h3>
+                <h3 className="text-xl font-bold text-center mb-6">{isEn ? 'More Options' : '其他功能'}</h3>
                 
                 <div className="flex flex-wrap justify-center gap-3">
                   <button
@@ -236,7 +237,7 @@ export default function AnnualFortuneEntryPage() {
                     className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-lg">bug_report</span>
-                    运行测试
+                    {isEn ? 'Run Tests' : '运行测试'}
                   </button>
                   
                   <button
@@ -244,7 +245,7 @@ export default function AnnualFortuneEntryPage() {
                     className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-lg">description</span>
-                    查看上次结果
+                    {isEn ? 'View Last Result' : '查看上次结果'}
                   </button>
                   
                   <button
@@ -252,7 +253,7 @@ export default function AnnualFortuneEntryPage() {
                     className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-lg">menu_book</span>
-                    查看文档
+                    {isEn ? 'View Docs' : '查看文档'}
                   </button>
                 </div>
               </motion.div>

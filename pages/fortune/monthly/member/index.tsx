@@ -211,6 +211,35 @@ interface MonthlyMemberResult {
 
 export default function MonthlyMemberFortune() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const texts = isEn ? {
+    pageTitle: 'Member Monthly Reading — Mystic Insights',
+    loading: 'Loading...',
+    backBtn: 'Back to Monthly',
+    sectionLabel: 'MEMBER MONTHLY READING',
+    h1Drawn: 'This Month\'s Reading is Complete',
+    h1NotDrawn: 'Draw Seven Tarot Cards',
+    subtitleDrawn: 'You\'ve completed this month\'s deep reading. Tap below to view your full guidance.',
+    subtitleNotDrawn: 'Quiet your mind and choose seven cards from below for your complete monthly guidance.',
+    progressHint: (n: number) => `💫 Draw seven cards one by one (${n}/7)`,
+    viewResult: 'View Deep Reading',
+    monthlyLimit: '✨ This month\'s reading is complete. Come back next month for a new one.',
+    startReading: 'Start Reading',
+  } : {
+    pageTitle: '会员版月运 - Mystic Insights',
+    loading: '加载中...',
+    backBtn: '返回月度运势',
+    sectionLabel: '会员尊享月度运势',
+    h1Drawn: '本月运势已抽取',
+    h1NotDrawn: '抽取七张塔罗牌',
+    subtitleDrawn: '你已抽取本月深度运势，点击下方按钮查看详细解析。',
+    subtitleNotDrawn: '静心感受，从下方卡牌中选择七张，获取全方位的月度指引。',
+    progressHint: (n: number) => `💫 请依次抽取七张卡牌（${n}/7）`,
+    viewResult: '查看深度解析',
+    monthlyLimit: '✨ 每月只能抽取一次，下个月再来吧',
+    startReading: '开始测算',
+  };
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'fortune-monthly-member',
@@ -426,7 +455,7 @@ export default function MonthlyMemberFortune() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{texts.loading}</div>
         </div>
       </div>
     );
@@ -435,7 +464,7 @@ export default function MonthlyMemberFortune() {
   return (
     <>
       <Head>
-        <title>会员版月运 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -481,7 +510,7 @@ export default function MonthlyMemberFortune() {
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <button onClick={handleBackToMonthly} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回月度运势</span>
+              <span className="text-sm font-medium">{texts.backBtn}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -492,14 +521,12 @@ export default function MonthlyMemberFortune() {
           <main className="px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-16">
             <div className="mx-auto max-w-7xl">
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">会员尊享月度运势</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawnThisMonth ? '本月运势已抽取' : '抽取七张塔罗牌'}
+                  {hasDrawnThisMonth ? texts.h1Drawn : texts.h1NotDrawn}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  {hasDrawnThisMonth 
-                    ? '你已抽取本月深度运势，点击下方按钮查看详细解析。' 
-                    : '静心感受，从下方卡牌中选择七张，获取全方位的月度指引。'}
+                  {hasDrawnThisMonth ? texts.subtitleDrawn : texts.subtitleNotDrawn}
                 </p>
               </div>
 
@@ -541,11 +568,12 @@ export default function MonthlyMemberFortune() {
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
+                      isEn={isEn}
                     />
 
                     {selectedCards.filter(c => c !== null).length < 7 && (
                       <div className="text-center text-white/50 text-sm mt-20">
-                        <p>💫 请依次抽取七张卡牌（{selectedCards.filter(c => c !== null).length}/7）</p>
+                        <p>{texts.progressHint(selectedCards.filter(c => c !== null).length)}</p>
                       </div>
                     )}
                   </motion.div>
@@ -564,6 +592,7 @@ export default function MonthlyMemberFortune() {
                     isAnimating={[false, false, false, false, false, false, false]}
                     showLoadingText={false}
                     forceFlipped={true}
+                    isEn={isEn}
                   />
 
                   <div className="text-center mt-8">
@@ -573,12 +602,12 @@ export default function MonthlyMemberFortune() {
                       onClick={handleViewResult}
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     >
-                      查看深度解析
+                      {texts.viewResult}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 每月只能抽取一次，下个月再来吧</p>
+                    <p>{texts.monthlyLimit}</p>
                   </div>
                 </motion.div>
               )}
@@ -596,8 +625,8 @@ export default function MonthlyMemberFortune() {
                     onClick={handleViewResult}
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                   >
-                    开始测算
-                  </motion.button>
+                    {texts.startReading}
+                    </motion.button>
                 </motion.div>
               )}
             </div>

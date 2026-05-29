@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -29,7 +30,9 @@ export default function EightCardsSpecialSlots({
   forceFlipped = false,
   slotConfig
 }: EightCardsSpecialSlotsProps) {
-  
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   // 用于渲染单张卡片的通用函数
   const renderCard = (index: number) => {
     const card = cards[index];
@@ -183,7 +186,7 @@ export default function EightCardsSpecialSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-4 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/8）</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/8)` : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/8）`}</p>
         </motion.div>
       )}
 

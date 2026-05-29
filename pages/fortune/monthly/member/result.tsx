@@ -93,6 +93,18 @@ const tarotCards = [
 
 // ============ 工具函数 ============
 
+const MONTHS_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const formatMonthDisplay = (isEn: boolean): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  return isEn ? `${MONTHS_EN[m]} ${y}` : `${y}年${m + 1}月`;
+};
+
 // 从旧 URL 中提取文件名作为 key
 const getCardKeyFromUrl = (url: string) => {
   const match = url.match(/\/([^/]+)\.png$/);
@@ -192,6 +204,37 @@ interface ShuffledTarotCard {
 
 export default function MonthlyMemberResultPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+
+  const getOrientationText = (orientation: 'upright' | 'reversed') =>
+    orientation === 'reversed' ? (isEn ? 'Reversed' : '逆位') : (isEn ? 'Upright' : '正位');
+
+  const texts = isEn ? {
+    pageTitle: 'Member Monthly Deep Reading — Mystic Insights',
+    backToHistory: 'Back to My Readings',
+    backBtn: 'Back to Monthly',
+    sectionLabel: 'MEMBER MONTHLY DEEP READING',
+    h1: `${formatMonthDisplay(true)} Deep Guidance`,
+    subtitle: 'Uncover the energy flows of this month and navigate the key turning points ahead.',
+    loadingText: 'Loading your reading...',
+    generatingText: 'Interpreting the seven cards in depth...',
+    errorFetch: 'Failed to generate reading. Please try again.',
+    overview: 'Monthly Overview',
+    disclaimer: '✨ May this guidance bring you clarity and peace.',
+  } : {
+    pageTitle: '会员版月运解析 - Mystic Insights',
+    backToHistory: '返回我的占卜记录',
+    backBtn: '返回月度运势',
+    sectionLabel: '会员版月运深度解析',
+    h1: `${formatMonthDisplay(false)} 深度指引`,
+    subtitle: '洞察本月能量流向，把握命运关键节点。',
+    loadingText: '加载中...',
+    generatingText: '正在深度解析七张牌的奥秘...',
+    errorFetch: '生成运势失败，请稍后重试',
+    overview: '本月总览',
+    disclaimer: '✨ 愿指引与你同在',
+  };
+
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentMonth = getCurrentMonth();
 
@@ -308,7 +351,7 @@ export default function MonthlyMemberResultPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || '获取运势失败');
+        throw new Error(data.error || (isEn ? 'Failed to load reading.' : '获取运势失败'));
       }
 
       const data = await response.json();
@@ -324,7 +367,7 @@ export default function MonthlyMemberResultPage() {
 
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
-      setError(err.message || '生成运势失败，请稍后重试');
+      setError(err.message || texts.errorFetch);
     } finally {
       setIsGenerating(false);
       setIsLoading(false);
@@ -339,12 +382,12 @@ export default function MonthlyMemberResultPage() {
     return (
       <>
         <Head>
-          <title>会员版月运解析 - Mystic Insights</title>
+          <title>{texts.pageTitle}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         <div className="dark">
           <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">
-            <MagicalLoading />
+            <MagicalLoading text={texts.loadingText} />
           </div>
         </div>
       </>
@@ -372,7 +415,7 @@ export default function MonthlyMemberResultPage() {
   return (
     <>
       <Head>
-        <title>会员版月运解析 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -462,7 +505,7 @@ export default function MonthlyMemberResultPage() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回月度运势'}</span>
+              <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.backBtn}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
@@ -475,15 +518,12 @@ export default function MonthlyMemberResultPage() {
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">会员版月运深度解析</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {savedResult.result?.month || (() => {
-                    const now = new Date();
-                    return `${now.getFullYear()}年${now.getMonth() + 1}月`;
-                  })()} 深度指引
+                  {texts.h1}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  洞察本月能量流向，把握命运关键节点。
+                  {texts.subtitle}
                 </p>
               </div>
 
@@ -501,12 +541,13 @@ export default function MonthlyMemberResultPage() {
                   isAnimating={[false, false, false, false, false, false, false]}
                   showLoadingText={false}
                   forceFlipped={true}
+                  isEn={isEn}
                 />
               </div>
 
               {/* 解析内容 */}
               {isGenerating ? (
-                <MagicalLoading text="正在深度解析七张牌的奥秘..." />
+                <MagicalLoading text={texts.generatingText} />
               ) : savedResult.result ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -523,7 +564,7 @@ export default function MonthlyMemberResultPage() {
                   >
                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary">auto_awesome</span>
-                      本月总览
+                      {texts.overview}
                     </h3>
                     <p className="text-white/90 leading-relaxed text-lg">
                       {savedResult.result.summary}
@@ -548,7 +589,7 @@ export default function MonthlyMemberResultPage() {
                               <div className="text-primary font-bold text-lg mb-2">{card.position}</div>
                               <div className="text-white/90 font-medium">{card.name}</div>
                               <div className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full ${card.orientation === 'upright' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-                                {card.orientation === 'upright' ? '正位' : '逆位'}
+                                {getOrientationText(card.orientation)}
                               </div>
                             </div>
                           </div>
@@ -574,7 +615,7 @@ export default function MonthlyMemberResultPage() {
                     transition={{ delay: 1.5 }}
                     className="text-center text-white/50 text-sm mt-12"
                   >
-                    <p>✨ 愿指引与你同在</p>
+                    <p>{texts.disclaimer}</p>
                   </motion.div>
                 </motion.div>
               ) : null}
@@ -587,7 +628,7 @@ export default function MonthlyMemberResultPage() {
 }
 
 // 魔幻加载动画组件
-const MagicalLoading = ({ text = "塔罗牌正在回应你的召唤..." }: { text?: string }) => {
+const MagicalLoading = ({ text = "Loading..." }: { text?: string }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <div className="relative mb-8">

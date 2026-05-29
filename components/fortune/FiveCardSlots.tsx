@@ -11,15 +11,24 @@ interface FiveCardSlotsProps {
   isAnimating: boolean[];
   showLoadingText?: boolean;
   forceFlipped?: boolean;
+  isEn?: boolean;
 }
 
 // 五张卡槽的位置名称和说明
 const SLOT_NAMES = [
-  '行动力',          // Slot 1: 左侧 - 代表行动、执行、创造力
-  '情感与人际关系',   // Slot 2: 右侧 - 代表情感、关系、心灵
-  '思维与计划',      // Slot 3: 下方 - 代表思考、规划、策略
-  '事业与财运',      // Slot 4: 上方 - 代表事业、物质、财富
-  '整体运势',        // Slot 5: 中心 - 代表核心主题、总体走向
+  '行动力',
+  '情感与人际关系',
+  '思维与计划',
+  '事业与财运',
+  '整体运势',
+];
+
+const SLOT_NAMES_EN = [
+  'Action',
+  'Emotion & Relationships',
+  'Mind & Planning',
+  'Career & Wealth',
+  'Overall',
 ];
 
 const SLOT_LABELS = [
@@ -34,7 +43,8 @@ export default function FiveCardSlots({
   cards, 
   isAnimating,
   showLoadingText = false,
-  forceFlipped = false
+  forceFlipped = false,
+  isEn = false,
 }: FiveCardSlotsProps) {
   // 五张牌的十字形布局：
   //        [4 财运]
@@ -54,7 +64,7 @@ export default function FiveCardSlots({
             {SLOT_LABELS[index]}
           </p>
           <p className="text-sm sm:text-base text-white/70 font-medium">
-            {SLOT_NAMES[index]}
+            {isEn ? SLOT_NAMES_EN[index] : SLOT_NAMES[index]}
           </p>
         </div>
         
@@ -199,7 +209,9 @@ export default function FiveCardSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/5）</p>
+          <p>🔮 {isEn
+            ? `Keep drawing cards (${cards.filter(c => c !== null).length}/5)`
+            : `请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/5）`}</p>
         </motion.div>
       )}
 

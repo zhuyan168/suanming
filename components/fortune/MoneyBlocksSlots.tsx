@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -21,7 +22,9 @@ export default function MoneyBlocksSlots({
   forceFlipped = false,
   slotConfig
 }: MoneyBlocksSlotsProps) {
-  
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   const renderCard = (index: number) => {
     const card = cards[index];
     const config = slotConfig[index];
@@ -143,7 +146,7 @@ export default function MoneyBlocksSlots({
           animate={{ opacity: 1, y: 0 }}
           className="text-center text-white/70 text-sm sm:text-base mt-8 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/5）</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/5)` : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/5）`}</p>
         </motion.div>
       )}
 

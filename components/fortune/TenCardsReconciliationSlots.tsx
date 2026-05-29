@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -35,7 +36,9 @@ export default function TenCardsReconciliationSlots({
   forceFlipped = false,
   slotConfig
 }: TenCardsReconciliationSlotsProps) {
-  
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+
   // 用于渲染单张卡片的通用函数
   const renderCard = (index: number) => {
     const card = cards[index];
@@ -205,7 +208,7 @@ export default function TenCardsReconciliationSlots({
           transition={{ duration: 0.3 }}
           className="text-center text-white/70 text-sm sm:text-base mt-2 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/10）</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/10)` : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/10）`}</p>
         </motion.div>
       )}
 

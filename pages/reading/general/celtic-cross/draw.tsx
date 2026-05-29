@@ -95,6 +95,22 @@ const loadResult = (): CelticCrossResult | null => {
 
 export default function CelticCrossDrawPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const texts = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Celtic Cross Spread — Draw Cards | Mystic Insights' : '凯尔特十字牌阵 - 抽牌 | Mystic Insights',
+    metaDesc: isEn ? 'Select 10 cards from the deck for your Celtic Cross reading.' : '从78张塔罗牌中选择10张，探索你的深度指引',
+    back: isEn ? 'Back' : '返回',
+    reset: isEn ? 'Reset' : '重置',
+    titleDone: isEn ? 'Cards Drawn' : '抽牌完成',
+    titleDrawing: isEn ? 'Draw Ten Tarot Cards' : '抽取十张塔罗牌',
+    subtitleDone: isEn ? 'Your cards are set. Now let\'s see what they reveal.' : '牌已经就位，现在让我们看看它们的指引。',
+    subtitleDrawing: isEn ? 'Breathe deeply and choose 10 cards from the deck below.' : '静心感受，从下方78张牌中选择10张，开启你的深度占卜之旅。',
+    yourQuestion: isEn ? 'Your Question' : '你的问题',
+    drawnCount: (n: number) => isEn ? `Cards Drawn: ${n} / 10` : `已抽牌：${n} / 10`,
+    confirmBack: isEn ? 'Are you sure you want to go back? Your current draw progress will be lost.' : '确定要返回吗？当前抽牌进度将丢失。',
+    confirmReset: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
+  };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'celtic-cross',
     redirectPath: '/reading/general',
@@ -280,12 +296,12 @@ export default function CelticCrossDrawPage() {
   };
 
   const handleBack = () => {
-    if (!confirm('确定要返回吗？当前抽牌进度将丢失。')) return;
+    if (!confirm(texts.confirmBack)) return;
     router.push('/reading/general/celtic-cross/question');
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(texts.confirmReset)) return;
 
     if (typeof window !== 'undefined') {
       localStorage.removeItem(RESULT_STORAGE_KEY);
@@ -312,7 +328,7 @@ export default function CelticCrossDrawPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loading}</div>
       </div>
     );
   }
@@ -320,8 +336,8 @@ export default function CelticCrossDrawPage() {
   return (
     <>
       <Head>
-        <title>凯尔特十字牌阵 - 抽牌 | Mystic Insights</title>
-        <meta name="description" content="从78张塔罗牌中选择10张，探索你的深度指引" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">
@@ -338,7 +354,7 @@ export default function CelticCrossDrawPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -352,7 +368,7 @@ export default function CelticCrossDrawPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.reset}</span>
           </button>
         </header>
 
@@ -365,12 +381,10 @@ export default function CelticCrossDrawPage() {
                 CELTIC CROSS SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                {hasDrawn ? '抽牌完成' : '抽取十张塔罗牌'}
+                {hasDrawn ? texts.titleDone : texts.titleDrawing}
               </h1>
               <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                {hasDrawn 
-                  ? '牌已经就位，现在让我们看看它们的指引。' 
-                  : '静心感受，从下方78张牌中选择10张，开启你的深度占卜之旅。'}
+                {hasDrawn ? texts.subtitleDone : texts.subtitleDrawing}
               </p>
             </div>
 
@@ -387,7 +401,7 @@ export default function CelticCrossDrawPage() {
                       psychology
                     </span>
                     <div className="flex-1">
-                      <p className="text-white/60 text-xs font-medium mb-1">你的问题</p>
+                      <p className="text-white/60 text-xs font-medium mb-1">{texts.yourQuestion}</p>
                       <p className="text-white/90 text-sm leading-relaxed">{question}</p>
                     </div>
                   </div>
@@ -433,7 +447,7 @@ export default function CelticCrossDrawPage() {
                   <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                   <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                    <p>已抽牌：{currentCardCount} / 10</p>
+                    <p>{texts.drawnCount(currentCardCount)}</p>
                   </div>
 
                   {/* 卡槽区域 */}

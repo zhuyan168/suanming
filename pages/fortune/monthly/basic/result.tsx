@@ -197,10 +197,61 @@ interface ShuffledTarotCard {
   orientation: 'upright' | 'reversed';
 }
 
+// 将 YYYY-MM 格式转为可读月份字符串
+const formatMonthDisplay = (month: string, isEn: boolean): string => {
+  const [year, monthNum] = month.split('-').map(Number);
+  if (isEn) {
+    const date = new Date(year, monthNum - 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  return `${year}年${monthNum}月`;
+};
+
 export default function MonthlyBasicResult() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const currentMonth = getCurrentMonth();
+
+  const texts = isEn ? {
+    pageTitle: 'Monthly Reading — Mystic Insights',
+    backToHistory: 'Back to My Readings',
+    backToMonthly: 'Back to Monthly Fortune',
+    sectionLabel: 'MONTHLY READING',
+    subtitle: 'May this reading bring you clarity and light for the month ahead.',
+    loadingText: 'Connecting with the cards...',
+    generatingText: 'Reading the cards...',
+    errorFetch: 'Failed to get your reading. Please try again.',
+    errorGenerate: 'Failed to generate reading. Please try again.',
+    cardLabel: (n: number) => `Card ${n}`,
+    fortune: {
+      overall: 'Overall',
+      love: 'Love',
+      career: 'Career & Study',
+      wealth: 'Wealth',
+      health: 'Health',
+    },
+    footerHint: '✨ Come back next month for a new reading.',
+  } : {
+    pageTitle: '月度运势解析 - Mystic Insights',
+    backToHistory: '返回我的占卜记录',
+    backToMonthly: '返回月度运势',
+    sectionLabel: '月度运势解析',
+    subtitle: '愿这份指引为你的本月带来光明与力量。',
+    loadingText: '塔罗牌正在回应你的召唤...',
+    generatingText: '正在解读牌面蕴含的指引...',
+    errorFetch: '获取运势失败',
+    errorGenerate: '生成运势失败，请稍后重试',
+    cardLabel: (n: number) => `第${n}张牌`,
+    fortune: {
+      overall: '综合运势',
+      love: '爱情运势',
+      career: '事业 & 学业',
+      wealth: '财运',
+      health: '健康',
+    },
+    footerHint: '✨ 下个月再来抽取新的运势吧',
+  };
   
   const [savedResult, setSavedResult] = useState<MonthlyBasicResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -299,7 +350,7 @@ export default function MonthlyBasicResult() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || '获取运势失败');
+        throw new Error(data.error || texts.errorFetch);
       }
 
       const data = await response.json();
@@ -315,7 +366,7 @@ export default function MonthlyBasicResult() {
 
     } catch (err: any) {
       console.error('❌ 生成运势错误:', err);
-      setError(err.message || '生成运势失败，请稍后重试');
+      setError(err.message || texts.errorGenerate);
     } finally {
       setIsGenerating(false);
       setIsLoading(false);
@@ -334,12 +385,12 @@ export default function MonthlyBasicResult() {
     return (
       <>
         <Head>
-          <title>月度运势解析 - Mystic Insights</title>
+          <title>{texts.pageTitle}</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
         <div className="dark">
           <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center">
-            <MagicalLoading />
+            <MagicalLoading text={texts.loadingText} />
           </div>
         </div>
       </>
@@ -386,7 +437,7 @@ export default function MonthlyBasicResult() {
   return (
     <>
       <Head>
-        <title>月度运势解析 - Mystic Insights</title>
+        <title>{texts.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -484,7 +535,7 @@ export default function MonthlyBasicResult() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">{isFromHistory ? '返回我的占卜记录' : '返回月度运势'}</span>
+              <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.backToMonthly}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
               <div className="size-6 text-primary">
@@ -505,12 +556,12 @@ export default function MonthlyBasicResult() {
             <div className="mx-auto max-w-7xl">
               {/* 标题区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">月度运势解析</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">{texts.sectionLabel}</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {currentMonth} 运势解读
+                  {formatMonthDisplay(currentMonth, isEn)}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  愿这份指引为你的本月带来光明与力量。
+                  {texts.subtitle}
                 </p>
               </div>
 
@@ -533,7 +584,7 @@ export default function MonthlyBasicResult() {
 
               {/* 解析内容 */}
               {isGenerating ? (
-                <MagicalLoading text="正在解读牌面蕴含的指引..." />
+                <MagicalLoading text={texts.generatingText} />
               ) : savedResult.result ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -561,7 +612,7 @@ export default function MonthlyBasicResult() {
                         transition={{ delay: 0.3 + index * 0.1 }}
                         className="rounded-2xl border border-white/10 bg-white/5 p-6"
                       >
-                        <h3 className="text-lg font-bold text-white mb-2">第{index + 1}张牌</h3>
+                        <h3 className="text-lg font-bold text-white mb-2">{texts.cardLabel(index + 1)}</h3>
                         <p className="text-sm text-white/60 mb-3">{card.name}</p>
                         <p className="text-sm text-white/80 leading-relaxed">
                           {index === 0 && savedResult.result?.card1Meaning}
@@ -577,32 +628,32 @@ export default function MonthlyBasicResult() {
                     <div className="sm:col-span-2">
                       <FortuneCard
                         icon="wb_sunny"
-                        title="综合运势"
+                        title={texts.fortune.overall}
                         content={savedResult.result.overall}
                         delay={0.6}
                       />
                     </div>
                     <FortuneCard
                       icon="favorite"
-                      title="爱情运势"
+                      title={texts.fortune.love}
                       content={savedResult.result.love}
                       delay={0.7}
                     />
                     <FortuneCard
                       icon="school"
-                      title="事业 & 学业"
+                      title={texts.fortune.career}
                       content={savedResult.result.career}
                       delay={0.8}
                     />
                     <FortuneCard
                       icon="paid"
-                      title="财运"
+                      title={texts.fortune.wealth}
                       content={savedResult.result.wealth}
                       delay={0.9}
                     />
                     <FortuneCard
                       icon="healing"
-                      title="健康"
+                      title={texts.fortune.health}
                       content={savedResult.result.health}
                       delay={1.0}
                     />
@@ -615,7 +666,7 @@ export default function MonthlyBasicResult() {
                     transition={{ delay: 1.3 }}
                     className="text-center text-white/50 text-sm mt-8"
                   >
-                    <p>✨ 下个月再来抽取新的运势吧</p>
+                    <p>{texts.footerHint}</p>
                   </motion.div>
                 </motion.div>
               ) : null}
@@ -656,7 +707,7 @@ function FortuneCard({ icon, title, content, delay, compact = false }: FortuneCa
 }
 
 // 魔幻加载动画组件
-const MagicalLoading = ({ text = "塔罗牌正在回应你的召唤..." }: { text?: string }) => {
+const MagicalLoading = ({ text = "Loading..." }: { text?: string }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8">
       <div className="relative mb-8">
