@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next/pages';
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
 import { supabase } from '../lib/supabase';
-import FloatingLuna from '../components/luna/FloatingLuna';
 import { useGuestTrial } from '../context/GuestTrialContext';
 
 // 完整的78张塔罗牌数据
@@ -1480,7 +1479,6 @@ export default function Home() {
           <TarotReadingModal isOpen={isTarotOpen} onRequestClose={handleTarotClose} />
         </div>
       </div>
-      <FloatingLuna />
       <FeatureToast visible={isToastVisible} title={toast.title} message={toast.message} onClose={handleCloseToast} />
     </>
   );
