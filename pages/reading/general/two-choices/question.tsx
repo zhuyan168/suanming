@@ -141,7 +141,7 @@ export default function TwoChoicesQuestionPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

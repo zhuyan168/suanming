@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { matchSpreadByMessage, getSpreadById } from '../../utils/luna/spreadMatcher';
 import { getAuthHeaders } from '../../lib/apiHeaders';
+import { useRouter } from 'next/router';
 
 interface MessageAction {
   label: string;
@@ -33,12 +34,60 @@ const WELCOME_MESSAGE: LunaMessage = {
   ],
 };
 
+function lunaText(isEn: boolean) {
+  return {
+    welcome: {
+      role: 'assistant' as const,
+      content: isEn
+        ? "Hi, I'm Luna.\nIf you're not sure where to start, tell me what's on your mind."
+        : '嗨，我是 Luna。\n不知道从哪里开始的话，就先来找我吧。',
+      actions: [
+        { label: isEn ? 'Help me choose a spread' : '帮我选牌阵', type: 'quick-entry' as const, payload: 'spread-select' },
+        { label: isEn ? 'Membership / support' : '充值 / 使用问题', type: 'quick-entry' as const, payload: 'support' },
+      ],
+    },
+    subtitle: isEn ? 'Your site assistant' : '你的站内小助手',
+    spreadFallback: (name: string, description: string) =>
+      isEn ? `I recommend trying "${name}" — ${description}` : `推荐你试试「${name}」——${description}`,
+    openSpread: isEn ? 'Open this spread' : '去看看这个牌阵',
+    chooseAgain: isEn ? 'Choose again' : '换个问题重新选',
+    supportPrompt: isEn ? 'What would you like help with?' : '你想了解哪方面的问题？',
+    membership: isEn ? 'Membership access' : '如何充值 / 成为会员',
+    result: isEn ? 'Where are my results?' : '占卜结果在哪里看',
+    human: isEn ? 'Contact support' : '联系人工客服',
+    faqAnswers: {
+      'faq-membership': isEn
+        ? 'Membership features are still being improved. Some advanced spreads are marked as members-only, and a full membership flow will be available later.\n\nYou can ask me anything else meanwhile.'
+        : '目前会员功能还在完善中，部分高级牌阵会在页面上标注「会员专属」。后续我们会上线正式的会员系统，届时你可以在个人中心完成开通。\n\n如果你有其他问题，随时可以问我。',
+      'faq-result': isEn
+        ? 'Your result appears right after you draw the cards. If you leave midway, history may not be available for every reading yet, so saving a screenshot is still a good idea.\n\nA fuller history feature is being improved.'
+        : '你的占卜结果会在完成抽牌后直接展示在页面上。如果中途离开了页面，目前暂不支持历史记录查看，建议占卜时截图保存。\n\n后续我们会上线历史记录功能，敬请期待。',
+      'faq-human': isEn
+        ? 'Direct human support is not available yet. If you run into a problem, you can leave a message through the contact link in the footer and we will reply as soon as possible.'
+        : '目前暂未开通人工客服通道。如果你遇到了无法解决的问题，可以通过页面底部的联系方式给我们留言，我们会尽快回复。',
+    } as Record<string, string>,
+    unknownFaq: isEn ? "I can't answer that one yet, but this helper will keep improving." : '这个问题我暂时还回答不了，后续会继续完善。',
+    moreQuestions: isEn ? 'I have another question' : '我还有别的问题',
+    home: isEn ? 'Main menu' : '返回主菜单',
+    spreadPrompt: isEn ? "Tell me what you'd like guidance on, and I'll recommend a suitable spread." : '把你现在最想占卜的事情告诉我，我来帮你推荐更适合的牌阵。',
+    homeReply: isEn ? 'Sure. What else can I help with?' : '好的，还有什么我能帮你的吗？',
+    chatFallback: isEn ? 'I lost the thread for a moment. Could you say that again?' : '嗯，我好像走神了。你可以再说一次吗？',
+    networkError: isEn ? 'I’m having trouble connecting right now. Please try again later.' : '我现在连接遇到了一点问题，请稍后再试。',
+    modeHint: isEn ? "Describe what you'd like guidance on, and I'll match a spread for you." : '描述你想占卜的事情，我来帮你匹配牌阵',
+    spreadPlaceholder: isEn ? 'For example: I want to know how my ex feels...' : '比如：我想知道前任怎么想我...',
+    placeholder: isEn ? 'Type your message...' : '输入你想说的...',
+  };
+}
+
 export default function LunaChatPanel({
   isOpen,
   onClose,
   messages,
   onMessagesChange,
 }: LunaChatPanelProps) {
+  const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const copy = lunaText(isEn);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -48,9 +97,9 @@ export default function LunaChatPanel({
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      onMessagesChange([WELCOME_MESSAGE]);
+      onMessagesChange([copy.welcome]);
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length, onMessagesChange, copy.welcome]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,21 +142,21 @@ export default function LunaChatPanel({
         const res = await fetch('/api/luna-spread-match', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message: userText }),
+          body: JSON.stringify({ message: userText, locale: isEn ? 'en' : 'zh' }),
         });
 
         if (!res.ok) throw new Error('API failed');
 
         const data = await res.json();
-        const spread = getSpreadById(data.spreadId);
+        const spread = getSpreadById(data.spreadId, isEn ? 'en' : 'zh');
 
         if (spread) {
           const reply: LunaMessage = {
             role: 'assistant',
-            content: data.reason || `推荐你试试「${spread.name}」——${spread.description}`,
+            content: data.reason || copy.spreadFallback(spread.name, spread.description),
             actions: [
-              { label: '去看看这个牌阵', type: 'link', href: spread.url },
-              { label: '换个问题重新选', type: 'quick-entry', payload: 'spread-select' },
+              { label: copy.openSpread, type: 'link', href: spread.url },
+              { label: copy.chooseAgain, type: 'quick-entry', payload: 'spread-select' },
             ],
           };
           appendMessages(current, reply);
@@ -120,59 +169,51 @@ export default function LunaChatPanel({
         setIsLoading(false);
       }
 
-      const result = matchSpreadByMessage(userText);
+      const result = matchSpreadByMessage(userText, isEn ? 'en' : 'zh');
       const reply: LunaMessage = {
         role: 'assistant',
         content: result.message,
         actions: [
-          { label: '去看看这个牌阵', type: 'link', href: result.spread.url },
-          { label: '换个问题重新选', type: 'quick-entry', payload: 'spread-select' },
+          { label: copy.openSpread, type: 'link', href: result.spread.url },
+          { label: copy.chooseAgain, type: 'quick-entry', payload: 'spread-select' },
         ],
       };
       appendMessages(current, reply);
       setMode('idle');
     },
-    [appendMessages],
+    [appendMessages, copy, isEn],
   );
 
   const handleSupport = useCallback(
     (current: LunaMessage[]) => {
       const reply: LunaMessage = {
         role: 'assistant',
-        content: '你想了解哪方面的问题？',
+        content: copy.supportPrompt,
         actions: [
-          { label: '如何充值 / 成为会员', type: 'quick-entry', payload: 'faq-membership' },
-          { label: '占卜结果在哪里看', type: 'quick-entry', payload: 'faq-result' },
-          { label: '联系人工客服', type: 'quick-entry', payload: 'faq-human' },
+          { label: copy.membership, type: 'quick-entry', payload: 'faq-membership' },
+          { label: copy.result, type: 'quick-entry', payload: 'faq-result' },
+          { label: copy.human, type: 'quick-entry', payload: 'faq-human' },
         ],
       };
       appendMessages(current, reply);
       setMode('idle');
     },
-    [appendMessages],
+    [appendMessages, copy],
   );
 
   const handleFaq = useCallback(
     (faqKey: string, current: LunaMessage[]) => {
-      const answers: Record<string, string> = {
-        'faq-membership':
-          '目前会员功能还在完善中，部分高级牌阵会在页面上标注「会员专属」。后续我们会上线正式的会员系统，届时你可以在个人中心完成开通。\n\n如果你有其他问题，随时可以问我。',
-        'faq-result':
-          '你的占卜结果会在完成抽牌后直接展示在页面上。如果中途离开了页面，目前暂不支持历史记录查看，建议占卜时截图保存。\n\n后续我们会上线历史记录功能，敬请期待。',
-        'faq-human':
-          '目前暂未开通人工客服通道。如果你遇到了无法解决的问题，可以通过页面底部的联系方式给我们留言，我们会尽快回复。',
-      };
       const reply: LunaMessage = {
         role: 'assistant',
-        content: answers[faqKey] || '这个问题我暂时还回答不了，后续会继续完善。',
+        content: copy.faqAnswers[faqKey] || copy.unknownFaq,
         actions: [
-          { label: '我还有别的问题', type: 'quick-entry', payload: 'support' },
-          { label: '返回主菜单', type: 'quick-entry', payload: 'home' },
+          { label: copy.moreQuestions, type: 'quick-entry', payload: 'support' },
+          { label: copy.home, type: 'quick-entry', payload: 'home' },
         ],
       };
       appendMessages(current, reply);
     },
-    [appendMessages],
+    [appendMessages, copy],
   );
 
   const handleActionClick = useCallback(
@@ -192,7 +233,7 @@ export default function LunaChatPanel({
       if (payload === 'spread-select') {
         const reply: LunaMessage = {
           role: 'assistant',
-          content: '把你现在最想占卜的事情告诉我，我来帮你推荐更适合的牌阵。',
+          content: copy.spreadPrompt,
         };
         appendMessages(current, reply);
         setMode('spread-select');
@@ -206,8 +247,8 @@ export default function LunaChatPanel({
 
       if (payload === 'home') {
         const homeReply: LunaMessage = {
-          ...WELCOME_MESSAGE,
-          content: '好的，还有什么我能帮你的吗？',
+          ...copy.welcome,
+          content: copy.homeReply,
         };
         appendMessages(current, homeReply);
         setMode('idle');
@@ -219,7 +260,7 @@ export default function LunaChatPanel({
         return;
       }
     },
-    [messages, onMessagesChange, appendMessages, handleSupport, handleFaq],
+    [messages, onMessagesChange, appendMessages, handleSupport, handleFaq, copy],
   );
 
   const sendMessage = useCallback(async () => {
@@ -247,7 +288,7 @@ export default function LunaChatPanel({
       const res = await fetch('/api/luna-chat', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ messages: contextMessages }),
+        body: JSON.stringify({ messages: contextMessages, locale: isEn ? 'en' : 'zh' }),
       });
 
       if (!res.ok) throw new Error('Request failed');
@@ -255,19 +296,19 @@ export default function LunaChatPanel({
       const data = await res.json();
       const assistantMsg: LunaMessage = {
         role: 'assistant',
-        content: data.reply || '嗯，我好像走神了。你可以再说一次吗？',
+        content: data.reply || copy.chatFallback,
       };
       onMessagesChange([...updated, assistantMsg]);
     } catch {
       const errorMsg: LunaMessage = {
         role: 'assistant',
-        content: '我现在连接遇到了一点问题，请稍后再试。',
+        content: copy.networkError,
       };
       onMessagesChange([...updated, errorMsg]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading, messages, onMessagesChange, mode, handleSpreadSelect]);
+  }, [input, isLoading, messages, onMessagesChange, mode, handleSpreadSelect, copy, isEn]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -291,7 +332,7 @@ export default function LunaChatPanel({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-semibold leading-tight">Luna</p>
-          <p className="text-purple-300/60 text-xs">你的站内小助手</p>
+          <p className="text-purple-300/60 text-xs">{copy.subtitle}</p>
         </div>
         <button
           onClick={handleClose}
@@ -361,7 +402,7 @@ export default function LunaChatPanel({
       <div className="px-3 py-3 border-t border-purple-500/10">
         {mode === 'spread-select' && (
           <p className="text-[11px] text-purple-300/50 mb-1.5 px-1">
-            描述你想占卜的事情，我来帮你匹配牌阵
+            {copy.modeHint}
           </p>
         )}
         <div className="flex items-end gap-2 bg-white/[0.04] rounded-xl px-3 py-2 ring-1 ring-purple-500/10 focus-within:ring-purple-500/30 transition-all">
@@ -370,7 +411,7 @@ export default function LunaChatPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={mode === 'spread-select' ? '比如：我想知道前任怎么想我...' : '输入你想说的...'}
+            placeholder={mode === 'spread-select' ? copy.spreadPlaceholder : copy.placeholder}
             rows={1}
             className="flex-1 bg-transparent text-white/90 text-sm resize-none outline-none placeholder:text-white/25 max-h-[80px] min-h-[24px]"
             style={{ height: 'auto', overflow: 'hidden' }}

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HexagramSlots from '../../../../components/fortune/HexagramSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -155,7 +156,7 @@ export default function HexagramRevealPage() {
   const POSITION_TITLES = isEn ? POSITION_TITLES_EN : POSITION_TITLES_ZH;
   const texts = {
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Hexagram Spread — Cards Revealed | Mystic Insights' : '六芒星牌阵 - 结果展示 | Mystic Insights',
+    title: isEn ? 'Hexagram Spread — Cards Revealed | FateAura' : '六芒星牌阵 - 结果展示 | FateAura',
     metaDesc: isEn ? 'View your Hexagram Spread tarot results.' : '查看你的六芒星牌阵占卜结果',
     back: isEn ? 'Back' : '返回',
     redraw: isEn ? 'Redraw' : '重新占卜',
@@ -275,7 +276,7 @@ export default function HexagramRevealPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -377,10 +378,7 @@ export default function HexagramRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">{texts.keywords}</p>
                         <div className="flex flex-wrap gap-2">
-                          {(card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.keywords : card.keywords || [])
-                            : (typeof card.reversed === 'object' ? card.reversed.keywords : card.keywords || [])
-                          ).slice(0, 3).map((keyword, i) => (
+                          {getLocalizedKeywords(card, card.orientation, router.locale).slice(0, 3).map((keyword, i) => (
                             <span
                               key={i}
                               className="px-2 py-1 rounded-lg bg-white/10 text-white/70 text-xs"
@@ -394,10 +392,7 @@ export default function HexagramRevealPage() {
                       <div>
                         <p className="text-white/50 mb-1">{texts.meaning}</p>
                         <p className="text-white/70 leading-relaxed text-sm">
-                          {card.orientation === 'upright' 
-                            ? (typeof card.upright === 'object' ? card.upright.meaning : card.upright)
-                            : (typeof card.reversed === 'object' ? card.reversed.meaning : card.reversed)
-                          }
+                          {getLocalizedMeaning(card, card.orientation, router.locale)}
                         </p>
                       </div>
                     </div>

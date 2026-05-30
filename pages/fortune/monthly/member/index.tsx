@@ -214,7 +214,7 @@ export default function MonthlyMemberFortune() {
   const isEn = router.locale === 'en';
 
   const texts = isEn ? {
-    pageTitle: 'Member Monthly Reading — Mystic Insights',
+    pageTitle: 'Member Monthly Reading — FateAura',
     loading: 'Loading...',
     backBtn: 'Back to Monthly',
     sectionLabel: 'MEMBER MONTHLY READING',
@@ -227,7 +227,7 @@ export default function MonthlyMemberFortune() {
     monthlyLimit: '✨ This month\'s reading is complete. Come back next month for a new one.',
     startReading: 'Start Reading',
   } : {
-    pageTitle: '会员版月运 - Mystic Insights',
+    pageTitle: '会员版月运 - FateAura',
     loading: '加载中...',
     backBtn: '返回月度运势',
     sectionLabel: '会员尊享月度运势',
@@ -513,7 +513,7 @@ export default function MonthlyMemberFortune() {
               <span className="text-sm font-medium">{texts.backBtn}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div>
           </header>

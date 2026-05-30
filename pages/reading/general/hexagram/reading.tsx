@@ -74,13 +74,15 @@ export default function HexagramReadingPage() {
     btnRetry: isEn ? 'Retry' : '重新生成',
     btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Hexagram Spread Reading | Mystic Insights' : '六芒星牌阵解读 | Mystic Insights',
+    title: isEn ? 'Hexagram Spread Reading | FateAura' : '六芒星牌阵解读 | FateAura',
     metaDesc: isEn ? 'Your Hexagram Spread tarot reading.' : '查看你的塔罗牌解读结果',
     spreadTitle: isEn ? 'Hexagram Spread Reading' : '六芒星牌阵解读',
     yourQuestion: isEn ? 'Your Question' : '你的问题',
     noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
     overallReading: isEn ? 'Overall Guidance' : '整体解读',
     guideCard: isEn ? 'Guide Card' : '指引牌',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
     reminderFallbackQ: isEn ? 'These cards reflect the energy and possibilities of this moment. The power to create change always lies in your own choices and actions.' : '这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。',
     reminderFallbackNoQ: isEn ? 'Take your time — these cards are simply reflecting the current flow of energy. What truly brings change is your own choices and actions.' : '慢慢来，这些牌只是提醒你当下的能量流动，真正能带来改变的，是你自己的选择和行动。',
     backHome: isEn ? 'Back Home' : '返回首页',
@@ -260,7 +262,7 @@ export default function HexagramReadingPage() {
 
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -440,7 +442,7 @@ export default function HexagramReadingPage() {
                                 >
                                   <img
                                     src={cardData.image}
-                                    alt={cardReading.cardName}
+                                    alt={isEn ? (cardData?.name || cardReading.cardName) : cardReading.cardName}
                                     className="w-full h-full object-cover shadow-lg border border-white/10"
                                   />
                                 </div>
@@ -455,7 +457,7 @@ export default function HexagramReadingPage() {
                             <p className={`text-[10px] font-bold text-center uppercase tracking-wider mb-1 ${
                               isGuidanceCard ? 'text-yellow-400' : 'text-white/50'
                             }`}>
-                              {cardReading.position}
+                              {POSITION_TITLES[idx] || cardReading.position}
                             </p>
                             {isGuidanceCard && (
                               <div className="flex items-center gap-1 text-yellow-400 text-xs">
@@ -474,7 +476,7 @@ export default function HexagramReadingPage() {
                                 }`}
                                 style={!isGuidanceCard ? { color: '#a855f7' } : {}}
                               >
-                                {cardReading.cardName}
+                                {isEn ? (cardData?.name || cardReading.cardName) : cardReading.cardName}
                               </span>
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full border ${
@@ -483,7 +485,7 @@ export default function HexagramReadingPage() {
                                     : 'border-emerald-500/50 text-emerald-400'
                                 }`}
                               >
-                                {cardReading.orientation}
+                                {cardData?.orientation === 'reversed' ? texts.reversed : texts.upright}
                               </span>
                             </div>
                             <p className="text-white/80 leading-relaxed text-base whitespace-pre-wrap">

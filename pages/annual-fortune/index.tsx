@@ -85,7 +85,7 @@ export default function AnnualFortuneEntryPage() {
   return (
     <>
       <Head>
-        <title>{isEn ? 'Yearly Fortune - Mystic Insights' : '年度运势 - Mystic Insights'}</title>
+        <title>{isEn ? 'Yearly Fortune - FateAura' : '年度运势 - FateAura'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link
           rel="stylesheet"
@@ -144,7 +144,7 @@ export default function AnnualFortuneEntryPage() {
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-                Mystic Insights
+                FateAura
               </h2>
             </div>
           </header>

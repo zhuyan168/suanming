@@ -291,7 +291,7 @@ export default function StayOrLeaveDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>这份工作是否值得继续做下去？ - Mystic Insights</title>
+        <title>这份工作是否值得继续做下去？ - FateAura</title>
         <meta name="description" content="评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。" />
       </Head>
 
@@ -301,7 +301,7 @@ export default function StayOrLeaveDraw() {
             <span className="material-symbols-outlined text-xl">arrow_back</span>
             <span className="text-sm font-medium">返回</span>
           </button>
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
             <span className="text-sm font-medium hidden sm:inline">重置</span>

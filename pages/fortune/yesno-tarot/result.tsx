@@ -3,9 +3,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
-import { getYesNoByCard, getAnswerText, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
+import { getYesNoByCard, YesNoAnswer } from '../../../utils/yesno-tarot-logic';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard {
   id: number;
@@ -139,6 +140,13 @@ export default function YesNoTarotResult() {
     askAnother: 'Ask Another',
     backToHome: 'Back to Home',
     fallbackNote: '\n\n(AI interpretation is temporarily unavailable. This is a brief reading based on traditional card meanings.)',
+    questionLabel: 'Your Question',
+    yes: 'Yes',
+    no: 'No',
+    maybe: 'Maybe',
+    fallbackYes: 'This card leans toward yes. Its energy supports movement, openness, or a favorable outcome, though your own judgment still matters.',
+    fallbackNo: 'This card leans toward no. It suggests delay, resistance, or a reason to pause before committing.',
+    fallbackMaybe: 'This card gives a mixed answer. More information, time, or inner clarity may be needed before the answer becomes firm.',
   } : {
     titleLoading: '是否塔罗 - 解读中',
     titleResult: '是否塔罗 - 解读结果',
@@ -157,6 +165,13 @@ export default function YesNoTarotResult() {
     askAnother: '再问一个',
     backToHome: '返回首页',
     fallbackNote: '\n\n（解读暂时不可用，这是基于牌意的简要判断）',
+    questionLabel: '你的问题',
+    yes: '是',
+    no: '否',
+    maybe: '不确定',
+    fallbackYes: '',
+    fallbackNo: '',
+    fallbackMaybe: '',
   };
 
   const [question, setQuestion] = useState('');
@@ -222,7 +237,14 @@ export default function YesNoTarotResult() {
       console.error('获取解读失败:', error);
       const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
       setAnswer(result.answer);
-      setInterpretation(result.reason + texts.fallbackNote);
+      const fallbackReason = isEn
+        ? result.answer === 'YES'
+          ? texts.fallbackYes
+          : result.answer === 'NO'
+            ? texts.fallbackNo
+            : texts.fallbackMaybe
+        : result.reason;
+      setInterpretation(fallbackReason + texts.fallbackNote);
       setIsLoading(false);
     }
   };
@@ -266,6 +288,9 @@ export default function YesNoTarotResult() {
   const answerBgColor = answer === 'YES' ? 'from-green-500/10' : answer === 'NO' ? 'from-red-500/10' : 'from-yellow-500/10';
   const backImage = CARD_BACK_IMAGE; // explicit reference to the card-back asset
   const frontImage = card?.image ?? backImage; // front image comes from rehydrated card, fallback to back if still missing
+  const answerText = answer === 'YES' ? texts.yes : answer === 'NO' ? texts.no : answer === 'MAYBE' ? texts.maybe : texts.unknown;
+  const localizedMeaning = card ? getLocalizedMeaning(card, card.orientation, router.locale) : '';
+  const localizedKeywords = card ? getLocalizedKeywords(card, card.orientation, router.locale) : [];
 
   return (
     <div className="dark">
@@ -285,7 +310,7 @@ export default function YesNoTarotResult() {
             <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.home}</span>
           </button>
           
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
 
           <button
             onClick={handleNewReading}
@@ -314,7 +339,7 @@ export default function YesNoTarotResult() {
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-6 text-center"
               >
-                <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">Your Question</p>
+                <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">{texts.questionLabel}</p>
                 <p className="text-lg text-white/95 leading-relaxed font-medium">{question}</p>
               </motion.div>
             )}
@@ -339,10 +364,10 @@ export default function YesNoTarotResult() {
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-white mb-1">{card.name}</h3>
                   <p className="text-sm text-white/60">
-                    {card.orientation === 'upright' ? texts.upright : texts.reversed} · {card.orientation === 'upright' ? card.upright : card.reversed}
+                    {card.orientation === 'upright' ? texts.upright : texts.reversed} · {localizedMeaning}
                   </p>
                   <div className="flex flex-wrap gap-2 justify-center mt-3">
-                    {card.keywords.map((keyword) => (
+                    {localizedKeywords.map((keyword) => (
                       <span
                         key={keyword}
                         className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
@@ -371,7 +396,7 @@ export default function YesNoTarotResult() {
                         <div>
                           <p className="text-sm font-medium text-white/70 uppercase tracking-wider">{texts.answerLabel}</p>
                           <p className={`text-4xl font-black ${answerColor}`}>
-                            {answer ? getAnswerText(answer) : texts.unknown}
+                            {answerText}
                           </p>
                         </div>
                       </div>

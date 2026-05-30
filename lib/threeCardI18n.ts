@@ -11,7 +11,7 @@ const zh = {
   reversed: '逆位',
 
   question: {
-    pageTitle: '三张牌万能牌阵 - 问题输入 | Mystic Insights',
+    pageTitle: '三张牌万能牌阵 - 问题输入 | FateAura',
     metaDesc: '输入你的问题，获得更精准的塔罗占卜解读',
     h1: '三张牌万能牌阵',
     label: '你的问题（可选）',
@@ -22,7 +22,7 @@ const zh = {
   },
 
   draw: {
-    pageTitle: '三张牌万能牌阵 - 抽牌 | Mystic Insights',
+    pageTitle: '三张牌万能牌阵 - 抽牌 | FateAura',
     metaDesc: '从78张塔罗牌中选择3张，探索你的指引',
     h1Drawing: '抽取三张塔罗牌',
     h1Done: '抽牌完成',
@@ -36,7 +36,7 @@ const zh = {
   },
 
   reveal: {
-    pageTitle: '三张牌万能牌阵 - 结果展示 | Mystic Insights',
+    pageTitle: '三张牌万能牌阵 - 结果展示 | FateAura',
     metaDesc: '查看你的塔罗牌占卜结果',
     h1: '三张牌万能牌阵',
     subtitle: '牌已就位，以下是你抽到的塔罗牌',
@@ -48,7 +48,7 @@ const zh = {
   },
 
   reading: {
-    pageTitle: '三张牌万能牌阵 · 解读 | Mystic Insights',
+    pageTitle: '三张牌万能牌阵 · 解读 | FateAura',
     metaDesc: '查看你的塔罗牌解读结果',
     h1: '三张牌万能牌阵 · 解读',
     errorIncomplete: '抽牌数据不完整，请重新抽牌',
@@ -83,7 +83,7 @@ const en: typeof zh = {
   reversed: 'Reversed',
 
   question: {
-    pageTitle: 'Three-Card Universal Spread - Question | Mystic Insights',
+    pageTitle: 'Three-Card Universal Spread - Question | FateAura',
     metaDesc: 'Enter your question for a more accurate tarot reading',
     h1: 'Three-Card Universal Spread',
     label: 'Your Question (Optional)',
@@ -94,7 +94,7 @@ const en: typeof zh = {
   },
 
   draw: {
-    pageTitle: 'Three-Card Universal Spread - Draw | Mystic Insights',
+    pageTitle: 'Three-Card Universal Spread - Draw | FateAura',
     metaDesc: 'Choose 3 cards from 78 tarot cards to reveal your guidance',
     h1Drawing: 'Draw Three Tarot Cards',
     h1Done: 'Cards Drawn',
@@ -108,7 +108,7 @@ const en: typeof zh = {
   },
 
   reveal: {
-    pageTitle: 'Three-Card Universal Spread - Result | Mystic Insights',
+    pageTitle: 'Three-Card Universal Spread - Result | FateAura',
     metaDesc: 'View your tarot reading result',
     h1: 'Three-Card Universal Spread',
     subtitle: 'Your cards are revealed. Here are the tarot cards you drew.',
@@ -120,7 +120,7 @@ const en: typeof zh = {
   },
 
   reading: {
-    pageTitle: 'Three-Card Universal Spread · Reading | Mystic Insights',
+    pageTitle: 'Three-Card Universal Spread · Reading | FateAura',
     metaDesc: 'View your tarot reading',
     h1: 'Three-Card Universal Spread · Reading',
     errorIncomplete: 'Card data is incomplete. Please draw again.',

@@ -134,13 +134,22 @@ interface InterviewExamResult {
   cards: ShuffledTarotCard[];
 }
 
-const SLOT_CONFIG = [
-  { id: "p1", name: "你现在最不确定的地方", meaning: "你现在最不确定的地方" },
-  { id: "p2", name: "你现在的优势在哪里", meaning: "你现在的优势在哪里" },
-  { id: "p3", name: "事情目前的整体走向", meaning: "事情目前的整体走向" },
-  { id: "p4", name: "目前可能影响你的地方", meaning: "目前可能影响你的地方" },
-  { id: "p5", name: "接下来你可以主动做什么", meaning: "接下来你可以主动做什么" }
-];
+const SLOT_CONFIG = {
+  en: [
+    { id: "p1", name: "Main uncertainty", meaning: "What feels most uncertain right now?" },
+    { id: "p2", name: "Your advantage", meaning: "Where is your current advantage?" },
+    { id: "p3", name: "Overall direction", meaning: "What is the overall direction of the situation?" },
+    { id: "p4", name: "Possible influence", meaning: "What may be affecting you right now?" },
+    { id: "p5", name: "Next action", meaning: "What can you actively do next?" }
+  ],
+  zh: [
+    { id: "p1", name: "你现在最不确定的地方", meaning: "你现在最不确定的地方" },
+    { id: "p2", name: "你现在的优势在哪里", meaning: "你现在的优势在哪里" },
+    { id: "p3", name: "事情目前的整体走向", meaning: "事情目前的整体走向" },
+    { id: "p4", name: "目前可能影响你的地方", meaning: "目前可能影响你的地方" },
+    { id: "p5", name: "接下来你可以主动做什么", meaning: "接下来你可以主动做什么" }
+  ],
+};
 
 const saveResult = (data: InterviewExamResult) => {
   if (typeof window === 'undefined') return;
@@ -161,6 +170,37 @@ const loadResult = (): InterviewExamResult | null => {
 
 export default function InterviewExamDraw() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG.en : SLOT_CONFIG.zh;
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'Interview & Exam Key Reminders Spread',
+        metaDescription: 'Find the key reminders before an interview, exam, or evaluation.',
+        back: 'Back',
+        reset: 'Reset',
+        title: 'Interview & Exam Key Reminders',
+        descDrawn: 'Card draw complete. Continue to start the deeper reading.',
+        descStart: 'See the key points, avoid easy-to-miss risks, and focus on what you can control. Draw 5 cards from the deck below.',
+        drawnCount: 'Cards drawn:',
+        startReading: 'Start Reading',
+        note: '✨ Avoid blind spots, focus on what matters, and prepare with clarity.',
+        resetConfirm: 'Start over? Your current draw will be cleared.',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '面试 / 考试关键提醒牌阵',
+        metaDescription: '看清重点，避开容易忽略的坑，把能掌控的部分做到最好。',
+        back: '返回',
+        reset: '重置',
+        title: '面试 / 考试关键提醒牌阵',
+        descDrawn: '抽牌已完成，点击下方按钮开始深度解读。',
+        descStart: '看清重点，避开容易忽略的坑，把能掌控的部分做到最好。请从下方牌堆中抽取 5 张牌。',
+        drawnCount: '已抽牌：',
+        startReading: '开始解读',
+        note: '✨ 避开误区，掌握关键，助你顺利通关',
+        resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+      };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'career-study',
     spreadId: 'interview-exam-key-reminders',
@@ -257,7 +297,7 @@ export default function InterviewExamDraw() {
   const handleReturnToList = () => { router.push('/themed-readings/career-study'); };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
     setSelectedCards(Array(5).fill(null));
@@ -271,7 +311,7 @@ export default function InterviewExamDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -280,20 +320,20 @@ export default function InterviewExamDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>面试 / 考试关键提醒牌阵</title>
-        <meta name="description" content="看清重点，避开容易忽略的坑，把能掌控的部分做到最好。" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -302,10 +342,10 @@ export default function InterviewExamDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Career & Study</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                面试 / 考试关键提醒牌阵
+                {text.title}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasDrawn ? '抽牌已完成，点击下方按钮开始深度解读。' : '看清重点，避开容易忽略的坑，把能掌控的部分做到最好。请从下方牌堆中抽取 5 张牌。'}
+                {hasDrawn ? text.descDrawn : text.descStart}
               </p>
             </div>
 
@@ -322,7 +362,7 @@ export default function InterviewExamDraw() {
                 </div>
                 <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-xs">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 5
+                  {text.drawnCount}{selectedCards.filter(c => c !== null).length} / 5
                 </div>
               </motion.div>
             )}
@@ -333,7 +373,7 @@ export default function InterviewExamDraw() {
                 isAnimating={isAnimating}
                 showLoadingText={!hasDrawn}
                 forceFlipped={hasDrawn}
-                slotConfig={SLOT_CONFIG}
+                slotConfig={slotConfig}
               />
             </div>
 
@@ -344,10 +384,10 @@ export default function InterviewExamDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
                 <p className="text-white/40 text-xs mt-4">
-                  ✨ 避开误区，掌握关键，助你顺利通关
+                  {text.note}
                 </p>
               </motion.div>
             )}
@@ -362,4 +402,3 @@ export default function InterviewExamDraw() {
     </div>
   );
 }
-

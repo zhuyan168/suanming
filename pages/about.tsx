@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 function LogoMark() {
   return (
@@ -35,11 +36,76 @@ function SectionCard({
 }
 
 export default function AboutPage() {
+  const router = useRouter()
+  const isEn = router.locale === 'en'
+
+  const texts = isEn ? {
+    title: 'About FateAura - FateAura',
+    metaDesc: 'Learn about FateAura, tarot readings, membership access, privacy, and contact information.',
+    navHome: 'Home',
+    navAbout: 'About',
+    heading: 'About FateAura',
+    brandTitle: '1. What FateAura Is',
+    brandBody: 'FateAura is a tarot and intuitive guidance platform built for people facing questions, decisions, waiting periods, and emotional uncertainty. Our readings are designed to help you reflect on the present moment and see your next step more clearly.',
+    contentTitle: '2. What We Offer',
+    contentIntro: 'On FateAura, you can choose different reading paths based on your question:',
+    contentItems: [
+      ['General readings', 'For open-ended questions, decisions, relationships, and direction.'],
+      ['Fortune forecasts', 'For daily, monthly, seasonal, and yearly energy check-ins.'],
+      ['Themed readings', 'For focused questions about love, career, study, and money.'],
+      ['Member readings', 'For deeper spreads and more complete reading experiences.'],
+    ],
+    philosophyTitle: '3. Our Approach',
+    philosophyBody1: 'We do not treat tarot as a fixed prediction or a replacement for your own judgment. A reading can offer reflection, language, and perspective.',
+    philosophyBody2: 'The cards may point to patterns and possibilities, but the final choice is always yours.',
+    disclaimerTitle: '4. Disclaimer',
+    disclaimerBody1: 'FateAura readings are for personal reflection and self-exploration only. They are not medical, legal, financial, psychological, or other professional advice.',
+    disclaimerBody2: 'For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
+    privacyTitle: '5. Privacy',
+    privacyBody1: 'We care about user privacy and aim to protect your account information and usage records.',
+    privacyBody2Prefix: 'For more details about data collection, use, and protection, please read our',
+    privacyLink: 'Privacy Policy',
+    privacyBody2Suffix: '.',
+    contactTitle: '6. Contact Us',
+    contactBody: 'For product questions, collaboration, or feedback, contact us by email:',
+    backHome: 'Back to Home',
+  } : {
+    title: '关于 FateAura - FateAura',
+    metaDesc: '了解 FateAura 品牌、服务内容与使用说明。',
+    navHome: '首页',
+    navAbout: '关于',
+    heading: '关于 FateAura',
+    brandTitle: '一、品牌介绍',
+    brandBody: 'FateAura 是一个以塔罗与占卜为核心的指引平台，帮助用户在困惑、选择与等待之中，看见当下的能量流动，获得更清晰的思考方向。',
+    contentTitle: '二、我们提供的内容',
+    contentIntro: '在 FateAura，你可以根据不同的问题与需求，选择适合自己的占卜方式：',
+    contentItems: [
+      ['综合占卜', '适合日常困惑、关系判断、选择与方向问题'],
+      ['运势测算', '适合观察一段时间内的整体趋势与变化'],
+      ['主题占卜', '适合聚焦爱情、事业、学业、财富等具体议题'],
+      ['会员内容', '提供更深入、更完整的解读体验'],
+    ],
+    philosophyTitle: '三、我们的理念',
+    philosophyBody1: '我们相信，占卜不是替你做决定，而是帮助你更诚实地看见自己，看见当下，并在不确定中找到更清晰的方向。',
+    philosophyBody2: '牌面可以提供提醒与启发，但真正做出选择的人，始终是你自己。',
+    disclaimerTitle: '四、免责声明',
+    disclaimerBody1: 'FateAura 提供的占卜与解读内容，仅供个人参考与自我探索使用，不构成医疗、法律、财务或其他专业建议。',
+    disclaimerBody2: '当你面临重大决定时，请结合现实情况，并在必要时寻求专业人士的帮助。',
+    privacyTitle: '五、隐私说明',
+    privacyBody1: '我们重视用户隐私，并尽力保护你的账户信息与使用记录。',
+    privacyBody2Prefix: '有关数据收集、使用与保护的更多内容，请参阅',
+    privacyLink: '隐私政策',
+    privacyBody2Suffix: '页面。',
+    contactTitle: '六、联系我们',
+    contactBody: '如有使用问题、合作咨询或反馈建议，欢迎通过以下方式联系我们：',
+    backHome: '返回首页',
+  }
+
   return (
     <>
       <Head>
-        <title>关于 FateAura - FateAura</title>
-        <meta name="description" content="了解 FateAura 品牌、服务内容与使用说明。" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
@@ -59,10 +125,10 @@ export default function AboutPage() {
             </Link>
             <nav className="flex items-center gap-6 sm:gap-8">
               <Link href="/" className="text-white/80 text-sm font-medium hover:text-primary transition-colors">
-                首页
+                {texts.navHome}
               </Link>
               <span className="text-primary text-sm font-medium" aria-current="page">
-                关于
+                {texts.navAbout}
               </span>
             </nav>
           </header>
@@ -71,56 +137,33 @@ export default function AboutPage() {
             <div className="mx-auto max-w-3xl">
               <div className="mb-10 sm:mb-12 text-center sm:text-left">
                 <h1 className="text-white text-3xl sm:text-4xl font-extrabold tracking-tight [text-shadow:0_0_40px_rgba(127,19,236,0.25)]">
-                  关于 FateAura
+                  {texts.heading}
                 </h1>
               </div>
 
               <div className="flex flex-col gap-8 sm:gap-10">
-                <SectionCard title="一、品牌介绍">
-                  <p>
-                    FateAura 是一个以塔罗与占卜为核心的指引平台，帮助用户在困惑、选择与等待之中，看见当下的能量流动，获得更清晰的思考方向。
-                  </p>
+                <SectionCard title={texts.brandTitle}>
+                  <p>{texts.brandBody}</p>
                 </SectionCard>
 
-                <SectionCard title="二、我们提供的内容">
-                  <p>在 FateAura，你可以根据不同的问题与需求，选择适合自己的占卜方式：</p>
+                <SectionCard title={texts.contentTitle}>
+                  <p>{texts.contentIntro}</p>
                   <ul className="list-none space-y-2.5 pl-0">
-                    <li className="flex gap-2.5">
-                      <span className="text-primary/90 shrink-0 mt-0.5">·</span>
-                      <span>
-                        <span className="text-white/90 font-medium">综合占卜</span>
-                        ：适合日常困惑、关系判断、选择与方向问题
-                      </span>
-                    </li>
-                    <li className="flex gap-2.5">
-                      <span className="text-primary/90 shrink-0 mt-0.5">·</span>
-                      <span>
-                        <span className="text-white/90 font-medium">运势测算</span>
-                        ：适合观察一段时间内的整体趋势与变化
-                      </span>
-                    </li>
-                    <li className="flex gap-2.5">
-                      <span className="text-primary/90 shrink-0 mt-0.5">·</span>
-                      <span>
-                        <span className="text-white/90 font-medium">主题占卜</span>
-                        ：适合聚焦爱情、事业、学业、财富等具体议题
-                      </span>
-                    </li>
-                    <li className="flex gap-2.5">
-                      <span className="text-primary/90 shrink-0 mt-0.5">·</span>
-                      <span>
-                        <span className="text-white/90 font-medium">会员内容</span>
-                        ：提供更深入、更完整的解读体验
-                      </span>
-                    </li>
+                    {texts.contentItems.map(([label, desc]) => (
+                      <li key={label} className="flex gap-2.5">
+                        <span className="text-primary/90 shrink-0 mt-0.5">·</span>
+                        <span>
+                          <span className="text-white/90 font-medium">{label}</span>
+                          {isEn ? ': ' : '：'}{desc}
+                        </span>
+                      </li>
+                    ))}
                   </ul>
                 </SectionCard>
 
-                <SectionCard title="三、我们的理念">
-                  <p>
-                    我们相信，占卜不是替你做决定，而是帮助你更诚实地看见自己，看见当下，并在不确定中找到更清晰的方向。
-                  </p>
-                  <p>牌面可以提供提醒与启发，但真正做出选择的人，始终是你自己。</p>
+                <SectionCard title={texts.philosophyTitle}>
+                  <p>{texts.philosophyBody1}</p>
+                  <p>{texts.philosophyBody2}</p>
                 </SectionCard>
 
                 <section
@@ -134,24 +177,22 @@ export default function AboutPage() {
                     <span className="material-symbols-outlined text-xl text-amber-200/80" aria-hidden>
                       policy
                     </span>
-                    四、免责声明
+                    {texts.disclaimerTitle}
                   </h2>
                   <div className="text-white/70 text-sm sm:text-[15px] leading-relaxed space-y-3">
-                    <p>
-                      FateAura 提供的占卜与解读内容，仅供个人参考与自我探索使用，不构成医疗、法律、财务或其他专业建议。
-                    </p>
-                    <p>当你面临重大决定时，请结合现实情况，并在必要时寻求专业人士的帮助。</p>
+                    <p>{texts.disclaimerBody1}</p>
+                    <p>{texts.disclaimerBody2}</p>
                   </div>
                 </section>
 
-                <SectionCard title="五、隐私说明">
-                  <p>我们重视用户隐私，并尽力保护你的账户信息与使用记录。</p>
+                <SectionCard title={texts.privacyTitle}>
+                  <p>{texts.privacyBody1}</p>
                   <p>
-                    有关数据收集、使用与保护的更多内容，请参阅
+                    {texts.privacyBody2Prefix}
                     <Link href="/privacy" className="text-primary hover:text-secondary mx-1 underline underline-offset-2">
-                      隐私政策
+                      {texts.privacyLink}
                     </Link>
-                    页面。
+                    {texts.privacyBody2Suffix}
                   </p>
                 </SectionCard>
 
@@ -166,12 +207,12 @@ export default function AboutPage() {
                     <span className="material-symbols-outlined text-xl text-primary/90" aria-hidden>
                       mail
                     </span>
-                    六、联系我们
+                    {texts.contactTitle}
                   </h2>
                   <div className="text-white/75 text-sm sm:text-[15px] leading-relaxed space-y-3">
-                    <p>如有使用问题、合作咨询或反馈建议，欢迎通过以下方式联系我们：</p>
+                    <p>{texts.contactBody}</p>
                     <p>
-                      <span className="text-white/60">邮箱：</span>
+                      <span className="text-white/60">{isEn ? 'Email: ' : '邮箱：'}</span>
                       <a
                         href="mailto:sephiroth.wang@foxmail.com"
                         className="text-primary hover:text-secondary break-all transition-colors"
@@ -189,7 +230,7 @@ export default function AboutPage() {
                   className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-primary transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">arrow_back</span>
-                  返回首页
+                  {texts.backHome}
                 </Link>
               </div>
             </div>

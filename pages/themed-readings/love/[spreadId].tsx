@@ -38,7 +38,7 @@ export default function SpreadDetailPage() {
     return (
       <>
         <Head>
-          <title>牌阵未找到 - Mystic Insights</title>
+          <title>牌阵未找到 - FateAura</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
@@ -109,7 +109,7 @@ export default function SpreadDetailPage() {
     return (
       <>
         <Head>
-          <title>加载中 - Mystic Insights</title>
+          <title>加载中 - FateAura</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link

@@ -136,13 +136,22 @@ interface SkillsDirectionResult {
   reading?: any; // 存储已生成的解读结果
 }
 
-const SLOT_CONFIG = [
-  { id: "p1", name: "内心真正渴望的状态", meaning: "我内心真正渴望的工作/发展状态是什么？" },
-  { id: "p2", name: "最适合的靠近方向", meaning: "我现在最适合往哪个方向去靠近它？" },
-  { id: "p3", name: "核心优势或潜力", meaning: "我目前最能拿得出手的优势或潜力是什么？" },
-  { id: "p4", name: "可获得的资源支持", meaning: "我可以从哪里获得支持或资源？" },
-  { id: "p5", name: "需要调整或补强", meaning: "我现在最需要调整或补强的地方是什么？" }
-];
+const SLOT_CONFIG = {
+  en: [
+    { id: "p1", name: "Desired work state", meaning: "What work or growth state do I truly want?" },
+    { id: "p2", name: "Best direction", meaning: "Which direction should I move toward now?" },
+    { id: "p3", name: "Core strengths", meaning: "What strengths or potential can I rely on most right now?" },
+    { id: "p4", name: "Available support", meaning: "Where can I find useful support or resources?" },
+    { id: "p5", name: "What to improve", meaning: "What do I most need to adjust or strengthen now?" }
+  ],
+  zh: [
+    { id: "p1", name: "内心真正渴望的状态", meaning: "我内心真正渴望的工作/发展状态是什么？" },
+    { id: "p2", name: "最适合的靠近方向", meaning: "我现在最适合往哪个方向去靠近它？" },
+    { id: "p3", name: "核心优势或潜力", meaning: "我目前最能拿得出手的优势或潜力是什么？" },
+    { id: "p4", name: "可获得的资源支持", meaning: "我可以从哪里获得支持或资源？" },
+    { id: "p5", name: "需要调整或补强", meaning: "我现在最需要调整或补强的地方是什么？" }
+  ],
+};
 
 const saveResult = (data: SkillsDirectionResult) => {
   if (typeof window === 'undefined') return;
@@ -163,6 +172,47 @@ const loadResult = (): SkillsDirectionResult | null => {
 
 export default function SkillsDirectionDraw() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG.en : SLOT_CONFIG.zh;
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'Career & Study - What Work Fits Me?',
+        metaDescription: 'Clarify your strengths, energy pattern, and a better direction for career or study.',
+        back: 'Back',
+        reset: 'Reset',
+        titleComplete: 'Career Direction Spread Complete',
+        titleDrawn: 'Card Draw Complete',
+        titleStart: 'What kind of work or skill should I pursue?',
+        descComplete: 'Your cards are ready. Continue to view the detailed reading.',
+        descDrawn: 'The cards are in place. Continue to start the deeper reading.',
+        descStart: 'Clarify your strengths, energy pattern, and growth path. Draw 5 cards from the deck below.',
+        drawnCount: 'Cards drawn:',
+        viewReading: 'View Reading',
+        startReading: 'Start Reading',
+        noteComplete: '✨ Card draw complete. You can reset and draw again at any time.',
+        noteStart: '✨ Explore your career potential and available resources.',
+        resetConfirm: 'Start over? Your current draw will be cleared.',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '事业 & 学业 - 我适合做什么工作？',
+        metaDescription: '理清你的优势与能量倾向，找到更适合你的方向与成长路径。',
+        back: '返回',
+        reset: '重置',
+        titleComplete: '职业方向牌阵已完成',
+        titleDrawn: '抽牌已完成',
+        titleStart: '我应该找什么样的工作 / 学什么技能？',
+        descComplete: '你已完成抽牌，点击下方按钮查看详细解读。',
+        descDrawn: '卡牌已就位，点击下方按钮开始深度解读。',
+        descStart: '理清你的优势与能量倾向，找到更适合你的方向与成长路径。请从下方牌堆中抽取 5 张牌。',
+        drawnCount: '已抽牌：',
+        viewReading: '查看解读',
+        startReading: '开始解读',
+        noteComplete: '✨ 已完成抽牌，可随时重新占卜',
+        noteStart: '✨ 深度挖掘你的职业潜力与资源',
+        resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+      };
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
     theme: 'career-study',
     spreadId: 'skills-direction',
@@ -262,7 +312,7 @@ export default function SkillsDirectionDraw() {
   const handleReturnToList = () => { router.push('/themed-readings/career-study'); };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
     setSelectedCards(Array(5).fill(null));
@@ -276,7 +326,7 @@ export default function SkillsDirectionDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -285,20 +335,20 @@ export default function SkillsDirectionDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>事业 & 学业 - 我适合做什么工作？</title>
-        <meta name="description" content="理清你的优势与能量倾向，找到更适合你的方向与成长路径。" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -307,10 +357,10 @@ export default function SkillsDirectionDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Career & Study</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                {hasReading ? '职业方向牌阵已完成' : (hasDrawn ? '抽牌已完成' : '我应该找什么样的工作 / 学什么技能？')}
+                {hasReading ? text.titleComplete : (hasDrawn ? text.titleDrawn : text.titleStart)}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasReading ? '你已完成抽牌，点击下方按钮查看详细解读。' : (hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '理清你的优势与能量倾向，找到更适合你的方向与成长路径。请从下方牌堆中抽取 5 张牌。')}
+                {hasReading ? text.descComplete : (hasDrawn ? text.descDrawn : text.descStart)}
               </p>
             </div>
 
@@ -327,7 +377,7 @@ export default function SkillsDirectionDraw() {
                 </div>
                 <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-xs">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 5
+                  {text.drawnCount}{selectedCards.filter(c => c !== null).length} / 5
                 </div>
               </motion.div>
             )}
@@ -337,7 +387,7 @@ export default function SkillsDirectionDraw() {
               isAnimating={isAnimating}
               showLoadingText={!hasDrawn}
               forceFlipped={hasDrawn}
-              slotConfig={SLOT_CONFIG}
+              slotConfig={slotConfig}
             />
 
             {hasDrawn && (
@@ -347,10 +397,10 @@ export default function SkillsDirectionDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  {hasReading ? '查看解读' : '开始解读'}
+                  {hasReading ? text.viewReading : text.startReading}
                 </button>
                 <p className="text-white/40 text-xs mt-4">
-                  {hasReading ? '✨ 已完成抽牌，可随时重新占卜' : '✨ 深度挖掘你的职业潜力与资源'}
+                  {hasReading ? text.noteComplete : text.noteStart}
                 </p>
               </motion.div>
             )}

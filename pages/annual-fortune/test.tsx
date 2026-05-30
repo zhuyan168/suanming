@@ -64,7 +64,7 @@ export default function TestPage() {
   return (
     <>
       <Head>
-        <title>Annual Fortune Tests - Mystic Insights</title>
+        <title>Annual Fortune Tests - FateAura</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link
           rel="stylesheet"
@@ -123,7 +123,7 @@ export default function TestPage() {
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm">
             <div className="flex items-center gap-4">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-                Mystic Insights
+                FateAura
               </h2>
               <span className="text-white/50 text-sm">/ Tests</span>
             </div>

@@ -774,7 +774,7 @@ export default function MonthlyBasicFortune() {
   const isEn = router.locale === 'en';
 
   const texts = isEn ? {
-    pageTitle: 'Monthly Fortune — Mystic Insights',
+    pageTitle: 'Monthly Fortune — FateAura',
     loading: 'Loading...',
     back: 'Back to Monthly Fortune',
     sectionLabel: 'MONTHLY FORTUNE',
@@ -787,7 +787,7 @@ export default function MonthlyBasicFortune() {
     monthlyHint: '✨ One reading per month — come back next month for a new one.',
     startReading: 'Start Reading',
   } : {
-    pageTitle: '三张牌月度运势 - Mystic Insights',
+    pageTitle: '三张牌月度运势 - FateAura',
     loading: '加载中...',
     back: '返回月度运势',
     sectionLabel: '月度运势',
@@ -1171,7 +1171,7 @@ export default function MonthlyBasicFortune() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div> {/* 占位，保持标题居中 */}
           </header>
@@ -1253,6 +1253,7 @@ export default function MonthlyBasicFortune() {
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
+                      locale={router.locale}
                     />
 
                     {selectedCards.filter(c => c !== null).length < 3 && (
@@ -1278,6 +1279,7 @@ export default function MonthlyBasicFortune() {
                     isAnimating={[false, false, false]}
                     showLoadingText={false}
                     forceFlipped={true}
+                    locale={router.locale}
                   />
 
                   <div className="text-center mt-8">

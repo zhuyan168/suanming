@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -14,14 +15,24 @@ interface SixCardSlotsProps {
 }
 
 // 六张卡槽的位置名称和说明（未来恋人牌阵）
-const SLOT_CONFIG = [
-  { key: 'guide', label: '指引牌', subLabel: '', icon: '🌙' },
-  { key: 'type', label: '1', subLabel: '他/她是什么类型', icon: '💫' },
-  { key: 'appeared', label: '2', subLabel: '他/她已经出现了吗？', icon: '👁️' },
-  { key: 'obstacle', label: '3', subLabel: '遇到的阻力', icon: '⚡' },
-  { key: 'pattern', label: '4', subLabel: '相处模式', icon: '💞' },
-  { key: 'how_to_meet', label: '5', subLabel: '怎样才能遇到他/她', icon: '✨' },
-];
+const SLOT_CONFIG = {
+  en: [
+    { key: 'guide', label: 'Guide Card', subLabel: '', icon: '🌙' },
+    { key: 'type', label: '1', subLabel: 'What type of person they are', icon: '💫' },
+    { key: 'appeared', label: '2', subLabel: 'Have they appeared yet?', icon: '👁️' },
+    { key: 'obstacle', label: '3', subLabel: 'Obstacles in the way', icon: '⚡' },
+    { key: 'pattern', label: '4', subLabel: 'Relationship pattern', icon: '💞' },
+    { key: 'how_to_meet', label: '5', subLabel: 'How you may meet them', icon: '✨' },
+  ],
+  zh: [
+    { key: 'guide', label: '指引牌', subLabel: '', icon: '🌙' },
+    { key: 'type', label: '1', subLabel: '他/她是什么类型', icon: '💫' },
+    { key: 'appeared', label: '2', subLabel: '他/她已经出现了吗？', icon: '👁️' },
+    { key: 'obstacle', label: '3', subLabel: '遇到的阻力', icon: '⚡' },
+    { key: 'pattern', label: '4', subLabel: '相处模式', icon: '💞' },
+    { key: 'how_to_meet', label: '5', subLabel: '怎样才能遇到他/她', icon: '✨' },
+  ],
+};
 
 export default function SixCardSlots({ 
   cards, 
@@ -29,11 +40,14 @@ export default function SixCardSlots({
   showLoadingText = false,
   forceFlipped = false
 }: SixCardSlotsProps) {
+  const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG.en : SLOT_CONFIG.zh;
   
   // 用于渲染单张卡片的通用函数
   const renderCard = (index: number) => {
     const card = cards[index];
-    const config = SLOT_CONFIG[index];
+    const config = slotConfig[index];
     const isGuideCard = index === 0;
     
     return (
@@ -200,7 +214,7 @@ export default function SixCardSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-4 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌（{cards.filter(c => c !== null).length}/6）</p>
+          <p>{isEn ? `🔮 Keep drawing the remaining cards (${cards.filter(c => c !== null).length}/6)` : `🔮 请继续抽取剩余卡牌（${cards.filter(c => c !== null).length}/6）`}</p>
         </motion.div>
       )}
 

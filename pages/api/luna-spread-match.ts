@@ -5,6 +5,10 @@ const SPREAD_LIST = LUNA_SPREADS.map(
   (s) => `- id: "${s.id}" | 名称: ${s.name} | 分类: ${s.category} | 简介: ${s.description}`,
 ).join('\n');
 
+const SPREAD_LIST_EN = LUNA_SPREADS.map(
+  (s) => `- id: "${s.id}" | name: ${s.nameEn || s.name} | category: ${s.category} | description: ${s.descriptionEn || s.description}`,
+).join('\n');
+
 const SYSTEM_PROMPT = `你是一个塔罗占卜网站的牌阵推荐助手。你的唯一任务是：根据用户的描述，从下面的牌阵列表中选出最合适的一个。
 
 ## 可选牌阵列表（你只能从这里面选，不能推荐列表以外的牌阵）：
@@ -17,13 +21,26 @@ ${SPREAD_LIST}
 4. 不要输出任何 JSON 以外的内容，不要加 markdown 代码块标记
 5. 如果用户的问题实在无法归类，选 "three-card-general"`;
 
+const SYSTEM_PROMPT_EN = `You are a spread recommendation assistant for a tarot reading website. Your only task is to choose the single best spread from the list below based on the user's message.
+
+## Available spreads
+${SPREAD_LIST_EN}
+
+## Output rules
+1. Return only one JSON object in this format: {"spreadId": "xxx", "reason": "one short recommendation reason"}
+2. spreadId must be one of the ids from the list above.
+3. reason must be in English, friendly, and 1-2 sentences.
+4. Do not output markdown or any text outside JSON.
+5. If the user's message cannot be categorized, choose "three-card-general".`;
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { message } = req.body as { message: string };
+    const { message, locale } = req.body as { message: string; locale?: string };
+    const isEn = locale === 'en';
 
     if (!message?.trim()) {
       return res.status(400).json({ error: 'Message is required' });
@@ -44,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: isEn ? SYSTEM_PROMPT_EN : SYSTEM_PROMPT },
           { role: 'user', content: message },
         ],
         temperature: 0.3,
@@ -72,7 +89,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!parsed.spreadId || !validIds.has(parsed.spreadId)) {
       return res.status(200).json({
         spreadId: 'three-card-general',
-        reason: parsed.reason || '你可以先试试通用牌阵，适合任何主题的问题。',
+        reason: parsed.reason || (isEn
+          ? 'You can start with the Three-Card Universal spread. It works well for open questions.'
+          : '你可以先试试通用牌阵，适合任何主题的问题。'),
       });
     }
 

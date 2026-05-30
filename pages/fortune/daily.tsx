@@ -9,6 +9,7 @@ import { TarotCard } from '../../components/fortune/CardItem';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { useSpreadAccess } from '../../hooks/useSpreadAccess';
 import { getAuthHeaders } from '../../lib/apiHeaders';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../lib/tarotCardI18n';
 
 // 兼容旧数据格式的辅助函数：获取含义文本
 const getMeaning = (value: string | { keywords: string[]; meaning: string } | undefined): string => {
@@ -742,7 +743,7 @@ export default function DailyFortune() {
   const isEn = router.locale === 'en';
 
   const texts = isEn ? {
-    pageTitle: 'Daily Fortune — Mystic Insights',
+    pageTitle: 'Daily Fortune — FateAura',
     loading: 'Loading...',
     back: 'Back',
     backToHistory: 'Back to My Readings',
@@ -765,7 +766,7 @@ export default function DailyFortune() {
       luckyNumber: 'Lucky Number',
     },
   } : {
-    pageTitle: '每日运势 - Mystic Insights',
+    pageTitle: '每日运势 - FateAura',
     loading: '加载中...',
     back: '返回首页',
     backToHistory: '返回我的占卜记录',
@@ -811,6 +812,12 @@ export default function DailyFortune() {
   const [uiSlots, setUiSlots] = useState<(ShuffledTarotCard | null)[]>([]);
   // 已抽取的卡牌数组
   const [drawnCards, setDrawnCards] = useState<ShuffledTarotCard[]>([]);
+  const resultCardMeaning = todayResult
+    ? getLocalizedMeaning(todayResult.card, todayResult.orientation, router.locale)
+    : '';
+  const resultCardKeywords = todayResult
+    ? getLocalizedKeywords(todayResult.card, todayResult.orientation, router.locale)
+    : [];
 
   useEffect(() => {
     if (accessLoading || !allowed) return;
@@ -1090,7 +1097,7 @@ export default function DailyFortune() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div> {/* 占位，保持标题居中 */}
           </header>
@@ -1191,10 +1198,10 @@ export default function DailyFortune() {
                           <h3 className="text-2xl font-bold text-white mb-1">{todayResult.card.name}</h3>
                           <p className="text-sm text-white/60 mb-3">
                             {todayResult.orientation === 'upright' ? (isEn ? 'Upright' : '正位') : (isEn ? 'Reversed' : '逆位')} · 
-                            {todayResult.orientation === 'upright' ? getMeaning(todayResult.card.upright) : getMeaning(todayResult.card.reversed)}
+                            {resultCardMeaning}
                           </p>
                           <div className="flex flex-wrap gap-2 justify-center">
-                            {(todayResult.orientation === 'upright' ? getKeywords(todayResult.card.upright, todayResult.card.keywords) : getKeywords(todayResult.card.reversed, todayResult.card.keywords)).map((keyword) => (
+                            {resultCardKeywords.map((keyword) => (
                               <span
                                 key={keyword}
                                 className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
@@ -1318,4 +1325,3 @@ function FortuneCard({ icon, title, content, delay, compact = false }: FortuneCa
     </motion.div>
   );
 }
-

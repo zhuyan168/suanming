@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards: TarotCard[] = [
@@ -310,8 +311,8 @@ export default function YearAheadResultPage() {
   const currentYear = getCurrentYear();
 
   const texts = {
-    loadingTitle: isEn ? 'Year Ahead Reading | Mystic Insights' : 'Year Ahead 解析 - Mystic Insights',
-    pageTitle: (year: string) => isEn ? `${year} Yearly Fortune Reading | Mystic Insights` : `Year Ahead 解析 - Mystic Insights`,
+    loadingTitle: isEn ? 'Year Ahead Reading | FateAura' : 'Year Ahead 解析 - FateAura',
+    pageTitle: (year: string) => isEn ? `${year} Yearly Fortune Reading | FateAura` : `Year Ahead 解析 - FateAura`,
     errorFetch: isEn ? 'Failed to load reading. Please try again.' : '获取运势失败',
     errorGenerate: isEn ? 'Failed to generate reading. Please try again.' : '生成运势失败，请稍后重试',
     backHistory: isEn ? 'Back to My Readings' : '返回我的占卜记录',
@@ -320,6 +321,8 @@ export default function YearAheadResultPage() {
     subtitle: isEn ? 'Explore the energy flow of the year ahead — discover key themes for each month.' : '洞察未来一年的能量流向，把握每月命运关键。',
     yearOverview: isEn ? 'Yearly Energy Overview' : '年度能量概览',
     monthlyGuide: isEn ? 'Monthly Guidance' : '月度详细指引',
+    cardMeaning: isEn ? 'Card meaning' : '牌面含义',
+    aiInterpretation: isEn ? 'Yearly interpretation' : '年度解读',
     upright: isEn ? 'Upright' : '正位',
     reversed: isEn ? 'Reversed' : '逆位',
     oncePer: isEn ? '✨ You can draw one yearly reading per year.' : '✨ 每年只能抽取一次年度运势',
@@ -543,7 +546,7 @@ export default function YearAheadResultPage() {
               <span className="text-sm font-medium">{isFromHistory ? texts.backHistory : texts.backHome}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div>
           </header>
@@ -606,6 +609,8 @@ export default function YearAheadResultPage() {
                     {savedResult.result.cards.map((cardResult, index) => {
                       const card = savedResult.cards[index];
                       const isYearTheme = index === 12; // 第13张是年度主题牌
+                      const localizedMeaning = getLocalizedMeaning(card, card.orientation, router.locale);
+                      const localizedKeywords = getLocalizedKeywords(card, card.orientation, router.locale);
                       
                       return (
                         <motion.div
@@ -664,7 +669,7 @@ export default function YearAheadResultPage() {
                               </h3>
                               
                               <div className="flex flex-wrap gap-2 mb-3">
-                                {card.keywords.map((keyword, kidx) => (
+                                {localizedKeywords.map((keyword, kidx) => (
                                   <span
                                     key={kidx}
                                     className="px-2 py-1 text-xs rounded-md bg-white/10 text-white/60 border border-white/10"
@@ -673,10 +678,23 @@ export default function YearAheadResultPage() {
                                   </span>
                                 ))}
                               </div>
+                              {localizedMeaning && (
+                                <div className="mb-4 rounded-xl border border-white/10 bg-black/15 p-4">
+                                  <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
+                                    {texts.cardMeaning}
+                                  </p>
+                                  <p className="text-sm text-white/75 leading-relaxed">{localizedMeaning}</p>
+                                </div>
+                              )}
                               
-                              <p className="text-white/80 leading-relaxed whitespace-pre-line">
-                                {cardResult.meaning}
-                              </p>
+                              <div className="border-t border-white/10 pt-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
+                                  {texts.aiInterpretation}
+                                </p>
+                                <p className="text-white/80 leading-relaxed whitespace-pre-line">
+                                  {cardResult.meaning}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </motion.div>
@@ -698,4 +716,3 @@ export default function YearAheadResultPage() {
     </>
   );
 }
-

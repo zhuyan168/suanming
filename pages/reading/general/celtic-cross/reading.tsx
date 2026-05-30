@@ -146,7 +146,7 @@ export default function CelticCrossReadingPage() {
     btnRetry: isEn ? 'Retry' : '重新生成',
     btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Celtic Cross Spread Reading | Mystic Insights' : '凯尔特十字牌阵 · 解读 | Mystic Insights',
+    title: isEn ? 'Celtic Cross Spread Reading | FateAura' : '凯尔特十字牌阵 · 解读 | FateAura',
     metaDesc: isEn ? 'Your Celtic Cross Spread tarot reading.' : '查看你的塔罗牌解读结果',
     spreadTitle: isEn ? 'Celtic Cross Spread Reading' : '凯尔特十字牌阵解读',
     yourQuestion: isEn ? 'Your Question' : '你的问题',
@@ -158,6 +158,18 @@ export default function CelticCrossReadingPage() {
     backHome: isEn ? 'Back Home' : '返回首页',
     browseMore: isEn ? 'Explore More Spreads' : '浏览更多牌阵',
   };
+  const positionTitlesEn = [
+    'Present',
+    'Challenge',
+    'Focus',
+    'Past',
+    'Advantage',
+    'Near Future',
+    'How to Approach',
+    'Advice',
+    'Hopes & Fears',
+    'Outcome',
+  ];
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
@@ -272,7 +284,7 @@ export default function CelticCrossReadingPage() {
   //   return (
   //     <>
   //       <Head>
-  //         <title>凯尔特十字牌阵 · 解读 | Mystic Insights</title>
+  //         <title>凯尔特十字牌阵 · 解读 | FateAura</title>
   //         <meta name="description" content="查看你的塔罗牌解读结果" />
   //       </Head>
 
@@ -295,7 +307,7 @@ export default function CelticCrossReadingPage() {
 
   //           <div className="flex items-center gap-4">
   //             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-  //               Mystic Insights
+  //               FateAura
   //             </h2>
   //           </div>
 
@@ -451,7 +463,7 @@ export default function CelticCrossReadingPage() {
 
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -638,7 +650,7 @@ export default function CelticCrossReadingPage() {
                               {cardReading.position}
                             </div>
                             <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-wider">
-                              {cardReading.positionTitle}
+                              {isEn ? (positionTitlesEn[idx] || cardReading.positionTitle) : cardReading.positionTitle}
                             </p>
                           </div>
 

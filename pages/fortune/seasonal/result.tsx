@@ -8,6 +8,7 @@ import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../lib/tarotCardI18n';
 
 // 获取当前季节
 const getCurrentSeason = (): string => {
@@ -225,7 +226,7 @@ export default function SeasonalResult() {
   const displaySeason = getSeasonLabel(currentSeason, isEn);
 
   const texts = isEn ? {
-    pageTitle: `${displaySeason} Fortune Reading — Mystic Insights`,
+    pageTitle: `${displaySeason} Fortune Reading — FateAura`,
     loading: 'Loading...',
     errorRetry: 'Try Again',
     errorFetch: 'Failed to load your reading. Please try again.',
@@ -241,10 +242,11 @@ export default function SeasonalResult() {
     slotMind: 'Mind & Planning',
     slotWealth: 'Career & Wealth',
     synthesis: 'Overall Guidance',
+    cardMeaning: 'Card meaning',
     backHomeBtn: 'Back Home',
     nextQuarterHint: `🔒 This season's reading is complete. Your next reading will be available ${formatNextQuarterRange(true)}.`,
   } : {
-    pageTitle: `${currentSeason}运势解析 - Mystic Insights`,
+    pageTitle: `${currentSeason}运势解析 - FateAura`,
     loading: '加载中...',
     errorRetry: '重试',
     errorFetch: '获取解读失败，请稍后重试',
@@ -260,6 +262,7 @@ export default function SeasonalResult() {
     slotMind: '思维与计划（Thinking）',
     slotWealth: '事业与财运（Wealth）',
     synthesis: '综合建议',
+    cardMeaning: '牌面含义',
     backHomeBtn: '返回首页',
     nextQuarterHint: `🔒 本季度牌阵已抽取，下个季度 ${formatNextQuarterRange(false)} 可抽取新的牌阵`,
   };
@@ -382,6 +385,39 @@ export default function SeasonalResult() {
     router.push('/');
   };
 
+  const renderCardMeta = (card?: ShuffledTarotCard | null, featured = false) => {
+    if (!card) return null;
+
+    const localizedMeaning = getLocalizedMeaning(card, card.orientation, router.locale);
+    const localizedKeywords = getLocalizedKeywords(card, card.orientation, router.locale);
+
+    return (
+      <div className="space-y-3">
+        <p className={`${featured ? 'text-primary/80' : 'text-white/60'} text-sm font-medium`}>
+          {card.name} ({getOrientationText(card.orientation)})
+        </p>
+        {localizedMeaning && (
+          <div className="rounded-xl border border-white/10 bg-black/15 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
+              {texts.cardMeaning}
+            </p>
+            <p className="text-sm text-white/75 leading-relaxed">{localizedMeaning}</p>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {localizedKeywords.map((keyword) => (
+                <span
+                  key={keyword}
+                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (accessLoading || !allowed || isLoading || !result) {
     return (
       <div className="dark">
@@ -484,7 +520,7 @@ export default function SeasonalResult() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div>
           </header>
@@ -573,9 +609,7 @@ export default function SeasonalResult() {
                         <h3 className="text-2xl font-bold text-white mb-2">
                           {texts.slotOverall}
                         </h3>
-                        <p className="text-sm text-primary/80 font-medium mb-2">
-                          {cards[4]?.name} ({cards[4]?.orientation ? getOrientationText(cards[4].orientation) : ''})
-                        </p>
+                        {renderCardMeta(cards[4], true)}
                       </div>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -593,9 +627,7 @@ export default function SeasonalResult() {
                         <h3 className="text-2xl font-bold text-white mb-2">
                           {texts.slotAction}
                         </h3>
-                        <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[0]?.name} ({cards[0]?.orientation ? getOrientationText(cards[0].orientation) : ''})
-                        </p>
+                        {renderCardMeta(cards[0])}
                       </div>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -613,9 +645,7 @@ export default function SeasonalResult() {
                         <h3 className="text-2xl font-bold text-white mb-2">
                           {texts.slotEmotion}
                         </h3>
-                        <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[1]?.name} ({cards[1]?.orientation ? getOrientationText(cards[1].orientation) : ''})
-                        </p>
+                        {renderCardMeta(cards[1])}
                       </div>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -633,9 +663,7 @@ export default function SeasonalResult() {
                         <h3 className="text-2xl font-bold text-white mb-2">
                           {texts.slotMind}
                         </h3>
-                        <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[2]?.name} ({cards[2]?.orientation ? getOrientationText(cards[2].orientation) : ''})
-                        </p>
+                        {renderCardMeta(cards[2])}
                       </div>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -653,9 +681,7 @@ export default function SeasonalResult() {
                         <h3 className="text-2xl font-bold text-white mb-2">
                           {texts.slotWealth}
                         </h3>
-                        <p className="text-sm text-white/60 font-medium mb-2">
-                          {cards[3]?.name} ({cards[3]?.orientation ? getOrientationText(cards[3].orientation) : ''})
-                        </p>
+                        {renderCardMeta(cards[3])}
                       </div>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
@@ -706,4 +732,3 @@ export default function SeasonalResult() {
     </>
   );
 }
-

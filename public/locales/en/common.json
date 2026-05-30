@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "FateAura – Tarot & Divination"
+    "title": "FateAura - Tarot Readings & Intuitive Guidance"
   },
   "nav": {
     "home": "Home",
@@ -14,21 +14,21 @@
     "menu": "Menu"
   },
   "hero": {
-    "title": "Illuminate the Path Ahead",
-    "subtitle": "Let tarot and intuitive divination help you tune into the energy around you and find your own clarity.",
+    "title": "Find Clarity in the Cards",
+    "subtitle": "Ask what is on your mind, draw your cards, and receive thoughtful guidance for love, work, money, and life's turning points.",
     "cta": "Begin Reading"
   },
   "section": {
     "general": {
-      "title": "General Reading",
-      "desc": "Open to any question or theme — draw a spread and let the cards reflect where your energy flows right now.",
+      "title": "General Readings",
+      "desc": "For open-ended questions, decisions, and moments when you need a clearer view of what is unfolding.",
       "spreads": "Tarot Spreads",
       "yesno": "Yes / No Tarot",
-      "oracle": "Oracle Divination"
+      "oracle": "Jiaobei Oracle"
     },
     "fortune": {
-      "title": "Energy Forecasts",
-      "desc": "Check in with the rhythm of your days, months, and seasons — so you can move with the current instead of against it.",
+      "title": "Fortune Forecasts",
+      "desc": "Look at the rhythm of your day, month, season, or year so you can move with more awareness.",
       "daily": "Daily",
       "monthly": "Monthly",
       "seasonal": "Seasonal",
@@ -37,13 +37,13 @@
     },
     "themed": {
       "title": "Themed Readings",
-      "desc": "Go deeper on the moments that matter most — love, purpose, and the flow of abundance in your life.",
+      "desc": "Explore the areas people ask about most: love, career, study, money, and personal direction.",
       "love": "Love",
       "career": "Career & Studies",
       "wealth": "Wealth"
     }
   },
-  "tagline": "The cards reveal the currents — the choices are always yours.",
+  "tagline": "The cards can reflect the moment. The choice remains yours.",
   "footer": {
     "copyright": "© 2026 FateAura. All rights reserved.",
     "about": "About",
@@ -60,31 +60,31 @@
     "beginReading": "Begin Reading",
     "membersOnly": "Members Only",
     "unlockTitle": "Members Only",
-    "unlockDesc": "This reading is exclusive to members.\nMembership is coming soon — stay tuned!",
-    "goMembership": "Go Premium",
+    "unlockDesc": "This reading is exclusive to members.\nMembership access is coming soon.",
+    "goMembership": "View Membership",
     "backButton": "Back",
     "general": {
-      "metaTitle": "Tarot Spreads – FateAura",
-      "metaDesc": "Open to any theme — draw a spread and find clarity in your current energy.",
+      "metaTitle": "Tarot Spreads - FateAura",
+      "metaDesc": "Choose a tarot spread for your question and find clearer guidance for the moment.",
       "title": "Tarot Spreads",
-      "desc": "Open to any theme — let the cards reflect your energy right now.",
-      "tagline": "Readings reflect the energy present — what you do with it is always up to you."
+      "desc": "Choose a spread that fits your question and draw your cards.",
+      "tagline": "Readings reflect the current moment. What you do next is always up to you."
     },
     "love": {
-      "metaTitle": "Love Readings – FateAura",
-      "metaDesc": "Explore the mysteries of love and find your answers.",
-      "subtitle": "Choose a reading and gently explore what's stirring in you right now.",
-      "tagline": "The cards reveal the currents — the choices are always yours."
+      "metaTitle": "Love Readings - FateAura",
+      "metaDesc": "Explore love, attraction, relationship dynamics, and emotional clarity through tarot.",
+      "subtitle": "Choose a reading and gently explore what is moving beneath the surface.",
+      "tagline": "The cards can reflect the emotional current. The choice remains yours."
     },
     "career": {
-      "metaTitle": "Career & Study Readings – FateAura",
+      "metaTitle": "Career & Study Readings - FateAura",
       "metaDesc": "Explore directions, prepare for key milestones, and make clearer choices.",
-      "tagline": "Readings reflect your current energy — your growth comes from your own clarity and steady effort."
+      "tagline": "Readings can clarify the moment. Growth still comes from clear judgment and steady effort."
     },
     "wealth": {
-      "metaTitle": "Wealth Readings – FateAura",
-      "metaDesc": "See the flow and obstacles of money — make more grounded choices.",
-      "tagline": "Readings reflect the currents of energy — lasting change comes from your choices and daily actions."
+      "metaTitle": "Wealth Readings - FateAura",
+      "metaDesc": "Explore money patterns, financial blocks, and grounded next steps through tarot.",
+      "tagline": "Readings can reveal patterns. Lasting change comes from your choices and daily actions."
     }
   }
 }

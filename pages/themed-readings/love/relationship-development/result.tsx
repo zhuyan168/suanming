@@ -91,6 +91,17 @@ const SLOT_CONFIG = [
   },
 ];
 
+const SLOT_CONFIG_EN = [
+  { position: 1, title: 'The Real You', meaning: 'Your true state and inner feelings in this relationship, beyond what you show on the surface.' },
+  { position: 2, title: 'The Real Them', meaning: 'Their true state and deeper motivation in this relationship, beyond surface behavior.' },
+  { position: 3, title: 'How They See You', meaning: 'How they currently perceive you, and whether that view matches your real self.' },
+  { position: 4, title: 'How You See Them', meaning: 'How you currently understand them, and how close that view is to their real state.' },
+  { position: 5, title: 'The Past of the Relationship', meaning: 'What this relationship has been through and what still influences the present.' },
+  { position: 6, title: 'The Relationship Now', meaning: 'Where this relationship truly stands right now, without judging it as good or bad.' },
+  { position: 7, title: 'Where the Relationship Is Going', meaning: 'Where this relationship may naturally move if the current pattern continues.' },
+  { position: 8, title: 'Your Next Step', meaning: 'The attitude or action that can help you face this relationship more honestly and steadily.' },
+];
+
 // 从 localStorage 读取结果
 const loadResult = (): RelationshipDev8Result | null => {
   if (typeof window === 'undefined') return null;
@@ -148,6 +159,34 @@ const validateReading = (reading: any): boolean => {
 export default function RelationshipDev8Result() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Relationship Development - Reading | FateAura' : '??????? - ???? | FateAura',
+    metaDesc: isEn ? 'Understand the true state and natural direction of this relationship.' : '????????????????',
+    loadingTitle: isEn ? 'Loading... - Relationship Development' : '???... - ???????',
+    loading: isEn ? 'Loading...' : '???...',
+    loadingData: isEn ? 'Loading data...' : '?????...',
+    header: isEn ? 'Relationship Development' : '???????',
+    reset: isEn ? 'Reset' : '??',
+    h1: isEn ? 'Relationship Development' : '???????',
+    subtitle: isEn ? 'Understand the true state and natural direction of the relationship' : '??????????????',
+    retry: isEn ? 'Retry' : '????',
+    generatingTitle: isEn ? 'Reading the true state of this relationship...' : '???????????????',
+    generatingDesc: isEn ? 'This may take a moment. Please wait.' : '?????????????',
+    spreadExplanation: isEn ? 'Spread Explanation' : '????',
+    cardReading: isEn ? 'Card Reading' : '????',
+    integration: isEn ? 'Relationship Dynamics' : '??????',
+    theme: isEn ? 'Current Relationship Theme' : '????????',
+    drivingForce: isEn ? 'Core Driving Force' : '?????????',
+    tension: isEn ? 'The Tension That Needs Attention' : '???????????',
+    shortTermTrend: isEn ? 'Short-Term Trend' : '??????',
+    closingTitle: isEn ? 'Final Message' : '????',
+    closingFallback: isEn ? 'The cards reflect the current state of this relationship. May this understanding help you find your own rhythm.' : '??????????????????????????????',
+    backLove: isEn ? 'Back to Love Readings' : '??????',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -294,10 +333,10 @@ export default function RelationshipDev8Result() {
     return (
       <>
         <Head>
-          <title>加载中... - 这段感情的发展</title>
+          <title>{pageText.loadingTitle}</title>
         </Head>
         <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-          <div className="text-white text-lg">加载中...</div>
+          <div className="text-white text-lg">{pageText.loadingData}</div>
         </div>
       </>
     );
@@ -307,7 +346,7 @@ export default function RelationshipDev8Result() {
     return (
       <>
         <Head>
-          <title>加载中... - 这段感情的发展</title>
+          <title>{pageText.loadingTitle}</title>
         </Head>
         <div className="min-h-screen bg-[#191022] flex items-center justify-center">
           <div className="text-white text-lg">数据加载中...</div>
@@ -319,8 +358,8 @@ export default function RelationshipDev8Result() {
   return (
     <>
       <Head>
-        <title>这段感情的发展 - 解读结果</title>
-        <meta name="description" content="看看这段关系的真实状态与自然走向" />
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -396,7 +435,7 @@ export default function RelationshipDev8Result() {
               </button>
               
               <div className="flex items-center gap-4 text-white">
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">这段感情的发展</h2>
+                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">{pageText.header}</h2>
               </div>
 
               <button
@@ -404,7 +443,7 @@ export default function RelationshipDev8Result() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">refresh</span>
-                <span className="text-sm font-medium hidden sm:inline">重置</span>
+                <span className="text-sm font-medium hidden sm:inline">{pageText.reset}</span>
               </button>
             </header>
 
@@ -413,10 +452,10 @@ export default function RelationshipDev8Result() {
               <div className="max-w-7xl mx-auto text-center">
                 <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reading Result</p>
                 <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-2">
-                  这段感情的发展
+                  {pageText.h1}
                 </h1>
                 <p className="text-white/70 text-base max-w-2xl mx-auto">
-                  理解关系的真实状态与自然走向
+                  {pageText.subtitle}
                 </p>
               </div>
             </div>
@@ -430,7 +469,7 @@ export default function RelationshipDev8Result() {
                     isAnimating={[false, false, false, false, false, false, false, false]}
                     showLoadingText={false}
                     forceFlipped={true}
-                    slotConfig={SLOT_CONFIG}
+                    slotConfig={slotConfig}
                   />
                 </div>
               </div>
@@ -457,7 +496,7 @@ export default function RelationshipDev8Result() {
                               onClick={handleRetry}
                               className="mt-2 text-xs text-red-400 hover:text-red-300 underline"
                             >
-                              点击重试
+                              {pageText.retry}
                             </button>
                           </div>
                           <button
@@ -480,9 +519,9 @@ export default function RelationshipDev8Result() {
                     >
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" style={{ borderTopColor: '#7f13ec' }}></div>
-                        <p className="text-white text-lg font-semibold">正在为你解读这段关系的真实状态</p>
+                        <p className="text-white text-lg font-semibold">{pageText.generatingTitle}</p>
                         <p className="text-white/60 text-sm">
-                          这需要一点时间，请放心等待
+                          {pageText.generatingDesc}
                         </p>
                       </div>
                     </motion.div>
@@ -500,7 +539,7 @@ export default function RelationshipDev8Result() {
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <span className="text-2xl">📖</span>
-                          <h2 className="text-white text-lg sm:text-xl font-bold">牌阵说明</h2>
+                          <h2 className="text-white text-lg sm:text-xl font-bold">{pageText.spreadExplanation}</h2>
                         </div>
                         <p className="text-white/75 text-base leading-relaxed whitespace-pre-wrap">
                           {reading.spreadExplanation}
@@ -511,12 +550,12 @@ export default function RelationshipDev8Result() {
                       <div className="mb-10">
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-2xl">🎴</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">牌面解读</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.shortTermTrend}</h2>
                         </div>
                         <div className="space-y-6">
                           {reading.cardReadings?.map((cardReading, index) => {
                             const card = savedResult.cards?.[index];
-                            const config = SLOT_CONFIG?.[index];
+                            const config = slotConfig?.[index];
                             
                             if (!card || !config) return null;
                             
@@ -535,7 +574,7 @@ export default function RelationshipDev8Result() {
                                   </div>
                                   <div className="flex-1">
                                     <h3 className="text-white text-lg sm:text-xl font-bold mb-1">
-                                      {cardReading.label}
+                                      {isEn ? (config.title || cardReading.label) : cardReading.label}
                                     </h3>
                                     <p className="text-white/50 text-sm">
                                       {config.meaning}
@@ -561,7 +600,7 @@ export default function RelationshipDev8Result() {
                                         {card.name}
                                       </h4>
                                       <p className="text-white/50 text-xs">
-                                        {card.orientation === 'upright' ? '正位' : '逆位'}
+                                        {card.orientation === 'upright' ? pageText.upright : pageText.reversed}
                                       </p>
                                     </div>
                                   </div>
@@ -595,7 +634,7 @@ export default function RelationshipDev8Result() {
                         <div className="space-y-5">
                           <div>
                             <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
-                              当前关系的主旋律
+                              {pageText.theme}
                             </h3>
                             <p className="text-white/90 text-base leading-relaxed">
                               {reading.integration.theme}
@@ -604,7 +643,7 @@ export default function RelationshipDev8Result() {
 
                           <div>
                             <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
-                              推动关系的核心力量
+                              {pageText.drivingForce}
                             </h3>
                             <p className="text-white/90 text-base leading-relaxed">
                               {reading.integration.drivingForce}
@@ -613,7 +652,7 @@ export default function RelationshipDev8Result() {
 
                           <div>
                             <h3 className="text-white/70 text-sm font-semibold mb-2 uppercase tracking-wider">
-                              当前最需要被看见的张力
+                              {pageText.tension}
                             </h3>
                             <p className="text-white/90 text-base leading-relaxed">
                               {reading.integration.tension}
@@ -648,9 +687,9 @@ export default function RelationshipDev8Result() {
                         <div className="flex items-start gap-4">
                           <span className="text-2xl">💫</span>
                           <div className="flex-1">
-                            <h2 className="text-white text-lg font-bold mb-3">最后的话</h2>
+                            <h2 className="text-white text-lg font-bold mb-3">{pageText.closingTitle}</h2>
                             <p className="text-white/85 text-base leading-relaxed whitespace-pre-wrap">
-                              {reading.closing?.trim() || '塔罗牌为你呈现了这段关系的现状，愿你在理解中找到自己的节奏。'}
+                              {reading.closing?.trim() || pageText.closingFallback}
                             </p>
                           </div>
                         </div>

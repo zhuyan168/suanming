@@ -18,6 +18,14 @@ const SLOT_CONFIG = [
   { id: "p5", name: "你可以如何突破这一财务阻碍", meaning: "你可以如何突破这一财务阻碍" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "Current Finances", meaning: "Your current financial state." },
+  { id: "p2", name: "External Influence", meaning: "Outside factors affecting your money situation." },
+  { id: "p3", name: "Your Attitude", meaning: "How your mindset is shaping your finances." },
+  { id: "p4", name: "Main Block", meaning: "The core reason your finances feel blocked." },
+  { id: "p5", name: "Breakthrough Path", meaning: "How you can start moving through this block." }
+];
+
 interface TarotCard {
   id: number;
   name: string;
@@ -43,6 +51,21 @@ interface ReadingResult {
 export default function WealthObstaclesReadingPage() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Wealth Obstacles Reading | FateAura' : '财富阻碍解读 - FateAura',
+    header: isEn ? 'Wealth Obstacles Reading' : '财富阻碍解读',
+    h1: isEn ? 'What Is Blocking My Wealth Right Now?' : '我现在的财富阻碍是什么？',
+    scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
+    loadingTitle: isEn ? 'Reading your wealth energy in depth...' : '正在深度洞察你的财富能量...',
+    overallTitle: isEn ? 'Wealth Energy Overview' : '财富能量总览',
+    position: isEn ? 'Position' : '牌位',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    backWealth: isEn ? 'Back to Wealth Readings' : '返回财富主页',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -109,7 +132,7 @@ export default function WealthObstaclesReadingPage() {
       }
 
     } catch (err: any) {
-      setError(err.message || '出错了，请稍后重试');
+      setError(err.message || texts.errorGenerateRetry);
     } finally {
       setLoading(false);
     }
@@ -134,7 +157,7 @@ export default function WealthObstaclesReadingPage() {
   if (accessLoading || !allowed) {
     return (
       <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loadingTitle}</div>
       </div>
     );
   }
@@ -174,7 +197,7 @@ export default function WealthObstaclesReadingPage() {
   return (
     <div className="dark bg-[#191022] min-h-screen text-white font-sans">
       <Head>
-        <title>财富阻碍解读 - Mystic Insights</title>
+        <title>{pageText.title}</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
@@ -183,7 +206,7 @@ export default function WealthObstaclesReadingPage() {
           <span className="material-symbols-outlined text-xl">arrow_back</span>
           <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
-        <h2 className="text-lg font-bold">财富阻碍解读</h2>
+        <h2 className="text-lg font-bold">{pageText.header}</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
           <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
@@ -200,7 +223,7 @@ export default function WealthObstaclesReadingPage() {
           >
             <div className="text-center mb-8">
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">Wealth Obstacles Reading</span>
-              <h1 className="text-2xl sm:text-4xl font-black mb-4 px-4 leading-tight text-white">我现在的财富阻碍是什么？</h1>
+              <h1 className="text-2xl sm:text-4xl font-black mb-4 px-4 leading-tight text-white">{pageText.h1}</h1>
               <div className="h-1 w-24 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>
 
@@ -213,7 +236,7 @@ export default function WealthObstaclesReadingPage() {
                   isAnimating={[false, false, false, false, false]}
                   showLoadingText={false}
                   forceFlipped={true}
-                  slotConfig={SLOT_CONFIG}
+                  slotConfig={slotConfig}
                 />
               </div>
             </div>
@@ -224,7 +247,7 @@ export default function WealthObstaclesReadingPage() {
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">下滑查看解读内容</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{pageText.scrollHint}</span>
                 <span className="material-symbols-outlined text-white/20 text-xl">keyboard_double_arrow_down</span>
               </motion.div>
             </div>
@@ -247,7 +270,7 @@ export default function WealthObstaclesReadingPage() {
                 <div className="absolute inset-4 border-4 border-purple-400 border-b-transparent rounded-full animate-spin-slow" style={{ borderColor: 'transparent transparent #a855f7 transparent' }}></div>
               </div>
               <h3 className="text-2xl font-bold mb-3">
-                {router.locale === 'en' ? 'Reading your wealth energy in depth…' : '正在深度洞察你的财富能量…'}
+                {pageText.loadingTitle}
               </h3>
               <p className="text-white/40 max-w-sm mx-auto text-base leading-relaxed">
                 {router.locale === 'en'
@@ -268,7 +291,7 @@ export default function WealthObstaclesReadingPage() {
                 <div className="relative bg-[#1f1629] border border-white/10 rounded-3xl p-8 sm:p-12 shadow-glow-sm">
                   <h3 className="text-2xl font-bold flex items-center gap-3 mb-8 text-purple-300">
                     <span className="material-symbols-outlined text-3xl">auto_awesome</span>
-                    财富能量总览
+                    {pageText.overallTitle}
                   </h3>
                   <div className="text-white/90 leading-relaxed text-xl px-2 space-y-4">
                     {reading.overall.split('\n').map((para, i) => (
@@ -307,7 +330,7 @@ export default function WealthObstaclesReadingPage() {
                               >
                                 <img
                                   src={cardData.image}
-                                  alt={cardReading.card}
+                                  alt={isEn ? (cardData?.name || cardReading.card) : cardReading.card}
                                   className="w-full h-full object-cover border border-white/10"
                                 />
                               </div>
@@ -318,16 +341,16 @@ export default function WealthObstaclesReadingPage() {
                             )}
                           </div>
                           <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] text-center">Position {idx + 1}</span>
-                            <p className="text-[11px] font-bold text-primary/80 text-center leading-tight">{cardReading.title}</p>
+                            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] text-center">{pageText.position} {idx + 1}</span>
+                            <p className="text-[11px] font-bold text-primary/80 text-center leading-tight">{isEn ? (slotConfig[idx]?.name || cardReading.title) : cardReading.title}</p>
                           </div>
                         </div>
                         
                         <div className="flex-1 space-y-5">
                           <div className="flex flex-wrap items-center gap-3">
-                            <span className="text-2xl font-black text-white group-hover:text-primary transition-colors duration-300">{cardReading.card}</span>
+                            <span className="text-2xl font-black text-white group-hover:text-primary transition-colors duration-300">{isEn ? (cardData?.name || cardReading.card) : cardReading.card}</span>
                             <span className={`text-xs px-3 py-1 rounded-full font-bold border ${cardData?.orientation === 'reversed' ? 'border-orange-500/30 bg-orange-500/10 text-orange-400' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'}`}>
-                              {cardReading.orientation}
+                              {cardData?.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                             </span>
                           </div>
                           <div className="text-white/80 leading-relaxed text-lg space-y-4">
@@ -361,7 +384,7 @@ export default function WealthObstaclesReadingPage() {
                     className="w-full sm:w-auto px-10 py-4 rounded-2xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-3"
                   >
                     <span className="material-symbols-outlined">home</span>
-                    <span className="font-bold">返回首页</span>
+                    <span className="font-bold">{pageText.backHome}</span>
                   </button>
                   <button
                     onClick={handleReturn}
@@ -369,7 +392,7 @@ export default function WealthObstaclesReadingPage() {
                     style={{ backgroundColor: '#7f13ec' }}
                   >
                     <span className="material-symbols-outlined">paid</span>
-                    <span className="font-bold">返回财富主页</span>
+                    <span className="font-bold">{pageText.backWealth}</span>
                   </button>
                 </div>
               </div>

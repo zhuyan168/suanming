@@ -148,19 +148,24 @@ export default function HorseshoeReadingPage() {
     btnRetry: isEn ? 'Retry' : '重新生成',
     btnBackList: isEn ? 'Back to Spreads' : '返回牌阵列表',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Horseshoe Spread Reading | Mystic Insights' : '马蹄铁牌阵 · 解读 | Mystic Insights',
+    title: isEn ? 'Horseshoe Spread Reading | FateAura' : '马蹄铁牌阵 · 解读 | FateAura',
     metaDesc: isEn ? 'Your Horseshoe Spread tarot reading.' : '查看你的塔罗牌解读结果',
     spreadTitle: isEn ? 'Horseshoe Spread Reading' : '马蹄铁牌阵解读',
     yourQuestion: isEn ? 'Your Question' : '你的问题',
     noQuestion: isEn ? 'No question provided — we\'ll read the energy of this moment.' : '你没有写下具体问题，我们将以你当下的能量趋势进行解读',
     overallReading: isEn ? 'Overall Guidance' : '整体解读',
     corePosition: isEn ? 'Key Position' : '核心位',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
     tipsTitle: isEn ? 'Practical Reminders & Action Advice' : '现实提醒与行动建议',
     reminderFallbackQ: isEn ? 'These cards reflect the energy and possibilities of this moment. The power to create change always lies in your own choices and actions.' : '这些牌呈现的，只是当下的能量与可能性。真正能带来改变的，始终是你自己的选择和行动。',
     reminderFallbackNoQ: isEn ? 'Tarot reflects the current flow of energy. What truly brings change is your own choices and actions.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
     backHome: isEn ? 'Back Home' : '返回首页',
     browseMore: isEn ? 'Explore More Spreads' : '浏览更多牌阵',
   };
+  const positionNames = isEn
+    ? ['Past Influences', 'Present State', 'Hidden Influences', 'Obstacle', 'External Environment', 'Advice', 'Outcome']
+    : ['过去的影响', '当下的状态', '隐藏的影响', '阻碍与挑战', '潜在的发展', '行动建议', '可能的结果'];
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
@@ -338,7 +343,7 @@ export default function HorseshoeReadingPage() {
 
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -515,7 +520,7 @@ export default function HorseshoeReadingPage() {
                                 >
                                   <img
                                     src={cardData.image}
-                                    alt={cardReading.card_name_cn}
+                                    alt={isEn ? (cardData?.name || cardReading.card_name_cn) : cardReading.card_name_cn}
                                     className="w-full h-full object-cover shadow-lg border border-white/10"
                                   />
                                 </div>
@@ -535,7 +540,7 @@ export default function HorseshoeReadingPage() {
                               {cardReading.position}
                             </div>
                             <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-wider">
-                              {cardReading.position_name}
+                              {positionNames[idx] || cardReading.position_name}
                             </p>
                           </div>
 
@@ -546,16 +551,16 @@ export default function HorseshoeReadingPage() {
                                 className="text-lg font-bold text-primary"
                                 style={{ color: '#a855f7' }}
                               >
-                                {cardReading.card_name_cn}
+                                {isEn ? (cardData?.name || cardReading.card_name_cn) : cardReading.card_name_cn}
                               </span>
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full border ${
-                                  cardReading.orientation_cn === '逆位'
+                                  cardData?.orientation === 'reversed'
                                     ? 'border-orange-500/50 text-orange-400'
                                     : 'border-emerald-500/50 text-emerald-400'
                                 }`}
                               >
-                                {cardReading.orientation_cn}
+                                {cardData?.orientation === 'reversed' ? texts.reversed : texts.upright}
                               </span>
                               {isKeyPosition && (
                                 <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 border border-primary/50 text-primary">

@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 function LogoMark() {
   return (
@@ -13,11 +14,40 @@ function LogoMark() {
 }
 
 export default function PrivacyPage() {
+  const router = useRouter()
+  const isEn = router.locale === 'en'
+
+  const texts = isEn ? {
+    title: 'Privacy Policy - FateAura',
+    metaDesc: 'Learn how FateAura handles account information, usage records, and privacy.',
+    navAbout: 'About',
+    heading: 'Privacy Policy',
+    paragraphs: [
+      'We care about your privacy and data security. This page explains how FateAura approaches the collection, use, and protection of information related to your account and use of the service. We may update this page as the product develops.',
+      'In general, we aim to protect account information and necessary usage records. We do not sell personally identifiable information to third parties without your consent. By using FateAura, you understand that we may process data needed to provide, maintain, secure, and improve the service.',
+      'Reading history, membership status, guest trial data, and account-related information may be stored when needed to provide the features you use. We keep this information only for legitimate service purposes and reasonable product operation needs.',
+    ],
+    contactPrefix: 'If you have privacy questions, contact us at',
+    backAbout: 'Back to About FateAura',
+  } : {
+    title: '隐私政策 - FateAura',
+    metaDesc: 'FateAura 隐私与数据保护说明。',
+    navAbout: '关于',
+    heading: '隐私政策',
+    paragraphs: [
+      '我们重视你的隐私与数据安全。本页将对 FateAura 如何收集、使用与保护你的信息作出说明；完整条文正在根据产品功能持续修订，修订后将在此更新。',
+      '在现行原则下：我们会尽力保护账户信息与必要的使用记录，不会在未获你同意的情况下将可识别你身份的信息出售给第三方。使用本服务即表示你理解并同意我们按合法、正当、必要的方式处理与服务提供相关的数据。',
+      '当你使用历史记录、会员状态、游客试用等功能时，相关数据可能会被保存，以便提供对应功能。我们仅会基于服务运行、账户管理与产品体验所需处理这些信息。',
+    ],
+    contactPrefix: '若你对隐私有任何疑问，欢迎通过',
+    backAbout: '← 返回关于 FateAura',
+  }
+
   return (
     <>
       <Head>
-        <title>隐私政策 - FateAura</title>
-        <meta name="description" content="FateAura 隐私与数据保护说明。" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
@@ -35,7 +65,7 @@ export default function PrivacyPage() {
             </Link>
             <nav className="flex items-center gap-6">
               <Link href="/about" className="text-white/80 text-sm font-medium hover:text-primary transition-colors">
-                关于
+                {texts.navAbout}
               </Link>
             </nav>
           </header>
@@ -43,30 +73,26 @@ export default function PrivacyPage() {
           <main className="flex-1 px-4 sm:px-8 md:px-16 lg:px-24 py-10 sm:py-14">
             <div className="mx-auto max-w-3xl">
               <h1 className="text-white text-3xl sm:text-4xl font-extrabold tracking-tight mb-8 [text-shadow:0_0_40px_rgba(127,19,236,0.2)]">
-                隐私政策
+                {texts.heading}
               </h1>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-6 sm:px-7 sm:py-8 text-white/75 text-sm sm:text-[15px] leading-relaxed space-y-4">
+                {texts.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
                 <p>
-                  我们重视你的隐私与数据安全。本页将对 FateAura
-                  如何收集、使用与保护你的信息作出说明；完整条文正在根据产品功能持续修订，修订后将在此更新。
-                </p>
-                <p>
-                  在现行原则下：我们会尽力保护账户信息与必要的使用记录，不会在未获你同意的情况下将可识别你身份的信息出售给第三方。使用本服务即表示你理解并同意我们按合法、正当、必要的方式处理与服务提供相关的数据。
-                </p>
-                <p>
-                  若你对隐私有任何疑问，欢迎通过
+                  {texts.contactPrefix}{' '}
                   <a
                     href="mailto:sephiroth.wang@foxmail.com"
                     className="text-primary hover:text-secondary mx-1 underline underline-offset-2 break-all"
                   >
                     sephiroth.wang@foxmail.com
                   </a>
-                  与我们联系。
+                  {isEn ? '.' : '与我们联系。'}
                 </p>
               </div>
               <div className="mt-10 text-center sm:text-left">
                 <Link href="/about" className="text-sm text-white/50 hover:text-primary transition-colors">
-                  ← 返回关于 FateAura
+                  {texts.backAbout}
                 </Link>
               </div>
             </div>

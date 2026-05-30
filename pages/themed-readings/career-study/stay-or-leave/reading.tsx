@@ -75,10 +75,63 @@ const SLOT_CONFIG = [
   }
 ];
 
+const SLOT_CONFIG_EN = [
+  {
+    id: "p1",
+    name: "Your Current Career State",
+    meaning: "Your real situation, mindset, and overall feeling in this job"
+  },
+  {
+    id: "p2",
+    name: "Strengths of This Job",
+    meaning: "The support, resources, or positive value this job currently gives you"
+  },
+  {
+    id: "p3",
+    name: "Weaknesses of This Job",
+    meaning: "What drains you, limits you, or may create long-term pressure"
+  },
+  {
+    id: "p4",
+    name: "How Your Manager Sees You",
+    meaning: "How your manager may view your ability, role, and potential"
+  },
+  {
+    id: "p5",
+    name: "How Colleagues See You",
+    meaning: "How people around you may feel about working with you"
+  },
+  {
+    id: "p6",
+    name: "Room for Personal Growth",
+    meaning: "Whether this job can still support your growth if you keep investing energy"
+  },
+  {
+    id: "p7",
+    name: "Future Direction",
+    meaning: "How this job may develop if nothing changes dramatically"
+  }
+];
+
 
 export default function StayOrLeaveReading() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Stay or Leave Reading | FateAura' : '职业发展全景解读 - FateAura',
+    h1: isEn ? 'Is This Job Still Worth Continuing?' : '这份工作是否值得继续做下去？',
+    loadingLine: isEn ? 'Connecting the dots and organizing your career reading...' : '正在链接灵感，整理你的职业档案...',
+    overviewTitle: isEn ? 'Current Situation Review' : '现状深度复盘',
+    deepTitle: isEn ? 'Deep Reading' : '深度解读',
+    actionTitle: isEn ? 'What You Can Do' : '你可以怎么做',
+    reminderTitle: isEn ? 'Reality Reminder' : '现实提醒',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    backCareer: isEn ? 'Back to Career & Study' : '返回事业&学业占卜',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const { key } = router.query;
 
@@ -151,7 +204,7 @@ export default function StayOrLeaveReading() {
   if (accessLoading || !allowed) {
     return (
       <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loadingTitle}</div>
       </div>
     );
   }
@@ -169,7 +222,7 @@ export default function StayOrLeaveReading() {
 
   return (
     <div className="dark bg-[#191022] min-h-screen text-white font-display">
-      <Head><title>职业发展全景解读 - Mystic Insights</title></Head>
+      <Head><title>{pageText.title}</title></Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
         <button onClick={isFromHistory ? goBackToHistory : () => router.push('/themed-readings/career-study')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
@@ -195,7 +248,7 @@ export default function StayOrLeaveReading() {
 
       <main className="px-4 py-8 sm:py-12 max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-2xl sm:text-4xl font-black mb-4">这份工作是否值得继续做下去？</h1>
+          <h1 className="text-2xl sm:text-4xl font-black mb-4">{pageText.h1}</h1>
           <div className="h-1.5 w-24 bg-primary mx-auto rounded-full shadow-[0_0_15px_rgba(127,19,236,0.5)]"></div>
         </div>
 
@@ -208,7 +261,7 @@ export default function StayOrLeaveReading() {
                 isAnimating={Array(7).fill(false)}
                 showLoadingText={false}
                 forceFlipped={true}
-                slotConfig={SLOT_CONFIG}
+                slotConfig={slotConfig}
               />
             </div>
           </div>
@@ -225,7 +278,7 @@ export default function StayOrLeaveReading() {
                   </svg>
                   <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full -z-10 animate-pulse"></div>
                 </div>
-                <p className="text-primary/60 font-medium tracking-widest animate-pulse">正在链接灵感，整理你的职业档案...</p>
+                <p className="text-primary/60 font-medium tracking-widest animate-pulse">{pageText.loadingLine}</p>
               </div>
             </motion.div>
           ) : interpretation ? (
@@ -235,7 +288,7 @@ export default function StayOrLeaveReading() {
               <section className="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl relative overflow-hidden">
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 blur-3xl rounded-full"></div>
                 <h3 className="text-primary font-bold text-xl mb-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined">auto_awesome</span> 现状深度复盘
+                  <span className="material-symbols-outlined">auto_awesome</span> {pageText.overviewTitle}
                 </h3>
                 <p className="text-white/90 leading-relaxed text-lg">{interpretation.overview}</p>
               </section>
@@ -243,7 +296,7 @@ export default function StayOrLeaveReading() {
               {/* 深度解读 */}
               <section className="space-y-8">
                 <div className="flex items-center gap-4 mb-8">
-                  <h2 className="text-2xl font-black tracking-widest">深度解读</h2>
+                  <h2 className="text-2xl font-black tracking-widest">{pageText.deepTitle}</h2>
                   <div className="flex-1 h-px bg-white/10"></div>
                 </div>
                 
@@ -254,19 +307,19 @@ export default function StayOrLeaveReading() {
                         <div className="relative w-32 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl border border-white/20">
                           <img 
                             src={result?.cards[idx].image} 
-                            alt={detail.cardName} 
-                            className={`w-full h-full object-cover ${detail.orientation === '逆位' ? 'rotate-180' : ''}`}
+                            alt={isEn ? (result?.cards[idx]?.name || detail.cardName) : detail.cardName}
+                            className={`w-full h-full object-cover ${result?.cards[idx]?.orientation === 'reversed' ? 'rotate-180' : ''}`}
                           />
                         </div>
                         <span className="text-[10px] text-white/40 font-bold tracking-widest px-3 py-1 bg-white/5 rounded-full uppercase">
-                          {detail.slotName}
+                          {isEn ? (slotConfig[idx]?.name || detail.slotName) : detail.slotName}
                         </span>
                       </div>
                       <div className="flex-1 space-y-4">
                         <div className="flex items-center gap-3">
-                          <h4 className="text-xl font-bold text-primary">{detail.cardName}</h4>
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${detail.orientation === '逆位' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500'}`}>
-                            {detail.orientation}
+                          <h4 className="text-xl font-bold text-primary">{isEn ? (result?.cards[idx]?.name || detail.cardName) : detail.cardName}</h4>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${result?.cards[idx]?.orientation === 'reversed' ? 'bg-orange-500/20 text-orange-500' : 'bg-green-500/20 text-green-500'}`}>
+                            {result?.cards[idx]?.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                           </span>
                         </div>
                         <p className="text-white/80 leading-relaxed text-base">{detail.interpretation}</p>
@@ -279,7 +332,7 @@ export default function StayOrLeaveReading() {
               {/* 行动建议 */}
               <section className="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-xl">
                 <h3 className="text-primary font-bold text-xl mb-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined">rocket_launch</span> 你可以怎么做
+                  <span className="material-symbols-outlined">rocket_launch</span> {pageText.actionTitle}
                 </h3>
                 <ul className="space-y-4">
                   {interpretation.actionSuggestions.map((suggestion, i) => (
@@ -293,7 +346,7 @@ export default function StayOrLeaveReading() {
 
               {/* 现实提醒 */}
               <section className="bg-primary/5 border border-primary/20 rounded-3xl p-8 relative overflow-hidden text-center">
-                 <h3 className="text-primary/80 font-bold text-lg mb-4">现实提醒</h3>
+                 <h3 className="text-primary/80 font-bold text-lg mb-4">{pageText.reminderTitle}</h3>
                  <p className="text-white/70 italic leading-relaxed">“{interpretation.realityReminder}”</p>
               </section>
 
@@ -304,13 +357,13 @@ export default function StayOrLeaveReading() {
                   className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-white/70 hover:text-white"
                 >
                   <span className="material-symbols-outlined text-sm">home</span>
-                  <span>返回首页</span>
+                  <span>{pageText.backHome}</span>
                 </button>
                 <button 
                   onClick={() => router.push('/themed-readings/career-study')}
                   className="w-full sm:w-auto flex items-center justify-center px-8 py-3 bg-primary rounded-xl hover:shadow-[0_0_20px_rgba(127,19,236,0.4)] transition-all text-white font-bold"
                 >
-                  <span>返回事业&学业占卜</span>
+                  <span>{pageText.backCareer}</span>
                 </button>
               </div>
 

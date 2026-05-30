@@ -36,6 +36,7 @@ const RESULT_STORAGE_KEY = 'general_three_card_draw_result';
 export default function ThreeCardReadingPage() {
   const router = useRouter();
   const t = getThreeCardT(router.locale);
+  const isZh = router.locale === 'zh';
 
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<ThreeCardResult | null>(null);
@@ -204,7 +205,7 @@ export default function ThreeCardReadingPage() {
 
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -367,7 +368,7 @@ export default function ThreeCardReadingPage() {
                                 >
                                   <img
                                     src={cardData.image}
-                                    alt={cardReading.card_name_zh}
+                                    alt={isZh ? cardReading.card_name_zh : (cardData?.name || cardReading.card_name_zh)}
                                     className="w-full h-full object-cover shadow-lg border border-white/10"
                                   />
                                 </div>
@@ -390,7 +391,7 @@ export default function ThreeCardReadingPage() {
                                 className="text-lg font-bold text-primary"
                                 style={{ color: '#a855f7' }}
                               >
-                                {cardReading.card_name_zh}
+                                {isZh ? cardReading.card_name_zh : (cardData?.name || cardReading.card_name_zh)}
                               </span>
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full border ${

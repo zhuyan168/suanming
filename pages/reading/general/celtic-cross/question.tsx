@@ -17,7 +17,7 @@ export default function CelticCrossQuestionPage() {
       : '输入问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Celtic Cross Spread — Enter Your Question | Mystic Insights' : '凯尔特十字牌阵 - 问题输入 | Mystic Insights',
+    title: isEn ? 'Celtic Cross Spread — Enter Your Question | FateAura' : '凯尔特十字牌阵 - 问题输入 | FateAura',
     metaDesc: isEn ? 'Enter your question and begin your Celtic Cross Spread deep reading.' : '输入你的问题，开启凯尔特十字牌阵的深度解读',
     back: isEn ? 'Back' : '返回',
     spreadName: isEn ? 'Celtic Cross Spread' : '凯尔特十字牌阵',
@@ -118,7 +118,7 @@ export default function CelticCrossQuestionPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

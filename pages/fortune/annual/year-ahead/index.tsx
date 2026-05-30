@@ -401,7 +401,7 @@ export default function YearAheadFortune() {
   return (
     <>
       <Head>
-        <title>{isEn ? 'Year Ahead Spread | Mystic Insights' : 'Year Ahead Spread - 年度运势 - Mystic Insights'}</title>
+        <title>{isEn ? 'Year Ahead Spread | FateAura' : 'Year Ahead Spread - 年度运势 - FateAura'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -450,7 +450,7 @@ export default function YearAheadFortune() {
               <span className="text-sm font-medium">{texts.backHome}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div>
           </header>

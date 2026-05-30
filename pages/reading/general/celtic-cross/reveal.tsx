@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import CelticCrossSlots from '../../../../components/fortune/CelticCrossSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -264,7 +265,7 @@ export default function CelticCrossRevealPage() {
   const POSITION_INFO = isEn ? POSITION_INFO_EN : POSITION_INFO_ZH;
   const texts = {
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Celtic Cross Spread — Cards Revealed | Mystic Insights' : '凯尔特十字牌阵 - 结果展示 | Mystic Insights',
+    title: isEn ? 'Celtic Cross Spread — Cards Revealed | FateAura' : '凯尔特十字牌阵 - 结果展示 | FateAura',
     metaDesc: isEn ? 'View your Celtic Cross Spread tarot results.' : '查看你的凯尔特十字牌阵占卜结果',
     back: isEn ? 'Back' : '返回',
     redraw: isEn ? 'Redraw' : '重新占卜',
@@ -383,7 +384,7 @@ export default function CelticCrossRevealPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -485,6 +486,29 @@ export default function CelticCrossRevealPage() {
                     <p className="text-white/50 text-xs leading-relaxed">
                       {POSITION_INFO[index].desc}
                     </p>
+
+                    <div className="mt-3 space-y-2 text-xs">
+                      <div>
+                        <p className="text-white/50 mb-1">{isEn ? 'Keywords' : '关键词'}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {getLocalizedKeywords(card, card.orientation, router.locale).slice(0, 3).map((keyword, i) => (
+                            <span
+                              key={i}
+                              className="rounded-lg bg-white/10 px-2 py-1 text-white/70"
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-white/50 mb-1">{isEn ? 'Meaning' : '含义'}</p>
+                        <p className="text-white/70 leading-relaxed">
+                          {getLocalizedMeaning(card, card.orientation, router.locale)}
+                        </p>
+                      </div>
+                    </div>
                   </motion.div>
                 ))}
               </div>

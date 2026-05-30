@@ -18,7 +18,7 @@ export default function HorseshoeQuestionPage() {
     hintWithQ: isEn ? 'Question entered' : '已输入问题',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Horseshoe Spread — Enter Your Question | Mystic Insights' : '马蹄铁牌阵 - 问题输入 | Mystic Insights',
+    title: isEn ? 'Horseshoe Spread — Enter Your Question | FateAura' : '马蹄铁牌阵 - 问题输入 | FateAura',
     metaDesc: isEn ? 'Enter your question for a focused Horseshoe Spread reading.' : '输入你的问题，获得更精准的塔罗占卜解读',
     back: isEn ? 'Back' : '返回',
     spreadName: isEn ? 'Horseshoe Spread' : '马蹄铁牌阵',
@@ -122,7 +122,7 @@ export default function HorseshoeQuestionPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

@@ -98,7 +98,7 @@ export default function CelticCrossDrawPage() {
   const isEn = router.locale === 'en';
   const texts = {
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Celtic Cross Spread — Draw Cards | Mystic Insights' : '凯尔特十字牌阵 - 抽牌 | Mystic Insights',
+    title: isEn ? 'Celtic Cross Spread — Draw Cards | FateAura' : '凯尔特十字牌阵 - 抽牌 | FateAura',
     metaDesc: isEn ? 'Select 10 cards from the deck for your Celtic Cross reading.' : '从78张塔罗牌中选择10张，探索你的深度指引',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
@@ -359,7 +359,7 @@ export default function CelticCrossDrawPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

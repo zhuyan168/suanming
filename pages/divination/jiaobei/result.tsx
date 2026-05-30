@@ -14,35 +14,87 @@ interface ResultInfo {
   gradient: string;
 }
 
-const resultData: Record<ResultType, ResultInfo> = {
-  sheng: {
-    title: '圣筊',
-    subtitle: 'Positive Sign',
-    description: '此事可行，顺势而为。神明已允准你的请求，时机成熟，把握当下，勇敢前行。',
-    emoji: '🌕🌑',
-    color: '#10b981',
-    gradient: 'from-emerald-500/20 to-green-500/20',
+const resultData: Record<'en' | 'zh', Record<ResultType, ResultInfo>> = {
+  en: {
+    sheng: {
+      title: 'Sheng Jiao',
+      subtitle: 'Positive Sign',
+      description:
+        'This points to a favorable answer. The timing is supportive, so move forward with care and confidence.',
+      emoji: '🌕🌑',
+      color: '#10b981',
+      gradient: 'from-emerald-500/20 to-green-500/20',
+    },
+    yin: {
+      title: 'Yin Jiao',
+      subtitle: 'Negative Sign',
+      description:
+        'This suggests pausing for now. Take more time to reflect, avoid forcing the matter, and wait for a better moment.',
+      emoji: '🌕🌕',
+      color: '#ef4444',
+      gradient: 'from-red-500/20 to-rose-500/20',
+    },
+    xiao: {
+      title: 'Xiao Jiao',
+      subtitle: 'Unclear Sign',
+      description:
+        'The answer is not clear yet. Your question may need to be more specific, or the situation may need more time.',
+      emoji: '🌑🌑',
+      color: '#f59e0b',
+      gradient: 'from-amber-500/20 to-yellow-500/20',
+    },
   },
-  yin: {
-    title: '阴筊',
-    subtitle: 'Negative Sign',
-    description: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
-    emoji: '🌕🌕',
-    color: '#ef4444',
-    gradient: 'from-red-500/20 to-rose-500/20',
-  },
-  xiao: {
-    title: '笑筊',
-    subtitle: 'Unclear Sign',
-    description: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
-    emoji: '🌑🌑',
-    color: '#f59e0b',
-    gradient: 'from-amber-500/20 to-yellow-500/20',
+  zh: {
+    sheng: {
+      title: '圣筊',
+      subtitle: 'Positive Sign',
+      description: '此事可行，顺势而为。神明已允准你的请求，时机成熟，把握当下，勇敢前行。',
+      emoji: '🌕🌑',
+      color: '#10b981',
+      gradient: 'from-emerald-500/20 to-green-500/20',
+    },
+    yin: {
+      title: '阴筊',
+      subtitle: 'Negative Sign',
+      description: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
+      emoji: '🌕🌕',
+      color: '#ef4444',
+      gradient: 'from-red-500/20 to-rose-500/20',
+    },
+    xiao: {
+      title: '笑筊',
+      subtitle: 'Unclear Sign',
+      description: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
+      emoji: '🌑🌑',
+      color: '#f59e0b',
+      gradient: 'from-amber-500/20 to-yellow-500/20',
+    },
   },
 };
 
 export default function ResultPage() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const locale = isEn ? 'en' : 'zh';
+  const text = isEn
+    ? {
+        pageTitle: 'Jiaobei Oracle Result',
+        backHome: 'Back Home',
+        aiReading: 'AI Reading',
+        yourQuestion: 'Your question: ',
+        loadingAi: 'Reading...',
+        tryAgain: 'Cast Again',
+        disclaimer: 'Divination is for reflection only. Please make final decisions with real-world judgment.',
+      }
+    : {
+        pageTitle: '掷筊占卜结果',
+        backHome: '返回首页',
+        aiReading: 'AI 解读',
+        yourQuestion: '你的问题：',
+        loadingAi: '正在解读中...',
+        tryAgain: '再掷一次',
+        disclaimer: '占卜仅供参考，最终决策请结合实际情况谨慎判断',
+      };
   const { type, question } = router.query;
   const [isVisible, setIsVisible] = useState(false);
   const [result, setResult] = useState<ResultInfo | null>(null);
@@ -59,8 +111,8 @@ export default function ResultPage() {
   useEffect(() => {
     if (type && typeof type === 'string') {
       const resultType = type as ResultType;
-      if (resultData[resultType]) {
-        setResult(resultData[resultType]);
+      if (resultData[locale][resultType]) {
+        setResult(resultData[locale][resultType]);
         setTimeout(() => setIsVisible(true), 100);
         
         // 检查免费次数后再决定是否继续
@@ -69,7 +121,7 @@ export default function ResultPage() {
         router.push('/');
       }
     }
-  }, [type, question, router]);
+  }, [type, question, router, locale]);
 
   const checkAndProceed = (resultType: ResultType, userQuestion?: string) => {
     if (hasCheckedRef.current) return;
@@ -122,7 +174,7 @@ export default function ResultPage() {
   return (
     <>
       <Head>
-        <title>{result.title} - 掷筊占卜结果 - Mystic Insights</title>
+        <title>{result.title} - {text.pageTitle} - FateAura</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -225,7 +277,7 @@ export default function ResultPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
               </div>
               <button
                 type="button"
@@ -233,7 +285,7 @@ export default function ResultPage() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">home</span>
-                <span className="text-sm font-medium hidden sm:inline">返回首页</span>
+                <span className="text-sm font-medium hidden sm:inline">{text.backHome}</span>
               </button>
             </header>
 
@@ -287,15 +339,15 @@ export default function ResultPage() {
                         <div className="rounded-2xl border border-primary/30 bg-primary/10 p-6">
                           <div className="flex items-center gap-2 mb-3">
                             <span className="material-symbols-outlined text-primary text-xl">auto_awesome</span>
-                            <span className="text-sm font-semibold text-primary uppercase tracking-wider">AI 解读</span>
+                            <span className="text-sm font-semibold text-primary uppercase tracking-wider">{text.aiReading}</span>
                           </div>
                           <div className="mb-3 text-white/70 text-sm">
-                            <span className="font-medium">你的问题：</span>{question}
+                            <span className="font-medium">{text.yourQuestion}</span>{question}
                           </div>
                           {isLoadingAI ? (
                             <div className="flex items-center gap-2 text-white/60">
                               <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                              <span className="text-sm">正在解读中...</span>
+                              <span className="text-sm">{text.loadingAi}</span>
                             </div>
                           ) : aiInterpretation ? (
                             <p className="text-white/90 text-base leading-relaxed">
@@ -318,7 +370,7 @@ export default function ResultPage() {
                         className="flex items-center gap-2 rounded-full bg-primary text-white px-6 py-3 text-base font-bold shadow-[0_0_30px_rgba(127,19,236,0.4)] hover:bg-primary/90 hover:scale-105 transition-all duration-300"
                       >
                         <span className="material-symbols-outlined text-xl">refresh</span>
-                        <span>再掷一次</span>
+                        <span>{text.tryAgain}</span>
                       </button>
                       <button
                         type="button"
@@ -326,7 +378,7 @@ export default function ResultPage() {
                         className="flex items-center gap-2 rounded-full bg-white/10 text-white px-6 py-3 text-base font-bold border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300"
                       >
                         <span className="material-symbols-outlined text-xl">home</span>
-                        <span>返回首页</span>
+                        <span>{text.backHome}</span>
                       </button>
                     </div>
                   </div>
@@ -334,7 +386,7 @@ export default function ResultPage() {
                   {/* 额外提示 */}
                   <div className="mt-8 text-center">
                     <p className="text-white/50 text-sm">
-                      占卜仅供参考，最终决策请结合实际情况谨慎判断
+                      {text.disclaimer}
                     </p>
                   </div>
                 </div>
@@ -346,4 +398,3 @@ export default function ResultPage() {
     </>
   );
 }
-

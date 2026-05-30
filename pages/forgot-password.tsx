@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
 
   const texts = isEn ? {
-    title: 'Forgot Password — FateAura',
+    title: 'Forgot Password - FateAura',
     metaDesc: 'Reset your FateAura account password',
     back: 'Back to Sign In',
     heading: 'Forgot Password',
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
     successBody2: '. Please check your inbox and click the link to reset your password.',
     backToLogin: 'Back to Sign In',
     labelEmail: 'Email',
-    submitting: 'Sending…',
+    submitting: 'Sending...',
     submit: 'Send Reset Email',
     rememberPassword: 'Remember your password?',
     login: 'Sign In',

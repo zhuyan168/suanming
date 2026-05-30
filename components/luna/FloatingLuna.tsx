@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import LunaChatPanel, { type LunaMessage } from './LunaChatPanel';
+import { useRouter } from 'next/router';
 
 export default function FloatingLuna() {
+  const router = useRouter();
+  const isEn = router.locale !== 'zh';
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<LunaMessage[]>([]);
 
@@ -124,7 +127,9 @@ export default function FloatingLuna() {
         >
           <div className="relative bg-[#1a1025]/95 border border-purple-400/25 rounded-xl px-5 py-3.5 shadow-lg shadow-purple-900/30 backdrop-blur-sm">
             <p className="text-white/90 text-sm leading-relaxed">
-            嗨，我是 Luna。不知道从哪里开始，就先来找我吧。
+              {isEn
+                ? "Hi, I'm Luna. If you're not sure where to start, come talk to me."
+                : '嗨，我是 Luna。不知道从哪里开始，就先来找我吧。'}
             </p>
             {/* Tail arrow pointing to avatar */}
             <div className="absolute -bottom-1.5 right-7 w-3 h-3 bg-[#1a1025]/95 border-r border-b border-purple-400/25 rotate-45" />

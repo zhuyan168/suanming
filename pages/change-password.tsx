@@ -51,7 +51,7 @@ export default function ChangePasswordPage() {
   const [verificationResult, setVerificationResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const texts = isEn ? {
-    title: 'Change Password — FateAura',
+    title: 'Change Password - FateAura',
     metaDesc: 'Change your FateAura account password',
     back: 'Back to Account',
     heading: 'Change Password',
@@ -60,14 +60,14 @@ export default function ChangePasswordPage() {
     successSub: 'Your password has been updated.',
     backToAccount: 'Back to Account',
     unverifiedWarning: 'Your email is not verified. We recommend verifying your email before changing your password.',
-    sendingVerification: 'Sending…',
+    sendingVerification: 'Sending...',
     sendVerificationBtn: 'Send Verification Email',
     verificationSent: 'Verification email sent. Please check your inbox.',
     labelPassword: 'New Password',
     placeholderPassword: 'At least 6 characters',
     labelConfirm: 'Confirm New Password',
     placeholderConfirm: 'Re-enter new password',
-    submitting: 'Saving…',
+    submitting: 'Saving...',
     submit: 'Save New Password',
     validatePassword: 'Please enter your new password.',
     validatePasswordLen: 'Password must be at least 6 characters.',

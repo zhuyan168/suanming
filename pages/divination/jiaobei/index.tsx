@@ -7,6 +7,53 @@ type ResultType = 'sheng' | 'yin' | 'xiao';
 
 export default function JiaoBeiPage() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'Jiaobei Oracle - FateAura',
+        backHome: 'Back Home',
+        badge: 'Jiaobei Oracle',
+        heading: 'Ask with Jiaobei',
+        intro1:
+          'Jiaobei, also known as moon block divination, is a traditional way to seek symbolic guidance.',
+        intro2:
+          'Hold your question in mind, then cast the two blocks. Their paired positions reveal the answer.',
+        shengTitle: 'Sheng Jiao',
+        shengDesc: 'One flat and one round side: a positive sign.',
+        xiaoTitle: 'Xiao Jiao',
+        xiaoDesc: 'Two round sides: the answer is unclear.',
+        yinTitle: 'Yin Jiao',
+        yinDesc: 'Two flat sides: a negative or unsuitable sign.',
+        questionLabel: 'Your question (optional)',
+        questionPlaceholder:
+          'Hold your question in mind before casting, or enter it here for a more personal reading...',
+        questionHint: 'Enter a question to receive a personalized AI interpretation',
+        processing: 'The oracle is responding...',
+        casting: 'Casting...',
+        start: 'Cast Jiaobei',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '掷筊占卜 - FateAura',
+        backHome: '返回首页',
+        badge: '掷筊占卜',
+        heading: '掷筊 · 问神明',
+        intro1: '掷筊，又称问筊，是传统民俗中与神明沟通的方式。',
+        intro2: '人们在心中默念问题后，掷出两块圣杯，通过杯面朝向来判断神明的回应。',
+        shengTitle: '圣筊',
+        shengDesc: '一正一反，表示允准',
+        xiaoTitle: '笑筊',
+        xiaoDesc: '两反，神明含笑未答',
+        yinTitle: '阴筊',
+        yinDesc: '两正，表示否定或不宜',
+        questionLabel: '你的问题（可选）',
+        questionPlaceholder: '在心中默念问题后开始掷筊，也可以在此输入问题获得更详细的解读...',
+        questionHint: '输入问题可获得 AI 个性化解读',
+        processing: '神明正在回应...',
+        casting: '掷筊中...',
+        start: '开始掷筊',
+      };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'divination-jiaobei',
     redirectPath: '/',
@@ -55,7 +102,7 @@ export default function JiaoBeiPage() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -64,7 +111,7 @@ export default function JiaoBeiPage() {
   return (
     <>
       <Head>
-        <title>掷筊占卜 - Mystic Insights</title>
+        <title>{text.pageTitle}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -163,7 +210,7 @@ export default function JiaoBeiPage() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
               </div>
               <button
                 type="button"
@@ -171,7 +218,7 @@ export default function JiaoBeiPage() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
-                <span className="text-sm font-medium">返回首页</span>
+                <span className="text-sm font-medium">{text.backHome}</span>
               </button>
             </header>
 
@@ -181,33 +228,33 @@ export default function JiaoBeiPage() {
                 {/* 介绍文字 */}
                 <div className="mb-12 text-center">
                   <div className="inline-block mb-4 rounded-full bg-primary/10 border border-primary/30 px-4 py-1.5">
-                    <span className="text-primary text-sm font-semibold uppercase tracking-wider">掷筊占卜</span>
+                    <span className="text-primary text-sm font-semibold uppercase tracking-wider">{text.badge}</span>
                   </div>
                   <h1 className="text-white text-4xl sm:text-5xl font-black leading-tight tracking-[-0.033em] mb-6">
-                    掷筊 · 问神明
+                    {text.heading}
                   </h1>
                   <div className="max-w-2xl mx-auto space-y-4 text-white/70 text-base leading-relaxed">
                     <p>
-                      掷筊，又称问筊，是传统民俗中与神明沟通的方式。
+                      {text.intro1}
                     </p>
                     <p>
-                      人们在心中默念问题后，掷出两块圣杯，通过杯面朝向来判断神明的回应。
+                      {text.intro2}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 text-sm">
                       <div className="rounded-xl bg-white/5 border border-white/10 p-4">
                         <div className="text-2xl mb-2">🌕🌑</div>
-                        <div className="font-semibold text-white mb-1">圣筊</div>
-                        <div className="text-white/60">一正一反，表示允准</div>
+                        <div className="font-semibold text-white mb-1">{text.shengTitle}</div>
+                        <div className="text-white/60">{text.shengDesc}</div>
                       </div>
                       <div className="rounded-xl bg-white/5 border border-white/10 p-4">
                         <div className="text-2xl mb-2">🌑🌑</div>
-                        <div className="font-semibold text-white mb-1">笑筊</div>
-                        <div className="text-white/60">两反，神明含笑未答</div>
+                        <div className="font-semibold text-white mb-1">{text.xiaoTitle}</div>
+                        <div className="text-white/60">{text.xiaoDesc}</div>
                       </div>
                       <div className="rounded-xl bg-white/5 border border-white/10 p-4">
                         <div className="text-2xl mb-2">🌕🌕</div>
-                        <div className="font-semibold text-white mb-1">阴筊</div>
-                        <div className="text-white/60">两正，表示否定或不宜</div>
+                        <div className="font-semibold text-white mb-1">{text.yinTitle}</div>
+                        <div className="text-white/60">{text.yinDesc}</div>
                       </div>
                     </div>
                   </div>
@@ -218,7 +265,7 @@ export default function JiaoBeiPage() {
                   <div className="mb-12 max-w-2xl mx-auto">
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                       <label className="block text-sm font-semibold text-white/80 mb-3" htmlFor="jiaobei-question">
-                        你的问题（可选）
+                        {text.questionLabel}
                       </label>
                       <textarea
                         id="jiaobei-question"
@@ -227,10 +274,10 @@ export default function JiaoBeiPage() {
                         maxLength={100}
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="在心中默念问题后开始掷筊，也可以在此输入问题获得更详细的解读..."
+                        placeholder={text.questionPlaceholder}
                       />
                       <div className="mt-2 flex items-center justify-between text-xs text-white/50">
-                        <span>输入问题可获得 AI 个性化解读</span>
+                        <span>{text.questionHint}</span>
                         <span>{question.length}/100</span>
                       </div>
                     </div>
@@ -255,7 +302,7 @@ export default function JiaoBeiPage() {
                       />
                       {/* 提示文字 */}
                       <p className="text-white text-lg font-medium">
-                        神明正在回应……
+                        {text.processing}
                       </p>
                     </div>
                   </div>
@@ -276,7 +323,7 @@ export default function JiaoBeiPage() {
                     <span className="material-symbols-outlined text-2xl">
                       {isProcessing ? 'hourglass_empty' : 'auto_awesome'}
                     </span>
-                    <span>{isProcessing ? '掷筊中…' : '开始掷筊'}</span>
+                    <span>{isProcessing ? text.casting : text.start}</span>
                   </button>
                 </div>
               </div>
@@ -287,4 +334,3 @@ export default function JiaoBeiPage() {
     </>
   );
 }
-

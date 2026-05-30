@@ -118,14 +118,54 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
 
 const STORAGE_KEY = 'wealth_current_status_result';
 
-const SLOT_CONFIG = [
-  { id: "p1", name: "当前的财运状态", meaning: "你现在整体的金钱状况与能量基调，反映你当下与财富的关系。" },
-  { id: "p2", name: "正在影响你财运的因素", meaning: "无论是外在环境、现实条件，还是你的选择与心态，正在对财运产生作用的关键因素。" },
-  { id: "p3", name: "近期的财运走向与提醒", meaning: "接下来一段时间财运的整体趋势，以及你需要留意或调整的方向。" }
-];
+const SLOT_CONFIG = {
+  en: [
+    { id: "p1", name: "Current money state", meaning: "Your overall financial condition and current relationship with money." },
+    { id: "p2", name: "Influencing factor", meaning: "The key external condition, practical factor, choice, or mindset affecting your finances." },
+    { id: "p3", name: "Near-term trend", meaning: "The likely financial direction ahead, plus what to notice or adjust." }
+  ],
+  zh: [
+    { id: "p1", name: "当前的财运状态", meaning: "你现在整体的金钱状况与能量基调，反映你当下与财富的关系。" },
+    { id: "p2", name: "正在影响你财运的因素", meaning: "无论是外在环境、现实条件，还是你的选择与心态，正在对财运产生作用的关键因素。" },
+    { id: "p3", name: "近期的财运走向与提醒", meaning: "接下来一段时间财运的整体趋势，以及你需要留意或调整的方向。" }
+  ],
+};
 
 export default function CurrentWealthStatusDraw() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG.en : SLOT_CONFIG.zh;
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'How Is My Money Energy Right Now? - Draw Cards',
+        back: 'Back',
+        reset: 'Reset',
+        titleComplete: 'Wealth Spread Complete',
+        titleStart: 'How is my money energy right now?',
+        descComplete: 'The cards are in place. Continue to start the deeper reading.',
+        descStart: 'Use three cards to see your current money state, the factors affecting it, and the near-term trend. Draw 3 cards from the deck below.',
+        drawnCount: 'Cards drawn:',
+        startReading: 'Start Reading',
+        note: '✨ Look deeper into your money energy and spot useful opportunities.',
+        comingSoon: 'Reading feature coming soon',
+        resetConfirm: 'Start over? Your current draw will be cleared.',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '我现在的财运如何？ - 抽牌',
+        back: '返回',
+        reset: '重置',
+        titleComplete: '财运牌阵已完成',
+        titleStart: '我现在的财运如何？',
+        descComplete: '卡牌已就位，点击下方按钮开始深度解读。',
+        descStart: '用三张牌快速看清你当前的财运状态、影响因素与近期走向。请从下方牌堆中抽取 3 张牌。',
+        drawnCount: '已抽牌：',
+        startReading: '开始解读',
+        note: '✨ 深度洞察金钱能量，把握财富机遇',
+        comingSoon: '解读功能即将上线',
+        resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+      };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'wealth',
     spreadId: 'current-wealth-status',
@@ -218,7 +258,7 @@ export default function CurrentWealthStatusDraw() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
     setSelectedCards([null, null, null]);
@@ -231,7 +271,7 @@ export default function CurrentWealthStatusDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -240,7 +280,7 @@ export default function CurrentWealthStatusDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>我现在的财运如何？ - 抽牌</title>
+        <title>{text.pageTitle}</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
@@ -248,12 +288,12 @@ export default function CurrentWealthStatusDraw() {
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={() => router.push('/themed-readings/wealth')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -262,10 +302,10 @@ export default function CurrentWealthStatusDraw() {
             <div className="text-center mb-12">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-3">Wealth Readings</p>
               <h1 className="text-3xl sm:text-5xl font-black mb-4">
-                {hasDrawn ? '财运牌阵已完成' : '我现在的财运如何？'}
+                {hasDrawn ? text.titleComplete : text.titleStart}
               </h1>
               <p className="text-white/60 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '用三张牌快速看清你当前的财运状态、影响因素与近期走向。请从下方牌堆中抽取 3 张牌。'}
+                {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
 
@@ -295,7 +335,7 @@ export default function CurrentWealthStatusDraw() {
                   setScrollValue(val);
                 }} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-sm font-medium">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 3
+                  {text.drawnCount}{selectedCards.filter(c => c !== null).length} / 3
                 </div>
               </motion.div>
             )}
@@ -305,7 +345,7 @@ export default function CurrentWealthStatusDraw() {
               isAnimating={isAnimating}
               showLoadingText={!hasDrawn}
               forceFlipped={hasDrawn}
-              slotConfig={SLOT_CONFIG}
+              slotConfig={slotConfig}
             />
 
             {hasDrawn && (
@@ -315,10 +355,10 @@ export default function CurrentWealthStatusDraw() {
                   className="px-12 py-4 rounded-xl bg-primary text-white font-bold text-xl shadow-glow transition-all hover:scale-105 active:scale-95"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
                 <p className="text-white/40 text-sm mt-6">
-                  ✨ 深度洞察金钱能量，把握财富机遇
+                  {text.note}
                 </p>
               </motion.div>
             )}
@@ -330,7 +370,7 @@ export default function CurrentWealthStatusDraw() {
       <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${toastVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
         <div className="px-6 py-3 rounded-full bg-background-dark/90 border border-white/10 backdrop-blur-md text-white shadow-glow flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">info</span>
-          <span className="text-sm font-bold">解读功能即将上线</span>
+          <span className="text-sm font-bold">{text.comingSoon}</span>
         </div>
       </div>
 

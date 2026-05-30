@@ -192,6 +192,8 @@ export default function YesNoTarotDraw() {
     startReading: 'Start Reading',
     completedHint: '✨ Your card has been drawn. Ready to reveal your guidance.',
     confirmReset: 'Are you sure you want to start over? Your current result will be cleared.',
+    confirmBack: 'Going back will require you to draw again. Are you sure you want to go back?',
+    questionLabel: 'Your Question',
   } : {
     title: '是否塔罗 - 抽牌',
     metaDesc: '静心抽取你的指引',
@@ -207,6 +209,8 @@ export default function YesNoTarotDraw() {
     startReading: '开始解读',
     completedHint: '✨ 已完成抽牌，准备查看指引',
     confirmReset: '确定要重新开始吗？当前结果将被清空。',
+    confirmBack: '返回将需要重新抽牌，确定要返回吗？',
+    questionLabel: '你的问题',
   };
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -325,7 +329,7 @@ export default function YesNoTarotDraw() {
 
   const handleReturnToQuestion = () => {
     if (hasDrawn) {
-      if (!confirm(isEn ? 'Going back will require you to draw again. Are you sure you want to go back?' : '返回将需要重新抽牌，确定要返回吗？')) return;
+      if (!confirm(texts.confirmBack)) return;
       // 清除抽牌数据，但保留问题
       localStorage.removeItem(STORAGE_KEY_DRAW);
     }
@@ -378,7 +382,7 @@ export default function YesNoTarotDraw() {
             </button>
             
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
 
             <button
@@ -401,7 +405,7 @@ export default function YesNoTarotDraw() {
                 </h1>
                 {question && (
                   <div className="mb-6 mt-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-5 text-center max-w-2xl mx-auto">
-                    <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">Your Question</p>
+                    <p className="text-sm font-medium text-primary/80 mb-2 uppercase tracking-wider">{texts.questionLabel}</p>
                     <p className="text-lg text-white/95 leading-relaxed font-medium">{question}</p>
                   </div>
                 )}

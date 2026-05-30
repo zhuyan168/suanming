@@ -261,7 +261,7 @@ export default function SacredTriangleDraw() {
             </button>
             
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
 
             <button

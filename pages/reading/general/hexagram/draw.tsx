@@ -79,7 +79,7 @@ export default function HexagramDrawPage() {
   const isEn = router.locale === 'en';
   const texts = {
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Hexagram Spread — Draw Cards | Mystic Insights' : '六芒星牌阵 - 抽牌 | Mystic Insights',
+    title: isEn ? 'Hexagram Spread — Draw Cards | FateAura' : '六芒星牌阵 - 抽牌 | FateAura',
     metaDesc: isEn ? 'Select 7 cards from the deck for your Hexagram reading.' : '从78张塔罗牌中选择7张，全面解读你的局势',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
@@ -280,7 +280,7 @@ export default function HexagramDrawPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

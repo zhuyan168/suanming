@@ -287,7 +287,7 @@ export default function OfferDecisionDraw() {
             <span className="material-symbols-outlined text-xl">arrow_back</span>
             <span className="text-sm font-medium">返回</span>
           </button>
-          <h2 className="text-lg font-bold">Mystic Insights</h2>
+          <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
             <span className="text-sm font-medium hidden sm:inline">重置</span>

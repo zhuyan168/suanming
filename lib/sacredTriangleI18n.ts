@@ -13,7 +13,7 @@ const zh = {
   meaning: '含义',
 
   question: {
-    pageTitle: '圣三角牌阵 - 问题输入 | Mystic Insights',
+    pageTitle: '圣三角牌阵 - 问题输入 | FateAura',
     metaDesc: '经典三张牌阵，适合快速厘清问题',
     h1: '圣三角牌阵',
     label: '你的问题（可选）',
@@ -24,7 +24,7 @@ const zh = {
   },
 
   draw: {
-    pageTitle: '圣三角牌阵 - 抽牌 | Mystic Insights',
+    pageTitle: '圣三角牌阵 - 抽牌 | FateAura',
     metaDesc: '从过去、现在到未来，帮助你梳理脉络与下一步方向',
     h1Drawing: '抽取三张塔罗牌',
     h1Done: '圣三角牌阵已完成',
@@ -37,7 +37,7 @@ const zh = {
   },
 
   result: {
-    pageTitle: '圣三角牌阵 - 抽牌结果 | Mystic Insights',
+    pageTitle: '圣三角牌阵 - 抽牌结果 | FateAura',
     metaDesc: '查看你的圣三角牌阵抽牌结果',
     h1: '圣三角牌阵',
     subtitle: '从过去、现在到未来的指引',
@@ -47,7 +47,7 @@ const zh = {
   },
 
   reading: {
-    pageTitle: '圣三角牌阵 · 解读 | Mystic Insights',
+    pageTitle: '圣三角牌阵 · 解读 | FateAura',
     metaDesc: '查看你的塔罗牌解读结果',
     h1: '圣三角牌阵 · 解读',
     errorIncomplete: '抽牌数据不完整，请重新抽牌',
@@ -86,7 +86,7 @@ const en: typeof zh = {
   meaning: 'Meaning',
 
   question: {
-    pageTitle: 'Sacred Triangle Spread - Question | Mystic Insights',
+    pageTitle: 'Sacred Triangle Spread - Question | FateAura',
     metaDesc: 'A classic three-card spread to quickly clarify your situation',
     h1: 'Sacred Triangle Spread',
     label: 'Your Question (Optional)',
@@ -97,7 +97,7 @@ const en: typeof zh = {
   },
 
   draw: {
-    pageTitle: 'Sacred Triangle Spread - Draw | Mystic Insights',
+    pageTitle: 'Sacred Triangle Spread - Draw | FateAura',
     metaDesc: 'Explore the flow from past to present to future',
     h1Drawing: 'Draw Three Tarot Cards',
     h1Done: 'Sacred Triangle Complete',
@@ -110,7 +110,7 @@ const en: typeof zh = {
   },
 
   result: {
-    pageTitle: 'Sacred Triangle Spread - Result | Mystic Insights',
+    pageTitle: 'Sacred Triangle Spread - Result | FateAura',
     metaDesc: 'View your Sacred Triangle spread result',
     h1: 'Sacred Triangle Spread',
     subtitle: 'Guidance flowing from past through present to future',
@@ -120,7 +120,7 @@ const en: typeof zh = {
   },
 
   reading: {
-    pageTitle: 'Sacred Triangle Spread · Reading | Mystic Insights',
+    pageTitle: 'Sacred Triangle Spread · Reading | FateAura',
     metaDesc: 'View your tarot reading',
     h1: 'Sacred Triangle Spread · Reading',
     errorIncomplete: 'Card data is incomplete. Please draw again.',

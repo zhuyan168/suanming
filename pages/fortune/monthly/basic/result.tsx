@@ -6,6 +6,7 @@ import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 // 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
 interface LocalTarotCard {
@@ -214,7 +215,7 @@ export default function MonthlyBasicResult() {
   const currentMonth = getCurrentMonth();
 
   const texts = isEn ? {
-    pageTitle: 'Monthly Reading — Mystic Insights',
+    pageTitle: 'Monthly Reading — FateAura',
     backToHistory: 'Back to My Readings',
     backToMonthly: 'Back to Monthly Fortune',
     sectionLabel: 'MONTHLY READING',
@@ -224,6 +225,9 @@ export default function MonthlyBasicResult() {
     errorFetch: 'Failed to get your reading. Please try again.',
     errorGenerate: 'Failed to generate reading. Please try again.',
     cardLabel: (n: number) => `Card ${n}`,
+    upright: 'Upright',
+    reversed: 'Reversed',
+    monthlyInterpretation: 'Monthly interpretation',
     fortune: {
       overall: 'Overall',
       love: 'Love',
@@ -233,7 +237,7 @@ export default function MonthlyBasicResult() {
     },
     footerHint: '✨ Come back next month for a new reading.',
   } : {
-    pageTitle: '月度运势解析 - Mystic Insights',
+    pageTitle: '月度运势解析 - FateAura',
     backToHistory: '返回我的占卜记录',
     backToMonthly: '返回月度运势',
     sectionLabel: '月度运势解析',
@@ -243,6 +247,9 @@ export default function MonthlyBasicResult() {
     errorFetch: '获取运势失败',
     errorGenerate: '生成运势失败，请稍后重试',
     cardLabel: (n: number) => `第${n}张牌`,
+    upright: '正位',
+    reversed: '逆位',
+    monthlyInterpretation: '本月解读',
     fortune: {
       overall: '综合运势',
       love: '爱情运势',
@@ -546,7 +553,7 @@ export default function MonthlyBasicResult() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div> {/* 占位，保持标题居中 */}
           </header>
@@ -579,6 +586,7 @@ export default function MonthlyBasicResult() {
                   isAnimating={[false, false, false]}
                   showLoadingText={false}
                   forceFlipped={true}
+                  locale={router.locale}
                 />
               </div>
 
@@ -604,23 +612,49 @@ export default function MonthlyBasicResult() {
 
                   {/* 三张牌的单独解读 */}
                   <div className="grid md:grid-cols-3 gap-4 mb-8">
-                    {savedResult.cards.map((card, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        className="rounded-2xl border border-white/10 bg-white/5 p-6"
-                      >
-                        <h3 className="text-lg font-bold text-white mb-2">{texts.cardLabel(index + 1)}</h3>
-                        <p className="text-sm text-white/60 mb-3">{card.name}</p>
-                        <p className="text-sm text-white/80 leading-relaxed">
-                          {index === 0 && savedResult.result?.card1Meaning}
-                          {index === 1 && savedResult.result?.card2Meaning}
-                          {index === 2 && savedResult.result?.card3Meaning}
-                        </p>
-                      </motion.div>
-                    ))}
+                    {displayCards.map((card, index) => {
+                      const localizedMeaning = getLocalizedMeaning(card, card.orientation, router.locale);
+                      const localizedKeywords = getLocalizedKeywords(card, card.orientation, router.locale);
+                      const aiMeaning =
+                        index === 0 ? savedResult.result?.card1Meaning :
+                        index === 1 ? savedResult.result?.card2Meaning :
+                        savedResult.result?.card3Meaning;
+
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 + index * 0.1 }}
+                          className="rounded-2xl border border-white/10 bg-white/5 p-6"
+                        >
+                          <h3 className="text-lg font-bold text-white mb-2">{texts.cardLabel(index + 1)}</h3>
+                          <p className="text-sm text-white/60 mb-2">{card.name}</p>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-3">
+                            {card.orientation === 'upright' ? texts.upright : texts.reversed}
+                          </p>
+                          <p className="text-sm text-white/80 leading-relaxed">{localizedMeaning}</p>
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            {localizedKeywords.map((keyword) => (
+                              <span
+                                key={keyword}
+                                className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                          {aiMeaning && (
+                            <div className="mt-4 border-t border-white/10 pt-4">
+                              <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
+                                {texts.monthlyInterpretation}
+                              </p>
+                              <p className="text-sm text-white/80 leading-relaxed">{aiMeaning}</p>
+                            </div>
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {/* 运势详情网格 */}

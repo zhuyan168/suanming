@@ -54,9 +54,39 @@ const SLOT_CONFIG = [
   { id: "guide", name: "指引牌", meaning: "这组牌想提醒你的核心问题" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "How the Relationship Drifted Apart", meaning: "The real reason this connection separated in the first place" },
+  { id: "p2", name: "Your Current Emotional State", meaning: "Your current emotions and where your inner conflict comes from" },
+  { id: "p3", name: "Their Current State", meaning: "Their real stance toward this relationship right now" },
+  { id: "p4", name: "Your Feelings About Reconciliation", meaning: "Your deeper truth about getting back together" },
+  { id: "p5", name: "Their Feelings About Reconciliation", meaning: "Their real attitude toward reconnecting" },
+  { id: "p6", name: "The Biggest Obstacle", meaning: "The core issue that is hardest to move through now" },
+  { id: "p7", name: "Support or Turning Point", meaning: "Helpful support or a possible shift in your favor" },
+  { id: "p8", name: "What You May Be Overlooking", meaning: "An important factor that may be hidden or ignored" },
+  { id: "p9", name: "The Choice You Need to Make", meaning: "The final lesson this relationship is asking of you" },
+  { id: "guide", name: "Guide Card", meaning: "The core reminder this spread wants to give you" }
+];
+
 export default function ReconciliationResultPage() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Reconciliation Potential - Reading | FateAura' : '复合的可能性 - 解读结果 | FateAura',
+    metaDesc: isEn ? 'A deep reading for the path of reconnection.' : '深度解读你们的重新联结之路',
+    loading: isEn ? 'Opening the space between past and present...' : '正在开启时空之间...',
+    h1: isEn ? 'Reconciliation Potential' : '复合的可能性',
+    generatingTitle: isEn ? 'Generating your deep reconciliation reading...' : '正在深度链接潜意识...',
+    generatingDesc: isEn ? 'This usually takes 20-40 seconds. Please wait a moment.' : '这通常需要 20-40 秒，请静心等待',
+    retry: isEn ? 'Retry' : '重试生成',
+    summaryFallbackTitle: isEn ? 'Healing Message' : '疗愈寄语',
+    actionTitle: isEn ? 'Next Action Guidance' : '接下来的行动建议',
+    backLove: isEn ? 'Back to Love Readings' : '返回爱情占卜',
+    disclaimer: isEn ? 'Tarot readings are for reflection only. Stay grounded and keep agency over your own life.' : '塔罗解读仅供参考，请保持清醒，主宰你的人生',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -180,7 +210,7 @@ export default function ReconciliationResultPage() {
   if (accessLoading || !allowed || isLoading || !savedResult) {
     return (
       <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-        <div className="text-white/60 animate-pulse text-lg tracking-widest font-light">正在开启时空之门...</div>
+        <div className="text-white/60 animate-pulse text-lg tracking-widest font-light">{pageText.loading}</div>
       </div>
     );
   }
@@ -188,8 +218,8 @@ export default function ReconciliationResultPage() {
   return (
     <div className="dark">
       <Head>
-        <title>复合的可能性 - 解读结果</title>
-        <meta name="description" content="深度解读你们的重新联结之路" />
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
@@ -198,7 +228,7 @@ export default function ReconciliationResultPage() {
             <span className="material-symbols-outlined text-xl">arrow_back</span>
             <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.back}</span>
           </button>
-          <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Mystic Insights</h2>
+          <h2 className="text-lg font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">FateAura</h2>
           <button onClick={handleDrawAgain} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
             <span className="text-sm font-medium hidden sm:inline">{texts.btnDrawAgain}</span>
@@ -210,7 +240,7 @@ export default function ReconciliationResultPage() {
           <section className="mb-12">
             <div className="text-center mb-10">
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-3 block">Reconciliation Potential Spread</span>
-              <h1 className="text-3xl sm:text-4xl font-black mb-4">复 合 的 可 能 性</h1>
+              <h1 className="text-3xl sm:text-4xl font-black mb-4">{pageText.h1}</h1>
               <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>
 
@@ -219,7 +249,7 @@ export default function ReconciliationResultPage() {
               isAnimating={Array(10).fill(false)}
               showLoadingText={false}
               forceFlipped={true}
-              slotConfig={SLOT_CONFIG.map(s => ({ id: s.id, name: s.name, meaning: s.meaning }))}
+              slotConfig={slotConfig.map(s => ({ id: s.id, name: s.name, meaning: s.meaning }))}
             />
           </section>
 
@@ -228,8 +258,8 @@ export default function ReconciliationResultPage() {
             {isGeneratingDeep && !deepReading && (
               <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm">
                 <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-6"></div>
-                <p className="text-primary font-medium tracking-widest">正在深度链接潜意识...</p>
-                <p className="text-white/40 text-sm mt-2">这通常需要 20-40 秒，请静心等待</p>
+                <p className="text-primary font-medium tracking-widest">{pageText.generatingTitle}</p>
+                <p className="text-white/40 text-sm mt-2">{pageText.generatingDesc}</p>
               </div>
             )}
 
@@ -240,7 +270,7 @@ export default function ReconciliationResultPage() {
                   onClick={() => generateDeepReading(savedResult)}
                   className="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-full text-sm transition-colors"
                 >
-                  重试生成
+                  {pageText.retry}
                 </button>
               </div>
             )}
@@ -252,7 +282,7 @@ export default function ReconciliationResultPage() {
                   <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all"></div>
                   <h3 className="text-primary text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                     <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                    {deepReading.summary.title === '姐姐的真心话' ? '治愈寄语' : deepReading.summary.title}
+                    {isEn ? pageText.summaryFallbackTitle : deepReading.summary.title}
                   </h3>
                   <p className="text-2xl sm:text-3xl font-bold leading-tight italic">
                     「{deepReading.summary.text}」
@@ -268,7 +298,7 @@ export default function ReconciliationResultPage() {
                     // 通过 slotKey 找到对应的配置索引，确保牌、文案、位置完全对应
                     const configIndex = SLOT_CONFIG.findIndex(s => s.id === section.slotKey);
                     const card = savedResult.cards[configIndex];
-                    const config = SLOT_CONFIG[configIndex];
+                    const config = slotConfig[configIndex];
                     
                     if (!card || !config) return null;
 
@@ -317,7 +347,7 @@ export default function ReconciliationResultPage() {
                                   ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
                                   : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                               }`}>
-                                {card.orientation === 'reversed' ? '逆位 Reversed' : '正位 Upright'}
+                                {card.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                               </p>
                             </div>
                           </div>
@@ -342,7 +372,7 @@ export default function ReconciliationResultPage() {
                 {(() => {
                   const guideSection = deepReading.sections.find(s => s.slotKey === 'guide');
                   const guideCard = savedResult.cards[9];
-                  const guideConfig = SLOT_CONFIG[9];
+                  const guideConfig = slotConfig[9];
 
                   if (!guideSection || !guideCard) return null;
 
@@ -388,7 +418,7 @@ export default function ReconciliationResultPage() {
                                 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
                                 : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             }`}>
-                              {guideCard.orientation === 'reversed' ? '逆位 Reversed' : '正位 Upright'}
+                              {guideCard.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                             </p>
                           </div>
                         </div>
@@ -411,8 +441,8 @@ export default function ReconciliationResultPage() {
                 {/* 行动建议 */}
                 <div className="p-8 rounded-3xl bg-white/5 border border-white/10">
                   <h3 className="text-xl font-bold mb-8 flex items-center gap-3">
-                    <span className="text-primary">✨</span>
-                    接下来的行动建议
+                    <span className="text-primary">✓</span>
+                    {pageText.actionTitle}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {deepReading.actions.map((action, idx) => (
@@ -435,12 +465,12 @@ export default function ReconciliationResultPage() {
                     onClick={handleReturnToList}
                     className="w-full sm:w-auto px-10 py-4 rounded-xl bg-primary text-white hover:bg-primary/80 transition-all text-sm font-bold tracking-widest shadow-[0_0_20px_rgba(127,19,236,0.3)]"
                   >
-                    返回爱情占卜
+                    {pageText.backLove}
                   </button>
                 </div>
                 <div className="text-center mt-8">
                   <p className="text-xs sm:text-sm text-white/40 tracking-widest font-light italic">
-                    “ 塔罗解读仅供参考，请保持清醒，主宰你的人生 ”
+                    “ {pageText.disclaimer} ”
                   </p>
                 </div>
               </motion.div>
@@ -455,4 +485,3 @@ export default function ReconciliationResultPage() {
     </div>
   );
 }
-

@@ -7,6 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { getTwoChoicesT } from '../../../../lib/twoChoicesI18n';
+import { getLocalizedKeywords } from '../../../../lib/tarotCardI18n';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -260,7 +261,7 @@ export default function TwoChoicesReadingPage() {
 
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 
@@ -467,7 +468,7 @@ export default function TwoChoicesReadingPage() {
                             </div>
                             
                             <div className="flex flex-wrap gap-2">
-                              {cardReading.keywords.map((keyword, i) => (
+                              {(cardData ? getLocalizedKeywords(cardData, cardData.orientation, router.locale) : cardReading.keywords).map((keyword, i) => (
                                 <span
                                   key={i}
                                   className={`px-2 py-0.5 rounded-lg text-xs ${

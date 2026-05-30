@@ -15,21 +15,21 @@ export default function MonthlyFortune() {
   const isEn = router.locale === 'en';
 
   const texts = isEn ? {
-    pageTitle: 'Monthly Fortune — Mystic Insights',
+    pageTitle: 'Monthly Tarot Readings — FateAura',
     back: 'Back',
-    sectionLabel: 'MONTHLY FORTUNE',
-    h1: 'What does this month have in store for you?',
-    subtitle: 'Choose a spread to begin your reading.',
-    basicTitle: 'Three-Card Monthly Reading (Free)',
-    basicSubtitle: 'A quick look at the overall energy of your month.',
-    basicButton: 'Start Reading',
-    memberTitle: 'Monthly Deep Dive (Members)',
-    memberSubtitle: 'Career / Wealth / Love / Connections / Energy — fully explored.',
-    memberButtonUnlocked: 'Start Deep Reading',
+    sectionLabel: 'MONTHLY TAROT',
+    h1: 'Choose Your Monthly Reading',
+    subtitle: 'Start with a quick three-card overview or unlock a deeper seven-card monthly spread.',
+    basicTitle: 'Three-Card Monthly Reading',
+    basicSubtitle: 'A clear snapshot of this month\'s overall energy and direction.',
+    basicButton: 'Start Free Reading',
+    memberTitle: 'Seven-Card Monthly Deep Dive',
+    memberSubtitle: 'A fuller look at love, career, wealth, relationships, month-end energy, and practical guidance.',
+    memberButtonUnlocked: 'Start Member Reading',
     memberButtonLocked: 'Unlock Full Reading',
     memberBadge: 'Member',
   } : {
-    pageTitle: '月度运势 - Mystic Insights',
+    pageTitle: '月度运势 - FateAura',
     back: '返回首页',
     sectionLabel: '月度运势',
     h1: '本月你的命运走向如何？',
@@ -187,7 +187,7 @@ export default function MonthlyFortune() {
                   ></path>
                 </svg>
               </div>
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div> {/* 占位，保持标题居中 */}
           </header>
@@ -518,4 +518,3 @@ function CardEntry({ title, subtitle, buttonText, cardCount, layout, onClick, is
     </motion.div>
   );
 }
-

@@ -149,38 +149,72 @@ interface WhatTheyThinkResult {
 }
 
 // 牌位配置（⚠️ 不可更改）
-const SLOT_CONFIG = [
-  {
-    position: 1,
-    title: 'TA 对你说出口的态度',
-    meaning: 'TA 目前对你表达出来的想法与立场，代表你现在听到和看到的那一层。',
-  },
-  {
-    position: 2,
-    title: 'TA 内心真正的想法',
-    meaning: 'TA 心里正在反复思考的真实念头，以及理性层面对这段关系的判断。',
-  },
-  {
-    position: 3,
-    title: 'TA 内心深处的真实感受',
-    meaning: 'TA 潜意识中的情绪与真实感受，可能连 TA 自己都没有完全意识到。',
-  },
-  {
-    position: 4,
-    title: 'TA 对你的实际行动',
-    meaning: 'TA 在现实中对你采取的行为与反应，用来对照前面的说、想与感受。',
-  },
-  {
-    position: 5,
-    title: '正在影响 TA 的外在因素',
-    meaning: '来自现实或他人的外部影响因素,正在左右 TA 的判断与选择。',
-  },
-  {
-    position: 6,
-    title: '这段关系的短期走向',
-    meaning: '基于当前状态，这段关系在接下来约 2–3 个月内最可能的发展趋势。',
-  },
-];
+const SLOT_CONFIG = {
+  en: [
+    {
+      position: 1,
+      title: 'What they say to you',
+      meaning: 'Their expressed attitude and the layer you can currently see or hear.',
+    },
+    {
+      position: 2,
+      title: 'What they truly think',
+      meaning: 'The thoughts they keep returning to, and their rational view of this connection.',
+    },
+    {
+      position: 3,
+      title: 'Their deeper feelings',
+      meaning: 'The emotions beneath the surface, including feelings they may not fully recognize.',
+    },
+    {
+      position: 4,
+      title: 'Their actual actions',
+      meaning: 'How they behave in real life, compared with what they say, think, and feel.',
+    },
+    {
+      position: 5,
+      title: 'Outside influences',
+      meaning: 'Real-world or social factors affecting their judgment and choices.',
+    },
+    {
+      position: 6,
+      title: 'Short-term direction',
+      meaning: 'The most likely direction of this connection over the next 2 to 3 months.',
+    },
+  ],
+  zh: [
+    {
+      position: 1,
+      title: 'TA 对你说出口的态度',
+      meaning: 'TA 目前对你表达出来的想法与立场，代表你现在听到和看到的那一层。',
+    },
+    {
+      position: 2,
+      title: 'TA 内心真正的想法',
+      meaning: 'TA 心里正在反复思考的真实念头，以及理性层面对这段关系的判断。',
+    },
+    {
+      position: 3,
+      title: 'TA 内心深处的真实感受',
+      meaning: 'TA 潜意识中的情绪与真实感受，可能连 TA 自己都没有完全意识到。',
+    },
+    {
+      position: 4,
+      title: 'TA 对你的实际行动',
+      meaning: 'TA 在现实中对你采取的行为与反应，用来对照前面的说、想与感受。',
+    },
+    {
+      position: 5,
+      title: '正在影响 TA 的外在因素',
+      meaning: '来自现实或他人的外部影响因素，正在左右 TA 的判断与选择。',
+    },
+    {
+      position: 6,
+      title: '这段关系的短期走向',
+      meaning: '基于当前状态，这段关系在接下来约 2-3 个月内最可能的发展趋势。',
+    },
+  ],
+};
 
 // 保存结果到 localStorage
 const saveWhatTheyThinkResult = (data: WhatTheyThinkResult) => {
@@ -203,6 +237,40 @@ const loadWhatTheyThinkResult = (): WhatTheyThinkResult | null => {
 
 export default function WhatTheyThinkDraw() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG.en : SLOT_CONFIG.zh;
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'What They Think - Draw Cards',
+        metaDescription: 'Explore what they may truly think and feel right now.',
+        back: 'Back',
+        reset: 'Reset',
+        completedTitle: 'What They Think - Complete',
+        drawTitle: 'Draw Six Tarot Cards',
+        completedDescription: 'Your cards are ready. Continue to look deeper into their inner world.',
+        drawDescription:
+          'Take a quiet moment, then choose 6 cards from the 78-card deck to explore their thoughts, feelings, actions, and short-term direction.',
+        drawnCount: 'Cards drawn:',
+        viewReading: 'View Reading',
+        completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
+        resetConfirm: 'Start over? Your current draw will be cleared.',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '对方在想什么 - 抽牌',
+        metaDescription: '探索对方此刻的真实想法与情绪',
+        back: '返回',
+        reset: '重置',
+        completedTitle: '对方在想什么 - 已完成',
+        drawTitle: '抽取六张塔罗牌',
+        completedDescription: '牌已经就位，现在，让我们一起看看 TA 的内心。',
+        drawDescription: '静心感受，从下方78张牌中选择6张，探索对方的真实想法、感受与关系走向。',
+        drawnCount: '已抽牌：',
+        viewReading: '查看解读',
+        completedNote: '✨ 已完成抽牌，可随时重新占卜',
+        resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+      };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'love',
     spreadId: 'what-they-think',
@@ -342,7 +410,7 @@ export default function WhatTheyThinkDraw() {
 
   const handleReset = () => {
     if (typeof window === 'undefined') return;
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
 
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('what_they_think_reading'); // 同时清除解读缓存
@@ -365,7 +433,7 @@ export default function WhatTheyThinkDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -374,8 +442,8 @@ export default function WhatTheyThinkDraw() {
   return (
     <>
       <Head>
-        <title>对方在想什么 - 抽牌</title>
-        <meta name="description" content="探索对方此刻的真实想法与情绪" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -439,11 +507,11 @@ export default function WhatTheyThinkDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{text.back}</span>
             </button>
             
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
 
             <button
@@ -451,7 +519,7 @@ export default function WhatTheyThinkDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
+              <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
             </button>
           </header>
 
@@ -462,12 +530,12 @@ export default function WhatTheyThinkDraw() {
               <div className="text-center mb-12">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">What They Think Spread</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '对方在想什么 - 已完成' : '抽取六张塔罗牌'}
+                  {hasDrawn ? text.completedTitle : text.drawTitle}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
                   {hasDrawn 
-                    ? '牌已经就位，现在，让我们一起看看 TA 的内心。' 
-                    : '静心感受，从下方78张牌中选择6张，探索对方的真实想法、感受与关系走向。'}
+                    ? text.completedDescription 
+                    : text.drawDescription}
                 </p>
               </div>
 
@@ -515,7 +583,7 @@ export default function WhatTheyThinkDraw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 6</p>
+                      <p>{text.drawnCount}{selectedCards.filter(c => c !== null).length} / 6</p>
                     </div>
 
                     {/* 卡槽区域 */}
@@ -523,7 +591,7 @@ export default function WhatTheyThinkDraw() {
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
-                      slotConfig={SLOT_CONFIG}
+                      slotConfig={slotConfig}
                     />
                   </motion.div>
                 )}
@@ -542,7 +610,7 @@ export default function WhatTheyThinkDraw() {
                     isAnimating={Array(6).fill(false)}
                     showLoadingText={false}
                     forceFlipped={true}
-                    slotConfig={SLOT_CONFIG}
+                    slotConfig={slotConfig}
                   />
 
                   <div className="text-center mt-8">
@@ -553,12 +621,12 @@ export default function WhatTheyThinkDraw() {
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      查看解读
+                      {text.viewReading}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已完成抽牌，可随时重新占卜</p>
+                    <p>{text.completedNote}</p>
                   </div>
                 </motion.div>
               )}
@@ -578,7 +646,7 @@ export default function WhatTheyThinkDraw() {
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    查看解读
+                    {text.viewReading}
                   </motion.button>
                 </motion.div>
               )}
@@ -589,4 +657,3 @@ export default function WhatTheyThinkDraw() {
     </>
   );
 }
-

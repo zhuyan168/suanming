@@ -24,7 +24,7 @@ const zh = {
   ],
 
   question: {
-    pageTitle: '二选一牌阵 - 问题输入 | Mystic Insights',
+    pageTitle: '二选一牌阵 - 问题输入 | FateAura',
     metaDesc: '在两个选项之间做选择，获得更清晰的指引',
     h1: '二选一牌阵',
     tagline: '帮助你在两个选项之间做选择',
@@ -43,7 +43,7 @@ const zh = {
   },
 
   draw: {
-    pageTitle: '二选一牌阵 - 抽牌 | Mystic Insights',
+    pageTitle: '二选一牌阵 - 抽牌 | FateAura',
     metaDesc: '从78张塔罗牌中选择5张，探索你的选择指引',
     h1Drawing: '抽取五张塔罗牌',
     h1Done: '抽牌完成',
@@ -56,7 +56,7 @@ const zh = {
   },
 
   result: {
-    pageTitle: '二选一牌阵 - 结果展示 | Mystic Insights',
+    pageTitle: '二选一牌阵 - 结果展示 | FateAura',
     metaDesc: '查看你的二选一牌阵占卜结果',
     h1: '二选一牌阵',
     subtitle: '牌已就位，以下是你抽到的塔罗牌',
@@ -69,7 +69,7 @@ const zh = {
   },
 
   reading: {
-    pageTitle: '二选一牌阵 · 解读 | Mystic Insights',
+    pageTitle: '二选一牌阵 · 解读 | FateAura',
     metaDesc: '查看你的二选一牌阵解读结果',
     h1: '二选一牌阵 · 解读',
     errorIncomplete: '抽牌数据不完整，请重新抽牌',
@@ -120,7 +120,7 @@ const en: typeof zh = {
   ],
 
   question: {
-    pageTitle: 'Two Choices Spread - Question | Mystic Insights',
+    pageTitle: 'Two Choices Spread - Question | FateAura',
     metaDesc: 'Gain clarity between two options with a tarot reading',
     h1: 'Two Choices Spread',
     tagline: 'Helping you choose between two paths',
@@ -139,7 +139,7 @@ const en: typeof zh = {
   },
 
   draw: {
-    pageTitle: 'Two Choices Spread - Draw | Mystic Insights',
+    pageTitle: 'Two Choices Spread - Draw | FateAura',
     metaDesc: 'Choose 5 cards from 78 tarot cards to explore your decision',
     h1Drawing: 'Draw Five Tarot Cards',
     h1Done: 'Cards Drawn',
@@ -152,7 +152,7 @@ const en: typeof zh = {
   },
 
   result: {
-    pageTitle: 'Two Choices Spread - Result | Mystic Insights',
+    pageTitle: 'Two Choices Spread - Result | FateAura',
     metaDesc: 'View your Two Choices spread result',
     h1: 'Two Choices Spread',
     subtitle: 'Your cards are revealed. Here are the tarot cards you drew.',
@@ -165,7 +165,7 @@ const en: typeof zh = {
   },
 
   reading: {
-    pageTitle: 'Two Choices Spread · Reading | Mystic Insights',
+    pageTitle: 'Two Choices Spread · Reading | FateAura',
     metaDesc: 'View your Two Choices spread reading',
     h1: 'Two Choices Spread · Reading',
     errorIncomplete: 'Card data is incomplete. Please draw again.',

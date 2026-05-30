@@ -19,6 +19,15 @@ const SLOT_CONFIG = [
   { position: 6, title: "除了它之外还存在的其他机会", meaning: "除了它之外，你目前还存在的其他机会" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { position: 1, title: "How well this opportunity fits you", meaning: "How well this opportunity fits your current needs, values, and direction" },
+  { position: 2, title: "Growth and development potential", meaning: "The growth, learning, or future space this opportunity may bring" },
+  { position: 3, title: "Relationships and collaboration", meaning: "The people, teamwork, and collaboration dynamics involved" },
+  { position: 4, title: "Their real expectations", meaning: "What the company, team, or environment may truly expect from you" },
+  { position: 5, title: "Risks and costs to notice", meaning: "The hidden risks, tradeoffs, or costs that deserve attention" },
+  { position: 6, title: "Other opportunities around you", meaning: "Other possibilities or alternatives that may still exist beyond this offer" }
+];
+
 interface TarotCard {
   id: number;
   name: string;
@@ -41,6 +50,31 @@ interface ReadingResult {
 export default function OfferDecisionReading() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Offer Decision Reading | FateAura' : '我已经拿到 offer 了，要不要接受？ - 解读 | FateAura',
+    metaDesc: isEn ? 'Clarify what this opportunity may bring without letting tarot make the decision for you.' : '帮助你看清这项机会的真实面貌，而不是替你做决定',
+    noCardsTitle: isEn ? 'No Cards Drawn Yet' : '你还没有完成抽牌',
+    noCardsDesc: isEn ? 'Please finish drawing your cards before viewing the reading.' : '请先完成抽牌，才能查看解读结果',
+    goDraw: isEn ? 'Go to Draw Page' : '前往抽牌页',
+    backList: isEn ? 'Back to List' : '返回列表页',
+    header: isEn ? 'Offer Decision Reading' : 'Offer 决策解读',
+    h1: isEn ? 'Should I Accept This Offer?' : '我已经拿到 offer 了，要不要接受？',
+    intro: isEn
+      ? 'This reading helps you understand the likely influence of this opportunity, without replacing your own decision.'
+      : '这份解读将围绕你所抽到的牌，帮助你理解这项机会可能带来的影响，而不是替你做出决定。',
+    scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读',
+    overallTitle: isEn ? 'Overall Reading' : '整体解读总览',
+    deepTitle: isEn ? 'Deep Reading' : '深度解读',
+    disclaimer: isEn
+      ? 'Tarot reflects the energy and possible direction around this opportunity. Please treat this reading as a reference, not the only basis for your decision.'
+      : '占卜仅呈现你当下所处的能量状态与可能的倾向，未来仍取决于你的判断、选择与持续的行动。请将解读作为参考，而非唯一依据。',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    backCareer: isEn ? 'Back to Career & Study' : '返回事业&学业占卜',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -67,7 +101,7 @@ export default function OfferDecisionReading() {
         setError(texts.errorLoad);
       }
     } else {
-      setError('你还没有完成抽牌');
+        setError(pageText.noCardsTitle);
     }
   }, []);
 
@@ -103,7 +137,7 @@ export default function OfferDecisionReading() {
       }
 
     } catch (err: any) {
-      setError(err.message || '出错了，请稍后重试');
+      setError(err.message || texts.errorGenerateRetry);
     } finally {
       setLoading(false);
     }
@@ -132,7 +166,7 @@ export default function OfferDecisionReading() {
   if (accessLoading || !allowed) {
     return (
       <div className="dark bg-[#191022] min-h-screen text-white flex items-center justify-center">
-        <div className="text-white/60">加载中...</div>
+        <div className="text-white/60">{texts.loadingTitle}</div>
       </div>
     );
   }
@@ -142,26 +176,26 @@ export default function OfferDecisionReading() {
     return (
       <div className="dark bg-[#191022] min-h-screen text-white flex flex-col items-center justify-center p-4">
         <Head>
-          <title>我已经拿到offer了，要不要接受？ - 解读</title>
+          <title>{pageText.title}</title>
         </Head>
         
         <div className="bg-white/5 border border-white/10 p-8 rounded-2xl max-w-md w-full text-center">
           <div className="text-yellow-400 mb-4 text-4xl">💭</div>
-          <p className="text-lg mb-2 font-bold">你还没有完成抽牌</p>
-          <p className="text-white/60 text-sm mb-6">请先完成抽牌，才能查看解读结果</p>
+          <p className="text-lg mb-2 font-bold">{pageText.noCardsTitle}</p>
+          <p className="text-white/60 text-sm mb-6">{pageText.noCardsDesc}</p>
           <div className="flex flex-col gap-3">
             <button
               onClick={handleReturnToDraw}
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              前往抽牌页
+              {pageText.goDraw}
             </button>
             <button
               onClick={handleReturnToList}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回列表页
+              {pageText.backList}
             </button>
           </div>
         </div>
@@ -174,7 +208,7 @@ export default function OfferDecisionReading() {
     return (
       <div className="dark bg-[#191022] min-h-screen text-white flex flex-col items-center justify-center p-4">
         <Head>
-          <title>我已经拿到offer了，要不要接受？ - 解读</title>
+          <title>{pageText.title}</title>
         </Head>
         
         <div className="bg-white/5 border border-white/10 p-8 rounded-2xl max-w-md w-full text-center">
@@ -186,13 +220,13 @@ export default function OfferDecisionReading() {
               className="w-full py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
               style={{ backgroundColor: '#7f13ec' }}
             >
-              重新生成
+              {texts.btnRetry}
             </button>
             <button
               onClick={handleReturnToList}
               className="w-full py-3 rounded-xl bg-white/10 text-white/70 hover:bg-white/20 transition-all"
             >
-              返回列表
+              {pageText.backList}
             </button>
           </div>
         </div>
@@ -203,8 +237,8 @@ export default function OfferDecisionReading() {
   return (
     <div className="dark bg-[#191022] min-h-screen text-white font-sans">
       <Head>
-        <title>我已经拿到offer了，要不要接受？ - 解读</title>
-        <meta name="description" content="帮助你看清这项机会的真实面貌，而不是替你做决定" />
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
       </Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
@@ -212,7 +246,7 @@ export default function OfferDecisionReading() {
           <span className="material-symbols-outlined text-xl">arrow_back</span>
           <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
-        <h2 className="text-lg font-bold">Offer 决策解读</h2>
+        <h2 className="text-lg font-bold">{pageText.header}</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
           <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
@@ -230,10 +264,10 @@ export default function OfferDecisionReading() {
             <div className="text-center mb-3 sm:mb-4">
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">Offer Decision Reading</span>
               <h1 className="text-2xl sm:text-3xl font-black mb-2 px-4 leading-tight">
-                我已经拿到offer了，要不要接受？
+                {pageText.h1}
               </h1>
               <p className="text-white/50 text-sm max-w-2xl mx-auto px-4 mt-3">
-                这份解读将围绕你所抽到的牌，帮助你理解这项机会可能带来的影响，而不是替你做出决定。
+                {pageText.intro}
               </p>
               <div className="h-1 w-16 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec] mt-3"></div>
             </div>
@@ -247,7 +281,7 @@ export default function OfferDecisionReading() {
                   isAnimating={Array(6).fill(false)}
                   showLoadingText={false}
                   forceFlipped={true}
-                  slotConfig={SLOT_CONFIG}
+                  slotConfig={slotConfig}
                 />
               </div>
             </div>
@@ -258,7 +292,7 @@ export default function OfferDecisionReading() {
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">下滑查看解读</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{pageText.scrollHint}</span>
                 <span className="material-symbols-outlined text-white/20 text-xl">keyboard_double_arrow_down</span>
               </motion.div>
             </div>
@@ -294,7 +328,7 @@ export default function OfferDecisionReading() {
                 <div className="relative bg-[#1f1629] border border-white/10 rounded-2xl p-6 sm:p-10">
                   <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                     <span className="material-symbols-outlined">auto_awesome</span>
-                    整体解读总览
+                    {pageText.overallTitle}
                   </h3>
                   <p className="text-white/80 leading-relaxed text-base sm:text-lg whitespace-pre-line">
                     {reading.overall}
@@ -306,7 +340,7 @@ export default function OfferDecisionReading() {
               <div className="space-y-10">
                 <div className="flex items-center gap-4 px-4">
                   <div className="h-px flex-1 bg-white/10"></div>
-                  <h3 className="text-xl font-black text-white/50 tracking-widest uppercase">深度解读</h3>
+                  <h3 className="text-xl font-black text-white/50 tracking-widest uppercase">{pageText.deepTitle}</h3>
                   <div className="h-px flex-1 bg-white/10"></div>
                 </div>
                 {reading.positions.map((pos, idx) => {
@@ -329,7 +363,7 @@ export default function OfferDecisionReading() {
                             >
                               <img
                                 src={cardData.image}
-                                alt={pos.card}
+                                alt={isEn ? (cardData?.name || pos.card) : pos.card}
                                 className="w-full h-full object-cover shadow-lg border border-white/10"
                               />
                             </div>
@@ -339,13 +373,13 @@ export default function OfferDecisionReading() {
                             </div>
                           )}
                         </div>
-                        <p className="text-xs font-bold text-white/50 text-center uppercase tracking-wider">{pos.position}</p>
+                        <p className="text-xs font-bold text-white/50 text-center uppercase tracking-wider">{isEn ? (slotConfig[idx]?.title || pos.position) : pos.position}</p>
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{pos.card}</span>
+                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{isEn ? (cardData?.name || pos.card) : pos.card}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${cardData?.orientation === 'reversed' ? 'border-orange-500/50 text-orange-400' : 'border-emerald-500/50 text-emerald-400'}`}>
-                            {cardData?.orientation === 'reversed' ? '逆位' : '正位'}
+                            {cardData?.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                           </span>
                         </div>
                         <p className="text-white/80 leading-relaxed text-sm sm:text-base">
@@ -364,9 +398,7 @@ export default function OfferDecisionReading() {
                     <span className="material-symbols-outlined text-purple-400 text-2xl">psychology</span>
                   </div>
                   <p className="text-white/70 leading-relaxed text-sm sm:text-base max-w-2xl mx-auto">
-                    占卜仅呈现你当下所处的能量状态与可能的倾向，<br className="hidden sm:block" />
-                    未来仍取决于你的判断、选择与持续的行动。<br className="hidden sm:block" />
-                    请将解读作为参考，而非唯一依据。
+                    {pageText.disclaimer}
                   </p>
                 </div>
                 
@@ -376,14 +408,14 @@ export default function OfferDecisionReading() {
                     className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">home</span>
-                    返回首页
+                    {pageText.backHome}
                   </button>
                   <button
                     onClick={handleReturnToList}
                     className="w-full sm:w-auto px-10 py-3 rounded-xl bg-primary text-white font-bold hover:scale-105 transition-all shadow-lg shadow-primary/20"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    返回事业&学业占卜
+                    {pageText.backCareer}
                   </button>
                 </div>
               </div>

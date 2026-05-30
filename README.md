@@ -1,4 +1,4 @@
-# 算命 - Mystic Insights
+# 算命 - FateAura
 
 一个集成了塔罗占卜功能的 Next.js 应用程序，支持多种牌阵和 AI 解读。
 

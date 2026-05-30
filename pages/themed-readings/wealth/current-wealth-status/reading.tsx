@@ -15,6 +15,12 @@ const SLOT_CONFIG = [
   { id: "p3", name: "近期的财运走向与提醒", meaning: "接下来一段时间财运的整体趋势，以及你需要留意或调整的方向。" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "Current Wealth State", meaning: "Your overall money situation and current relationship with wealth." },
+  { id: "p2", name: "Main Influence", meaning: "The external condition, practical factor, choice, or mindset currently shaping your wealth." },
+  { id: "p3", name: "Near-Term Trend", meaning: "The likely direction of your wealth energy and what deserves attention next." }
+];
+
 interface TarotCard {
   id: number;
   name: string;
@@ -39,6 +45,21 @@ interface ReadingResult {
 export default function WealthCurrentStatusReadingPage() {
   const router = useRouter();
   const texts = getReadingUiText(router.locale);
+  const isEn = router.locale !== 'zh';
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Current Wealth Status - Reading | FateAura' : '我现在的财运如何？ - 解读结果 | FateAura',
+    header: isEn ? 'Current Wealth Reading' : '财运现状解读',
+    h1: isEn ? 'How Is My Wealth Energy Right Now?' : '我现在的财运如何？',
+    scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
+    loadingTitle: isEn ? 'Reading your wealth clues...' : '正在整理你的财运线索...',
+    overallTitle: isEn ? 'Wealth Overview' : '财运总览',
+    actionTitle: isEn ? 'Action Guidance' : '行动建议',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    backWealth: isEn ? 'Back to Wealth Readings' : '返回财富占卜',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [reading, setReading] = useState<ReadingResult | null>(null);
@@ -99,7 +120,7 @@ export default function WealthCurrentStatusReadingPage() {
       }
 
     } catch (err: any) {
-      setError(err.message || '出错了，请稍后重试');
+      setError(err.message || texts.errorGenerateRetry);
     } finally {
       setLoading(false);
     }
@@ -156,7 +177,7 @@ export default function WealthCurrentStatusReadingPage() {
   return (
     <div className="dark bg-[#191022] min-h-screen text-white font-sans">
       <Head>
-        <title>我现在的财运如何？ - 解读结果</title>
+        <title>{pageText.title}</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
@@ -165,7 +186,7 @@ export default function WealthCurrentStatusReadingPage() {
           <span className="material-symbols-outlined text-xl">arrow_back</span>
           <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
-        <h2 className="text-lg font-bold">财运现状解读</h2>
+        <h2 className="text-lg font-bold">{pageText.header}</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
           <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
@@ -182,7 +203,7 @@ export default function WealthCurrentStatusReadingPage() {
           >
             <div className="text-center mb-6">
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">Current Wealth Status Reading</span>
-              <h1 className="text-2xl sm:text-4xl font-black mb-3 px-4 leading-tight text-white">我现在的财运如何？</h1>
+              <h1 className="text-2xl sm:text-4xl font-black mb-3 px-4 leading-tight text-white">{pageText.h1}</h1>
               <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>
 
@@ -195,7 +216,7 @@ export default function WealthCurrentStatusReadingPage() {
                   isAnimating={[false, false, false]}
                   showLoadingText={false}
                   forceFlipped={true}
-                  slotConfig={SLOT_CONFIG}
+                  slotConfig={slotConfig}
                 />
               </div>
             </div>
@@ -206,7 +227,7 @@ export default function WealthCurrentStatusReadingPage() {
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">下滑查看解读内容</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{pageText.scrollHint}</span>
                 <span className="material-symbols-outlined text-white/20 text-xl">keyboard_double_arrow_down</span>
               </motion.div>
             </div>
@@ -226,7 +247,7 @@ export default function WealthCurrentStatusReadingPage() {
                 <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" style={{ borderColor: '#7f13ec transparent transparent transparent' }}></div>
               </div>
-              <h3 className="text-xl font-bold mb-2">正在整理你的财运线索…</h3>
+              <h3 className="text-xl font-bold mb-2">{pageText.loadingTitle}</h3>
               <p className="text-white/40 max-w-xs mx-auto text-sm">{texts.loadingSubtitle}</p>
             </motion.div>
           ) : reading ? (
@@ -242,7 +263,7 @@ export default function WealthCurrentStatusReadingPage() {
                 <div className="relative bg-[#1f1629] border border-white/10 rounded-2xl p-6 sm:p-10">
                   <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                     <span className="material-symbols-outlined">auto_awesome</span>
-                    财运总览
+                    {pageText.overallTitle}
                   </h3>
                   <p className="text-white/80 leading-relaxed text-lg italic px-2">
                     {reading.overall}
@@ -277,7 +298,7 @@ export default function WealthCurrentStatusReadingPage() {
                             >
                               <img
                                 src={cardData.image}
-                                alt={pos.card_name_zh}
+                                alt={isEn ? (cardData?.name || pos.card_name_zh) : pos.card_name_zh}
                                 className="w-full h-full object-cover shadow-lg border border-white/10"
                               />
                             </div>
@@ -287,13 +308,13 @@ export default function WealthCurrentStatusReadingPage() {
                             </div>
                           )}
                         </div>
-                        <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-wider">{pos.title}</p>
+                        <p className="text-[10px] font-bold text-white/50 text-center uppercase tracking-wider">{isEn ? (slotConfig[idx]?.name || pos.title) : pos.title}</p>
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{pos.card_name_zh}</span>
+                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{isEn ? (cardData?.name || pos.card_name_zh) : pos.card_name_zh}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${cardData?.orientation === 'reversed' ? 'border-orange-500/50 text-orange-400' : 'border-emerald-500/50 text-emerald-400'}`}>
-                            {cardData?.orientation === 'reversed' ? '逆位' : '正位'}
+                            {cardData?.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                           </span>
                         </div>
                         <p className="text-white/80 leading-relaxed text-base">
@@ -309,7 +330,7 @@ export default function WealthCurrentStatusReadingPage() {
               <section className="space-y-8 pt-4">
                 <h3 className="text-2xl font-black text-center flex items-center justify-center gap-3">
                   <span className="material-symbols-outlined text-primary">lightbulb</span>
-                  行动建议
+                  {pageText.actionTitle}
                 </h3>
                 
                 <div className="grid grid-cols-1 gap-4">
@@ -344,7 +365,7 @@ export default function WealthCurrentStatusReadingPage() {
                     className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">home</span>
-                    返回首页
+                    {pageText.backHome}
                   </button>
                   <button
                     onClick={handleReturn}
@@ -352,7 +373,7 @@ export default function WealthCurrentStatusReadingPage() {
                     style={{ backgroundColor: '#7f13ec' }}
                   >
                     <span className="material-symbols-outlined text-sm">paid</span>
-                    返回财富占卜
+                    {pageText.backWealth}
                   </button>
                 </div>
               </div>

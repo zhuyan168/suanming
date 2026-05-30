@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 function LogoMark() {
   return (
@@ -35,11 +36,144 @@ function SectionCard({
 }
 
 export default function TermsPage() {
+  const router = useRouter()
+  const isEn = router.locale === 'en'
+
+  const texts = isEn ? {
+    title: 'Terms of Service - FateAura',
+    metaDesc: 'Read the FateAura terms of service, usage notes, membership terms, and disclaimers.',
+    navHome: 'Home',
+    navAbout: 'About',
+    navTerms: 'Terms',
+    heading: 'Terms of Service',
+    sections: [
+      {
+        title: '1. Service Overview',
+        paragraphs: [
+          'Welcome to FateAura.',
+          'FateAura is an online platform for tarot readings, intuitive guidance, interactive reading experiences, account features, and membership-related access.',
+        ],
+      },
+      {
+        title: '3. Accounts and Use',
+        paragraphs: [
+          'When you create and use a FateAura account, you are responsible for keeping your login information secure and for activity under your account.',
+          'You may not misuse, attack, interfere with, or disrupt the website or its services, and you may not use FateAura for unlawful or inappropriate purposes.',
+        ],
+      },
+      {
+        title: '4. Membership and Access',
+        paragraphs: [
+          'FateAura may provide membership access, membership code redemption, or paid features.',
+          'Specific member benefits, availability, duration, and usage limits are determined by the current pages and actual product functionality.',
+          'We may update, adjust, or discontinue membership features as the product develops.',
+        ],
+      },
+      {
+        title: '5. Service Changes and Interruptions',
+        paragraphs: [
+          'To improve the product, fix issues, or adjust features, FateAura may update, modify, suspend, or remove pages, features, content, or services without prior notice.',
+          'We aim to keep the service stable, but we cannot guarantee uninterrupted access when maintenance, network issues, third-party service problems, or other events outside our control occur.',
+        ],
+      },
+      {
+        title: '6. Content and Copyright',
+        paragraphs: [
+          'Unless otherwise stated, page design, written content, reading text, images, and related materials on this website belong to FateAura or their respective rights holders.',
+          'You may not copy, republish, modify, distribute, or use this content commercially without permission.',
+        ],
+      },
+      {
+        title: '8. Updates',
+        paragraphs: [
+          'FateAura may update these terms from time to time.',
+          'Updated terms will be posted on this website and take effect when published.',
+        ],
+      },
+    ],
+    referenceTitle: '2. For Reflection Only',
+    referenceParagraphs: [
+      'FateAura readings are for personal reflection and self-exploration only. They are not medical, legal, financial, psychological, or other professional advice.',
+      'For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
+    ],
+    privacyTitle: '7. Privacy and Contact',
+    privacyParagraph1: 'We care about user privacy and aim to protect your account information and usage records.',
+    privacyPrefix: 'For more details about data collection, use, and protection, please read our',
+    privacyLink: 'Privacy Policy',
+    privacySuffix: '.',
+    privacyParagraph3: 'For questions, collaboration, or feedback, contact us through the information provided on the site.',
+    backHome: 'Back to Home',
+  } : {
+    title: '服务条款 - FateAura',
+    metaDesc: 'FateAura 服务条款与使用说明。',
+    navHome: '首页',
+    navAbout: '关于',
+    navTerms: '服务条款',
+    heading: '服务条款',
+    sections: [
+      {
+        title: '一、服务说明',
+        paragraphs: [
+          '欢迎使用 FateAura。',
+          'FateAura 是一个提供塔罗与占卜相关内容、指引与互动功能的线上平台，用户可通过本网站体验不同类型的占卜服务、查看解读内容，并使用与账户、会员相关的功能。',
+        ],
+      },
+      {
+        title: '三、账户与使用',
+        paragraphs: [
+          '当你注册并使用 FateAura 账户时，应妥善保管你的登录信息，并对账户下发生的行为负责。',
+          '你不得以任何方式滥用、干扰、攻击或破坏本网站及其服务，也不得将本网站用于任何违法或不当用途。',
+        ],
+      },
+      {
+        title: '四、会员与权益',
+        paragraphs: [
+          'FateAura 可能提供会员服务、会员码兑换或其他付费相关功能。',
+          '具体会员权益、可用范围、有效期限及相关说明，以网站当前页面展示与实际功能为准。',
+          '我们保留根据产品发展情况，对会员内容、功能或展示方式进行调整与更新的权利。',
+        ],
+      },
+      {
+        title: '五、服务变更与中断',
+        paragraphs: [
+          '为了优化体验、修复问题或进行功能调整，FateAura 可能在不事先通知的情况下，对部分页面、功能、内容或服务进行更新、修改、暂停或下线。',
+          '我们会尽力保持服务稳定，但不对因系统维护、网络异常、第三方服务波动或其他不可控因素导致的中断承担保证责任。',
+        ],
+      },
+      {
+        title: '六、内容与版权',
+        paragraphs: [
+          '本网站中的页面设计、文案内容、解读文本、图像素材及相关内容，除另有说明外，均归 FateAura 或相关权利人所有。',
+          '未经授权，不得复制、转载、修改、传播或用于其他商业用途。',
+        ],
+      },
+      {
+        title: '八、条款更新',
+        paragraphs: [
+          'FateAura 保留对本服务条款进行更新与调整的权利。',
+          '更新后的内容将在网站公布，并自公布后生效。',
+        ],
+      },
+    ],
+    referenceTitle: '二、仅供参考',
+    referenceParagraphs: [
+      'FateAura 提供的占卜与解读内容，仅供个人参考与自我探索使用，不构成医疗、法律、财务、心理咨询或其他专业建议。',
+      '当你面临重大决定时，请结合现实情况，并在必要时寻求专业人士的帮助。',
+    ],
+    privacyTitle: '七、隐私与联系',
+    privacyParagraph1: '我们重视用户隐私，并会尽力保护你的账户信息与使用记录。',
+    privacyPrefix: '有关数据收集、使用与保护的更多内容，请参阅',
+    privacyLink: '隐私政策',
+    privacySuffix: '页面。',
+    privacyParagraph3: '如有使用问题、合作咨询或反馈建议，可通过页面中提供的联系方式与我们取得联系。',
+    backHome: '返回首页',
+  }
+
   return (
     <>
       <Head>
-        <title>服务条款 - FateAura</title>
-        <meta name="description" content="FateAura 服务条款与使用说明。" />
+        <title>{texts.title}</title>
+        <meta name="description" content={texts.metaDesc} />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
@@ -59,13 +193,13 @@ export default function TermsPage() {
             </Link>
             <nav className="flex items-center gap-6 sm:gap-8">
               <Link href="/" className="text-white/80 text-sm font-medium hover:text-primary transition-colors">
-                首页
+                {texts.navHome}
               </Link>
               <Link href="/about" className="text-white/80 text-sm font-medium hover:text-primary transition-colors">
-                关于
+                {texts.navAbout}
               </Link>
               <span className="text-primary text-sm font-medium" aria-current="page">
-                服务条款
+                {texts.navTerms}
               </span>
             </nav>
           </header>
@@ -74,17 +208,15 @@ export default function TermsPage() {
             <div className="mx-auto max-w-3xl">
               <div className="mb-10 sm:mb-12 text-center sm:text-left">
                 <h1 className="text-white text-3xl sm:text-4xl font-extrabold tracking-tight [text-shadow:0_0_40px_rgba(127,19,236,0.25)]">
-                  服务条款
+                  {texts.heading}
                 </h1>
               </div>
 
               <div className="flex flex-col gap-8 sm:gap-10">
-                <SectionCard title="一、服务说明">
-                  <p>欢迎使用 FateAura。</p>
-                  <p>
-                    FateAura
-                    是一个提供塔罗与占卜相关内容、指引与互动功能的线上平台，用户可通过本网站体验不同类型的占卜服务、查看解读内容，并使用与账户、会员相关的功能。
-                  </p>
+                <SectionCard title={texts.sections[0].title}>
+                  {texts.sections[0].paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
                 </SectionCard>
 
                 <section
@@ -98,47 +230,22 @@ export default function TermsPage() {
                     <span className="material-symbols-outlined text-xl text-amber-200/80" aria-hidden>
                       info
                     </span>
-                    二、仅供参考
+                    {texts.referenceTitle}
                   </h2>
                   <div className="text-white/70 text-sm sm:text-[15px] leading-relaxed space-y-3">
-                    <p>
-                      FateAura
-                      提供的占卜与解读内容，仅供个人参考与自我探索使用，不构成医疗、法律、财务、心理咨询或其他专业建议。
-                    </p>
-                    <p>当你面临重大决定时，请结合现实情况，并在必要时寻求专业人士的帮助。</p>
+                    {texts.referenceParagraphs.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
                   </div>
                 </section>
 
-                <SectionCard title="三、账户与使用">
-                  <p>当你注册并使用 FateAura 账户时，应妥善保管你的登录信息，并对账户下发生的行为负责。</p>
-                  <p>
-                    你不得以任何方式滥用、干扰、攻击或破坏本网站及其服务，也不得将本网站用于任何违法或不当用途。
-                  </p>
-                </SectionCard>
-
-                <SectionCard title="四、会员与权益">
-                  <p>FateAura 可能提供会员服务、会员码兑换或其他付费相关功能。</p>
-                  <p>具体会员权益、可用范围、有效期限及相关说明，以网站当前页面展示与实际功能为准。</p>
-                  <p>我们保留根据产品发展情况，对会员内容、功能或展示方式进行调整与更新的权利。</p>
-                </SectionCard>
-
-                <SectionCard title="五、服务变更与中断">
-                  <p>
-                    为了优化体验、修复问题或进行功能调整，FateAura
-                    可能在不事先通知的情况下，对部分页面、功能、内容或服务进行更新、修改、暂停或下线。
-                  </p>
-                  <p>
-                    我们会尽力保持服务稳定，但不对因系统维护、网络异常、第三方服务波动或其他不可控因素导致的中断承担保证责任。
-                  </p>
-                </SectionCard>
-
-                <SectionCard title="六、内容与版权">
-                  <p>
-                    本网站中的页面设计、文案内容、解读文本、图像素材及相关内容，除另有说明外，均归 FateAura
-                    或相关权利人所有。
-                  </p>
-                  <p>未经授权，不得复制、转载、修改、传播或用于其他商业用途。</p>
-                </SectionCard>
+                {texts.sections.slice(1, 5).map((section) => (
+                  <SectionCard key={section.title} title={section.title}>
+                    {section.paragraphs.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </SectionCard>
+                ))}
 
                 <section
                   className="rounded-xl border border-primary/35 bg-primary/[0.08] px-5 py-6 sm:px-7 sm:py-7 shadow-[0_0_32px_-8px_rgba(127,19,236,0.35)]"
@@ -151,24 +258,25 @@ export default function TermsPage() {
                     <span className="material-symbols-outlined text-xl text-primary/90" aria-hidden>
                       privacy_tip
                     </span>
-                    七、隐私与联系
+                    {texts.privacyTitle}
                   </h2>
                   <div className="text-white/75 text-sm sm:text-[15px] leading-relaxed space-y-3">
-                    <p>我们重视用户隐私，并会尽力保护你的账户信息与使用记录。</p>
+                    <p>{texts.privacyParagraph1}</p>
                     <p>
-                      有关数据收集、使用与保护的更多内容，请参阅
+                      {texts.privacyPrefix}
                       <Link href="/privacy" className="text-primary hover:text-secondary mx-1 underline underline-offset-2">
-                        隐私政策
+                        {texts.privacyLink}
                       </Link>
-                      页面。
+                      {texts.privacySuffix}
                     </p>
-                    <p>如有使用问题、合作咨询或反馈建议，可通过页面中提供的联系方式与我们取得联系。</p>
+                    <p>{texts.privacyParagraph3}</p>
                   </div>
                 </section>
 
-                <SectionCard title="八、条款更新">
-                  <p>FateAura 保留对本服务条款进行更新与调整的权利。</p>
-                  <p>更新后的内容将在网站公布，并自公布后生效。</p>
+                <SectionCard title={texts.sections[5].title}>
+                  {texts.sections[5].paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
                 </SectionCard>
               </div>
 
@@ -178,7 +286,7 @@ export default function TermsPage() {
                   className="inline-flex items-center gap-1.5 text-sm text-white/50 hover:text-primary transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">arrow_back</span>
-                  返回首页
+                  {texts.backHome}
                 </Link>
               </div>
             </div>

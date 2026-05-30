@@ -5,8 +5,10 @@ export type SpreadCategory = 'love' | 'career' | 'wealth' | 'fortune' | 'general
 export interface SpreadItem {
   id: string;
   name: string;
+  nameEn: string;
   category: SpreadCategory;
   description: string;
+  descriptionEn: string;
   url: string;
   keywords: string[];
 }
@@ -34,6 +36,24 @@ const LUNA_KEYWORDS: Record<string, string[]> = {
   'three-card-general': ['不确定', '迷茫', '不知道', '看看', '通用', '随便'],
 };
 
+const LUNA_DESCRIPTIONS_EN: Record<string, string> = {
+  'love-what-they-think': 'Explore their real thoughts, feelings, and the short-term direction of the relationship',
+  'love-reconciliation': 'Assess whether there is room to reconnect and what it may cost emotionally',
+  'love-relationship-development': 'See the real state of the relationship and where it may naturally go next',
+  'love-future-lover': 'Explore the image of a future lover and the path toward meeting them',
+  'career-skills-direction': 'Clarify your strengths and a suitable career or skill direction',
+  'career-interview-exam': 'See key reminders for an interview, exam, or important evaluation',
+  'career-offer-decision': 'Compare the costs and opportunities behind an offer decision',
+  'career-stay-or-leave': 'Assess whether it is still worth staying with your current work path',
+  'wealth-current-status': 'Quickly understand your current money energy and near-term trend',
+  'wealth-obstacles': 'Find the main block standing in the way of financial improvement',
+  'fortune-daily': 'Check the overall energy and reminders for today',
+  'fortune-monthly': 'Look at the main rhythm and focus for this month',
+  'fortune-seasonal': 'Explore the energy trend across the current season',
+  'fortune-yearly': 'See the broader pattern and key themes for the year',
+  'three-card-general': 'A flexible spread for any open question or uncertain situation',
+};
+
 function categoryFromMeta(s: SpreadMeta): SpreadCategory {
   const c = s.category;
   if (c === 'divination') return 'general';
@@ -46,8 +66,10 @@ export const LUNA_SPREADS: SpreadItem[] = SPREAD_LIST
   .map((s) => ({
     id: s.key,
     name: s.name,
+    nameEn: s.nameEn,
     category: categoryFromMeta(s),
     description: s.description ?? '',
+    descriptionEn: LUNA_DESCRIPTIONS_EN[s.key] ?? s.nameEn,
     url: s.path,
     keywords: LUNA_KEYWORDS[s.key] ?? [],
   }));
@@ -150,9 +172,32 @@ const CATEGORY_LABELS: Record<SpreadCategory, string> = {
   general: '通用的',
 };
 
-export function getRecommendedSpread(userMessage: string): SpreadRecommendation {
+export function getRecommendedSpread(userMessage: string, locale?: string): SpreadRecommendation {
   const category = detectCategory(userMessage);
   const spread = findBestSpread(userMessage, category);
+  const isEn = locale === 'en';
+
+  if (isEn) {
+    const name = spread.nameEn || spread.name;
+    const description = spread.descriptionEn || spread.description;
+    const categoryLabel: Record<SpreadCategory, string> = {
+      love: 'love and relationships',
+      career: 'career or study',
+      wealth: 'money and finances',
+      fortune: 'fortune trends',
+      general: 'general guidance',
+    };
+    const message =
+      category === 'general'
+        ? `I'm not completely sure which area fits best yet, so "${name}" is a good place to start. It works well for open questions.`
+        : `For ${categoryLabel[category]}, I recommend "${name}" — ${description}`;
+
+    return {
+      spread: { ...spread, name, description },
+      category,
+      message,
+    };
+  }
 
   const catLabel = CATEGORY_LABELS[category];
   const replyMessage =
@@ -163,10 +208,16 @@ export function getRecommendedSpread(userMessage: string): SpreadRecommendation 
   return { spread, category, message: replyMessage };
 }
 
-export function matchSpreadByMessage(message: string): SpreadRecommendation {
-  return getRecommendedSpread(message);
+export function matchSpreadByMessage(message: string, locale?: string): SpreadRecommendation {
+  return getRecommendedSpread(message, locale);
 }
 
-export function getSpreadById(id: string): SpreadItem | undefined {
-  return LUNA_SPREADS.find((s) => s.id === id);
+export function getSpreadById(id: string, locale?: string): SpreadItem | undefined {
+  const spread = LUNA_SPREADS.find((s) => s.id === id);
+  if (!spread || locale !== 'en') return spread;
+  return {
+    ...spread,
+    name: spread.nameEn || spread.name,
+    description: spread.descriptionEn || spread.description,
+  };
 }

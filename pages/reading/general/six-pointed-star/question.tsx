@@ -68,7 +68,7 @@ export default function SixPointedStarQuestionPage() {
   return (
     <>
       <Head>
-        <title>六芒星牌阵 - 问题输入 | Mystic Insights</title>
+        <title>六芒星牌阵 - 问题输入 | FateAura</title>
         <meta
           name="description"
           content="输入你的问题，获得更精准的塔罗占卜解读"
@@ -94,7 +94,7 @@ export default function SixPointedStarQuestionPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

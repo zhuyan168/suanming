@@ -79,7 +79,7 @@ export default function HorseshoeDrawPage() {
   const isEn = router.locale === 'en';
   const texts = {
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Horseshoe Spread — Draw Cards | Mystic Insights' : '马蹄铁牌阵 - 抽牌 | Mystic Insights',
+    title: isEn ? 'Horseshoe Spread — Draw Cards | FateAura' : '马蹄铁牌阵 - 抽牌 | FateAura',
     metaDesc: isEn ? 'Select 7 cards from the deck for your Horseshoe reading.' : '从78张塔罗牌中选择7张，探索你的指引',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
@@ -280,7 +280,7 @@ export default function HorseshoeDrawPage() {
           
           <div className="flex items-center gap-4">
             <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-              Mystic Insights
+              FateAura
             </h2>
           </div>
 

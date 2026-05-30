@@ -169,6 +169,39 @@ const loadFutureLoverResult = (): FutureLoverResult | null => {
 
 export default function FutureLoverDraw() {
   const router = useRouter();
+  const isEn = router.locale !== 'zh';
+  const text = isEn
+    ? {
+        loading: 'Loading...',
+        pageTitle: 'Future Lover Spread - Draw Cards',
+        metaDescription: 'Explore your future lover and how you may meet.',
+        back: 'Back',
+        reset: 'Reset',
+        completedTitle: 'Future Lover Spread Complete',
+        drawTitle: 'Draw Six Tarot Cards',
+        completedDescription: 'Your cards are ready. Continue to view the full reading.',
+        drawDescription:
+          'Take a quiet moment, then choose 6 cards from the 78-card deck to explore your future lover and meeting path.',
+        drawnCount: 'Cards drawn:',
+        viewReading: 'View Reading',
+        completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
+        resetConfirm: 'Start over? Your current draw will be cleared.',
+      }
+    : {
+        loading: '加载中...',
+        pageTitle: '未来恋人牌阵 - 抽牌',
+        metaDescription: '探索你的未来恋人',
+        back: '返回',
+        reset: '重置',
+        completedTitle: '未来恋人牌阵已完成',
+        drawTitle: '抽取六张塔罗牌',
+        completedDescription: '你已完成抽牌，点击下方按钮查看详细解读。',
+        drawDescription: '静心感受，从下方78张牌中选择6张，探索你的未来恋人与相遇路径。',
+        drawnCount: '已抽牌：',
+        viewReading: '查看解读',
+        completedNote: '✨ 已完成抽牌，可随时重新占卜',
+        resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+      };
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'love',
     spreadId: 'future-lover',
@@ -307,7 +340,7 @@ export default function FutureLoverDraw() {
 
   const handleReset = () => {
     if (typeof window === 'undefined') return;
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
 
     localStorage.removeItem(STORAGE_KEY);
     
@@ -329,7 +362,7 @@ export default function FutureLoverDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -338,8 +371,8 @@ export default function FutureLoverDraw() {
   return (
     <>
       <Head>
-        <title>未来恋人牌阵 - 抽牌</title>
-        <meta name="description" content="探索你的未来恋人" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="dark">
@@ -351,11 +384,11 @@ export default function FutureLoverDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{text.back}</span>
             </button>
             
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
 
             <button
@@ -363,7 +396,7 @@ export default function FutureLoverDraw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
+              <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
             </button>
           </header>
 
@@ -374,12 +407,12 @@ export default function FutureLoverDraw() {
               <div className="text-center mb-12">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Future Lover Spread</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {hasDrawn ? '未来恋人牌阵已完成' : '抽取六张塔罗牌'}
+                  {hasDrawn ? text.completedTitle : text.drawTitle}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
                   {hasDrawn 
-                    ? '你已完成抽牌，点击下方按钮查看详细解读。' 
-                    : '静心感受，从下方78张牌中选择6张，探索你的未来恋人与相遇路径。'}
+                    ? text.completedDescription 
+                    : text.drawDescription}
                 </p>
               </div>
 
@@ -427,7 +460,7 @@ export default function FutureLoverDraw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 6</p>
+                      <p>{text.drawnCount}{selectedCards.filter(c => c !== null).length} / 6</p>
                     </div>
 
                     {/* 卡槽区域 */}
@@ -463,12 +496,12 @@ export default function FutureLoverDraw() {
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      查看解读
+                      {text.viewReading}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已完成抽牌，可随时重新占卜</p>
+                    <p>{text.completedNote}</p>
                   </div>
                 </motion.div>
               )}
@@ -488,7 +521,7 @@ export default function FutureLoverDraw() {
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    查看解读
+                    {text.viewReading}
                   </motion.button>
                 </motion.div>
               )}
@@ -499,4 +532,3 @@ export default function FutureLoverDraw() {
     </>
   );
 }
-

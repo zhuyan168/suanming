@@ -8,6 +8,7 @@ import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards = [
@@ -96,6 +97,26 @@ const tarotCards = [
 const MONTHS_EN = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const POSITION_LABELS_ZH = [
+  '月初状态',
+  '本月感情/桃花',
+  '本月事业',
+  '本月财运',
+  '本月人际关系',
+  '月末状态',
+  '本月建议',
+];
+
+const POSITION_LABELS_EN = [
+  'Early Month',
+  'Love & Romance',
+  'Career',
+  'Wealth',
+  'Relationships',
+  'Late Month',
+  'Monthly Advice',
 ];
 
 const formatMonthDisplay = (isEn: boolean): string => {
@@ -210,7 +231,7 @@ export default function MonthlyMemberResultPage() {
     orientation === 'reversed' ? (isEn ? 'Reversed' : '逆位') : (isEn ? 'Upright' : '正位');
 
   const texts = isEn ? {
-    pageTitle: 'Member Monthly Deep Reading — Mystic Insights',
+    pageTitle: 'Member Monthly Deep Reading — FateAura',
     backToHistory: 'Back to My Readings',
     backBtn: 'Back to Monthly',
     sectionLabel: 'MEMBER MONTHLY DEEP READING',
@@ -220,9 +241,12 @@ export default function MonthlyMemberResultPage() {
     generatingText: 'Interpreting the seven cards in depth...',
     errorFetch: 'Failed to generate reading. Please try again.',
     overview: 'Monthly Overview',
+    positionLabel: (n: number) => `Position ${n}`,
+    cardMeaning: 'Card meaning',
+    deepInterpretation: 'Deep interpretation',
     disclaimer: '✨ May this guidance bring you clarity and peace.',
   } : {
-    pageTitle: '会员版月运解析 - Mystic Insights',
+    pageTitle: '会员版月运解析 - FateAura',
     backToHistory: '返回我的占卜记录',
     backBtn: '返回月度运势',
     sectionLabel: '会员版月运深度解析',
@@ -232,6 +256,9 @@ export default function MonthlyMemberResultPage() {
     generatingText: '正在深度解析七张牌的奥秘...',
     errorFetch: '生成运势失败，请稍后重试',
     overview: '本月总览',
+    positionLabel: (n: number) => `牌位 ${n}`,
+    cardMeaning: '牌面含义',
+    deepInterpretation: '深度解读',
     disclaimer: '✨ 愿指引与你同在',
   };
 
@@ -508,7 +535,7 @@ export default function MonthlyMemberResultPage() {
               <span className="text-sm font-medium">{isFromHistory ? texts.backToHistory : texts.backBtn}</span>
             </button>
             <div className="flex items-center gap-4 text-white">
-              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Mystic Insights</h2>
+              <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>
             </div>
             <div className="w-20"></div>
           </header>
@@ -573,39 +600,74 @@ export default function MonthlyMemberResultPage() {
 
                   {/* 七个位置的详细解读 */}
                   <div className="space-y-6">
-                    {savedResult.result.cards.map((card, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + index * 0.1 }}
-                        className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                          {/* 左侧：牌面信息小卡片 */}
-                          <div className="flex-shrink-0 sm:w-48">
-                            <div className="bg-black/20 rounded-xl p-4 border border-white/5 text-center">
-                              <div className="text-xs text-white/40 uppercase tracking-wider mb-1">Position {index + 1}</div>
-                              <div className="text-primary font-bold text-lg mb-2">{card.position}</div>
-                              <div className="text-white/90 font-medium">{card.name}</div>
-                              <div className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full ${card.orientation === 'upright' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
-                                {getOrientationText(card.orientation)}
+                    {savedResult.result.cards.map((card, index) => {
+                      const displayCard = displayCards[index];
+                      const positionLabel = (isEn ? POSITION_LABELS_EN : POSITION_LABELS_ZH)[index] ?? card.position;
+                      const localizedMeaning = displayCard
+                        ? getLocalizedMeaning(displayCard, displayCard.orientation, router.locale)
+                        : '';
+                      const localizedKeywords = displayCard
+                        ? getLocalizedKeywords(displayCard, displayCard.orientation, router.locale)
+                        : [];
+                      const orientation = displayCard?.orientation ?? card.orientation;
+
+                      return (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 + index * 0.1 }}
+                          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:bg-white/10 transition-colors"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                            {/* 左侧：牌面信息小卡片 */}
+                            <div className="flex-shrink-0 sm:w-48">
+                              <div className="bg-black/20 rounded-xl p-4 border border-white/5 text-center">
+                                <div className="text-xs text-white/40 uppercase tracking-wider mb-1">{texts.positionLabel(index + 1)}</div>
+                                <div className="text-primary font-bold text-lg mb-2">{positionLabel}</div>
+                                <div className="text-white/90 font-medium">{displayCard?.name ?? card.name}</div>
+                                <div className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full ${orientation === 'upright' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+                                  {getOrientationText(orientation)}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* 右侧：解读内容 */}
+                            <div className="flex-grow">
+                              <h4 className="text-lg font-bold text-white mb-3 flex items-center gap-2 sm:hidden">
+                                {positionLabel}
+                              </h4>
+                              {localizedMeaning && (
+                                <div className="mb-4">
+                                  <p className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-2">
+                                    {texts.cardMeaning}
+                                  </p>
+                                  <p className="text-white/80 leading-relaxed">{localizedMeaning}</p>
+                                  <div className="flex flex-wrap gap-2 mt-3">
+                                    {localizedKeywords.map((keyword) => (
+                                      <span
+                                        key={keyword}
+                                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
+                                      >
+                                        {keyword}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              <div className="border-t border-white/10 pt-4">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
+                                  {texts.deepInterpretation}
+                                </p>
+                                <p className="text-white/80 leading-relaxed">
+                                  {card.meaning}
+                                </p>
                               </div>
                             </div>
                           </div>
-                          
-                          {/* 右侧：解读内容 */}
-                          <div className="flex-grow">
-                            <h4 className="text-lg font-bold text-white mb-3 flex items-center gap-2 sm:hidden">
-                              {card.position}
-                            </h4>
-                            <p className="text-white/80 leading-relaxed">
-                              {card.meaning}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {/* 底部提示 */}
@@ -678,4 +740,3 @@ const MagicalLoading = ({ text = "Loading..." }: { text?: string }) => {
     </div>
   );
 };
-

@@ -55,23 +55,23 @@ export default function LoginPage() {
   const [resendResult, setResendResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const texts = isEn ? {
-    title: 'Sign In — FateAura',
+    title: 'Sign In - FateAura',
     metaDesc: 'Sign in to your FateAura account',
     back: 'Back to Home',
     heading: 'Welcome Back',
     successTitle: 'Signed in successfully.',
-    successSub: 'Redirecting to home…',
+    successSub: 'Redirecting to home...',
     labelEmail: 'Email',
     labelPassword: 'Password',
     forgotPassword: 'Forgot password?',
     placeholderPassword: 'Enter your password',
-    resending: 'Sending…',
+    resending: 'Sending...',
     resendBtn: 'Resend Verification Email',
     resendSuccess: 'Verification email sent. Please check your inbox.',
-    submitting: 'Signing in…',
+    submitting: 'Signing in...',
     submit: 'Sign In',
     divider: 'or',
-    googleLoading: 'Redirecting…',
+    googleLoading: 'Redirecting...',
     googleBtn: 'Sign in with Google',
     noAccount: "Don't have an account yet?",
     register: 'Sign Up',
@@ -205,7 +205,7 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
             <p className="mt-2 text-white/50 text-sm">
-              {isEn ? 'Sign in to continue your mystical insight journey.' : '登录以继续你的神秘洞察之旅'}
+              {isEn ? 'Sign in to save readings and manage your account.' : '登录以继续你的神秘洞察之旅'}
             </p>
           </div>
 
