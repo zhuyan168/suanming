@@ -1,4 +1,5 @@
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+﻿import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 
 export default async function handler(req, res) {
   // 只允许 POST 请求
@@ -17,13 +18,21 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少必需参数：result' });
     }
 
+    const isEn = isEnglishRequest(req);
+
     // 如果没有问题，返回默认解释
     if (!question || !question.trim()) {
-      const defaultInterpretations = {
-        sheng: '此事可行，顺势而为。神明已允准你的请求，时机成熟，把握当下，勇敢前行。',
-        yin: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
-        xiao: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
-      };
+      const defaultInterpretations = isEn
+        ? {
+            sheng: 'This looks favorable. The timing supports moving forward with care, confidence, and grounded judgment.',
+            yin: 'Pause for now. This is a time to reflect, avoid forcing the matter, and wait for a clearer opportunity.',
+            xiao: 'The answer is not clear yet. Refine the question, give the situation more time, and ask again later.',
+          }
+        : {
+            sheng: '此事可行，顺势而为。神明已允准你的请求，时机成熟，把握当下，勇敢前行。',
+            yin: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
+            xiao: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
+          };
       if (accessStatus.userId) {
         await recordReadingHistory({
           userId: accessStatus.userId,
@@ -32,7 +41,9 @@ export default async function handler(req, res) {
           cards: [],
           readingResult: {
             type: result,
-            title: { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' }[result] || result,
+            title: (isEn
+              ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
+              : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
             description: defaultInterpretations[result] || defaultInterpretations.sheng,
           },
           resultPath: `/divination/jiaobei/result?type=${result}`,
@@ -44,7 +55,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found in environment variables');
@@ -55,14 +66,22 @@ export default async function handler(req, res) {
     }
 
     // 构建 prompt
-    const resultNames = {
-      sheng: '圣筊（一阳一阴，表示允准、可行）',
-      yin: '阴筊（两阳，表示否定、不宜）',
-      xiao: '笑筊（两阴，神明含笑未答、需再问）',
-    };
+    const resultNames = isEn
+      ? {
+          sheng: 'Sheng Jiao (one rounded side and one flat side; a favorable or supportive sign)',
+          yin: 'Yin Jiao (two rounded sides; a negative or not-yet-supportive sign)',
+          xiao: 'Xiao Jiao (two flat sides; unclear answer, refine the question or ask again)',
+        }
+      : {
+          sheng: '圣筊（一阳一阴，表示允准、可行）',
+          yin: '阴筊（两阳，表示否定、不宜）',
+          xiao: '笑筊（两阴，神明含笑未答、需再问）',
+        };
 
     const resultName = resultNames[result] || resultNames.sheng;
-    const userMessage = `用户的问题是：「${question.trim()}」\n掷筊结果是：「${resultName}」\n\n请根据这个掷筊结果，给出一段温和、具体的建议（50字左右）。语气要亲切但不失神圣感，像在传达神明的旨意。`;
+    const userMessage = isEn
+      ? `The user's question is: "${question.trim()}"\nThe Jiaobei result is: "${resultName}"\n\nBased on this result, give one warm and specific paragraph of advice in English, about 60-90 words. Keep the tone reflective, grounded, and respectful. Do not use Chinese text.`
+      : `用户的问题是：「${question.trim()}」\n掷筊结果是：「${resultName}」\n\n请根据这个掷筊结果，给出一段温和、具体的建议（50字左右）。语气要亲切但不失神圣感，像在传达神明的旨意。`;
 
     // 调用 DeepSeek API
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -76,7 +95,9 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: '你是一位掷筊占卜的解读者，擅长将神明的旨意用温和、贴近生活的语言传达给问卜者。',
+            content: isEn
+              ? 'You are a Jiaobei oracle reader. Explain the result in warm, practical English for reflection, without fatalistic claims.'
+              : '你是一位掷筊占卜的解读者，擅长将神明的旨意用温和、贴近生活的语言传达给问卜者。',
           },
           {
             role: 'user',
@@ -118,6 +139,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: '未能获取有效响应' });
     }
 
+    let interpretation = content.trim();
+    try {
+      const parsed = JSON.parse(interpretation);
+      interpretation = parsed.advice || parsed.interpretation || parsed.message || interpretation;
+    } catch {
+      // Plain text is the expected response for this endpoint.
+    }
+
     if (accessStatus.userId) {
       await recordReadingHistory({
         userId: accessStatus.userId,
@@ -126,16 +155,20 @@ export default async function handler(req, res) {
         cards: [],
         readingResult: {
           type: result,
-          title: { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' }[result] || result,
-          description: { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' }[result] || '',
-          aiInterpretation: content.trim(),
+          title: (isEn
+            ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
+            : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
+          description: (isEn
+            ? { sheng: 'This looks favorable. Move forward with care.', yin: 'Pause and reflect before acting.', xiao: 'The answer is unclear. Ask again with a clearer question.' }
+            : { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' })[result] || '',
+          aiInterpretation: interpretation,
         },
         resultPath: `/divination/jiaobei/result?type=${result}`,
       });
     }
 
     return res.status(200).json({
-      interpretation: content.trim(),
+      interpretation,
     });
 
   } catch (error) {

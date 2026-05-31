@@ -1,5 +1,22 @@
+import { isEnglishRequest } from '../../lib/aiLanguage';
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
 import { getYesNoByCard, getAnswerText } from '../../utils/yesno-tarot-logic';
+
+const getAnswerTextEn = (answer) => {
+  if (answer === 'YES') return 'Yes';
+  if (answer === 'NO') return 'No';
+  return 'Maybe';
+};
+
+const getEnglishFallbackReason = (answer) => {
+  if (answer === 'YES') {
+    return 'This card leans toward yes. Its energy supports movement, openness, or a favorable outcome, though your own judgment still matters.';
+  }
+  if (answer === 'NO') {
+    return 'This card leans toward no. It suggests delay, resistance, or a reason to pause before committing.';
+  }
+  return 'This card gives a mixed answer. More information, time, or inner clarity may be needed before the answer becomes firm.';
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,12 +33,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少必需参数：cardName, orientation' });
     }
 
+    const isEn = isEnglishRequest(req);
+
     // 无问题时走本地规则
     if (!question || !question.trim()) {
       const localResult = getYesNoByCard(cardName, orientation);
+      const interpretation = isEn ? getEnglishFallbackReason(localResult.answer) : localResult.reason;
       const result = {
-        answer: getAnswerText(localResult.answer),
-        interpretation: localResult.reason,
+        answer: isEn ? getAnswerTextEn(localResult.answer) : getAnswerText(localResult.answer),
+        interpretation,
       };
 
       if (accessStatus.userId) {
@@ -29,7 +49,7 @@ export default async function handler(req, res) {
           userId: accessStatus.userId,
           spreadType: 'yesno-tarot',
           cards: [{ name: cardName, orientation }],
-          readingResult: { answer: localResult.answer, interpretation: localResult.reason },
+          readingResult: { answer: localResult.answer, interpretation },
           resultPath: '/fortune/yesno-tarot/result',
         });
       }
@@ -37,7 +57,7 @@ export default async function handler(req, res) {
       return res.status(200).json(result);
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // 调试信息（仅开发环境）
     if (process.env.NODE_ENV === 'development') {
@@ -55,8 +75,12 @@ export default async function handler(req, res) {
     }
 
     // 构建 prompt
-    const orientationText = orientation === 'upright' ? '正位' : '逆位';
-    const userMessage = `用户的问题是：「${question}」抽到的塔罗牌是：「${cardName}（${orientationText}）」。请根据这张牌的含义判断问题的答案倾向（yes 或 no），并给出一段细腻且完整的解析（50字左右，语气温柔但直白，像在轻声安慰对方）。\n输出格式如下：\n答案：Yes / No\n解析：……`;
+    const orientationText = isEn
+      ? (orientation === 'upright' ? 'Upright' : 'Reversed')
+      : (orientation === 'upright' ? '正位' : '逆位');
+    const userMessage = isEn
+      ? `The user's question is: "${question}"\nThe tarot card drawn is: "${cardName} (${orientationText})".\n\nJudge whether the answer leans Yes, No, or Maybe based on the card meaning. Then give one gentle but direct English interpretation, about 60-90 words.\n\nOutput exactly in this format:\nAnswer: Yes / No / Maybe\nInterpretation: ...\n\nDo not include Chinese text.`
+      : `用户的问题是：「${question}」抽到的塔罗牌是：「${cardName}（${orientationText}）」。请根据这张牌的含义判断问题的答案倾向（yes 或 no），并给出一段细腻且完整的解析（50字左右，语气温柔但直白，像在轻声安慰对方）。\n输出格式如下：\n答案：Yes / No\n解析：……`;
 
     // 调用 DeepSeek API
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -70,7 +94,9 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: '你是一位专业的塔罗占卜师。',
+            content: isEn
+              ? 'You are a professional tarot reader writing clear, grounded English guidance. Avoid fatalistic language.'
+              : '你是一位专业的塔罗占卜师。',
           },
           {
             role: 'user',
@@ -122,11 +148,19 @@ export default async function handler(req, res) {
     let answer = '';
     let interpretation = '';
 
+    try {
+      const parsed = JSON.parse(content);
+      answer = parsed.answer || parsed.result || '';
+      interpretation = parsed.interpretation || parsed.advice || parsed.message || '';
+    } catch {
+      // Plain text is the expected response for this endpoint.
+    }
+
     for (const line of lines) {
-      if (line.includes('答案：') || line.includes('答案:')) {
-        answer = line.replace(/答案[：:]\s*/, '').trim();
-      } else if (line.includes('解析：') || line.includes('解析:')) {
-        interpretation = line.replace(/解析[：:]\s*/, '').trim();
+      if (!answer && (line.includes('答案：') || line.includes('答案:') || /^answer\s*:/i.test(line))) {
+        answer = line.replace(/答案[：:]\s*/i, '').replace(/^answer\s*:\s*/i, '').trim();
+      } else if (!interpretation && (line.includes('解析：') || line.includes('解析:') || /^interpretation\s*:/i.test(line))) {
+        interpretation = line.replace(/解析[：:]\s*/i, '').replace(/^interpretation\s*:\s*/i, '').trim();
       }
     }
 

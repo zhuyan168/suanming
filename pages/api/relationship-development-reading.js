@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 // API Route: POST /api/relationship-development-reading
 // 调用 DeepSeek Chat API 生成「这段感情的发展」8张牌阵解读
 
@@ -83,7 +84,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: '需要提供 8 张卡牌' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found');
@@ -287,11 +290,11 @@ ${cardsInfo}
           messages: [
             {
               role: 'system',
-              content: systemPrompt,
+              content: withAiOutputLanguage(systemPrompt, isEn),
             },
             {
               role: 'user',
-              content: userPrompt,
+              content: withAiOutputLanguage(userPrompt, isEn),
             },
           ],
           temperature: 0.7,

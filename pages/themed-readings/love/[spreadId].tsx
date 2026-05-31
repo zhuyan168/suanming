@@ -12,6 +12,46 @@ import ThemeHeader from '../../../components/themed-readings/ThemeHeader';
  */
 export default function SpreadDetailPage() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = isEn ? {
+    notFoundTitle: 'Spread Not Found',
+    notFoundPageTitle: 'Spread Not Found - FateAura',
+    backToLove: 'Back to Love Readings',
+    loadingTitle: 'Loading - FateAura',
+    loading: 'Loading...',
+    pageSuffix: 'Love Reading',
+    cardCountPrefix: 'This spread uses ',
+    cardCountSuffix: ' tarot cards',
+    estimatedTime: 'Estimated reading time: 3-5 minutes',
+    memberOnly: 'Member-only spread',
+    inDevelopmentTitle: 'Coming Soon',
+    inDevelopmentBody: 'The draw and reading experience for this spread is still in development.',
+    comingNext: 'Future updates will include:',
+    featureDraw: 'Interactive card drawing',
+    featureAi: 'In-depth AI interpretation powered by DeepSeek',
+    featureAdvice: 'Personalized advice and guidance',
+    startSoon: 'Start Reading (Coming Soon)',
+    back: 'Back to Selection',
+  } : {
+    notFoundTitle: '牌阵未找到',
+    notFoundPageTitle: '牌阵未找到 - FateAura',
+    backToLove: '返回爱情占卜',
+    loadingTitle: '加载中 - FateAura',
+    loading: '加载中…',
+    pageSuffix: '爱情占卜',
+    cardCountPrefix: '此牌阵使用 ',
+    cardCountSuffix: ' 张塔罗牌',
+    estimatedTime: '预计占卜时间：3-5 分钟',
+    memberOnly: '会员专享牌阵',
+    inDevelopmentTitle: '功能开发中',
+    inDevelopmentBody: '此牌阵的抽牌界面与解读功能正在开发中。',
+    comingNext: '后续版本将接入：',
+    featureDraw: '交互式抽牌动画',
+    featureAi: 'AI 深度解读（接入 DeepSeek）',
+    featureAdvice: '个性化建议与指引',
+    startSoon: '开始占卜（即将推出）',
+    back: '返回选择',
+  };
   const { spreadId } = router.query;
   const { isMember, loading: membershipLoading, userId } = useMembership();
   const { isActive: isTrialActive } = useGuestTrial();
@@ -38,7 +78,7 @@ export default function SpreadDetailPage() {
     return (
       <>
         <Head>
-          <title>牌阵未找到 - FateAura</title>
+          <title>{text.notFoundPageTitle}</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
@@ -87,12 +127,12 @@ export default function SpreadDetailPage() {
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
           <div className="text-center">
             <span className="material-symbols-outlined text-white/30 text-6xl mb-4">error</span>
-            <h1 className="text-white text-2xl font-bold mb-6">牌阵未找到</h1>
+            <h1 className="text-white text-2xl font-bold mb-6">{text.notFoundTitle}</h1>
             <button
               onClick={() => router.push('/themed-readings/love')}
               className="px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
             >
-              返回爱情占卜
+              {text.backToLove}
             </button>
           </div>
         </div>
@@ -109,7 +149,7 @@ export default function SpreadDetailPage() {
     return (
       <>
         <Head>
-          <title>加载中 - FateAura</title>
+          <title>{text.loadingTitle}</title>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
@@ -118,7 +158,7 @@ export default function SpreadDetailPage() {
           />
         </Head>
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
-          <p className="text-white/50 text-sm">加载中…</p>
+          <p className="text-white/50 text-sm">{text.loading}</p>
         </div>
       </>
     );
@@ -160,8 +200,8 @@ export default function SpreadDetailPage() {
   return (
       <>
         <Head>
-          <title>{spreadConfig.titleZh} - 爱情占卜</title>
-          <meta name="description" content={spreadConfig.descZh} />
+          <title>{isEn ? spreadConfig.titleEn : spreadConfig.titleZh} - {text.pageSuffix}</title>
+          <meta name="description" content={isEn ? spreadConfig.descEn : spreadConfig.descZh} />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
           <link
@@ -221,9 +261,9 @@ export default function SpreadDetailPage() {
             {/* 头部 */}
             <ThemeHeader
               titleZh={spreadConfig.titleZh}
-              titleEn=""
+              titleEn={spreadConfig.titleEn}
               descZh={spreadConfig.descZh}
-              descEn=""
+              descEn={spreadConfig.descEn}
             />
 
             {/* 内容区域 */}
@@ -243,19 +283,19 @@ export default function SpreadDetailPage() {
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary">style</span>
                       <span className="text-white/70 text-lg">
-                        此牌阵使用 <span className="text-white font-semibold">{spreadConfig.cardsCount}</span> 张塔罗牌
+                        {text.cardCountPrefix}<span className="text-white font-semibold">{spreadConfig.cardsCount}</span>{text.cardCountSuffix}
                       </span>
                     </div>
                     
                     <div className="flex items-center gap-3 mb-4">
                       <span className="material-symbols-outlined text-primary">schedule</span>
-                      <span className="text-white/70 text-lg">预计占卜时间：3-5 分钟</span>
+                      <span className="text-white/70 text-lg">{text.estimatedTime}</span>
                     </div>
 
                     {spreadConfig.isPaid && (
                       <div className="flex items-center gap-3">
                         <span className="material-symbols-outlined text-primary">workspace_premium</span>
-                        <span className="text-white/70 text-lg">会员专享牌阵</span>
+                        <span className="text-white/70 text-lg">{text.memberOnly}</span>
                       </div>
                     )}
                   </div>
@@ -267,24 +307,24 @@ export default function SpreadDetailPage() {
                 <div className="flex items-start gap-4">
                   <span className="material-symbols-outlined text-primary text-3xl">construction</span>
                   <div>
-                    <h3 className="text-white text-xl font-bold mb-2">功能开发中</h3>
+                    <h3 className="text-white text-xl font-bold mb-2">{text.inDevelopmentTitle}</h3>
                     <p className="text-white/70 text-base leading-relaxed mb-4">
-                      此牌阵的抽牌界面与解读功能正在开发中。
+                      {text.inDevelopmentBody}
                       <br />
-                      后续版本将接入：
+                      {text.comingNext}
                     </p>
                     <ul className="text-white/60 text-sm space-y-2 ml-6">
                       <li className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        交互式抽牌动画
+                        {text.featureDraw}
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        AI 深度解读（接入 DeepSeek）
+                        {text.featureAi}
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                        个性化建议与指引
+                        {text.featureAdvice}
                       </li>
                     </ul>
                   </div>
@@ -297,13 +337,13 @@ export default function SpreadDetailPage() {
                   disabled
                   className="flex-1 py-4 rounded-lg bg-white/10 text-white/40 font-semibold cursor-not-allowed"
                 >
-                  开始占卜（即将推出）
+                  {text.startSoon}
                 </button>
                 <button
                   onClick={() => router.push('/themed-readings/love')}
                   className="px-8 py-4 rounded-lg bg-white/5 border border-white/20 text-white font-semibold hover:bg-white/10 transition-colors"
                 >
-                  返回选择
+                  {text.back}
                 </button>
               </div>
             </div>
@@ -313,4 +353,3 @@ export default function SpreadDetailPage() {
     </>
   );
 }
-

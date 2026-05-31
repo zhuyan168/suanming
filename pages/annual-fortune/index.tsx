@@ -265,19 +265,23 @@ export default function AnnualFortuneEntryPage() {
                 transition={{ delay: 0.6 }}
                 className="mt-12 p-6 rounded-2xl border border-white/10 bg-white/5"
               >
-                <h4 className="text-lg font-semibold mb-3">📝 使用说明</h4>
+                <h4 className="text-lg font-semibold mb-3">{isEn ? 'Notes' : '📝 使用说明'}</h4>
                 <ul className="text-white/70 text-sm space-y-2 list-disc list-inside">
                   <li>
-                    <strong>快速测试</strong>：自动生成随机数据，立即体验结果页面（推荐）
+                    <strong>{isEn ? 'Quick Test' : '快速测试'}</strong>
+                    {isEn ? ': automatically generates sample data so you can preview the result page.' : '：自动生成随机数据，立即体验结果页面（推荐）'}
                   </li>
                   <li>
-                    <strong>完整抽牌</strong>：跳转到现有的抽牌页面，亲自选择 13 张牌
+                    <strong>{isEn ? 'Full Draw' : '完整抽牌'}</strong>
+                    {isEn ? ': opens the full draw flow so you can choose 13 cards yourself.' : '：跳转到现有的抽牌页面，亲自选择 13 张牌'}
                   </li>
                   <li>
-                    <strong>运行测试</strong>：执行自动化测试，验证功能完整性
+                    <strong>{isEn ? 'Run Tests' : '运行测试'}</strong>
+                    {isEn ? ': runs automated checks for this feature.' : '：执行自动化测试，验证功能完整性'}
                   </li>
                   <li>
-                    <strong>查看上次结果</strong>：如果有保存的数据，直接查看结果
+                    <strong>{isEn ? 'View Last Result' : '查看上次结果'}</strong>
+                    {isEn ? ': opens the saved result if one is available.' : '：如果有保存的数据，直接查看结果'}
                   </li>
                 </ul>
               </motion.div>
@@ -288,4 +292,3 @@ export default function AnnualFortuneEntryPage() {
     </>
   );
 }
-

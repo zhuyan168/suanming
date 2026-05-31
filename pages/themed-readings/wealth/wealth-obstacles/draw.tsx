@@ -126,8 +126,35 @@ const SLOT_CONFIG = [
   { id: "p5", name: "你可以如何突破这一财务阻碍", meaning: "你可以如何突破这一财务阻碍" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "Current Financial Situation", meaning: "Your current financial state and money baseline" },
+  { id: "p2", name: "External Financial Influences", meaning: "Outside factors affecting your finances" },
+  { id: "p3", name: "Your Financial Attitude", meaning: "How you currently relate to your money situation" },
+  { id: "p4", name: "The Main Wealth Block", meaning: "What is blocking financial improvement" },
+  { id: "p5", name: "How to Break Through", meaning: "How you can move through this financial block" }
+];
+
 export default function WealthObstaclesDraw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    pageTitle: isEn ? 'What Is Blocking My Wealth Right Now? - Draw Cards' : '我现在的财富阻碍是什么？ - 抽牌',
+    back: isEn ? 'Back' : '返回',
+    reset: isEn ? 'Reset' : '重置',
+    resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
+    titleComplete: isEn ? 'Wealth Obstacles Spread Complete' : '财富阻碍牌阵已完成',
+    titleStart: isEn ? 'What Is Blocking My Wealth Right Now?' : '我现在的财富阻碍是什么？',
+    descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
+    descStart: isEn
+      ? 'Look at your current situation, outside influences, attitude, and blocks to find a practical breakthrough. Draw 5 cards from the deck below.'
+      : '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。请从下方牌堆中抽取 5 张牌。',
+    drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    note: isEn ? 'Explore your wealth blocks and find a clearer path forward' : '✨ 深度洞察财富阻碍，开启丰盛人生',
+    comingSoon: isEn ? 'Reading feature coming soon' : '解读功能即将上线',
+  };
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'wealth',
     spreadId: 'wealth-obstacles',
@@ -215,7 +242,7 @@ export default function WealthObstaclesDraw() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
     setSelectedCards([null, null, null, null, null]);
@@ -228,7 +255,7 @@ export default function WealthObstaclesDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -237,7 +264,7 @@ export default function WealthObstaclesDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>我现在的财富阻碍是什么？ - 抽牌</title>
+        <title>{text.pageTitle}</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
@@ -245,12 +272,12 @@ export default function WealthObstaclesDraw() {
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={() => router.push('/themed-readings/wealth')} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
           <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -259,10 +286,10 @@ export default function WealthObstaclesDraw() {
             <div className="text-center mb-12">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-3">Wealth Readings</p>
               <h1 className="text-3xl sm:text-5xl font-black mb-4">
-                {hasDrawn ? '财富阻碍牌阵已完成' : '我现在的财富阻碍是什么？'}
+                {hasDrawn ? text.titleComplete : text.titleStart}
               </h1>
               <p className="text-white/60 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。请从下方牌堆中抽取 5 张牌。'}
+                {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
 
@@ -292,7 +319,7 @@ export default function WealthObstaclesDraw() {
                   setScrollValue(val);
                 }} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-sm font-medium">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 5
+                  {text.drawnCount} {selectedCards.filter(c => c !== null).length} / 5
                 </div>
               </motion.div>
             )}
@@ -302,7 +329,7 @@ export default function WealthObstaclesDraw() {
               isAnimating={isAnimating}
               showLoadingText={!hasDrawn}
               forceFlipped={hasDrawn}
-              slotConfig={SLOT_CONFIG}
+              slotConfig={slotConfig}
             />
 
             {hasDrawn && (
@@ -312,10 +339,10 @@ export default function WealthObstaclesDraw() {
                   className="px-12 py-4 rounded-xl bg-primary text-white font-bold text-xl shadow-glow transition-all hover:scale-105 active:scale-95"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
                 <p className="text-white/40 text-sm mt-6">
-                  ✨ 深度洞察财富阻碍，开启丰盛人生
+                  {text.note}
                 </p>
               </motion.div>
             )}
@@ -327,7 +354,7 @@ export default function WealthObstaclesDraw() {
       <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${toastVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
         <div className="px-6 py-3 rounded-full bg-background-dark/90 border border-white/10 backdrop-blur-md text-white shadow-glow flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">info</span>
-          <span className="text-sm font-bold">解读功能即将上线</span>
+          <span className="text-sm font-bold">{text.comingSoon}</span>
         </div>
       </div>
 

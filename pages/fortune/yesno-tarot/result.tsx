@@ -213,6 +213,7 @@ export default function YesNoTarotResult() {
           question: userQuestion || '',
           cardName: drawnCard.name,
           orientation: drawnCard.orientation,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

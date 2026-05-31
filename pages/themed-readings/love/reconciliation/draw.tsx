@@ -150,6 +150,19 @@ const SLOT_CONFIG = [
   { id: "guide", name: "指引牌", meaning: "这组牌想提醒你的核心问题" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "How This Relationship Drifted Apart", meaning: "The real reason this relationship separated" },
+  { id: "p2", name: "Your Current Emotional State", meaning: "Your current emotions and where the confusion comes from" },
+  { id: "p3", name: "Your Ex's Current State", meaning: "Their real position toward this relationship now" },
+  { id: "p4", name: "Your Inner Feeling About Reconciliation", meaning: "What you truly feel about getting back together" },
+  { id: "p5", name: "Their Inner Feeling About Reconciliation", meaning: "Their real attitude toward reconnecting" },
+  { id: "p6", name: "The Biggest Obstacle Between You", meaning: "The core issue that is hardest to cross right now" },
+  { id: "p7", name: "Helpful Turn or Support", meaning: "Support or a turning point that may work in your favor" },
+  { id: "p8", name: "An Overlooked Factor", meaning: "An important variable you may not have noticed" },
+  { id: "p9", name: "The Choice You Need to Make", meaning: "The final lesson this relationship is asking of you" },
+  { id: "guide", name: "Guidance Card", meaning: "The core reminder this spread wants to give you" }
+];
+
 const saveResult = (data: ReconciliationResult) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -169,6 +182,23 @@ const loadResult = (): ReconciliationResult | null => {
 
 export default function ReconciliationDraw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    pageTitle: isEn ? 'Reconciliation Potential - Draw Cards' : '复合的可能性 - 抽牌',
+    metaDescription: isEn ? 'Evaluate the space, cost, and path for reconnecting.' : '评估重新靠近的空间与代价，给你更稳的选择',
+    back: isEn ? 'Back' : '返回',
+    reset: isEn ? 'Reset' : '重置',
+    resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
+    titleComplete: isEn ? 'Cards Drawn' : '抽牌已完成',
+    titleStart: isEn ? 'Can This Relationship Begin Again?' : '「这段关系，还能不能重新走一次？」',
+    descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
+    descStart: isEn ? 'Take a quiet moment with the past and present of this relationship, then draw 10 cards from the deck below.' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌。',
+    drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    note: isEn ? 'Reconciliation spread: explore the path of reconnection in depth' : '✨ 复合牌阵：深度透视你们的重新联结之路',
+  };
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
     theme: 'love',
     spreadId: 'reconciliation',
@@ -276,7 +306,7 @@ export default function ReconciliationDraw() {
   const handleReturnToList = () => { router.push('/themed-readings/love'); };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     const newSessionId = generateSessionId();
     setSessionId(newSessionId);
@@ -297,7 +327,7 @@ export default function ReconciliationDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -306,20 +336,20 @@ export default function ReconciliationDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>复合的可能性 - 抽牌</title>
-        <meta name="description" content="评估重新靠近的空间与代价，给你更稳的选择" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
           <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -328,10 +358,10 @@ export default function ReconciliationDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reconciliation Potential</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                {hasDrawn ? '抽牌已完成' : '「这段关系，还能不能重新走一次？」'}
+                {hasDrawn ? text.titleComplete : text.titleStart}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasDrawn ? '卡牌已就位，点击下方按钮开始深度解读。' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌。'}
+                {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
 
@@ -348,7 +378,7 @@ export default function ReconciliationDraw() {
                 </div>
                 <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-xs">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 10
+                  {text.drawnCount} {selectedCards.filter(c => c !== null).length} / 10
                 </div>
               </motion.div>
             )}
@@ -358,7 +388,7 @@ export default function ReconciliationDraw() {
               isAnimating={isAnimating}
               showLoadingText={!hasDrawn}
               forceFlipped={hasDrawn}
-              slotConfig={SLOT_CONFIG}
+              slotConfig={slotConfig}
             />
 
             {hasDrawn && (
@@ -368,9 +398,9 @@ export default function ReconciliationDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
-                <p className="text-white/40 text-xs mt-4">✨ 复合牌阵：深度透视你们的重新联结之路</p>
+                <p className="text-white/40 text-xs mt-4">{text.note}</p>
               </motion.div>
             )}
           </div>
@@ -386,4 +416,3 @@ export default function ReconciliationDraw() {
     </div>
   );
 }
-

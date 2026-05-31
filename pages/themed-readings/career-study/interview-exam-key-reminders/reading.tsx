@@ -17,6 +17,14 @@ const SLOT_CONFIG = [
   { id: "p5", name: "接下来你可以主动做什么", meaning: "我现在可以采取什么具体行动？" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "What Feels Most Uncertain", meaning: "What feels most uncertain about this interview or exam?" },
+  { id: "p2", name: "Your Current Strength", meaning: "Where is your clearest advantage right now?" },
+  { id: "p3", name: "Overall Direction", meaning: "What direction is this situation currently moving toward?" },
+  { id: "p4", name: "What May Affect You", meaning: "What factor may affect your performance?" },
+  { id: "p5", name: "What You Can Do Next", meaning: "What specific action can you take now?" }
+];
+
 interface TarotCard {
   id: number;
   name: string;
@@ -47,7 +55,27 @@ interface ReadingResult {
 
 export default function InterviewExamReadingPageNew() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const texts = getReadingUiText(router.locale);
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    title: isEn ? 'Interview & Exam Reminders - Reading Result' : '面试考试关键提醒 - 解读结果',
+    header: isEn ? 'Interview & Exam Reminders' : '面试/考试关键提醒',
+    h1: isEn ? 'Interview & Exam Key Reminders' : '面试/考试关键提醒',
+    scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读',
+    loadingTitle: isEn ? 'Reading your key reminders...' : '正在解读关键提醒...',
+    aiInsight: isEn ? 'AI Core Insight' : 'AI 核心洞察',
+    overall: isEn ? 'Overall Reading' : '整体局面解读',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    actionGuide: isEn ? 'Action Guidance' : '行动指引',
+    breakthrough: isEn ? 'Core Breakthrough' : '核心突破口',
+    avoidTitle: isEn ? 'Things to Avoid' : '避坑指南（大忌）',
+    next7: isEn ? 'What to Do in the Next 7 Days' : '接下来 7 天可以做的事',
+    next30: isEn ? 'Preparation for the Next 30 Days' : '接下来 30 天的准备',
+    backHome: isEn ? 'Back Home' : '返回首页',
+    backCareer: isEn ? 'Back to Career & Study' : '返回事业&学业占卜',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [cards, setCards] = useState<TarotCard[]>([]);
   const [reading, setReading] = useState<ReadingResult | null>(null);
@@ -85,6 +113,7 @@ export default function InterviewExamReadingPageNew() {
         body: JSON.stringify({
           cards: cards,
           question: '',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 
@@ -156,7 +185,7 @@ export default function InterviewExamReadingPageNew() {
   return (
     <div className="dark bg-[#191022] min-h-screen text-white font-sans">
       <Head>
-        <title>面试考试关键提醒 - 解读结果</title>
+        <title>{pageText.title}</title>
       </Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">
@@ -164,7 +193,7 @@ export default function InterviewExamReadingPageNew() {
           <span className="material-symbols-outlined text-xl">arrow_back</span>
           <span className="text-sm">{isFromHistory ? texts.backToHistory : texts.back}</span>
         </button>
-        <h2 className="text-lg font-bold">面试/考试关键提醒</h2>
+        <h2 className="text-lg font-bold">{pageText.header}</h2>
         <button onClick={handleReset} className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors group">
           <span className="material-symbols-outlined text-xl group-hover:rotate-180 transition-transform duration-500">refresh</span>
           <span className="text-sm font-medium">{texts.btnDrawAgain}</span>
@@ -181,7 +210,7 @@ export default function InterviewExamReadingPageNew() {
           >
             <div className="text-center mb-3 sm:mb-4">
               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">Interview & Exam Key Reminders</span>
-              <h1 className="text-2xl sm:text-3xl font-black mb-2 px-4 leading-tight">面试/考试关键提醒</h1>
+              <h1 className="text-2xl sm:text-3xl font-black mb-2 px-4 leading-tight">{pageText.h1}</h1>
               <div className="h-1 w-16 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>
 
@@ -195,7 +224,7 @@ export default function InterviewExamReadingPageNew() {
                   isAnimating={Array(5).fill(false)}
                   showLoadingText={false}
                   forceFlipped={true}
-                  slotConfig={SLOT_CONFIG}
+                  slotConfig={slotConfig}
                 />
               </div>
             </div>
@@ -206,7 +235,7 @@ export default function InterviewExamReadingPageNew() {
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">下滑查看解读</span>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{pageText.scrollHint}</span>
                 <span className="material-symbols-outlined text-white/20 text-xl">keyboard_double_arrow_down</span>
               </motion.div>
             </div>
@@ -226,7 +255,7 @@ export default function InterviewExamReadingPageNew() {
                 <div className="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
                 <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" style={{ borderColor: '#7f13ec transparent transparent transparent' }}></div>
               </div>
-              <h3 className="text-xl font-bold mb-2">正在解读关键提醒...</h3>
+              <h3 className="text-xl font-bold mb-2">{pageText.loadingTitle}</h3>
               <p className="text-white/40 max-w-xs mx-auto text-sm">{texts.loadingSubtitle}</p>
             </motion.div>
           ) : reading ? (
@@ -239,7 +268,7 @@ export default function InterviewExamReadingPageNew() {
               {/* 2. AI 核心总结 */}
               <div className="text-center space-y-6">
                 <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-2">
-                  <span className="text-sm font-bold text-purple-300">✨ AI 核心洞察</span>
+                  <span className="text-sm font-bold text-purple-300">✨ {pageText.aiInsight}</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-black leading-tight text-white px-4">
                   {reading.title}
@@ -255,7 +284,7 @@ export default function InterviewExamReadingPageNew() {
                 <div className="relative bg-[#1f1629] border border-white/10 rounded-2xl p-6 sm:p-10">
                   <h3 className="text-xl font-bold flex items-center gap-3 mb-6 text-purple-300">
                     <span className="material-symbols-outlined">auto_awesome</span>
-                    整体局面解读
+                    {pageText.overall}
                   </h3>
                   <p className="text-white/80 leading-relaxed text-lg whitespace-pre-line">
                     {reading.overall}
@@ -272,6 +301,8 @@ export default function InterviewExamReadingPageNew() {
                 </div>
                 {reading.positions.map((pos, idx) => {
                   const cardData = cards[idx];
+                  const displayPosition = slotConfig[idx]?.name || pos.position;
+                  const displayCard = isEn ? (cardData?.name || pos.card) : pos.card;
                   return (
                     <motion.div
                       key={idx}
@@ -290,7 +321,7 @@ export default function InterviewExamReadingPageNew() {
                             >
                               <img
                                 src={cardData.image}
-                                alt={pos.card}
+                                alt={displayCard}
                                 className="w-full h-full object-cover shadow-lg border border-white/10"
                               />
                             </div>
@@ -300,13 +331,13 @@ export default function InterviewExamReadingPageNew() {
                             </div>
                           )}
                         </div>
-                        <p className="text-xs font-bold text-white/50 text-center uppercase tracking-wider">{pos.position}</p>
+                        <p className="text-xs font-bold text-white/50 text-center uppercase tracking-wider">{displayPosition}</p>
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{pos.card}</span>
+                          <span className="text-lg font-bold text-primary" style={{ color: '#a855f7' }}>{displayCard}</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${cardData?.orientation === 'reversed' ? 'border-orange-500/50 text-orange-400' : 'border-emerald-500/50 text-emerald-400'}`}>
-                            {cardData?.orientation === 'reversed' ? '逆位' : '正位'}
+                            {cardData?.orientation === 'reversed' ? pageText.reversed : pageText.upright}
                           </span>
                         </div>
                         <p className="text-white/80 leading-relaxed">
@@ -320,14 +351,14 @@ export default function InterviewExamReadingPageNew() {
 
               {/* 行动建议区 */}
               <section className="space-y-8 pt-8">
-                <h3 className="text-2xl font-black text-center">行动指引</h3>
+                <h3 className="text-2xl font-black text-center">{pageText.actionGuide}</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* 核心突破口 */}
                   <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-white/10 rounded-2xl p-6">
                     <h4 className="font-bold mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-purple-400">explore</span>
-                      核心突破口
+                      {pageText.breakthrough}
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {reading.action_plan.fit_directions.map((dir, i) => (
@@ -342,7 +373,7 @@ export default function InterviewExamReadingPageNew() {
                   <div className="bg-gradient-to-br from-orange-500/10 to-transparent border border-white/10 rounded-2xl p-6">
                     <h4 className="font-bold mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-orange-400">warning</span>
-                      避坑指南（大忌）
+                      {pageText.avoidTitle}
                     </h4>
                     <ul className="space-y-2">
                       {reading.action_plan.avoid.map((item, i) => (
@@ -360,7 +391,7 @@ export default function InterviewExamReadingPageNew() {
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
                     <h4 className="font-bold mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-blue-400">calendar_today</span>
-                      接下来 7 天可以做的事
+                      {pageText.next7}
                     </h4>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {reading.action_plan.next_7_days.map((action, i) => (
@@ -375,7 +406,7 @@ export default function InterviewExamReadingPageNew() {
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
                     <h4 className="font-bold mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-emerald-400">event_note</span>
-                      接下来 30 天的准备
+                      {pageText.next30}
                     </h4>
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {reading.action_plan.next_30_days.map((action, i) => (
@@ -399,14 +430,14 @@ export default function InterviewExamReadingPageNew() {
                     className="w-full sm:w-auto px-8 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">home</span>
-                    返回首页
+                    {pageText.backHome}
                   </button>
                   <button
                     onClick={handleReturn}
                     className="w-full sm:w-auto px-10 py-3 rounded-xl bg-primary text-white font-bold hover:scale-105 transition-all shadow-lg shadow-primary/20"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    返回事业&学业占卜
+                    {pageText.backCareer}
                   </button>
                 </div>
               </div>

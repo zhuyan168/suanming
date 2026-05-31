@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 // API Route: POST /api/what-they-think-reading
 // 调用 DeepSeek Chat API 生成「对方在想什么」牌阵解读
 
@@ -81,7 +82,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: '需要提供 6 张卡牌' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found');
@@ -189,11 +192,11 @@ JSON 结构（严格遵循）：
           messages: [
             {
               role: 'system',
-              content: systemPrompt,
+              content: withAiOutputLanguage(systemPrompt, isEn),
             },
             {
               role: 'user',
-              content: userPrompt,
+              content: withAiOutputLanguage(userPrompt, isEn),
             },
           ],
           temperature: 0.7,

@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
@@ -18,7 +19,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '需要提供三张卡牌信息' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // 调试信息（仅开发环境）
     if (process.env.NODE_ENV === 'development') {
@@ -80,7 +83,7 @@ ${cardsInfo}
           },
           {
             role: 'user',
-            content: userMessage,
+            content: withAiOutputLanguage(userMessage, isEn),
           },
         ],
         temperature: 0.7,

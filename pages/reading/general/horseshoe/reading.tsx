@@ -227,6 +227,7 @@ export default function HorseshoeReadingPage() {
         body: JSON.stringify({
           cards: result.cards,
           question: question || '',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

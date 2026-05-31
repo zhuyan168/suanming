@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
@@ -35,7 +36,9 @@ export default async function handler(req, res) {
       return `${now.getFullYear()}年${now.getMonth() + 1}月`;
     })();
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found');
@@ -111,7 +114,7 @@ JSON 结构示例：
           },
           {
             role: 'user',
-            content: userMessage,
+            content: withAiOutputLanguage(userMessage, isEn),
           },
         ],
         temperature: 0.7,

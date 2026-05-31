@@ -192,6 +192,49 @@ const SLOT_CONFIG = [
   },
 ];
 
+const SLOT_CONFIG_EN = [
+  {
+    position: 1,
+    title: 'The Real You',
+    meaning: 'Your true state and inner feelings in this relationship.',
+  },
+  {
+    position: 2,
+    title: 'The Real Them',
+    meaning: 'Their true state and deeper motivation in this relationship.',
+  },
+  {
+    position: 3,
+    title: 'How They See You',
+    meaning: 'How they currently understand and perceive you.',
+  },
+  {
+    position: 4,
+    title: 'How You See Them',
+    meaning: 'How you currently understand and perceive them.',
+  },
+  {
+    position: 5,
+    title: 'The Past',
+    meaning: 'What this relationship has been through and what still echoes now.',
+  },
+  {
+    position: 6,
+    title: 'The Present',
+    meaning: 'Where this relationship truly stands right now.',
+  },
+  {
+    position: 7,
+    title: 'Where It Is Heading',
+    meaning: 'Where the relationship may naturally move if the current pattern continues.',
+  },
+  {
+    position: 8,
+    title: 'Your Next Step',
+    meaning: 'The attitude or action that can help you face this relationship more honestly.',
+  },
+];
+
 // 保存结果到 localStorage
 const saveResult = (data: RelationshipDev8Result) => {
   if (typeof window === 'undefined') return;
@@ -213,6 +256,24 @@ const loadResult = (): RelationshipDev8Result | null => {
 
 export default function RelationshipDev8Draw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    pageTitle: isEn ? 'Relationship Development - Draw Cards' : '这段感情的发展 - 抽牌',
+    metaDescription: isEn ? 'Draw 8 cards to explore the real state and natural direction of this relationship.' : '抽取 8 张牌，看看这段关系的真实状态与自然走向',
+    back: isEn ? 'Back' : '返回',
+    reset: isEn ? 'Reset' : '重置',
+    resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
+    completedTitle: isEn ? 'Relationship Development - Complete' : '这段感情的发展 - 已完成',
+    drawTitle: isEn ? 'Relationship Development' : '这段感情的发展',
+    completedDescription: isEn ? 'Your cards are ready. Now let us look at the real state of this relationship.' : '牌已经就位，现在，让我们一起看看这段关系的真实状态。',
+    drawDescription: isEn ? 'Take a quiet moment, then choose 8 cards from the deck below to explore the real state and natural direction of this relationship.' : '静心感受，从下方78张牌中选择8张，看看这段关系的真实状态与自然走向。',
+    drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    viewReading: isEn ? 'View Reading' : '查看解读',
+    completedNote: isEn ? 'Cards drawn. You can start over anytime.' : '✨ 已完成抽牌，可随时重新占卜',
+  };
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'love',
     spreadId: 'relationship-development',
@@ -352,7 +413,7 @@ export default function RelationshipDev8Draw() {
 
   const handleReset = () => {
     if (typeof window === 'undefined') return;
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
 
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('relationship_development_reading'); // 同时清除解读缓存
@@ -375,7 +436,7 @@ export default function RelationshipDev8Draw() {
     return (
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -384,8 +445,8 @@ export default function RelationshipDev8Draw() {
   return (
     <>
       <Head>
-        <title>这段感情的发展 - 抽牌</title>
-        <meta name="description" content="抽取 8 张牌，看看这段关系的真实状态与自然走向" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="dark">
@@ -397,7 +458,7 @@ export default function RelationshipDev8Draw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">arrow_back</span>
-              <span className="text-sm font-medium">返回</span>
+              <span className="text-sm font-medium">{text.back}</span>
             </button>
             
             <div className="flex items-center gap-4 text-white">
@@ -409,7 +470,7 @@ export default function RelationshipDev8Draw() {
               className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined">refresh</span>
-              <span className="text-sm font-medium hidden sm:inline">重置</span>
+              <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
             </button>
           </header>
 
@@ -420,12 +481,12 @@ export default function RelationshipDev8Draw() {
               <div className="text-center mb-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-2">Deep Relationship Tarot Spread</p>
                 <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-2">
-                  {hasDrawn ? '这段感情的发展 - 已完成' : '这段感情的发展'}
+                  {hasDrawn ? text.completedTitle : text.drawTitle}
                 </h1>
                 <p className="text-white/70 text-base max-w-2xl mx-auto">
                   {hasDrawn 
-                    ? '牌已经就位，现在，让我们一起看看这段关系的真实状态。' 
-                    : '静心感受，从下方78张牌中选择8张，看看这段关系的真实状态与自然走向。'}
+                    ? text.completedDescription
+                    : text.drawDescription}
                 </p>
               </div>
 
@@ -473,7 +534,7 @@ export default function RelationshipDev8Draw() {
                     <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
 
                     <div className="mt-4 sm:mt-8 mb-2 sm:mb-4 text-center text-white/50 text-xs sm:text-sm">
-                      <p>已抽牌：{selectedCards.filter(c => c !== null).length} / 8</p>
+                      <p>{text.drawnCount} {selectedCards.filter(c => c !== null).length} / 8</p>
                     </div>
 
                     {/* 卡槽区域 */}
@@ -481,7 +542,7 @@ export default function RelationshipDev8Draw() {
                       cards={selectedCards}
                       isAnimating={isAnimating}
                       showLoadingText={true}
-                      slotConfig={SLOT_CONFIG}
+                      slotConfig={slotConfig}
                     />
                   </motion.div>
                 )}
@@ -500,7 +561,7 @@ export default function RelationshipDev8Draw() {
                     isAnimating={Array(8).fill(false)}
                     showLoadingText={false}
                     forceFlipped={true}
-                    slotConfig={SLOT_CONFIG}
+                    slotConfig={slotConfig}
                   />
 
                   <div className="text-center mt-8">
@@ -511,12 +572,12 @@ export default function RelationshipDev8Draw() {
                       className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      开始解读
+                      {text.startReading}
                     </motion.button>
                   </div>
 
                   <div className="text-center text-white/50 text-sm mt-6">
-                    <p>✨ 已完成抽牌，可随时重新占卜</p>
+                    <p>{text.completedNote}</p>
                   </div>
                 </motion.div>
               )}
@@ -536,7 +597,7 @@ export default function RelationshipDev8Draw() {
                     className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
-                    查看解读
+                    {text.viewReading}
                   </motion.button>
                 </motion.div>
               )}
@@ -547,4 +608,3 @@ export default function RelationshipDev8Draw() {
     </>
   );
 }
-

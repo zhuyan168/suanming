@@ -736,6 +736,7 @@ interface DrawResult {
   orientation: 'upright' | 'reversed';
   fortune: FortuneResult;
   date: string;
+  locale?: string;
 }
 
 export default function DailyFortune() {
@@ -823,28 +824,29 @@ export default function DailyFortune() {
     if (accessLoading || !allowed) return;
 
     const todayDate = getTodayDateString();
-    const stored = localStorage.getItem('dailyFortuneResult');
+    const storageKey = isEn ? 'dailyFortuneResult_en' : 'dailyFortuneResult_zh';
+    const stored = localStorage.getItem(storageKey);
     
     if (stored) {
       try {
         const result = JSON.parse(stored);
-        if (result.date === todayDate) {
+        if (result.date === todayDate && (result.locale || (isEn ? 'en' : 'zh')) === (isEn ? 'en' : 'zh')) {
           setHasDrawnToday(true);
           setTodayResult(result);
           setShowCards(false);
           return;
         } else {
-          localStorage.removeItem('dailyFortuneResult');
+          localStorage.removeItem(storageKey);
         }
       } catch (e) {
         console.error('Failed to parse stored result:', e);
-        localStorage.removeItem('dailyFortuneResult');
+        localStorage.removeItem(storageKey);
       }
     }
     const shuffled = shuffleCards(tarotCards);
     setDeck(shuffled);
     setUiSlots(shuffled);
-  }, [accessLoading, allowed]);
+  }, [accessLoading, allowed, isEn]);
 
 
   const drawCard = async (slotIndex: number) => {
@@ -906,6 +908,7 @@ export default function DailyFortune() {
           cardName: card.name,
           orientation,
           baseMeaning,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 
@@ -930,6 +933,7 @@ export default function DailyFortune() {
         orientation,
         fortune: data.fortune,
         date: getTodayDateString(),
+        locale: isEn ? 'en' : 'zh',
       };
 
       if (process.env.NODE_ENV === 'development') {
@@ -938,7 +942,7 @@ export default function DailyFortune() {
       }
 
       // 保存到 localStorage
-      localStorage.setItem('dailyFortuneResult', JSON.stringify(result));
+      localStorage.setItem(isEn ? 'dailyFortuneResult_en' : 'dailyFortuneResult_zh', JSON.stringify(result));
       
       setTodayResult(result);
       setHasDrawnToday(true);

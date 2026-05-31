@@ -157,6 +157,132 @@ function formatTime(iso: string): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
 }
 
+const HISTORY_LABEL_EN: Record<string, string> = {
+  '过去': 'Past',
+  '现在': 'Present',
+  '未来': 'Future',
+  '内在': 'Inner State',
+  '外在': 'External Influence',
+  '行动': 'Action',
+  '指引牌': 'Guidance Card',
+  '源头': 'Root Cause',
+  '现状': 'Current Situation',
+  '阻碍': 'Obstacle',
+  '重点': 'Focus',
+  '优势': 'Strength',
+  '近期': 'Near Future',
+  '应对': 'Response',
+  '提醒': 'Reminder',
+  '期待恐惧': 'Hopes & Fears',
+  '走向': 'Direction',
+  '过去的影响': 'Past Influence',
+  '当下的状态': 'Current State',
+  '隐藏的影响': 'Hidden Influence',
+  '阻碍与挑战': 'Obstacles & Challenges',
+  '潜在的发展': 'Potential Development',
+  '行动建议': 'Action Advice',
+  '可能的结果': 'Possible Outcome',
+  '月初状态': 'Early-Month Energy',
+  '事业学业': 'Career & Study',
+  '感情关系': 'Love & Relationships',
+  '财务资源': 'Wealth & Resources',
+  '人际合作': 'Relationships & Collaboration',
+  '月末趋势': 'Month-End Trend',
+  '给你的建议': 'Advice for You',
+  '年度主题牌': 'Annual Theme Card',
+  '一月': 'January',
+  '二月': 'February',
+  '三月': 'March',
+  '四月': 'April',
+  '五月': 'May',
+  '六月': 'June',
+  '七月': 'July',
+  '八月': 'August',
+  '九月': 'September',
+  '十月': 'October',
+  '十一月': 'November',
+  '十二月': 'December',
+  '行动力': 'Action',
+  '情感与人际': 'Emotion & Relationships',
+  '思维与计划': 'Mind & Planning',
+  '事业与财运': 'Career & Wealth',
+  '整体运势': 'Overall Fortune',
+  '他 / 她是什么类型': 'What Type of Person They Are',
+  '他/她是什么类型': 'What Type of Person They Are',
+  '他 / 她已经出现了吗？': 'Have They Appeared Yet?',
+  '他/她已经出现了吗？': 'Have They Appeared Yet?',
+  '遇到的阻力': 'Obstacles to Meeting',
+  '相处模式': 'Relationship Pattern',
+  '怎样才能遇到他 / 她': 'How to Meet Them',
+  '怎样才能遇到他/她': 'How to Meet Them',
+  '这段关系是如何走散的': 'How This Relationship Drifted Apart',
+  '你当前的情绪状态与纠结来源': 'Your Current Emotional State',
+  '前任目前的真实状态': 'Your Ex\'s Current State',
+  '你内心对复合的感受': 'How You Feel About Reconciliation',
+  '前任内心对复合的感受': 'How Your Ex Feels About Reconciliation',
+  '你们之间最大的阻碍是什么': 'The Biggest Obstacle Between You',
+  '对你有利的帮助或转机': 'Support or Turning Points in Your Favor',
+  '被你忽略的重要因素': 'Important Factors You May Be Missing',
+  '你需要做出的选择': 'The Choice You Need to Make',
+  '治愈寄语': 'Healing Message',
+  'TA的显性想法': 'Their Surface Thoughts',
+  'TA的真实情绪': 'Their True Feelings',
+  'TA对关系的期待': 'Their Expectations',
+  'TA隐藏的不安': 'Their Hidden Concerns',
+  'TA可能的下一步': 'Their Possible Next Step',
+  '给你的提醒': 'Reminder for You',
+  '关系当前状态': 'Current Relationship State',
+  '你在关系中的位置': 'Your Place in the Relationship',
+  'TA眼中的你': 'How They See You',
+  '你眼中的TA': 'How You See Them',
+  '推动关系发展的力量': 'What Moves the Relationship Forward',
+  '关系中的卡点': 'Relationship Block',
+  '关系的走向': 'Relationship Direction',
+  '你的下一步': 'Your Next Step',
+  '内心真正渴望的状态': 'What You Truly Want',
+  '最适合的靠近方向': 'Best Direction to Move Toward',
+  '核心优势或潜力': 'Core Strength or Potential',
+  '可获得的资源支持': 'Available Support',
+  '需要调整或补强': 'What Needs Adjustment',
+  '你现在最不确定的地方': 'What Feels Most Uncertain',
+  '你现在的优势在哪里': 'Where Your Strength Is',
+  '事情目前的整体走向': 'Current Overall Direction',
+  '目前可能影响你的地方': 'What May Be Affecting You',
+  '接下来你可以主动做什么': 'What You Can Do Next',
+  '这份工作的现实状态': 'The Reality of This Job',
+  '你在其中消耗最大的地方': 'Where It Drains You Most',
+  '你仍然能获得的东西': 'What You Can Still Gain',
+  '如果继续可能面对什么': 'What Continuing May Bring',
+  '如果离开可能面对什么': 'What Leaving May Bring',
+  '你真正需要看清的核心问题': 'The Core Issue to See Clearly',
+  '下一步最适合的心态': 'Best Mindset for the Next Step',
+}
+
+function translateHistoryLabel(label: string | undefined | null, isEn: boolean): string {
+  if (!label) return ''
+  if (!isEn) return label
+  const normalized = String(label).trim()
+  if (!normalized) return ''
+  const exact = HISTORY_LABEL_EN[normalized]
+  if (exact) return exact
+
+  const cardMatch = normalized.match(/^第\s*(\d+)\s*张牌$/)
+  if (cardMatch) return `Card ${cardMatch[1]}`
+  const positionMatch = normalized.match(/^(?:位置|牌位)\s*(\d+)$/)
+  if (positionMatch) return `Position ${positionMatch[1]}`
+  const numberedSlotMatch = normalized.match(/^(\d+)\s*号位$/)
+  if (numberedSlotMatch) return `Position ${numberedSlotMatch[1]}`
+
+  return normalized
+}
+
+function getYesNoDisplayText(answer: YesNoAnswer, isEn: boolean): string {
+  if (!isEn) return getAnswerText(answer)
+  if (answer === 'YES') return 'Yes'
+  if (answer === 'NO') return 'No'
+  return 'Maybe'
+}
+
 // ============================================================
 // Shared sub-components
 // ============================================================
@@ -205,6 +331,7 @@ function CardRow({
   const imageUrl = getCardImage(card)
   const orientation = getCardOrientation(card)
   const cardName = getCardDisplayName(card)
+  const displayPositionLabel = translateHistoryLabel(positionLabel, isEn)
 
   return (
     <div className="flex gap-4 rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/[0.07] transition-colors">
@@ -227,8 +354,8 @@ function CardRow({
       {/* Text */}
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-          {positionLabel && (
-            <span className="text-[10px] font-bold text-primary/80 uppercase tracking-wider">{positionLabel}</span>
+          {displayPositionLabel && (
+            <span className="text-[10px] font-bold text-primary/80 uppercase tracking-wider">{displayPositionLabel}</span>
           )}
           {cardName && (
             <>
@@ -626,7 +753,7 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
       <div className="flex flex-col gap-4">
         {resultCards.map((rc: any, i: number) => {
           const card = rawCards[i]
-          const posLabel = rc.position ?? rc.month ?? MONTH_LABELS[i] ?? (isEn ? `Card ${i + 1}` : `第${i + 1}张`)
+          const posLabel = translateHistoryLabel(rc.position ?? rc.month ?? MONTH_LABELS[i] ?? (isEn ? `Card ${i + 1}` : `第${i + 1}张`), isEn)
           const interpretation = rc.meaning ?? rc.reading ?? rc.interpretation ?? ''
           const isTheme = i === 12
           const cardKeywords: string[] = Array.isArray(card?.keywords) ? card.keywords : []
@@ -1008,14 +1135,14 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
       {/* Sections */}
       {sections.map((sec: any, i: number) => (
         <div key={i} className="rounded-xl border border-white/10 bg-white/5 p-4">
-          {sec.title && <p className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-2">{sec.title}</p>}
+          {sec.title && <p className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-2">{translateHistoryLabel(sec.title, isEn)}</p>}
           {sec.text && <p className="text-white/80 text-sm leading-relaxed whitespace-pre-line">{sec.text}</p>}
         </div>
       ))}
       {/* Summary */}
       {r.summary?.text && (
         <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-purple-900/20 p-5">
-          {r.summary.title && <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{r.summary.title}</p>}
+          {r.summary.title && <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">{translateHistoryLabel(r.summary.title, isEn)}</p>}
           <p className="text-white/90 text-sm leading-relaxed whitespace-pre-line">{r.summary.text}</p>
         </div>
       )}
@@ -1218,7 +1345,7 @@ function YesNoView({ record }: { record: HistoryRecord }) {
                 </span>
                 <div>
                   <p className="text-sm font-medium text-white/60 uppercase tracking-wider">{isEn ? 'Answer' : '答案'}</p>
-                  <p className={`text-4xl font-black ${answerColor}`}>{getAnswerText(answer)}</p>
+                  <p className={`text-4xl font-black ${answerColor}`}>{getYesNoDisplayText(answer, isEn)}</p>
                 </div>
               </div>
             </div>

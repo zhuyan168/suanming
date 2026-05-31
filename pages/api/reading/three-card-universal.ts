@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
 import { parseAIJson, AIJsonParseError } from '../../../lib/parseAIJson';
@@ -18,6 +19,8 @@ export default async function handler(
   if (!cards || !Array.isArray(cards) || cards.length !== 3) {
     return res.status(400).json({ error: 'Invalid cards data' });
   }
+
+  const isEn = isEnglishRequest(req);
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
@@ -165,8 +168,8 @@ export default async function handler(
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'system', content: withAiOutputLanguage(systemPrompt, isEn) },
+          { role: 'user', content: withAiOutputLanguage(userPrompt, isEn) },
         ],
         temperature: 0.7,
         response_format: { type: 'json_object' }

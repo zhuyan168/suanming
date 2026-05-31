@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
 import { useGuestTrial } from '../../context/GuestTrialContext';
 
 export default function GuestTrialBanner() {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
   const { isActive, hoursLeft, minutesLeft } = useGuestTrial();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -26,29 +29,38 @@ export default function GuestTrialBanner() {
 
   const timeText =
     hoursLeft >= 1
-      ? `${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}`
-      : `${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}`;
+      ? (isEn ? `${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}` : `${hoursLeft} 小时`)
+      : (isEn ? `${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}` : `${minutesLeft} 分钟`);
 
   return (
     <div className="w-full bg-gradient-to-r from-[#2d1b4e] to-[#1e1a3a] border-b border-purple-500/30">
       <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
         <p className="text-white/85 text-sm leading-snug flex-1 min-w-0">
-          Your free trial ends in{' '}
-          <span className="font-semibold text-purple-300">{timeText}</span>.{' '}
-          Sign up to save your readings.
+          {isEn ? (
+            <>
+              Your free trial ends in{' '}
+              <span className="font-semibold text-purple-300">{timeText}</span>.{' '}
+              Sign up to save your readings.
+            </>
+          ) : (
+            <>
+              免费试用还剩{' '}
+              <span className="font-semibold text-purple-300">{timeText}</span>。注册即可保存你的占卜记录。
+            </>
+          )}
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href="/register"
             className="inline-flex items-center h-8 px-4 rounded-md bg-[#7f13ec] text-white text-sm font-semibold hover:bg-[#6b0fd4] transition-colors whitespace-nowrap"
           >
-            Save My Readings
+            {isEn ? 'Save My Readings' : '保存我的记录'}
           </Link>
           <button
             type="button"
             onClick={() => setDismissed(true)}
             className="text-white/40 hover:text-white/70 transition-colors p-1 rounded"
-            aria-label="Dismiss banner"
+            aria-label={isEn ? 'Dismiss banner' : '关闭横幅'}
           >
             <svg
               className="w-4 h-4"

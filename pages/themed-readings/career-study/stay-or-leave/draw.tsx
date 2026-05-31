@@ -144,6 +144,16 @@ const SLOT_CONFIG = [
   { id: "p7", name: "工作未来发展趋势", meaning: "工作未来发展趋势" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { id: "p1", name: "Your Current Career State", meaning: "Your current work and career condition" },
+  { id: "p2", name: "Strengths of This Job", meaning: "What this job currently offers you" },
+  { id: "p3", name: "Weaknesses of This Job", meaning: "Where this job drains or limits you" },
+  { id: "p4", name: "How Leadership Sees You", meaning: "How your manager or leadership views you" },
+  { id: "p5", name: "How Colleagues See You", meaning: "How colleagues or direct reports view you" },
+  { id: "p6", name: "Room for Personal Growth", meaning: "Your space for growth and improvement here" },
+  { id: "p7", name: "Future Work Trend", meaning: "Where this job is likely to develop next" }
+];
+
 const saveResult = (data: StayOrLeaveResult) => {
   if (typeof window === 'undefined') return;
   const json = JSON.stringify(data);
@@ -169,6 +179,22 @@ const loadResult = (): StayOrLeaveResult | null => {
 
 export default function StayOrLeaveDraw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = {
+    loading: isEn ? 'Loading...' : '加载中...',
+    pageTitle: isEn ? 'Stay or Leave - Draw Cards | FateAura' : '这份工作是否值得继续做下去？ - FateAura',
+    metaDescription: isEn ? 'Review the meaning, cost, and turning points of staying in this job.' : '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。',
+    back: isEn ? 'Back' : '返回',
+    reset: isEn ? 'Reset' : '重置',
+    resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
+    title: isEn ? 'Is This Job Still Worth Continuing?' : '这份工作是否值得继续做下去？',
+    descComplete: isEn ? 'Cards drawn. Continue to view the deep reading.' : '抽牌已完成，点击下方按钮开始深度解读。',
+    descStart: isEn ? 'Review the meaning, cost, and turning points of staying in this job. Draw 7 cards from the deck below.' : '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。请从下方牌堆中抽取 7 张牌。',
+    drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
+    startReading: isEn ? 'Start Reading' : '开始解读',
+    note: isEn ? 'See the wider career picture and make a clearer choice' : '✨ 看清职业全景，做出更明智的选择',
+  };
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'career-study',
     spreadId: 'stay-or-leave',
@@ -267,7 +293,7 @@ export default function StayOrLeaveDraw() {
   };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
@@ -282,7 +308,7 @@ export default function StayOrLeaveDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -291,20 +317,20 @@ export default function StayOrLeaveDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>这份工作是否值得继续做下去？ - FateAura</title>
-        <meta name="description" content="评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.metaDescription} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
           <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -313,10 +339,10 @@ export default function StayOrLeaveDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Career & Study</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                这份工作是否值得继续做下去？
+                {text.title}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasDrawn ? '抽牌已完成，点击下方按钮开始深度解读。' : '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。请从下方牌堆中抽取 7 张牌。'}
+                {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
 
@@ -333,7 +359,7 @@ export default function StayOrLeaveDraw() {
                 </div>
                 <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-xs">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 7
+                  {text.drawnCount} {selectedCards.filter(c => c !== null).length} / 7
                 </div>
               </motion.div>
             )}
@@ -344,7 +370,7 @@ export default function StayOrLeaveDraw() {
                 isAnimating={isAnimating}
                 showLoadingText={!hasDrawn}
                 forceFlipped={hasDrawn}
-                slotConfig={SLOT_CONFIG}
+                slotConfig={slotConfig}
               />
             </div>
 
@@ -355,10 +381,10 @@ export default function StayOrLeaveDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
                 <p className="text-white/40 text-xs mt-4">
-                  ✨ 看清职业全景，做出更明智的选择
+                  {text.note}
                 </p>
               </motion.div>
             )}

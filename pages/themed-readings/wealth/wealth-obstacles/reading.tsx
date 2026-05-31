@@ -112,6 +112,7 @@ export default function WealthObstaclesReadingPage() {
         headers,
         body: JSON.stringify({
           cards: cards,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

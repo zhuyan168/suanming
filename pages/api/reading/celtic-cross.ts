@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson, AIJsonParseError } from '../../../lib/parseAIJson';
@@ -30,6 +31,8 @@ export default async function handler(
   //     message: '此功能需要会员权限'
   //   });
   // }
+
+  const isEn = isEnglishRequest(req);
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
@@ -192,8 +195,8 @@ ${cardsDescription}
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
+          { role: 'system', content: withAiOutputLanguage(systemPrompt, isEn) },
+          { role: 'user', content: withAiOutputLanguage(userPrompt, isEn) },
         ],
         temperature: 0.7,
         response_format: { type: 'json_object' }

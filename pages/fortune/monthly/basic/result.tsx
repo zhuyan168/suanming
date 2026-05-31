@@ -352,6 +352,7 @@ export default function MonthlyBasicResult() {
         headers,
         body: JSON.stringify({
           cards: result.cards,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

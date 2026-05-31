@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 // =============================================================================
 // API 端点：/api/seasonal-reading
 // 用于生成四季牌阵的 DeepSeek AI 解读
@@ -43,7 +44,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '需要提供五张卡牌信息' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found');
@@ -212,7 +215,7 @@ ${cardsInfo}
           },
           {
             role: 'user',
-            content: userMessage,
+            content: withAiOutputLanguage(userMessage, isEn),
           },
         ],
         temperature: 0.7,

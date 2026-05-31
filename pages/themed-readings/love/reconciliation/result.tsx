@@ -152,6 +152,7 @@ export default function ReconciliationResultPage() {
         headers,
         body: JSON.stringify({
           cards: cardsData,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

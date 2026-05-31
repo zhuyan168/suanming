@@ -286,6 +286,7 @@ export default function SeasonalResult() {
             reversed: card.reversed,
             keywords: card.keywords,
           })),
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

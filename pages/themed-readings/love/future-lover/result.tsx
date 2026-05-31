@@ -54,6 +54,15 @@ const SLOT_CONFIG = [
   { key: 'how_to_meet', label: '5号位', subLabel: '怎样才能遇到他/她', question: '你可以采取什么行动/状态调整来更接近相遇？' },
 ];
 
+const SLOT_CONFIG_EN = [
+  { key: 'guide', label: 'Guidance Card', question: 'What is the overall guidance for this reading?' },
+  { key: 'type', label: 'Position 1', subLabel: 'What type of person are they?', question: 'What are their personality, temperament, or traits?' },
+  { key: 'appeared', label: 'Position 2', subLabel: 'Have they appeared yet?', question: 'Are they already somewhere in your life, social circle, or field of view?' },
+  { key: 'obstacle', label: 'Position 3', subLabel: 'Obstacles to meeting', question: 'What may currently be blocking the meeting or progress?' },
+  { key: 'pattern', label: 'Position 4', subLabel: 'Relationship pattern', question: 'How are you most likely to interact and move closer?' },
+  { key: 'how_to_meet', label: 'Position 5', subLabel: 'How to meet them', question: 'What actions or state shifts may bring you closer to meeting them?' },
+];
+
 // 从 localStorage 读取结果
 const loadFutureLoverResult = (): FutureLoverResult | null => {
   if (typeof window === 'undefined') return null;
@@ -88,7 +97,29 @@ const loadDeepReading = (): DeepReading | null => {
 
 export default function FutureLoverResult() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const texts = getReadingUiText(router.locale);
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    loadingTitle: isEn ? 'Loading... - Future Lover Spread' : '加载中... - 未来恋人牌阵',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'Future Lover Spread - Reading Result' : '未来恋人牌阵 - 解读结果',
+    metaDesc: isEn ? 'Explore the energy around your future lover.' : '探索你的未来恋人',
+    header: isEn ? 'Future Lover Spread' : '未来恋人牌阵',
+    result: isEn ? 'Reading Result' : '解读结果',
+    redraw: isEn ? 'Draw Again' : '重抽',
+    summaryFallback: isEn ? 'One-Sentence Summary' : '一句话总结',
+    guideTitle: isEn ? 'Guidance Card - Overall Guidance' : '指引牌 - 整体指引',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    detailTitle: isEn ? 'Detailed Reading' : '详细解读',
+    actionTitle: isEn ? 'Action Suggestions' : '行动建议',
+    aboutTitle: isEn ? 'About This Reading' : '关于这次占卜',
+    aboutDesc: isEn
+      ? 'Tarot reflects current energy and tendencies, not absolute fate. The Future Lover Spread helps you clarify your expectations, current state, and possible path. Real connection still depends on staying open, sincere, and willing to act when the timing is right.'
+      : '塔罗牌反映的是当下的能量与趋势，而非绝对的命运。未来恋人牌阵帮助你看清自己的期待、当下的状态以及可能的路径。请记住，真正的相遇需要你保持开放、真诚，并在合适的时机采取行动。',
+    backLove: isEn ? 'Back to Love Readings' : '返回爱情占卜',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<FutureLoverResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,6 +150,7 @@ export default function FutureLoverResult() {
         headers,
         body: JSON.stringify({
           cards: cardsData,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 
@@ -194,10 +226,10 @@ export default function FutureLoverResult() {
     return (
       <>
         <Head>
-          <title>加载中... - 未来恋人牌阵</title>
+          <title>{pageText.loadingTitle}</title>
         </Head>
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
-          <div className="text-white text-lg">加载中...</div>
+          <div className="text-white text-lg">{pageText.loading}</div>
         </div>
       </>
     );
@@ -206,8 +238,8 @@ export default function FutureLoverResult() {
   return (
     <>
       <Head>
-        <title>未来恋人牌阵 - 解读结果</title>
-        <meta name="description" content="探索你的未来恋人" />
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -283,8 +315,8 @@ export default function FutureLoverResult() {
               </button>
               
               <div className="text-center">
-                <h1 className="text-xl sm:text-2xl font-bold text-white">未来恋人牌阵</h1>
-                <p className="text-sm text-white/50 mt-1">解读结果</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">{pageText.header}</h1>
+                <p className="text-sm text-white/50 mt-1">{pageText.result}</p>
               </div>
 
               <button
@@ -292,7 +324,7 @@ export default function FutureLoverResult() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">refresh</span>
-                <span className="hidden sm:inline">重抽</span>
+                <span className="hidden sm:inline">{pageText.redraw}</span>
               </button>
             </div>
           </div>
@@ -366,7 +398,7 @@ export default function FutureLoverResult() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-2xl">✨</span>
                       <h2 className="text-white text-lg font-bold">
-                        {deepReading?.summary.title || '一句话总结'}
+                        {deepReading?.summary.title || pageText.summaryFallback}
                       </h2>
                     </div>
                     <p className="text-white/80 text-base leading-relaxed">
@@ -381,7 +413,7 @@ export default function FutureLoverResult() {
                     <div className="flex items-center gap-3 mb-4">
                       <span className="text-2xl">🌙</span>
                       <h2 className="text-white text-xl sm:text-2xl font-bold">
-                        指引牌 - 整体指引
+                        {pageText.guideTitle}
                       </h2>
                     </div>
                     
@@ -406,13 +438,13 @@ export default function FutureLoverResult() {
                           {savedResult.cards[0].name}
                         </h3>
                         <p className="text-white/60 text-sm mb-4">
-                          {savedResult.cards[0].orientation === 'upright' ? '正位' : '逆位'}
+                          {savedResult.cards[0].orientation === 'upright' ? pageText.upright : pageText.reversed}
                           {' · '}
-                          {savedResult.cards[0].keywords.join('、')}
+                          {savedResult.cards[0].keywords.join(isEn ? ', ' : '、')}
                         </p>
                         <div className="rounded-lg bg-white/5 p-4">
                           <p className="text-white/70 text-base leading-relaxed">
-                            {deepReading?.sections[0]?.text || basicReading[0]?.text || SLOT_CONFIG[0].question}
+                            {deepReading?.sections[0]?.text || basicReading[0]?.text || slotConfig[0].question}
                           </p>
                         </div>
                       </div>
@@ -423,11 +455,11 @@ export default function FutureLoverResult() {
                 {/* 详细解读 */}
                 <div className="space-y-8">
                   <h2 className="text-white text-2xl font-bold text-center mb-8">
-                    详细解读
+                    {pageText.detailTitle}
                   </h2>
 
                   {savedResult.cards.slice(1).map((card, index) => {
-                    const config = SLOT_CONFIG[index + 1];
+                    const config = slotConfig[index + 1];
                     const deepSection = deepReading?.sections[index + 1];
                     const basicSection = basicReading[index + 1];
                     
@@ -474,9 +506,9 @@ export default function FutureLoverResult() {
                               {card.name}
                             </h4>
                             <p className="text-white/60 text-sm mb-4">
-                              {card.orientation === 'upright' ? '正位' : '逆位'}
+                              {card.orientation === 'upright' ? pageText.upright : pageText.reversed}
                               {' · '}
-                              {card.keywords.join('、')}
+                              {card.keywords.join(isEn ? ', ' : '、')}
                             </p>
                             <div className="rounded-lg bg-white/5 p-4">
                               <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
@@ -495,7 +527,7 @@ export default function FutureLoverResult() {
                   <div className="mt-12 rounded-xl bg-white/5 border border-white/10 p-6 sm:p-8">
                     <div className="flex items-center gap-3 mb-6">
                       <span className="text-2xl">💫</span>
-                      <h2 className="text-white text-xl font-bold">行动建议</h2>
+                      <h2 className="text-white text-xl font-bold">{pageText.actionTitle}</h2>
                     </div>
                     <div className="space-y-3">
                       {(deepReading?.actions || basicActions.map(text => ({ text }))).map((action, index) => (
@@ -531,11 +563,9 @@ export default function FutureLoverResult() {
                   <div className="flex items-start gap-4">
                     <span className="material-symbols-outlined text-primary text-2xl">info</span>
                     <div className="flex-1">
-                      <h3 className="text-white text-lg font-bold mb-2">关于这次占卜</h3>
+                      <h3 className="text-white text-lg font-bold mb-2">{pageText.aboutTitle}</h3>
                       <p className="text-white/70 text-sm leading-relaxed">
-                        塔罗牌反映的是当下的能量与趋势，而非绝对的命运。
-                        未来恋人牌阵帮助你看清自己的期待、当下的状态以及可能的路径。
-                        请记住，真正的相遇需要你保持开放、真诚，并在合适的时机采取行动。
+                        {pageText.aboutDesc}
                       </p>
                     </div>
                   </div>
@@ -553,7 +583,7 @@ export default function FutureLoverResult() {
                     onClick={handleReturnToList}
                     className="flex-1 py-4 rounded-lg bg-primary text-white font-semibold hover:bg-primary/80 transition-colors"
                   >
-                    返回爱情占卜
+                    {pageText.backLove}
                   </button>
                 </div>
               </motion.div>

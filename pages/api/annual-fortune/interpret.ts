@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 /**
  * 年度运势解读 API
  * 
@@ -29,7 +30,8 @@ interface InterpretRequest {
 async function generateWithLLM(
   themeCard: TarotCard,
   monthCards: Record<number, TarotCard>,
-  year: number
+  year: number,
+  isEn: boolean
 ): Promise<AnnualInterpretation | null> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   
@@ -146,11 +148,11 @@ ${monthCardsText}
         messages: [
           {
             role: 'system',
-            content: systemPrompt
+            content: withAiOutputLanguage(systemPrompt, isEn)
           },
           {
             role: 'user',
-            content: userPrompt
+            content: withAiOutputLanguage(userPrompt, isEn)
           }
         ],
         temperature: 0.7,
@@ -223,6 +225,7 @@ export default async function handler(
     }
 
     const currentYear = year || new Date().getFullYear();
+    const isEn = isEnglishRequest(req);
     let interpretation: AnnualInterpretation | null = null;
     let method = 'local';
 
@@ -237,7 +240,7 @@ export default async function handler(
     if (enableLLM) {
       // 会员用户或临时启用：尝试使用 LLM 生成个性化解读
       console.log('🤖 Attempting LLM interpretation...');
-      interpretation = await generateWithLLM(themeCard, monthCards, currentYear);
+      interpretation = await generateWithLLM(themeCard, monthCards, currentYear, isEn);
       
       if (interpretation) {
         method = 'llm';

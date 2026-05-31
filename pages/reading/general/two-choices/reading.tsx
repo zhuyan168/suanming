@@ -152,6 +152,7 @@ export default function TwoChoicesReadingPage() {
           question: question || '',
           optionA: optionA || '',
           optionB: optionB || '',
+          locale: isZh ? 'zh' : 'en',
         }),
       });
 

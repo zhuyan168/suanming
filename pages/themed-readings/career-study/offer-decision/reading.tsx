@@ -117,6 +117,7 @@ export default function OfferDecisionReading() {
         headers,
         body: JSON.stringify({
           cards: cards,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

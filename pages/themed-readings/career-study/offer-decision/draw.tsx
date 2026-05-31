@@ -143,6 +143,15 @@ const SLOT_CONFIG = [
   { position: 6, title: "除了它之外还存在的其他机会", meaning: "除了它之外，你目前还存在的其他机会" }
 ];
 
+const SLOT_CONFIG_EN = [
+  { position: 1, title: "How Well This Opportunity Fits You", meaning: "How well this opportunity fits you" },
+  { position: 2, title: "Growth After Accepting", meaning: "The growth and development space you may gain after accepting this opportunity" },
+  { position: 3, title: "People and Collaboration", meaning: "The people, relationships, and collaboration style you may face in this opportunity" },
+  { position: 4, title: "Their Real Expectations", meaning: "The other side's or environment's real expectations and attitude toward you" },
+  { position: 5, title: "Risks and Costs to Watch", meaning: "The risks and costs you should pay special attention to after accepting" },
+  { position: 6, title: "Other Opportunities Around You", meaning: "Other opportunities that may still exist besides this one" }
+];
+
 const saveResult = (data: OfferDecisionResult) => {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -162,6 +171,35 @@ const loadResult = (): OfferDecisionResult | null => {
 
 export default function OfferDecisionDraw() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
+  const text = isEn ? {
+    title: 'Should I Accept This Offer?',
+    pageTitle: 'Should I Accept This Offer? - FateAura',
+    description: 'When an opportunity is already in front of you, this spread helps you see what you may truly face after accepting it.',
+    intro: 'When an opportunity is already in front of you, this spread helps you see what you may truly face after accepting it. Draw 6 cards from the deck below.',
+    completed: 'Cards drawn. Continue to review your spread.',
+    back: 'Back',
+    reset: 'Reset',
+    resetConfirm: 'Start over? Your current result will be cleared.',
+    loading: 'Loading...',
+    drawn: 'Cards drawn:',
+    startReading: 'Start Reading',
+    note: 'See the real shape of the opportunity and make a clearer choice',
+  } : {
+    title: '我已经拿到offer了，要不要接受？',
+    pageTitle: '我已经拿到offer了，要不要接受？',
+    description: '当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。',
+    intro: '当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。请从下方牌堆中抽取 6 张牌。',
+    completed: '抽牌已完成，请查看你的牌阵。',
+    back: '返回',
+    reset: '重置',
+    resetConfirm: '确定要重新开始吗？当前结果将被清空。',
+    loading: '加载中...',
+    drawn: '已抽牌：',
+    startReading: '开始解读',
+    note: '✨ 看清机会背后的真实面貌，做出更明智的选择',
+  };
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({
     theme: 'career-study',
     spreadId: 'offer-decision',
@@ -254,7 +292,7 @@ export default function OfferDecisionDraw() {
   const handleReturnToList = () => { router.push('/themed-readings/career-study'); };
 
   const handleReset = () => {
-    if (!confirm('确定要重新开始吗？当前结果将被清空。')) return;
+    if (!confirm(text.resetConfirm)) return;
     localStorage.removeItem(STORAGE_KEY);
     setHasDrawn(false);
     setSelectedCards(Array(6).fill(null));
@@ -268,7 +306,7 @@ export default function OfferDecisionDraw() {
     return (
       <div className="dark">
         <div className="font-display bg-[#191022] min-h-screen text-white flex items-center justify-center">
-          <div className="text-white/60">加载中...</div>
+          <div className="text-white/60">{text.loading}</div>
         </div>
       </div>
     );
@@ -277,20 +315,20 @@ export default function OfferDecisionDraw() {
   return (
     <div className="dark">
       <Head>
-        <title>我已经拿到offer了，要不要接受？</title>
-        <meta name="description" content="当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。" />
+        <title>{text.pageTitle}</title>
+        <meta name="description" content={text.description} />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
         <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
           <button onClick={handleReturnToList} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{text.back}</span>
           </button>
           <h2 className="text-lg font-bold">FateAura</h2>
           <button onClick={handleReset} className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
             <span className="material-symbols-outlined text-xl">refresh</span>
-            <span className="text-sm font-medium hidden sm:inline">重置</span>
+            <span className="text-sm font-medium hidden sm:inline">{text.reset}</span>
           </button>
         </header>
 
@@ -299,10 +337,10 @@ export default function OfferDecisionDraw() {
             <div className="text-center mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Career & Study</p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
-                我已经拿到offer了，要不要接受？
+                {text.title}
               </h1>
               <p className="text-white/60 text-sm max-w-xl mx-auto">
-                {hasDrawn ? '抽牌已完成，请查看你的牌阵。' : '当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。请从下方牌堆中抽取 6 张牌。'}
+                {hasDrawn ? text.completed : text.intro}
               </p>
             </div>
 
@@ -319,7 +357,7 @@ export default function OfferDecisionDraw() {
                 </div>
                 <ScrollBar value={scrollValue} onChange={handleScrollBarChange} disabled={isLoading} />
                 <div className="mt-6 text-center text-white/40 text-xs">
-                  已抽牌：{selectedCards.filter(c => c !== null).length} / 6
+                  {text.drawn}{selectedCards.filter(c => c !== null).length} / 6
                 </div>
               </motion.div>
             )}
@@ -330,7 +368,7 @@ export default function OfferDecisionDraw() {
                 isAnimating={isAnimating}
                 showLoadingText={!hasDrawn}
                 forceFlipped={hasDrawn}
-                slotConfig={SLOT_CONFIG}
+                slotConfig={slotConfig}
               />
             </div>
 
@@ -343,10 +381,10 @@ export default function OfferDecisionDraw() {
                   className="px-10 py-4 rounded-xl bg-primary text-white font-bold text-lg hover:shadow-[0_0_25px_rgba(127,19,236,0.6)] transition-all"
                   style={{ backgroundColor: '#7f13ec' }}
                 >
-                  开始解读
+                  {text.startReading}
                 </button>
                 <p className="text-white/40 text-xs mt-4">
-                  ✨ 看清机会背后的真实面貌，做出更明智的选择
+                  {text.note}
                 </p>
               </motion.div>
             )}

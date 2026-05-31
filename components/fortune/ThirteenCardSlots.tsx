@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -26,6 +27,8 @@ export default function ThirteenCardSlots({
   showLoadingText = false,
   forceFlipped = false
 }: ThirteenCardSlotsProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
   const orbitRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<CardPosition[]>([]);
 
@@ -234,7 +237,7 @@ export default function ThirteenCardSlots({
       {/* Loading text */}
       {showLoadingText && cards.filter(c => c !== null).length < 13 && (
         <div className="mt-6 text-center text-white/50 text-sm">
-          <p>请继续抽取卡牌...</p>
+          <p>{isEn ? 'Keep drawing cards...' : '请继续抽取卡牌...'}</p>
         </div>
       )}
 

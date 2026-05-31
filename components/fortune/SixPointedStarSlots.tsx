@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -24,12 +25,25 @@ const POSITION_TITLES = [
   '指引牌｜对整体局势的总结与提醒',
 ];
 
+const POSITION_TITLES_EN = [
+  'Past | Root of the Issue',
+  'Present | Real State of the Issue',
+  'Future | Where This May Develop',
+  'Inner | Emotions and Mindset',
+  'Outer | Environment and Other People',
+  'Action | Your Attitude and Response',
+  'Guide Card | Overall Summary and Reminder',
+];
+
 export default function SixPointedStarSlots({ 
   cards, 
   isAnimating,
   showLoadingText = false,
   forceFlipped = false
 }: SixPointedStarSlotsProps) {
+  const router = useRouter();
+  const isEn = router.locale === 'en';
+  const positionTitles = isEn ? POSITION_TITLES_EN : POSITION_TITLES;
   const renderCard = (card: ShuffledTarotCard | null, index: number) => (
     <AnimatePresence mode="wait">
       {card ? (
@@ -133,7 +147,7 @@ export default function SixPointedStarSlots({
             <div className="text-xl sm:text-2xl mb-1">
               {index === 6 ? '⭐' : '🎴'}
             </div>
-            <p className="text-xs">{index === 6 ? '指引' : `位${index + 1}`}</p>
+            <p className="text-xs">{index === 6 ? (isEn ? 'Guide' : '指引') : (isEn ? `Pos ${index + 1}` : `位${index + 1}`)}</p>
           </div>
         </motion.div>
       )}
@@ -149,7 +163,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[0], 0)}
           {forceFlipped && cards[0] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[0]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[0]}</p>
             </div>
           )}
         </div>
@@ -159,7 +173,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[1], 1)}
           {forceFlipped && cards[1] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[1]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[1]}</p>
             </div>
           )}
         </div>
@@ -169,7 +183,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[2], 2)}
           {forceFlipped && cards[2] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[2]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[2]}</p>
             </div>
           )}
         </div>
@@ -179,7 +193,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[3], 3)}
           {forceFlipped && cards[3] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[3]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[3]}</p>
             </div>
           )}
         </div>
@@ -189,7 +203,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[4], 4)}
           {forceFlipped && cards[4] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[4]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[4]}</p>
             </div>
           )}
         </div>
@@ -199,7 +213,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[5], 5)}
           {forceFlipped && cards[5] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-white/60">{POSITION_TITLES[5]}</p>
+              <p className="text-xs sm:text-sm text-white/60">{positionTitles[5]}</p>
             </div>
           )}
         </div>
@@ -209,7 +223,7 @@ export default function SixPointedStarSlots({
           {renderCard(cards[6], 6)}
           {forceFlipped && cards[6] && (
             <div className="mt-2 text-center">
-              <p className="text-xs sm:text-sm text-yellow-400/90 font-semibold">{POSITION_TITLES[6]}</p>
+              <p className="text-xs sm:text-sm text-yellow-400/90 font-semibold">{positionTitles[6]}</p>
             </div>
           )}
         </div>
@@ -223,7 +237,10 @@ export default function SixPointedStarSlots({
           transition={{ duration: 0.3, delay: 0.2 }}
           className="text-center text-white/70 text-base sm:text-lg mt-6 font-medium"
         >
-          <p>🔮 请继续抽取剩余卡牌…{cards.filter(c => c !== null).length === 6 ? '最后一张是指引牌！' : ''}</p>
+          <p>{isEn
+            ? `🔮 Keep drawing the remaining cards...${cards.filter(c => c !== null).length === 6 ? ' The last one is the guide card.' : ''}`
+            : `🔮 请继续抽取剩余卡牌…${cards.filter(c => c !== null).length === 6 ? '最后一张是指引牌！' : ''}`}
+          </p>
         </motion.div>
       )}
 

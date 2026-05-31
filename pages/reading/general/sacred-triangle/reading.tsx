@@ -42,6 +42,7 @@ const STORAGE_KEY = 'general_sacred_triangle_result';
 export default function SacredTriangleReadingPage() {
   const router = useRouter();
   const t = getSacredTriangleT(router.locale);
+  const isEn = router.locale === 'en';
 
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<SacredTriangleResult | null>(null);
@@ -94,6 +95,7 @@ export default function SacredTriangleReadingPage() {
         body: JSON.stringify({
           cards: result.cards,
           question: question || '',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

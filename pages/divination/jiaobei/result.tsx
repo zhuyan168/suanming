@@ -142,6 +142,7 @@ export default function ResultPage() {
         body: JSON.stringify({
           question: userQuestion || '',
           result: resultType,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

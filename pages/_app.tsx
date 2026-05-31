@@ -2,6 +2,7 @@
 import type { AppProps } from "next/app";
 import Script from "next/script";
 import { appWithTranslation } from "next-i18next/pages";
+import nextI18NextConfig from "../next-i18next.config";
 import { GuestTrialProvider } from "../context/GuestTrialContext";
 import GuestTrialBanner from "../components/guest-trial/GuestTrialBanner";
 
@@ -39,4 +40,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default appWithTranslation(MyApp);
+export default appWithTranslation(MyApp, nextI18NextConfig);

@@ -372,7 +372,8 @@ export default function MonthlyMemberResultPage() {
             "本月人际关系",
             "月末状态",
             "本月建议"
-          ]
+          ],
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

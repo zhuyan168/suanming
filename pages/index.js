@@ -794,7 +794,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          aria-label="关闭是否塔罗面板"
+          aria-label={isEn ? 'Close Yes/No Tarot panel' : '关闭是否塔罗面板'}
           className="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/30 text-white/70 transition hover:border-white/20 hover:text-white"
           type="button"
           onClick={handleClose}
@@ -803,8 +803,10 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
         </button>
 
         <header className="mb-8 flex flex-col gap-3 text-center">
-          <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-2">是否塔罗</p>
-          <h2 className="text-3xl font-black leading-tight tracking-tight">静心提问，抽取你的指引</h2>
+          <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-2">{isEn ? 'Yes/No Tarot' : '是否塔罗'}</p>
+          <h2 className="text-3xl font-black leading-tight tracking-tight">
+            {isEn ? 'Ask Quietly, Draw Your Guidance' : '静心提问，抽取你的指引'}
+          </h2>
         </header>
 
         <div className="flex flex-col gap-6">
@@ -812,10 +814,16 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
             <div className="flex flex-col gap-3">
               <p className="text-sm text-white/90 leading-relaxed">
-                <span className="font-semibold text-primary">占卜建议：</span>为获得最准确的指引，同一个问题建议只问一次。重复占卜可能会让能量混乱，影响结果的准确性。
+                <span className="font-semibold text-primary">{isEn ? 'Reading tip: ' : '占卜建议：'}</span>
+                {isEn
+                  ? 'For the clearest guidance, ask the same question only once. Repeating the same reading can make the answer feel less clear.'
+                  : '为获得最准确的指引，同一个问题建议只问一次。重复占卜可能会让能量混乱，影响结果的准确性。'}
               </p>
               <p className="text-sm text-white/70 leading-relaxed">
-                <span className="font-semibold text-primary">提问技巧：</span>请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？
+                <span className="font-semibold text-primary">{isEn ? 'Question tip: ' : '提问技巧：'}</span>
+                {isEn
+                  ? 'Enter a question that can be answered with Yes or No, such as: Should I accept this new job offer? Will this relationship move forward?'
+                  : '请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？'}
               </p>
             </div>
           </div>
@@ -870,6 +878,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
 export default function Home() {
   const router = useRouter();
   const { t } = useTranslation('common');
+  const isEn = router.locale === 'en';
 
   const switchLocale = () => {
     const next = router.locale === 'en' ? 'zh' : 'en';
@@ -1234,13 +1243,13 @@ export default function Home() {
                             className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
                             {isTrialLoading ? (
-                              <span className="truncate">Starting…</span>
+                              <span className="truncate">{isEn ? 'Starting...' : '正在开启...'}</span>
                             ) : user ? (
                               <span className="truncate">{t('hero.cta')}</span>
                             ) : isTrialActive ? (
-                              <span className="truncate">Continue Free Trial</span>
+                              <span className="truncate">{isEn ? 'Continue Free Trial' : '继续免费试用'}</span>
                             ) : (
-                              <span className="truncate">Try Free for 72 Hours</span>
+                              <span className="truncate">{isEn ? 'Try Free for 72 Hours' : '免费试用 72 小时'}</span>
                             )}
                           </button>
 
@@ -1248,15 +1257,17 @@ export default function Home() {
                           {!user && !isTrialLoading && (
                             <p className="text-white/55 text-xs leading-tight">
                               {isTrialActive
-                                ? `Your trial ends in ${trialHoursLeft} hour${trialHoursLeft !== 1 ? 's' : ''}`
-                                : 'No login required'}
+                                ? (isEn
+                                    ? `Your trial ends in ${trialHoursLeft} hour${trialHoursLeft !== 1 ? 's' : ''}`
+                                    : `免费试用还剩 ${trialHoursLeft} 小时`)
+                                : (isEn ? 'No login required' : '无需登录')}
                             </p>
                           )}
 
                           {/* startTrial 失败时的轻量提示 */}
                           {startTrialError && (
                             <p className="text-red-400/90 text-xs leading-tight">
-                              Unable to start your free trial. Please try again.
+                              {isEn ? 'Unable to start your free trial. Please try again.' : '暂时无法开启免费试用，请稍后再试。'}
                             </p>
                           )}
                         </div>

@@ -148,6 +148,7 @@ export default function HexagramReadingPage() {
         body: JSON.stringify({
           cards: result.cards,
           question: question || '',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

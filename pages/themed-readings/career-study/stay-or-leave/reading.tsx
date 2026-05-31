@@ -172,7 +172,11 @@ export default function StayOrLeaveReading() {
       const response = await fetch('/api/reading/career-stay-or-leave', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ cards, questionTitle: '这份工作是否值得继续做下去？' })
+        body: JSON.stringify({
+          cards,
+          questionTitle: isEn ? 'Is this job still worth staying in?' : '这份工作是否值得继续做下去？',
+          locale: isEn ? 'en' : 'zh',
+        })
       });
 
       const data = await response.json();

@@ -93,6 +93,7 @@ export default function ThreeCardReadingPage() {
         body: JSON.stringify({
           cards: result.cards,
           question: question || '',
+          locale: isZh ? 'zh' : 'en',
         }),
       });
 

@@ -11,11 +11,25 @@ export default function SixPointedStarQuestionPage() {
   const router = useRouter();
   const isEn = router.locale === 'en';
   const texts = {
+    pageTitle: isEn ? 'Six-Pointed Star Spread - Enter Your Question | FateAura' : '六芒星牌阵 - 问题输入 | FateAura',
+    metaDesc: isEn ? 'Enter your question for a more focused tarot reading.' : '输入你的问题，获得更精准的塔罗占卜解读',
+    back: isEn ? 'Back' : '返回',
+    spreadName: isEn ? 'Six-Pointed Star Spread' : '六芒星牌阵',
+    subtitle: isEn
+      ? 'Enter your question if you want, and let this spread help you sort through the situation and direction.'
+      : '可输入你的问题（可选），让牌阵帮你梳理局势与方向。',
+    questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
+    placeholder: isEn
+      ? 'e.g. Work and relationships have both felt complicated lately. How should I respond? / Where is this relationship heading?'
+      : '例如：最近工作和感情都很复杂，我该如何应对？ / 这段关系的未来会怎样？',
     hint: isEn
       ? 'For a more focused reading, enter your question below. You can also start without a question.'
       : '输入你的问题后可获得更精准的解读，也可以不输入问题直接开始抽牌',
     hintWithQ: isEn ? 'Question entered' : '已输入问题',
     startBtn: isEn ? 'Start Reading' : '开始抽牌',
+    bottomHint: isEn
+      ? 'The Six-Pointed Star Spread is suited to complex situations, helping you examine the issue and direction from multiple angles.'
+      : '六芒星牌阵适合复杂局面，帮你从多个维度梳理问题与方向。',
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
@@ -68,10 +82,10 @@ export default function SixPointedStarQuestionPage() {
   return (
     <>
       <Head>
-        <title>六芒星牌阵 - 问题输入 | FateAura</title>
+        <title>{texts.pageTitle}</title>
         <meta
           name="description"
-          content="输入你的问题，获得更精准的塔罗占卜解读"
+          content={texts.metaDesc}
         />
       </Head>
 
@@ -89,7 +103,7 @@ export default function SixPointedStarQuestionPage() {
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
             <span className="material-symbols-outlined">arrow_back</span>
-            <span className="text-sm font-medium">返回</span>
+            <span className="text-sm font-medium">{texts.back}</span>
           </button>
           
           <div className="flex items-center gap-4">
@@ -115,10 +129,10 @@ export default function SixPointedStarQuestionPage() {
                 SIX-POINTED STAR SPREAD
               </p>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
-                六芒星牌阵
+                {texts.spreadName}
               </h1>
               <p className="text-white/70 text-lg">
-                可输入你的问题（可选），让牌阵帮你梳理局势与方向。
+                {texts.subtitle}
               </p>
             </motion.div>
 
@@ -132,12 +146,12 @@ export default function SixPointedStarQuestionPage() {
               {/* 输入框 */}
               <div className="mb-4">
                 <label className="block text-white/90 font-semibold mb-3">
-                  你的问题（可选）
+                  {texts.questionLabel}
                 </label>
                 <textarea
                   value={question}
                   onChange={handleQuestionChange}
-                  placeholder="例如：最近工作和感情都很复杂，我该如何应对？ / 这段关系的未来会怎样？"
+                  placeholder={texts.placeholder}
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
@@ -175,7 +189,7 @@ export default function SixPointedStarQuestionPage() {
                   auto_awesome
                 </span>
                 <p className="relative z-10 text-white/80 text-sm text-center leading-relaxed">
-                  六芒星牌阵适合复杂局面，帮你从多个维度梳理问题与方向。
+                  {texts.bottomHint}
                 </p>
                 <span className="material-symbols-outlined text-primary/80 text-xl animate-pulse" style={{ animationDelay: '1s' }}>
                   auto_awesome

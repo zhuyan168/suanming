@@ -58,6 +58,39 @@ const SLOT_CONFIG = [
   },
 ];
 
+const SLOT_CONFIG_EN = [
+  {
+    position: 1,
+    title: 'What they say out loud',
+    meaning: 'What they are currently expressing to you, representing the part you can hear and see.',
+  },
+  {
+    position: 2,
+    title: 'What they truly think',
+    meaning: 'The real thoughts they may be turning over internally, and how they judge this connection rationally.',
+  },
+  {
+    position: 3,
+    title: 'Their deeper feelings',
+    meaning: 'Their subconscious emotions and real feelings, including parts they may not fully recognize yet.',
+  },
+  {
+    position: 4,
+    title: 'Their actual actions toward you',
+    meaning: 'How they respond in real life, which helps compare their words, thoughts, and feelings.',
+  },
+  {
+    position: 5,
+    title: 'Outside influences affecting them',
+    meaning: 'External factors from reality or other people that may be shaping their judgment and choices.',
+  },
+  {
+    position: 6,
+    title: 'Short-term direction',
+    meaning: 'The most likely direction of this connection over roughly the next 2-3 months.',
+  },
+];
+
 // 从 localStorage 读取结果
 const loadWhatTheyThinkResult = (): WhatTheyThinkResult | null => {
   if (typeof window === 'undefined') return null;
@@ -92,7 +125,28 @@ const loadReading = (): SpreadReading | null => {
 
 export default function WhatTheyThinkResult() {
   const router = useRouter();
+  const isEn = router.locale === 'en';
   const texts = getReadingUiText(router.locale);
+  const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
+  const pageText = {
+    loadingTitle: isEn ? 'Loading... - What They Think' : '加载中... - 对方在想什么',
+    loading: isEn ? 'Loading...' : '加载中...',
+    title: isEn ? 'What They Think - Reading Result' : '对方在想什么 - 解读结果',
+    metaDesc: isEn ? 'We do not guess. We look at signals, evidence, and emotions.' : '我们不猜测，我们看证据与情绪',
+    header: isEn ? 'What They Think' : '对方在想什么',
+    reset: isEn ? 'Reset' : '重置',
+    h1: isEn ? 'What They Think' : '对方在想什么',
+    subtitle: isEn ? 'We do not guess. We look at signals, evidence, and emotions.' : '我们不猜测，我们看证据与情绪',
+    generatingTitle: isEn ? 'Reading the true state of this relationship...' : '正在为你解读这段关系里的真实状态',
+    generatingDesc: isEn ? 'This may take a moment. Please wait.' : '这需要一点时间，请放心等待',
+    overview: isEn ? 'Overview' : '总览',
+    upright: isEn ? 'Upright' : '正位',
+    reversed: isEn ? 'Reversed' : '逆位',
+    shortTerm: isEn ? 'Short-Term Direction' : '短期走向',
+    advice: isEn ? 'Suggested Actions' : '建议行动',
+    watchFor: isEn ? 'What to Watch For' : '观察重点',
+    backLove: isEn ? 'Back to Love Readings' : '返回爱情占卜',
+  };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [savedResult, setSavedResult] = useState<WhatTheyThinkResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +175,7 @@ export default function WhatTheyThinkResult() {
         headers,
         body: JSON.stringify({
           cards: cardsData,
-          locale: 'zh',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 
@@ -193,10 +247,10 @@ export default function WhatTheyThinkResult() {
     return (
       <>
         <Head>
-          <title>加载中... - 对方在想什么</title>
+          <title>{pageText.loadingTitle}</title>
         </Head>
         <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-          <div className="text-white text-lg">加载中...</div>
+          <div className="text-white text-lg">{pageText.loading}</div>
         </div>
       </>
     );
@@ -205,8 +259,8 @@ export default function WhatTheyThinkResult() {
   return (
     <>
       <Head>
-        <title>对方在想什么 - 解读结果</title>
-        <meta name="description" content="我们不猜测，我们看证据与情绪" />
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -282,7 +336,7 @@ export default function WhatTheyThinkResult() {
               </button>
               
               <div className="flex items-center gap-4 text-white">
-                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">对方在想什么</h2>
+                <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">{pageText.header}</h2>
               </div>
 
               <button
@@ -290,7 +344,7 @@ export default function WhatTheyThinkResult() {
                 className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
               >
                 <span className="material-symbols-outlined">refresh</span>
-                <span className="text-sm font-medium hidden sm:inline">重置</span>
+                <span className="text-sm font-medium hidden sm:inline">{pageText.reset}</span>
               </button>
             </header>
 
@@ -299,10 +353,10 @@ export default function WhatTheyThinkResult() {
               <div className="max-w-7xl mx-auto text-center">
                 <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Reading Result</p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
-                  {reading?.title || '对方在想什么'}
+                  {reading?.title || pageText.h1}
                 </h1>
                 <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                  我们不猜测，我们看证据与情绪
+                  {pageText.subtitle}
                 </p>
               </div>
             </div>
@@ -316,7 +370,7 @@ export default function WhatTheyThinkResult() {
                     isAnimating={[false, false, false, false, false, false]}
                     showLoadingText={false}
                     forceFlipped={true}
-                    slotConfig={SLOT_CONFIG}
+                    slotConfig={slotConfig}
                   />
                 </div>
               </div>
@@ -370,9 +424,9 @@ export default function WhatTheyThinkResult() {
                     >
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" style={{ borderTopColor: '#7f13ec' }}></div>
-                        <p className="text-white text-lg font-semibold">正在为你解读这段关系里的真实状态</p>
+                        <p className="text-white text-lg font-semibold">{pageText.generatingTitle}</p>
                         <p className="text-white/60 text-sm">
-                          这需要一点时间，请放心等待
+                          {pageText.generatingDesc}
                         </p>
                       </div>
                     </motion.div>
@@ -389,7 +443,7 @@ export default function WhatTheyThinkResult() {
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <span className="text-3xl">✨</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">总览</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.overview}</h2>
                         </div>
                         <p className="text-white/90 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
                           {reading.overall}
@@ -400,7 +454,7 @@ export default function WhatTheyThinkResult() {
                       <div className="space-y-6 mb-10">
                         {reading.positions?.map((pos, index) => {
                           const card = savedResult.cards?.[index];
-                          const config = SLOT_CONFIG?.[index];
+                          const config = slotConfig?.[index];
                           
                           // 防御性检查：如果 card 或 config 不存在，跳过此项
                           if (!card || !config) return null;
@@ -446,11 +500,11 @@ export default function WhatTheyThinkResult() {
                                     {card?.name}
                                   </h4>
                                   <p className="text-white/60 text-sm mb-4">
-                                    {card?.orientation === 'upright' ? '正位' : '逆位'}
+                                    {card?.orientation === 'upright' ? pageText.upright : pageText.reversed}
                                     {card?.keywords && card.keywords.length > 0 && (
                                       <>
                                         {' · '}
-                                        {card.keywords.join('、')}
+                                        {card.keywords.join(isEn ? ', ' : '、')}
                                       </>
                                     )}
                                   </p>
@@ -475,7 +529,7 @@ export default function WhatTheyThinkResult() {
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <span className="text-2xl">🔮</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">短期走向</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.shortTerm}</h2>
                         </div>
                         {reading.shortTerm?.trend && (
                           <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap mb-6">
@@ -488,7 +542,7 @@ export default function WhatTheyThinkResult() {
                           <div className="mb-6">
                             <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
                               <span className="text-xl">💡</span>
-                              建议行动
+                              {pageText.advice}
                             </h3>
                             <ul className="space-y-2">
                               {reading.shortTerm.advice.map((item, idx) => (
@@ -506,7 +560,7 @@ export default function WhatTheyThinkResult() {
                           <div>
                             <h3 className="text-white text-lg font-semibold mb-3 flex items-center gap-2">
                               <span className="text-xl">👁️</span>
-                              观察重点
+                              {pageText.watchFor}
                             </h3>
                             <ul className="space-y-2">
                               {reading.shortTerm.watchFor.map((item, idx) => (
@@ -552,7 +606,7 @@ export default function WhatTheyThinkResult() {
                       className="flex-1 py-4 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      返回爱情占卜
+                      {pageText.backLove}
                     </button>
                   </div>
                 </motion.div>

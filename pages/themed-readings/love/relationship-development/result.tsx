@@ -224,7 +224,7 @@ export default function RelationshipDev8Result() {
       headers,
       body: JSON.stringify({
           cards: cardsData,
-          locale: 'zh',
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 
@@ -349,7 +349,7 @@ export default function RelationshipDev8Result() {
           <title>{pageText.loadingTitle}</title>
         </Head>
         <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-          <div className="text-white text-lg">数据加载中...</div>
+          <div className="text-white text-lg">{pageText.loadingData}</div>
         </div>
       </>
     );
@@ -550,7 +550,7 @@ export default function RelationshipDev8Result() {
                       <div className="mb-10">
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-2xl">🎴</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.shortTermTrend}</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.cardReading}</h2>
                         </div>
                         <div className="space-y-6">
                           {reading.cardReadings?.map((cardReading, index) => {
@@ -628,7 +628,7 @@ export default function RelationshipDev8Result() {
                       >
                         <div className="flex items-center gap-3 mb-6">
                           <span className="text-2xl">✨</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">关系动力整合</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.integration}</h2>
                         </div>
                         
                         <div className="space-y-5">
@@ -670,7 +670,7 @@ export default function RelationshipDev8Result() {
                       >
                         <div className="flex items-center gap-3 mb-4">
                           <span className="text-2xl">🔮</span>
-                          <h2 className="text-white text-xl sm:text-2xl font-bold">短期发展趋势</h2>
+                          <h2 className="text-white text-xl sm:text-2xl font-bold">{pageText.shortTermTrend}</h2>
                         </div>
                         <p className="text-white/90 text-base leading-relaxed whitespace-pre-wrap">
                           {reading.shortTermTrend}
@@ -710,7 +710,7 @@ export default function RelationshipDev8Result() {
                       className="flex-1 py-4 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      返回爱情占卜
+                      {pageText.backLove}
                     </button>
                   </div>
                 </div>

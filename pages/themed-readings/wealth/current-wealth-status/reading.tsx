@@ -100,6 +100,7 @@ export default function WealthCurrentStatusReadingPage() {
           headers,
           body: JSON.stringify({
           cards: cards,
+          locale: isEn ? 'en' : 'zh',
         }),
       });
 

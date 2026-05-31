@@ -1,3 +1,4 @@
+﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
@@ -18,7 +19,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '缺少必需参数' });
     }
 
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const isEn = isEnglishRequest(req);
+
+  const apiKey = process.env.DEEPSEEK_API_KEY;
     
     // 调试信息（仅开发环境）
     if (process.env.NODE_ENV === 'development') {
@@ -34,8 +37,27 @@ export default async function handler(req, res) {
     }
 
     // 构建 prompt（按照用户提供的模板）
-    const orientationText = orientation === 'upright' ? '正位' : '逆位';
-    const userMessage = `用户今天抽到的塔罗牌信息如下：
+    const orientationText = isEn
+      ? (orientation === 'upright' ? 'Upright' : 'Reversed')
+      : (orientation === 'upright' ? '正位' : '逆位');
+    const userMessage = isEn ? `The user drew the following tarot card for today's daily reading:
+
+- Card: ${cardName}
+- Orientation: ${orientationText}
+- Card meaning: ${baseMeaning}
+
+Generate today's detailed daily fortune in natural English. Return one JSON object with these fields:
+
+- overall: overall fortune, 1-2 sentences
+- love: love and relationships, 1-2 sentences
+- career: career and study, 1-2 sentences
+- wealth: money and resources, 1 sentence
+- health: health or self-care advice, 1 sentence
+- luckyColor: lucky color, English color name
+- luckyNumber: lucky number, between 1 and 99
+- quote: a short gentle quote, under 10 English words, aligned with the reading
+
+Return JSON only. Do not include any Chinese text.` : `用户今天抽到的塔罗牌信息如下：
 
 - 牌名：${cardName}
 - 正逆位：${orientationText}
@@ -66,11 +88,13 @@ export default async function handler(req, res) {
         messages: [
           {
             role: 'system',
-            content: '你现在是一名温柔、专业的塔罗占卜师。',
+            content: isEn
+              ? 'You are a warm, professional tarot reader writing for an English-speaking audience.'
+              : '你现在是一名温柔、专业的塔罗占卜师。',
           },
           {
             role: 'user',
-            content: userMessage,
+            content: withAiOutputLanguage(userMessage, isEn),
           },
         ],
         temperature: 0.7,
