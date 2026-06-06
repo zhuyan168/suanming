@@ -5,10 +5,60 @@ import { useRouter } from 'next/router'
 import { useMembership } from '../hooks/useMembership'
 import { getAuthHeaders } from '../lib/apiHeaders'
 
+type MembershipPlanKey = 'monthly' | 'quarterly' | 'annual'
+
+const MEMBERSHIP_PLANS: Array<{
+  key: MembershipPlanKey
+  price: string
+  intervalEn: string
+  intervalZh: string
+  nameEn: string
+  nameZh: string
+  badgeEn?: string
+  badgeZh?: string
+  noteEn: string
+  noteZh: string
+}> = [
+  {
+    key: 'monthly',
+    nameEn: 'Monthly',
+    nameZh: '月会员',
+    price: '$9.90',
+    intervalEn: 'month',
+    intervalZh: '月',
+    noteEn: 'Billed monthly. Cancel anytime.',
+    noteZh: '每月自动续费，可随时取消。',
+  },
+  {
+    key: 'quarterly',
+    nameEn: 'Quarterly',
+    nameZh: '季度会员',
+    price: '$23.90',
+    intervalEn: '3 months',
+    intervalZh: '3 个月',
+    badgeEn: 'Popular',
+    badgeZh: '推荐',
+    noteEn: 'Billed every 3 months. Better monthly value.',
+    noteZh: '每 3 个月自动续费，月均价格更优惠。',
+  },
+  {
+    key: 'annual',
+    nameEn: 'Annual',
+    nameZh: '年会员',
+    price: '$86.90',
+    intervalEn: 'year',
+    intervalZh: '年',
+    badgeEn: 'Best value',
+    badgeZh: '最划算',
+    noteEn: 'Billed yearly. Best long-term value.',
+    noteZh: '每年自动续费，长期使用最划算。',
+  },
+]
+
 function formatMembershipDate(iso: string | null | undefined): string {
-  if (iso == null || String(iso).trim() === '') return '—'
+  if (iso == null || String(iso).trim() === '') return '-'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
@@ -21,23 +71,29 @@ export default function MembershipPage() {
   const [redeemLoading, setRedeemLoading] = useState(false)
   const [redeemError, setRedeemError] = useState<string | null>(null)
   const [redeemSuccess, setRedeemSuccess] = useState(false)
+  const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<MembershipPlanKey | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
   const texts = isEn ? {
     title: 'Membership - FateAura',
-    metaDesc: 'Manage membership access and redeem membership codes on FateAura.',
+    metaDesc: 'Subscribe to FateAura membership for advanced spreads and deeper tarot readings.',
     heading: 'Membership',
-    subtitle: 'Use membership access for advanced spreads and deeper reading experiences.',
+    subtitle: 'Unlock advanced spreads and deeper reading experiences.',
     alreadyMember: 'You are already a member.',
-    memberExpires: 'Membership expires on:',
-    notMember: 'Your account does not have an active membership. Redeem a membership code to unlock member benefits.',
-    loginPrompt: 'Sign in to redeem a membership code.',
+    memberExpires: 'Membership expires on: ',
+    notMember: 'Your account does not have an active membership yet. Choose a plan below to unlock member benefits.',
+    loginPrompt: 'Sign in before subscribing or redeeming a membership code.',
     loginBtn: 'Sign In',
     benefitsTitle: 'Member Benefits',
-    benefit1: 'Access to exclusive advanced spreads including Hexagram, Horseshoe, Celtic Cross, and more.',
-    benefit2: 'Deeper, more detailed readings to uncover complex issues and long-term trends.',
-    benefit3: 'Ongoing access to new member features and experience improvements.',
-    paymentTitle: 'Membership Access',
-    paymentComingSoon: 'Online payment is coming soon. For now, use a membership code if you have one.',
+    benefit1: 'Access advanced spreads including Hexagram, Horseshoe, Celtic Cross, and more.',
+    benefit2: 'Receive deeper readings for complex questions and long-term themes.',
+    benefit3: 'Keep access to new member features and future experience improvements.',
+    paymentTitle: 'Subscription Plans',
+    choosePlan: 'Subscriptions renew automatically. You can cancel anytime; paid access remains until the current period ends.',
+    subscribe: 'Subscribe',
+    checkoutLoading: 'Opening...',
+    checkoutLoginPrompt: 'Please sign in before purchasing membership.',
+    checkoutError: 'Unable to open checkout. Please try again later.',
     redeemTitle: 'Redeem Code',
     redeemPlaceholder: 'Enter membership code',
     redeemSuccess: 'Redeemed successfully!',
@@ -49,31 +105,35 @@ export default function MembershipPage() {
     errorRedeemFailed: 'Redemption failed. Please try again.',
     errorNetwork: 'Network error. Please check your connection and try again.',
   } : {
-    title: '开通会员 - FateAura',
-    metaDesc: '解锁高级牌阵与更完整的占卜体验',
-    heading: '开通会员',
-    subtitle: '解锁高级牌阵与更完整的占卜体验',
-    alreadyMember: '你当前已是会员用户',
-    memberExpires: '会员到期时间：',
-    notMember: '当前账号未开通会员，兑换会员码或后续支付开通后即可享受会员权益',
-    loginPrompt: '登录后即可兑换会员码',
+    title: '会员中心 - FateAura',
+    metaDesc: '开通 FateAura 会员，解锁高级牌阵和更深入的塔罗解读体验。',
+    heading: '会员中心',
+    subtitle: '解锁高级牌阵，获得更完整、更深入的解读体验。',
+    alreadyMember: '您当前已经是会员。',
+    memberExpires: '会员有效期至：',
+    notMember: '当前账号还没有有效会员。请选择下方套餐开通会员权益。',
+    loginPrompt: '请先登录，再开通会员或兑换会员码。',
     loginBtn: '去登录',
     benefitsTitle: '会员权益',
-    benefit1: '会员专属高级牌阵，含六芒星、马蹄铁、凯尔特十字等深度牌阵',
-    benefit2: '更深度的解读内容，看清复杂议题与长期走向',
-    benefit3: '后续持续扩展更多会员功能与体验优化',
-    paymentTitle: '支付开通',
-    paymentComingSoon: '支付功能即将上线',
+    benefit1: '解锁六芒星、马蹄铁、凯尔特十字等高级牌阵。',
+    benefit2: '获得更深入的解读内容，适合复杂问题和长期趋势判断。',
+    benefit3: '持续享受后续新增的会员功能和体验优化。',
+    paymentTitle: '订阅套餐',
+    choosePlan: '订阅会自动续费，可随时取消；取消后，已付款周期内的会员权益仍会保留。',
+    subscribe: '订阅',
+    checkoutLoading: '打开中...',
+    checkoutLoginPrompt: '请先登录后再开通会员。',
+    checkoutError: '暂时无法打开支付页面，请稍后再试。',
     redeemTitle: '会员码兑换',
     redeemPlaceholder: '请输入会员码',
-    redeemSuccess: '兑换成功',
-    redeemLoading: '兑换中…',
+    redeemSuccess: '兑换成功！',
+    redeemLoading: '兑换中...',
     redeemBtn: '兑换',
     backHome: '返回首页',
-    backAccount: '返回个人中心',
-    errorServiceUnavailable: '服务暂时不可用，请稍后再试',
-    errorRedeemFailed: '兑换失败，请稍后再试',
-    errorNetwork: '网络异常，请检查连接后重试',
+    backAccount: '返回账户',
+    errorServiceUnavailable: '服务暂时不可用，请稍后再试。',
+    errorRedeemFailed: '兑换失败，请稍后再试。',
+    errorNetwork: '网络异常，请检查连接后再试。',
   }
 
   const handleRedeemClick = async () => {
@@ -115,6 +175,46 @@ export default function MembershipPage() {
       setRedeemError(texts.errorNetwork)
     } finally {
       setRedeemLoading(false)
+    }
+  }
+
+  const handleCheckoutClick = async (planKey: MembershipPlanKey) => {
+    if (checkoutLoadingPlan) return
+
+    if (!userId) {
+      setCheckoutError(texts.checkoutLoginPrompt)
+      return
+    }
+
+    setCheckoutError(null)
+    setCheckoutLoadingPlan(planKey)
+
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch('/api/creem/create-checkout', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ planKey }),
+      })
+
+      let payload: { checkoutUrl?: string; error?: string } = {}
+      try {
+        payload = await res.json()
+      } catch {
+        setCheckoutError(texts.checkoutError)
+        return
+      }
+
+      if (!res.ok || !payload.checkoutUrl) {
+        setCheckoutError(typeof payload.error === 'string' ? payload.error : texts.checkoutError)
+        return
+      }
+
+      window.location.href = payload.checkoutUrl
+    } catch {
+      setCheckoutError(texts.checkoutError)
+    } finally {
+      setCheckoutLoadingPlan(null)
     }
   }
 
@@ -193,11 +293,56 @@ export default function MembershipPage() {
             </ul>
           </section>
 
-          <section className="rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-6 mb-6">
+          <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6">
             <h2 className="text-sm font-semibold text-white/90 mb-3">{texts.paymentTitle}</h2>
-            <p className="text-white/45 text-sm leading-relaxed text-center py-6">
-              {texts.paymentComingSoon}
-            </p>
+            <p className="text-white/50 text-sm leading-relaxed mb-5">{texts.choosePlan}</p>
+            <div className="space-y-3">
+              {MEMBERSHIP_PLANS.map((plan) => {
+                const isLoadingPlan = checkoutLoadingPlan === plan.key
+                const planName = isEn ? plan.nameEn : plan.nameZh
+                const interval = isEn ? plan.intervalEn : plan.intervalZh
+                const badge = isEn ? plan.badgeEn : plan.badgeZh
+                const note = isEn ? plan.noteEn : plan.noteZh
+
+                return (
+                  <div
+                    key={plan.key}
+                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-white font-semibold">{planName}</h3>
+                          {badge && (
+                            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[11px] font-medium text-primary">
+                              {badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-sm text-white/55">
+                          <span className="text-white/90 font-semibold">{plan.price}</span>
+                          <span> / {interval}</span>
+                        </p>
+                        <p className="mt-2 text-xs leading-relaxed text-white/45">{note}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCheckoutClick(plan.key)}
+                        disabled={loading || !!checkoutLoadingPlan || !userId}
+                        className="shrink-0 rounded-lg bg-primary/90 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isLoadingPlan ? texts.checkoutLoading : texts.subscribe}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+            {checkoutError && (
+              <p className="mt-4 text-center text-sm text-red-300/90" role="alert">
+                {checkoutError}
+              </p>
+            )}
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
