@@ -88,6 +88,8 @@ export default function MembershipPage() {
     benefit1: 'Access advanced spreads including Hexagram, Horseshoe, Celtic Cross, and more.',
     benefit2: 'Receive deeper readings for complex questions and long-term themes.',
     benefit3: 'Keep access to new member features and future experience improvements.',
+    aiNoticeTitle: 'AI Transparency',
+    aiNoticeBody: 'FateAura readings may be generated or assisted by AI. They are provided for entertainment, self-reflection, and personal insight only, and should not be considered medical, legal, financial, or other professional advice.',
     paymentTitle: 'Subscription Plans',
     choosePlan: 'Subscriptions renew automatically. You can cancel anytime; paid access remains until the current period ends.',
     subscribe: 'Subscribe',
@@ -291,6 +293,18 @@ export default function MembershipPage() {
                 <span>{texts.benefit3}</span>
               </li>
             </ul>
+          </section>
+
+          <section className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-6 mb-6">
+            <h2 className="text-sm font-semibold text-amber-100/95 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span className="material-symbols-outlined text-amber-200 text-lg">policy</span>
+              AI Transparency
+            </h2>
+            <p className="text-white/70 text-sm leading-relaxed">
+              FateAura readings may be generated or assisted by AI. They are provided for entertainment,
+              self-reflection, and personal insight only, and should not be considered medical, legal,
+              financial, or other professional advice.
+            </p>
           </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6">

@@ -60,7 +60,7 @@ export default function AboutPage() {
     philosophyBody2: 'The cards may point to patterns and possibilities, but the final choice is always yours.',
     disclaimerTitle: '4. Disclaimer',
     disclaimerBody1: 'FateAura readings are for personal reflection and self-exploration only. They are not medical, legal, financial, psychological, or other professional advice.',
-    disclaimerBody2: 'For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
+    disclaimerBody2: 'Some FateAura readings may be generated or assisted by AI. AI-assisted content is provided for entertainment, self-reflection, and personal insight only. For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
     privacyTitle: '5. Privacy',
     privacyBody1: 'We care about user privacy and aim to protect your account information and usage records.',
     privacyBody2Prefix: 'For more details about data collection, use, and protection, please read our',
@@ -214,10 +214,10 @@ export default function AboutPage() {
                     <p>
                       <span className="text-white/60">{isEn ? 'Email: ' : '邮箱：'}</span>
                       <a
-                        href="mailto:sephiroth.wang@foxmail.com"
+                        href="mailto:support@fateaura.com"
                         className="text-primary hover:text-secondary break-all transition-colors"
                       >
-                        sephiroth.wang@foxmail.com
+                        support@fateaura.com
                       </a>
                     </p>
                   </div>

@@ -94,6 +94,7 @@ export default function TermsPage() {
     referenceTitle: '2. For Reflection Only',
     referenceParagraphs: [
       'FateAura readings are for personal reflection and self-exploration only. They are not medical, legal, financial, psychological, or other professional advice.',
+      'Some FateAura readings may be generated or assisted by AI. AI-assisted content is provided for entertainment, self-reflection, and personal insight only.',
       'For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
     ],
     privacyTitle: '7. Privacy and Contact',
