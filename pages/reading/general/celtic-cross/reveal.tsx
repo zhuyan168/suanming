@@ -204,7 +204,7 @@ function MembershipModal({
 
             {/* 说明 */}
             <p className="text-white/70 text-center leading-relaxed mb-8">
-              {isEn ? 'This is a member-only reading feature. Unlock full readings by becoming a member (coming soon).' : '这是会员专属解读功能。\n开通会员后即可开始解读（功能即将上线）。'}
+              {isEn ? 'This is a member-only reading feature. You can review membership pricing before signing in or paying.' : '这是会员专属解读功能。您可以先查看会员价格，再决定是否登录订阅。'}
             </p>
 
             {/* 按钮 */}
@@ -277,7 +277,7 @@ export default function CelticCrossRevealPage() {
     reversed: isEn ? 'Reversed' : '逆位',
     memberTitle: isEn ? 'Member Reading Required' : '解读需开通会员',
     memberDesc: isEn ? 'The Celtic Cross is a deep-dive spread with a more detailed and time-intensive reading. You can explore the card meanings below on your own. Unlock the full reading by becoming a member.' : '凯尔特十字属于深度牌阵，解读会更详细也更耗时。你可以先根据牌位含义自行阅读牌面；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。',
-    memberComingSoon: isEn ? 'Membership coming soon — stay tuned.' : '会员系统即将上线，敬请期待',
+    memberComingSoon: isEn ? 'View membership plans from $9.90/month.' : '查看会员方案，$9.90/月起。',
     startReading: isEn ? 'Start Reading' : '开始解读',
     memberBadge: isEn ? 'Member' : '会员',
     backHome: isEn ? 'Back Home' : '返回首页',

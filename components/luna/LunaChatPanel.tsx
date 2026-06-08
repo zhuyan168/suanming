@@ -52,13 +52,13 @@ function lunaText(isEn: boolean) {
     openSpread: isEn ? 'Open this spread' : '去看看这个牌阵',
     chooseAgain: isEn ? 'Choose again' : '换个问题重新选',
     supportPrompt: isEn ? 'What would you like help with?' : '你想了解哪方面的问题？',
-    membership: isEn ? 'Membership access' : '如何充值 / 成为会员',
+    membership: isEn ? 'Membership access' : '会员与订阅',
     result: isEn ? 'Where are my results?' : '占卜结果在哪里看',
     human: isEn ? 'Contact support' : '联系人工客服',
     faqAnswers: {
       'faq-membership': isEn
-        ? 'Membership features are still being improved. Some advanced spreads are marked as members-only, and a full membership flow will be available later.\n\nYou can ask me anything else meanwhile.'
-        : '目前会员功能还在完善中，部分高级牌阵会在页面上标注「会员专属」。后续我们会上线正式的会员系统，届时你可以在个人中心完成开通。\n\n如果你有其他问题，随时可以问我。',
+        ? 'FateAura membership is available now. You can review monthly, quarterly, and annual prices before signing in or paying.\n\nMonthly: $9.90 / month\nQuarterly: $23.90 / 3 months\nAnnual: $86.90 / year'
+        : 'FateAura 会员已经开放。您无需登录也可以先查看月度、季度和年度价格，确认后再登录订阅。\n\nMonthly / 月度会员：$9.90 / 月\nQuarterly / 季度会员：$23.90 / 3 个月\nAnnual / 年度会员：$86.90 / 年',
       'faq-result': isEn
         ? 'Your result appears right after you draw the cards. If you leave midway, history may not be available for every reading yet, so saving a screenshot is still a good idea.\n\nA fuller history feature is being improved.'
         : '你的占卜结果会在完成抽牌后直接展示在页面上。如果中途离开了页面，目前暂不支持历史记录查看，建议占卜时截图保存。\n\n后续我们会上线历史记录功能，敬请期待。',
@@ -198,7 +198,7 @@ export default function LunaChatPanel({
       appendMessages(current, reply);
       setMode('idle');
     },
-    [appendMessages, copy],
+    [appendMessages, copy, isEn],
   );
 
   const handleFaq = useCallback(
@@ -207,13 +207,16 @@ export default function LunaChatPanel({
         role: 'assistant',
         content: copy.faqAnswers[faqKey] || copy.unknownFaq,
         actions: [
+          ...(faqKey === 'faq-membership'
+            ? [{ label: isEn ? 'View pricing' : '查看会员价格', type: 'link' as const, href: '/membership' }]
+            : []),
           { label: copy.moreQuestions, type: 'quick-entry', payload: 'support' },
           { label: copy.home, type: 'quick-entry', payload: 'home' },
         ],
       };
       appendMessages(current, reply);
     },
-    [appendMessages, copy],
+    [appendMessages, copy, isEn],
   );
 
   const handleActionClick = useCallback(

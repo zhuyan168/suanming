@@ -171,7 +171,7 @@ export default function HexagramRevealPage() {
     guideCard: isEn ? 'Guide Card' : '指引牌',
     memberTitle: isEn ? 'Member Reading Required' : '解读需开通会员',
     memberDesc: isEn ? 'This spread\'s full reading is a member-only feature. You can explore the card meanings below on your own. Unlock the full reading by becoming a member.' : '这个牌阵的解读属于付费内容。你可以先根据牌面含义自行理解；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。',
-    memberComingSoon: isEn ? 'Membership coming soon — stay tuned.' : '会员系统即将上线，敬请期待',
+    memberComingSoon: isEn ? 'View membership plans from $9.90/month.' : '查看会员方案，$9.90/月起。',
     startReading: isEn ? 'Start Reading' : '开始解读',
     memberBadge: isEn ? 'Member' : '会员',
     backHome: isEn ? 'Back Home' : '返回首页',
@@ -516,7 +516,7 @@ export default function HexagramRevealPage() {
                     解读需开通会员
                   </h3>
                   <p className="text-white/70 text-sm leading-relaxed">
-                    会员系统即将上线。上线后，开通会员即可解锁六芒星牌阵的完整解读。
+                    查看会员方案后，即可开通并解锁六芒星牌阵的完整解读。
                   </p>
                 </div>
                 

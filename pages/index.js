@@ -1469,6 +1469,12 @@ export default function Home() {
                         {t('footer.privacy')}
                       </Link>
                       <Link
+                        href="/membership"
+                        className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
+                      >
+                        {isEn ? 'Pricing' : '会员价格'}
+                      </Link>
+                      <Link
                         href="/terms"
                         className="text-white/70 font-medium leading-normal hover:text-primary transition-colors"
                       >

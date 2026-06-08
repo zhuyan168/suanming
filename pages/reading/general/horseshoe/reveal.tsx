@@ -149,7 +149,7 @@ export default function HorseshoeRevealPage() {
     meaning: isEn ? 'Meaning' : '含义',
     memberTitle: isEn ? 'Member Reading Required' : '解读需开通会员',
     memberDesc: isEn ? 'This spread\'s full reading is a member-only feature. You can explore the card meanings below on your own. Unlock the full reading by becoming a member.' : '这个牌阵的解读属于付费内容。你可以先根据牌面含义自行理解；如果想获得更完整、更有结构的解读，可以开通会员后解锁「开始解读」。',
-    memberComingSoon: isEn ? 'Membership coming soon — stay tuned.' : '会员系统即将上线，敬请期待',
+    memberComingSoon: isEn ? 'View membership plans from $9.90/month.' : '查看会员方案，$9.90/月起。',
     startReading: isEn ? 'Start Reading' : '开始解读',
     memberBadge: isEn ? 'Member' : '会员',
     backHome: isEn ? 'Back Home' : '返回首页',
