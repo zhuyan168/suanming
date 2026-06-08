@@ -95,10 +95,10 @@ export default function ContactPage() {
                 <div>
                   <p className="text-white/45 text-xs font-medium tracking-wide mb-2.5">{texts.emailLabel}</p>
                   <a
-                    href="mailto:sephiroth.wang@foxmail.com"
+                    href="mailto:support@fateaura.com"
                     className="text-[15px] sm:text-base text-white/95 hover:text-primary break-all transition-colors underline decoration-white/20 underline-offset-[5px] hover:decoration-primary/60"
                   >
-                    sephiroth.wang@foxmail.com
+                    support@fateaura.com
                   </a>
                 </div>
 

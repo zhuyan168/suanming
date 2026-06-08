@@ -82,10 +82,10 @@ export default function PrivacyPage() {
                 <p>
                   {texts.contactPrefix}{' '}
                   <a
-                    href="mailto:sephiroth.wang@foxmail.com"
+                    href="mailto:support@fateaura.com"
                     className="text-primary hover:text-secondary mx-1 underline underline-offset-2 break-all"
                   >
-                    sephiroth.wang@foxmail.com
+                    support@fateaura.com
                   </a>
                   {isEn ? '.' : '与我们联系。'}
                 </p>
