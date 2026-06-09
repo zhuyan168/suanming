@@ -61,6 +61,53 @@ function getPortalUrl(payload: any): string | null {
   return null;
 }
 
+function getCustomerId(payload: any): string | null {
+  const candidates = [
+    payload?.id,
+    payload?.customer_id,
+    payload?.customerId,
+    payload?.customer?.id,
+    payload?.data?.id,
+    payload?.data?.customer?.id,
+    payload?.object?.id,
+    payload?.items?.[0]?.id,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.startsWith('cust_')) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+async function findCreemCustomerIdByEmail(email: string, apiKey: string): Promise<string | null> {
+  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/customers?email=${encodeURIComponent(email)}`, {
+    method: 'GET',
+    headers: {
+      'x-api-key': apiKey,
+    },
+  });
+
+  let creemPayload: any = null;
+  try {
+    creemPayload = await creemRes.json();
+  } catch {
+    creemPayload = null;
+  }
+
+  if (!creemRes.ok) {
+    console.error('[api/creem/create-customer-portal] Creem customer lookup failed', {
+      status: creemRes.status,
+      payload: creemPayload,
+    });
+    return null;
+  }
+
+  return getCustomerId(creemPayload);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<CreateCustomerPortalSuccess | CreateCustomerPortalError>
@@ -103,7 +150,11 @@ export default async function handler(
     return res.status(500).json({ error: 'Unable to find your subscription. Please contact support.' });
   }
 
-  const customerId = subscriptions?.[0]?.creem_customer_id;
+  let customerId = subscriptions?.[0]?.creem_customer_id;
+  if (!customerId && user.email) {
+    customerId = await findCreemCustomerIdByEmail(user.email, apiKey);
+  }
+
   if (!customerId) {
     return res.status(404).json({ error: 'No Creem subscription was found for this account.' });
   }
