@@ -160,14 +160,6 @@ function addUtcDays(from: Date, days: number): string {
   return date.toISOString();
 }
 
-function isSameIsoDay(a: string | null | undefined, b: string | null | undefined): boolean {
-  if (!a || !b) return false;
-  const left = new Date(a);
-  const right = new Date(b);
-  if (Number.isNaN(left.getTime()) || Number.isNaN(right.getTime())) return false;
-  return left.toISOString().slice(0, 10) === right.toISOString().slice(0, 10);
-}
-
 async function findUserIdFromSubscription(subscriptionId: string | null): Promise<string | null> {
   if (!subscriptionId) return null;
   const { data, error } = await supabaseService
@@ -184,26 +176,16 @@ async function findUserIdFromSubscription(subscriptionId: string | null): Promis
   return data?.user_id || null;
 }
 
-async function getExistingSubscriptionPeriodEnd(subscriptionId: string | null): Promise<string | null> {
-  if (!subscriptionId) return null;
-  const { data, error } = await supabaseService
-    .from('creem_subscriptions')
-    .select('current_period_end')
-    .eq('creem_subscription_id', subscriptionId)
-    .maybeSingle();
-
-  if (error) {
-    console.error('[api/creem/webhook] find subscription period failed', error);
-    return null;
-  }
-
-  return data?.current_period_end || null;
-}
-
 async function extendMembershipFromCurrentProfile(params: {
   userId: string;
   durationDays: number;
-}): Promise<{ expiresAt: string | null; error: unknown | null }> {
+  planKey: string;
+  productId: string;
+  eventId: string;
+  subscriptionId: string | null;
+  periodEnd: string | null;
+  payload: CreemWebhookPayload;
+}): Promise<{ expiresAt: string | null; skipped: boolean; error: unknown | null }> {
   const { data: profile, error: readError } = await supabaseService
     .from('profiles')
     .select('membership_expires_at')
@@ -212,7 +194,7 @@ async function extendMembershipFromCurrentProfile(params: {
 
   if (readError) {
     console.error('[api/creem/webhook] profile read failed', readError);
-    return { expiresAt: null, error: readError };
+    return { expiresAt: null, skipped: false, error: readError };
   }
 
   const now = new Date();
@@ -221,6 +203,38 @@ async function extendMembershipFromCurrentProfile(params: {
   const base = currentExp && !Number.isNaN(currentExp.getTime()) && currentExp > now ? currentExp : now;
   const newExpiresAt = addUtcDays(base, params.durationDays);
 
+  const { data: ledgerRow, error: ledgerError } = await supabaseService
+    .from('membership_ledger')
+    .insert({
+      user_id: params.userId,
+      source: 'creem',
+      action: 'extend',
+      days_delta: params.durationDays,
+      expires_before: currentRaw || null,
+      expires_after: newExpiresAt,
+      plan_key: params.planKey,
+      creem_event_id: params.eventId,
+      creem_subscription_id: params.subscriptionId,
+      creem_product_id: params.productId,
+      creem_period_end: params.periodEnd,
+      metadata: params.payload,
+    })
+    .select('id')
+    .single();
+
+  if (ledgerError) {
+    if ((ledgerError as any).code === '23505') {
+      console.info('[api/creem/webhook] membership extension already recorded', {
+        eventId: params.eventId,
+        subscriptionId: params.subscriptionId,
+        periodEnd: params.periodEnd,
+      });
+      return { expiresAt: null, skipped: true, error: null };
+    }
+    console.error('[api/creem/webhook] membership ledger insert failed', ledgerError);
+    return { expiresAt: null, skipped: false, error: ledgerError };
+  }
+
   const { error: updateError } = await supabaseService
     .from('profiles')
     .update({ membership_expires_at: newExpiresAt })
@@ -228,10 +242,13 @@ async function extendMembershipFromCurrentProfile(params: {
 
   if (updateError) {
     console.error('[api/creem/webhook] profile membership extension failed', updateError);
-    return { expiresAt: null, error: updateError };
+    if (ledgerRow?.id) {
+      await supabaseService.from('membership_ledger').delete().eq('id', ledgerRow.id);
+    }
+    return { expiresAt: null, skipped: false, error: updateError };
   }
 
-  return { expiresAt: newExpiresAt, error: null };
+  return { expiresAt: newExpiresAt, skipped: false, error: null };
 }
 
 async function upsertSubscription(params: {
@@ -345,7 +362,6 @@ export default async function handler(
   const periodStart = getPeriodStart(eventObject);
   const periodEnd = getPeriodEnd(eventObject) || addUtcDays(new Date(), plan.fallbackDurationDays);
   const customerId = getCustomerId(eventObject);
-  const existingSubscriptionPeriodEnd = await getExistingSubscriptionPeriodEnd(subscriptionId);
 
   let status = eventObject?.status || eventType || 'unknown';
   if (ACTIVE_EVENT_TYPES.has(eventType)) status = 'active';
@@ -369,22 +385,19 @@ export default async function handler(
   });
 
   if (MEMBERSHIP_EXTENSION_EVENT_TYPES.has(eventType)) {
-    if (!isSameIsoDay(existingSubscriptionPeriodEnd, periodEnd)) {
-      const { error: profileError } = await extendMembershipFromCurrentProfile({
-        userId,
-        durationDays: plan.fallbackDurationDays,
-      });
+    const { error: profileError } = await extendMembershipFromCurrentProfile({
+      userId,
+      durationDays: plan.fallbackDurationDays,
+      planKey: plan.key,
+      productId,
+      eventId,
+      subscriptionId,
+      periodEnd,
+      payload,
+    });
 
-      if (profileError) {
-        return res.status(500).json({ received: false, error: 'Unable to update membership' });
-      }
-    } else {
-      console.info('[api/creem/webhook] membership extension already applied for period', {
-        eventType,
-        eventId,
-        subscriptionId,
-        periodEnd,
-      });
+    if (profileError) {
+      return res.status(500).json({ received: false, error: 'Unable to update membership' });
     }
   } else if (CANCELED_EVENT_TYPES.has(eventType) || SCHEDULED_CANCEL_EVENT_TYPES.has(eventType) || INACTIVE_EVENT_TYPES.has(eventType)) {
     console.info('[api/creem/webhook] subscription status recorded without shortening membership', {

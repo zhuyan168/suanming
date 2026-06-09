@@ -153,5 +153,24 @@ export default async function handler(
     return res.status(500).json({ error: '兑换处理异常，请稍后再试或联系客服' });
   }
 
+  const { error: ledgerErr } = await supabaseService
+    .from('membership_ledger')
+    .insert({
+      user_id: user.id,
+      source: 'code',
+      action: 'extend',
+      days_delta: durationDays,
+      expires_before: currentExpRaw || null,
+      expires_after: newIso,
+      membership_code_id: row.id,
+      metadata: {
+        code_expires_at: row.expires_at || null,
+      },
+    });
+
+  if (ledgerErr) {
+    console.error('[api/membership/redeem] membership ledger insert failed', ledgerErr);
+  }
+
   return res.status(200).json({ success: true, newMembershipExpiresAt: newIso });
 }
