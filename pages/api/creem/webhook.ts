@@ -53,6 +53,13 @@ const PAST_DUE_EVENT_TYPES = new Set([
   'subscription.past_due',
 ]);
 
+const REFUND_EVENT_TYPES = new Set([
+  'refund.created',
+  'refund.succeeded',
+  'payment.refunded',
+  'checkout.refunded',
+]);
+
 function readRawBody(req: NextApiRequest): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
@@ -160,6 +167,12 @@ function addUtcDays(from: Date, days: number): string {
   return date.toISOString();
 }
 
+function subtractUtcDays(from: Date, days: number): string {
+  const date = new Date(from.getTime());
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString();
+}
+
 async function findUserIdFromSubscription(subscriptionId: string | null): Promise<string | null> {
   if (!subscriptionId) return null;
   const { data, error } = await supabaseService
@@ -251,6 +264,124 @@ async function extendMembershipFromCurrentProfile(params: {
   return { expiresAt: newExpiresAt, skipped: false, error: null };
 }
 
+async function findLatestUnreversedCreemLedger(subscriptionId: string | null): Promise<any | null> {
+  if (!subscriptionId) return null;
+
+  const { data: ledgers, error } = await supabaseService
+    .from('membership_ledger')
+    .select('id, user_id, days_delta, expires_before, expires_after, plan_key, creem_subscription_id, creem_product_id, creem_period_end, created_at')
+    .eq('source', 'creem')
+    .eq('action', 'extend')
+    .eq('creem_subscription_id', subscriptionId)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('[api/creem/webhook] find creem ledger for refund failed', error);
+    return null;
+  }
+
+  for (const ledger of ledgers || []) {
+    const { data: reversal, error: reversalError } = await supabaseService
+      .from('membership_ledger')
+      .select('id')
+      .eq('source', 'refund')
+      .eq('action', 'reverse')
+      .eq('related_ledger_id', ledger.id)
+      .maybeSingle();
+
+    if (reversalError) {
+      console.error('[api/creem/webhook] find refund reversal failed', reversalError);
+      continue;
+    }
+
+    if (!reversal) return ledger;
+  }
+
+  return null;
+}
+
+async function reverseMembershipForRefund(params: {
+  eventId: string;
+  subscriptionId: string | null;
+  payload: CreemWebhookPayload;
+}): Promise<{ reversed: boolean; error: unknown | null }> {
+  const originalLedger = await findLatestUnreversedCreemLedger(params.subscriptionId);
+  if (!originalLedger) {
+    console.info('[api/creem/webhook] no unreversed membership ledger found for refund', {
+      eventId: params.eventId,
+      subscriptionId: params.subscriptionId,
+    });
+    return { reversed: false, error: null };
+  }
+
+  const { data: profile, error: readError } = await supabaseService
+    .from('profiles')
+    .select('membership_expires_at')
+    .eq('id', originalLedger.user_id)
+    .single();
+
+  if (readError) {
+    console.error('[api/creem/webhook] profile read for refund failed', readError);
+    return { reversed: false, error: readError };
+  }
+
+  const now = new Date();
+  const currentRaw = profile?.membership_expires_at;
+  const currentExp = currentRaw ? new Date(currentRaw as string) : null;
+  const base = currentExp && !Number.isNaN(currentExp.getTime()) && currentExp > now ? currentExp : now;
+  const reversedIso = subtractUtcDays(base, Math.abs(Number(originalLedger.days_delta) || 0));
+  const reversedDate = new Date(reversedIso);
+  const newExpiresAt = reversedDate > now ? reversedIso : now.toISOString();
+
+  const { data: ledgerRow, error: ledgerError } = await supabaseService
+    .from('membership_ledger')
+    .insert({
+      user_id: originalLedger.user_id,
+      source: 'refund',
+      action: 'reverse',
+      days_delta: -Math.abs(Number(originalLedger.days_delta) || 0),
+      expires_before: currentRaw || null,
+      expires_after: newExpiresAt,
+      plan_key: originalLedger.plan_key,
+      creem_event_id: params.eventId,
+      creem_subscription_id: originalLedger.creem_subscription_id,
+      creem_product_id: originalLedger.creem_product_id,
+      creem_period_end: originalLedger.creem_period_end,
+      related_ledger_id: originalLedger.id,
+      metadata: params.payload,
+    })
+    .select('id')
+    .single();
+
+  if (ledgerError) {
+    if ((ledgerError as any).code === '23505') {
+      console.info('[api/creem/webhook] refund reversal already recorded', {
+        eventId: params.eventId,
+        subscriptionId: params.subscriptionId,
+      });
+      return { reversed: false, error: null };
+    }
+    console.error('[api/creem/webhook] refund ledger insert failed', ledgerError);
+    return { reversed: false, error: ledgerError };
+  }
+
+  const { error: updateError } = await supabaseService
+    .from('profiles')
+    .update({ membership_expires_at: newExpiresAt })
+    .eq('id', originalLedger.user_id);
+
+  if (updateError) {
+    console.error('[api/creem/webhook] profile refund reversal failed', updateError);
+    if (ledgerRow?.id) {
+      await supabaseService.from('membership_ledger').delete().eq('id', ledgerRow.id);
+    }
+    return { reversed: false, error: updateError };
+  }
+
+  return { reversed: true, error: null };
+}
+
 async function upsertSubscription(params: {
   userId: string;
   subscriptionId: string | null;
@@ -336,6 +467,25 @@ export default async function handler(
     }
     console.error('[api/creem/webhook] event insert failed', eventInsertError);
     return res.status(500).json({ received: false, error: 'Unable to record webhook event' });
+  }
+
+  if (REFUND_EVENT_TYPES.has(eventType)) {
+    const { error: refundError } = await reverseMembershipForRefund({
+      eventId,
+      subscriptionId,
+      payload,
+    });
+
+    if (refundError) {
+      return res.status(500).json({ received: false, error: 'Unable to process refund' });
+    }
+
+    await supabaseService
+      .from('creem_webhook_events')
+      .update({ processed_at: new Date().toISOString() })
+      .eq('creem_event_id', eventId);
+
+    return res.status(200).json({ received: true });
   }
 
   const metadata = getMetadata(eventObject);
