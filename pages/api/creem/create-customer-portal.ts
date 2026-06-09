@@ -9,6 +9,12 @@ type CreateCustomerPortalError = {
   error: string;
 };
 
+type PortalResult = {
+  portalUrl: string | null;
+  status: number;
+  payload: any;
+};
+
 function parseCookies(cookieHeader?: string | null): Record<string, string> {
   const cookies: Record<string, string> = {};
   if (!cookieHeader) return cookies;
@@ -108,6 +114,32 @@ async function findCreemCustomerIdByEmail(email: string, apiKey: string): Promis
   return getCustomerId(creemPayload);
 }
 
+async function createPortalForCustomer(customerId: string, apiKey: string): Promise<PortalResult> {
+  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/customers/billing`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+    },
+    body: JSON.stringify({
+      customer_id: customerId,
+    }),
+  });
+
+  let creemPayload: any = null;
+  try {
+    creemPayload = await creemRes.json();
+  } catch {
+    creemPayload = null;
+  }
+
+  return {
+    portalUrl: getPortalUrl(creemPayload),
+    status: creemRes.status,
+    payload: creemPayload,
+  };
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<CreateCustomerPortalSuccess | CreateCustomerPortalError>
@@ -150,41 +182,41 @@ export default async function handler(
     return res.status(500).json({ error: 'Unable to find your subscription. Please contact support.' });
   }
 
-  let customerId = subscriptions?.[0]?.creem_customer_id;
-  if (!customerId && user.email) {
-    customerId = await findCreemCustomerIdByEmail(user.email, apiKey);
+  const customerIds = Array.from(new Set(
+    (subscriptions || [])
+      .map((subscription) => subscription.creem_customer_id)
+      .filter((customerId): customerId is string => typeof customerId === 'string' && customerId.startsWith('cust_'))
+  ));
+
+  if (user.email) {
+    const customerIdFromEmail = await findCreemCustomerIdByEmail(user.email, apiKey);
+    if (customerIdFromEmail && !customerIds.includes(customerIdFromEmail)) {
+      customerIds.push(customerIdFromEmail);
+    }
   }
 
-  if (!customerId) {
+  if (customerIds.length === 0) {
     return res.status(404).json({ error: 'No Creem subscription was found for this account.' });
   }
 
-  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/customers/billing`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      customer_id: customerId,
-    }),
-  });
+  const failedAttempts: Array<{ customerId: string; status: number; payload: any }> = [];
+  for (const customerId of customerIds) {
+    const portalResult = await createPortalForCustomer(customerId, apiKey);
+    if (portalResult.portalUrl) {
+      return res.status(200).json({ portalUrl: portalResult.portalUrl });
+    }
 
-  let creemPayload: any = null;
-  try {
-    creemPayload = await creemRes.json();
-  } catch {
-    creemPayload = null;
-  }
-
-  const portalUrl = getPortalUrl(creemPayload);
-  if (!creemRes.ok || !portalUrl) {
-    console.error('[api/creem/create-customer-portal] Creem portal failed', {
-      status: creemRes.status,
-      payload: creemPayload,
+    failedAttempts.push({
+      customerId,
+      status: portalResult.status,
+      payload: portalResult.payload,
     });
-    return res.status(502).json({ error: 'Unable to open subscription management. Please contact support.' });
   }
 
-  return res.status(200).json({ portalUrl });
+  console.error('[api/creem/create-customer-portal] Creem portal failed for all customers', {
+    userId: user.id,
+    email: user.email,
+    attempts: failedAttempts,
+  });
+  return res.status(502).json({ error: 'Unable to open subscription management. Please contact support.' });
 }
