@@ -110,6 +110,7 @@ function getProductId(obj: any): string | null {
 
 function getSubscriptionId(obj: any): string | null {
   return (
+    (obj?.object === 'subscription' && typeof obj?.id === 'string' ? obj.id : null) ||
     getNestedString(obj, ['subscription_id', 'subscriptionId', 'subscription']) ||
     getNestedString(obj?.subscription, ['id'])
   );
@@ -264,17 +265,31 @@ async function extendMembershipFromCurrentProfile(params: {
   return { expiresAt: newExpiresAt, skipped: false, error: null };
 }
 
-async function findLatestUnreversedCreemLedger(subscriptionId: string | null): Promise<any | null> {
-  if (!subscriptionId) return null;
-
-  const { data: ledgers, error } = await supabaseService
+async function findLatestUnreversedCreemLedger(params: {
+  subscriptionId: string | null;
+  userId: string | null;
+  productId: string | null;
+}): Promise<any | null> {
+  let query = supabaseService
     .from('membership_ledger')
     .select('id, user_id, days_delta, expires_before, expires_after, plan_key, creem_subscription_id, creem_product_id, creem_period_end, created_at')
     .eq('source', 'creem')
     .eq('action', 'extend')
-    .eq('creem_subscription_id', subscriptionId)
     .order('created_at', { ascending: false })
     .limit(10);
+
+  if (params.subscriptionId) {
+    query = query.eq('creem_subscription_id', params.subscriptionId);
+  } else if (params.userId) {
+    query = query.eq('user_id', params.userId);
+    if (params.productId) {
+      query = query.eq('creem_product_id', params.productId);
+    }
+  } else {
+    return null;
+  }
+
+  const { data: ledgers, error } = await query;
 
   if (error) {
     console.error('[api/creem/webhook] find creem ledger for refund failed', error);
@@ -301,16 +316,40 @@ async function findLatestUnreversedCreemLedger(subscriptionId: string | null): P
   return null;
 }
 
+async function findLatestUnreversedCreemLedgerForRefund(params: {
+  subscriptionId: string | null;
+  productId: string | null;
+}): Promise<any | null> {
+  const bySubscription = await findLatestUnreversedCreemLedger({
+    subscriptionId: params.subscriptionId,
+    userId: null,
+    productId: null,
+  });
+  if (bySubscription) return bySubscription;
+
+  const userId = await findUserIdFromSubscription(params.subscriptionId);
+  return findLatestUnreversedCreemLedger({
+    subscriptionId: null,
+    userId,
+    productId: params.productId,
+  });
+}
+
 async function reverseMembershipForRefund(params: {
   eventId: string;
   subscriptionId: string | null;
+  productId: string | null;
   payload: CreemWebhookPayload;
 }): Promise<{ reversed: boolean; error: unknown | null }> {
-  const originalLedger = await findLatestUnreversedCreemLedger(params.subscriptionId);
+  const originalLedger = await findLatestUnreversedCreemLedgerForRefund({
+    subscriptionId: params.subscriptionId,
+    productId: params.productId,
+  });
   if (!originalLedger) {
     console.info('[api/creem/webhook] no unreversed membership ledger found for refund', {
       eventId: params.eventId,
       subscriptionId: params.subscriptionId,
+      productId: params.productId,
     });
     return { reversed: false, error: null };
   }
@@ -473,6 +512,7 @@ export default async function handler(
     const { error: refundError } = await reverseMembershipForRefund({
       eventId,
       subscriptionId,
+      productId: getProductId(eventObject),
       payload,
     });
 
