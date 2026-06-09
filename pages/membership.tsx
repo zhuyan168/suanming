@@ -73,6 +73,8 @@ export default function MembershipPage() {
   const [redeemSuccess, setRedeemSuccess] = useState(false)
   const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<MembershipPlanKey | null>(null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
+  const [portalError, setPortalError] = useState<string | null>(null)
 
   const texts = isEn ? {
     title: 'Membership Pricing - FateAura',
@@ -103,6 +105,9 @@ export default function MembershipPage() {
     redeemLoading: 'Redeeming...',
     redeemBtn: 'Redeem',
     supportLine: 'Questions about billing or membership? Contact support@fateaura.com.',
+    manageSubscription: 'Manage subscription',
+    portalLoading: 'Opening subscription management...',
+    portalError: 'Unable to open subscription management. Please contact support@fateaura.com.',
     backHome: 'Back to Home',
     backAccount: 'Back to Account',
     errorServiceUnavailable: 'Service temporarily unavailable. Please try again later.',
@@ -137,6 +142,9 @@ export default function MembershipPage() {
     redeemLoading: '兑换中...',
     redeemBtn: '兑换',
     supportLine: '如果您有账单或会员问题，请联系 support@fateaura.com。',
+    manageSubscription: '管理订阅',
+    portalLoading: '正在打开订阅管理...',
+    portalError: '暂时无法打开订阅管理，请联系 support@fateaura.com。',
     backHome: '返回首页',
     backAccount: '返回账户',
     errorServiceUnavailable: '服务暂时不可用，请稍后再试。',
@@ -231,6 +239,40 @@ export default function MembershipPage() {
     }
   }
 
+  const handleManageSubscriptionClick = async () => {
+    if (portalLoading || !userId) return
+
+    setPortalError(null)
+    setPortalLoading(true)
+
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch('/api/creem/create-customer-portal', {
+        method: 'POST',
+        headers,
+      })
+
+      let payload: { portalUrl?: string; error?: string } = {}
+      try {
+        payload = await res.json()
+      } catch {
+        setPortalError(texts.portalError)
+        return
+      }
+
+      if (!res.ok || !payload.portalUrl) {
+        setPortalError(typeof payload.error === 'string' ? payload.error : texts.portalError)
+        return
+      }
+
+      window.location.href = payload.portalUrl
+    } catch {
+      setPortalError(texts.portalError)
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
   return (
     <>
       <Head>
@@ -316,6 +358,21 @@ export default function MembershipPage() {
               <p className="text-center text-emerald-200/75">
                 {texts.memberExpires}{formatMembershipDate(userProfile?.membership_expires_at)}
               </p>
+              <div className="pt-3 text-center">
+                <button
+                  type="button"
+                  onClick={handleManageSubscriptionClick}
+                  disabled={portalLoading}
+                  className="inline-flex items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-xs font-semibold text-emerald-100 transition-colors hover:bg-emerald-300/15 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {portalLoading ? texts.portalLoading : texts.manageSubscription}
+                </button>
+              </div>
+              {portalError && (
+                <p className="pt-2 text-center text-xs text-red-200/90" role="alert">
+                  {portalError}
+                </p>
+              )}
             </div>
           )}
 
