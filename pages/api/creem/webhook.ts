@@ -31,7 +31,6 @@ const ACTIVE_EVENT_TYPES = new Set([
 ]);
 
 const MEMBERSHIP_EXTENSION_EVENT_TYPES = new Set([
-  'checkout.completed',
   'subscription.paid',
 ]);
 
