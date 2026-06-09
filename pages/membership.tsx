@@ -94,11 +94,13 @@ export default function MembershipPage() {
     aiNoticeBody: 'FateAura readings may be generated or assisted by AI. They are provided for entertainment, self-reflection, and personal insight only, and should not be considered medical, legal, financial, or other professional advice.',
     paymentTitle: 'Subscription Plans',
     choosePlan: 'Subscriptions renew automatically. You can cancel anytime; paid access remains until the current billing period ends. Any final tax or payment details are shown by Creem at checkout before payment.',
+    activeMemberPlanNotice: 'You already have an active membership. Use subscription management below for renewal or cancellation details.',
     subscribe: 'Subscribe',
     signInToSubscribe: 'Sign in to subscribe',
     checkoutLoading: 'Opening...',
     checkoutLoginPrompt: 'Please sign in before purchasing membership.',
     checkoutError: 'Unable to open checkout. Please try again later.',
+    activeMemberCheckoutError: 'You already have an active membership. Please manage your subscription instead of starting a new one.',
     redeemTitle: 'Redeem Code',
     redeemPlaceholder: 'Enter membership code',
     redeemSuccess: 'Redeemed successfully!',
@@ -131,11 +133,13 @@ export default function MembershipPage() {
     aiNoticeBody: 'FateAura 的部分解读可能由 AI 生成或辅助生成，仅用于娱乐、自我反思和个人洞察，不构成医疗、法律、财务或其他专业建议。',
     paymentTitle: '订阅方案',
     choosePlan: '订阅会自动续费，可随时取消；取消后，当前已付账期内的会员权益仍会保留。税费或支付细节如有变化，会在 Creem 付款页支付前展示。',
+    activeMemberPlanNotice: '您当前已经是会员。如需查看续费或取消订阅，请使用下方的管理订阅按钮。',
     subscribe: '订阅',
     signInToSubscribe: '登录后订阅',
     checkoutLoading: '打开中...',
     checkoutLoginPrompt: '请先登录后再开通会员。',
     checkoutError: '暂时无法打开支付页面，请稍后再试。',
+    activeMemberCheckoutError: '您当前已经是会员，请使用订阅管理，不要重复开通新的自动续费订阅。',
     redeemTitle: '会员码兑换',
     redeemPlaceholder: '请输入会员码',
     redeemSuccess: '兑换成功！',
@@ -201,6 +205,11 @@ export default function MembershipPage() {
 
   const handleCheckoutClick = async (planKey: MembershipPlanKey) => {
     if (checkoutLoadingPlan) return
+
+    if (isMember) {
+      setCheckoutError(texts.activeMemberCheckoutError)
+      return
+    }
 
     if (!userId) {
       setCheckoutError(texts.checkoutLoginPrompt)
@@ -306,6 +315,11 @@ export default function MembershipPage() {
           <section className="rounded-2xl border border-primary/30 bg-white/[0.04] p-5 sm:p-6 mb-6 shadow-[0_0_44px_-18px_rgba(127,19,236,0.7)]">
             <h2 className="text-base sm:text-lg font-semibold text-white mb-2">{texts.paymentTitle}</h2>
             <p className="text-white/60 text-sm leading-relaxed mb-5">{texts.choosePlan}</p>
+            {!loading && isMember && (
+              <p className="mb-5 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-center text-xs text-emerald-100/85">
+                {texts.activeMemberPlanNotice}
+              </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {MEMBERSHIP_PLANS.map((plan) => {
                 const isLoadingPlan = checkoutLoadingPlan === plan.key
@@ -335,7 +349,7 @@ export default function MembershipPage() {
                     <button
                       type="button"
                       onClick={() => handleCheckoutClick(plan.key)}
-                      disabled={loading || !!checkoutLoadingPlan}
+                      disabled={loading || isMember || !!checkoutLoadingPlan}
                       className="mt-auto w-full rounded-lg bg-primary/90 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isLoadingPlan ? texts.checkoutLoading : userId ? texts.subscribe : texts.signInToSubscribe}

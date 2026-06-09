@@ -62,6 +62,12 @@ function getStringId(value: unknown): string | null {
   return null;
 }
 
+function isActiveMembership(expiresAt: unknown): boolean {
+  if (typeof expiresAt !== 'string' || !expiresAt.trim()) return false;
+  const expiresTime = new Date(expiresAt).getTime();
+  return Number.isFinite(expiresTime) && expiresTime > Date.now();
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<CreateCheckoutSuccess | CreateCheckoutError>
@@ -88,6 +94,23 @@ export default async function handler(
 
   if (userError || !user) {
     return res.status(401).json({ error: 'Please sign in before purchasing membership.' });
+  }
+
+  const { data: profile, error: profileError } = await supabaseService
+    .from('profiles')
+    .select('membership_expires_at')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('[api/creem/create-checkout] Profile lookup failed', profileError);
+    return res.status(500).json({ error: 'Unable to verify membership status. Please try again later.' });
+  }
+
+  if (isActiveMembership(profile?.membership_expires_at)) {
+    return res.status(409).json({
+      error: 'You already have an active membership. Please manage your subscription instead of starting a new one.',
+    });
   }
 
   let body: { planKey?: unknown };
