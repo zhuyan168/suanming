@@ -1,5 +1,6 @@
 // pages/_app.tsx
 import type { AppProps } from "next/app";
+import { useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Script from "next/script";
@@ -29,6 +30,69 @@ function shouldNoIndex(pathname: string): boolean {
     "/change-password",
     "/auth",
   ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
+function GlobalHomeButton() {
+  const router = useRouter();
+  const cleanPath = router.asPath.split("?")[0].split("#")[0] || "/";
+  const isHomePage = router.pathname === "/" || cleanPath === "/" || cleanPath === "/zh";
+  const isEn = router.locale === "en";
+
+  if (isHomePage) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => router.push("/")}
+      aria-label={isEn ? "Back to home" : "返回首页"}
+      title={isEn ? "Back to home" : "返回首页"}
+      className="fixed bottom-5 left-4 z-[9997] inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/15 bg-[#151326]/90 px-4 text-sm font-semibold text-white shadow-[0_12px_36px_rgba(0,0,0,0.32)] backdrop-blur-md transition-colors hover:border-primary/50 hover:bg-[#1f1934] sm:bottom-6 sm:left-6"
+    >
+      <span className="material-symbols-outlined text-[20px]" aria-hidden>
+        home
+      </span>
+      <span className="hidden sm:inline">{isEn ? "Home" : "首页"}</span>
+    </button>
+  );
+}
+
+function PageTitleBrandGuard() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const applyBrandTitle = () => {
+      const currentTitle = document.title.trim();
+      if (!currentTitle) {
+        document.title = DEFAULT_TITLE;
+        return;
+      }
+
+      if (/fateaura/i.test(currentTitle)) return;
+      document.title = `${currentTitle} | FateAura`;
+    };
+
+    applyBrandTitle();
+    const timer = window.setTimeout(applyBrandTitle, 0);
+    const titleElement = document.querySelector("title");
+    const observer = titleElement
+      ? new MutationObserver(applyBrandTitle)
+      : null;
+
+    observer?.observe(titleElement as HTMLTitleElement, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+
+    return () => {
+      window.clearTimeout(timer);
+      observer?.disconnect();
+    };
+  }, [router.asPath]);
+
+  return null;
 }
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -82,6 +146,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
       <GuestTrialBanner />
       <Component {...pageProps} />
+      <PageTitleBrandGuard />
+      <GlobalHomeButton />
     </GuestTrialProvider>
   );
 }

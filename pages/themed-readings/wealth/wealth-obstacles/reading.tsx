@@ -199,7 +199,6 @@ export default function WealthObstaclesReadingPage() {
     <div className="dark bg-[#191022] min-h-screen text-white font-sans">
       <Head>
         <title>{pageText.title}</title>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
       <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 py-3 bg-[#191022]/80 backdrop-blur-sm">

@@ -66,14 +66,6 @@ export default function TestPage() {
       <Head>
         <title>Annual Fortune Tests - FateAura</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
         <style dangerouslySetInnerHTML={{
           __html: `
             html.dark, html.dark body {

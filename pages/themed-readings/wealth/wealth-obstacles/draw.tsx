@@ -265,7 +265,6 @@ export default function WealthObstaclesDraw() {
     <div className="dark">
       <Head>
         <title>{text.pageTitle}</title>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
       <div className="font-display bg-[#191022] min-h-screen text-white">

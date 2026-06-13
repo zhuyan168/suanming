@@ -3,6 +3,7 @@ import { supabaseService } from '../../../lib/supabaseServer';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TRIAL_USAGE_LIMIT = 8;
+const TRIAL_COOKIE_NAME = 'guest_trial_session_id';
 
 type InvalidResponse =
   | { valid: false; reason: 'missing_session' }
@@ -20,6 +21,25 @@ type ActiveResponse = {
 
 type StatusResponse = InvalidResponse | ActiveResponse | { error: string };
 
+function parseCookies(cookieHeader?: string | null): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach((part) => {
+    const [rawName, rawValue] = part.split('=');
+    if (!rawName) return;
+    cookies[rawName.trim()] = decodeURIComponent(rawValue?.trim() || '');
+  });
+  return cookies;
+}
+
+function setTrialCookie(res: NextApiResponse, sessionId: string) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader(
+    'Set-Cookie',
+    `${TRIAL_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+  );
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<StatusResponse>
@@ -29,7 +49,9 @@ export default async function handler(
   }
 
   const rawHeader = req.headers['x-guest-session-id'];
-  const sessionId = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
+  const headerSessionId = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
+  const cookies = parseCookies(req.headers.cookie);
+  const sessionId = headerSessionId || cookies[TRIAL_COOKIE_NAME];
 
   if (!sessionId) {
     return res.status(200).json({ valid: false, reason: 'missing_session' });
@@ -54,6 +76,8 @@ export default async function handler(
     if (!session) {
       return res.status(200).json({ valid: false, reason: 'invalid_session' });
     }
+
+    setTrialCookie(res, session.session_id);
 
     const now = new Date();
     const expiresAt = new Date(session.expires_at);

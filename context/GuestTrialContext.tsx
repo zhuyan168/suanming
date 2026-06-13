@@ -71,18 +71,10 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
     if (typeof window === 'undefined') return;
 
     const storedSessionId = localStorage.getItem(STORAGE_KEY_SESSION_ID);
-    if (!storedSessionId) {
-      setSessionId(null);
-      setExpiresAt(null);
-      setTotalUsed(0);
-      setTotalRemaining(TRIAL_USAGE_LIMIT);
-      setIsExpired(false);
-      return;
-    }
 
     try {
       const response = await fetch('/api/guest-trial/status', {
-        headers: { 'x-guest-session-id': storedSessionId },
+        headers: storedSessionId ? { 'x-guest-session-id': storedSessionId } : undefined,
       });
       const data = await response.json();
 

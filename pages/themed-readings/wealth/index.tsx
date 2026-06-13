@@ -40,7 +40,6 @@ export default function WealthThemePage() {
       <Head>
         <title>{t('spreads.wealth.metaTitle')}</title>
         <meta name="description" content={t('spreads.wealth.metaDesc')} />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23]">

@@ -33,6 +33,7 @@ export interface ApiAccessStatus {
 /** Fallback timezone when the client sends nothing or an invalid value. */
 const FALLBACK_TIMEZONE = 'UTC';
 const DEFAULT_FREE_LIMIT = 3;
+const GUEST_TRIAL_COOKIE_NAME = 'guest_trial_session_id';
 
 /**
  * Validate an IANA timezone string received from the client.
@@ -179,7 +180,8 @@ export async function ensureAccessForRequest(params: {
   if (!token) {
     // No Supabase token — check for guest trial session
     const rawGuestHeader = req.headers['x-guest-session-id'];
-    const guestSessionId = Array.isArray(rawGuestHeader) ? rawGuestHeader[0] : (rawGuestHeader ?? null);
+    const headerGuestSessionId = Array.isArray(rawGuestHeader) ? rawGuestHeader[0] : (rawGuestHeader ?? null);
+    const guestSessionId = headerGuestSessionId || parseCookies(req.headers.cookie)[GUEST_TRIAL_COOKIE_NAME] || null;
 
     if (!guestSessionId) {
       return { allowed: false, isMember: false, reason: 'not_logged_in', remaining: freeDailyLimit };

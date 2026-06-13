@@ -79,12 +79,6 @@ export default function SpreadDetailPage() {
       <>
         <Head>
           <title>{text.notFoundPageTitle}</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-          />
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -150,12 +144,6 @@ export default function SpreadDetailPage() {
       <>
         <Head>
           <title>{text.loadingTitle}</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-          />
         </Head>
         <div className="min-h-screen bg-[#0f0f23] flex items-center justify-center">
           <p className="text-white/50 text-sm">{text.loading}</p>
@@ -202,12 +190,6 @@ export default function SpreadDetailPage() {
         <Head>
           <title>{isEn ? spreadConfig.titleEn : spreadConfig.titleZh} - {text.pageSuffix}</title>
           <meta name="description" content={isEn ? spreadConfig.descEn : spreadConfig.descZh} />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-          />
           <script
             dangerouslySetInnerHTML={{
               __html: `

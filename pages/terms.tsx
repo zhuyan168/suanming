@@ -190,11 +190,6 @@ export default function TermsPage() {
       <Head>
         <title>{texts.title}</title>
         <meta name="description" content={texts.metaDesc} />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700;800&display=swap"
-        />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
       </Head>
 
       <div className="dark min-h-screen font-display bg-background-light dark:bg-background-dark relative overflow-x-hidden">

@@ -287,12 +287,6 @@ export default function MembershipPage() {
       <Head>
         <title>{texts.title}</title>
         <meta name="description" content={texts.metaDesc} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
       </Head>
 
       <div className="min-h-screen bg-[#0f0f23] text-white">

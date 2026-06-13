@@ -378,7 +378,6 @@ export default function StayOrLeaveReading() {
 
       <style jsx global>{`
         .dark { --primary: #7f13ec; }
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
       `}</style>
     </div>
   );
