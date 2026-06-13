@@ -108,14 +108,9 @@ export default function TwoChoicesReadingPage() {
         const parsed = JSON.parse(savedResult);
         if (parsed.cards && parsed.cards.length === 5) {
           setResult(parsed);
-          
-          const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-          const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
-          const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
-          
-          if (savedQuestion) setQuestion(savedQuestion);
-          if (savedOptionA) setOptionA(savedOptionA);
-          if (savedOptionB) setOptionB(savedOptionB);
+          setQuestion(parsed.question ?? localStorage.getItem(QUESTION_STORAGE_KEY) ?? '');
+          setOptionA(parsed.optionA ?? localStorage.getItem(OPTION_A_STORAGE_KEY) ?? '');
+          setOptionB(parsed.optionB ?? localStorage.getItem(OPTION_B_STORAGE_KEY) ?? '');
           
           if (parsed.reading) {
             setReading(parsed.reading);

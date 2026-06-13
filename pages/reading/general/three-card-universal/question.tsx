@@ -25,20 +25,22 @@ export default function ThreeCardQuestionPage() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
     
+    const saved = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
     const existingResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (existingResult) {
       try {
         const result = JSON.parse(existingResult);
-        if (result.cards && result.cards.length === 3) {
+        if (result.cards && result.cards.length === 3 && (result.question ?? '') === saved) {
           router.replace('/reading/general/three-card-universal/reveal');
           return;
         }
+        localStorage.removeItem(RESULT_STORAGE_KEY);
       } catch (error) {
         console.error('Failed to parse existing result:', error);
+        localStorage.removeItem(RESULT_STORAGE_KEY);
       }
     }
     
-    const saved = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (saved) {
       setQuestion(saved);
       setCharCount(saved.length);

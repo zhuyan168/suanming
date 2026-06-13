@@ -55,6 +55,7 @@ export default function ThreeCardReadingPage() {
         const parsed = JSON.parse(savedResult);
         if (parsed.cards && parsed.cards.length === 3) {
           setResult(parsed);
+          setQuestion(parsed.question || '');
           if (parsed.reading) {
             setReading(parsed.reading);
           }
@@ -72,10 +73,8 @@ export default function ThreeCardReadingPage() {
       return;
     }
 
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    if (savedQuestion) {
-      setQuestion(savedQuestion);
-    }
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
+    setQuestion((current) => current || savedQuestion);
   }, [router]);
 
   const generateReading = async () => {

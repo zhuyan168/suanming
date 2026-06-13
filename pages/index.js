@@ -772,6 +772,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
     
     // 保存用户问题到 localStorage
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('yesno_tarot_draw_v1');
       localStorage.setItem('yesno_tarot_question_v1', question.trim());
     }
     

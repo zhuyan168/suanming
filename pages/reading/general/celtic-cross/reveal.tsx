@@ -308,10 +308,7 @@ export default function CelticCrossRevealPage() {
     setResult(saved);
 
     // 加载问题
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    if (savedQuestion) {
-      setQuestion(savedQuestion);
-    }
+    setQuestion(saved.question ?? localStorage.getItem(QUESTION_STORAGE_KEY) ?? '');
   }, [router]);
 
   const handleRedraw = () => {

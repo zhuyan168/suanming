@@ -117,20 +117,28 @@ export default function TwoChoicesDrawPage() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
 
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
-    const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
+    const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY) || '';
+    const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY) || '';
     
     if (savedQuestion) setQuestion(savedQuestion);
     if (savedOptionA) setOptionA(savedOptionA);
     if (savedOptionB) setOptionB(savedOptionB);
 
     const saved = loadResult();
-    if (saved) {
+    if (
+      saved &&
+      (saved.question ?? '') === savedQuestion &&
+      (saved.optionA ?? '') === savedOptionA &&
+      (saved.optionB ?? '') === savedOptionB
+    ) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCards(saved.cards);
     } else {
+      if (saved) {
+        localStorage.removeItem(RESULT_STORAGE_KEY);
+      }
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);

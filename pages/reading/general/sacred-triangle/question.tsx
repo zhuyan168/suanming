@@ -25,20 +25,21 @@ export default function SacredTriangleQuestionPage() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
     
+    const saved = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
     const savedResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (savedResult) {
       try {
         const parsed = JSON.parse(savedResult);
-        if (parsed.cards && parsed.cards.length === 3) {
+        if (parsed.cards && parsed.cards.length === 3 && (parsed.question ?? '') === saved) {
           router.replace('/reading/general/sacred-triangle/result');
           return;
         }
+        localStorage.removeItem(RESULT_STORAGE_KEY);
       } catch (e) {
         localStorage.removeItem(RESULT_STORAGE_KEY);
       }
     }
     
-    const saved = localStorage.getItem(QUESTION_STORAGE_KEY);
     if (saved) {
       setQuestion(saved);
       setCharCount(saved.length);

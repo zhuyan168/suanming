@@ -110,6 +110,7 @@ export default function HexagramReadingPage() {
         const parsed = JSON.parse(savedResult);
         if (parsed.cards && parsed.cards.length === 7) {
           setResult(parsed);
+          setQuestion(parsed.question || '');
           // 如果已经有解读结果，直接使用
           if (parsed.reading) {
             setReading(parsed.reading);
@@ -128,10 +129,8 @@ export default function HexagramReadingPage() {
     }
 
     // 加载问题
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    if (savedQuestion) {
-      setQuestion(savedQuestion);
-    }
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
+    setQuestion((current) => current || savedQuestion);
   }, [router]);
 
   const generateReading = async () => {

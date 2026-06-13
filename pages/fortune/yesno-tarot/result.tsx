@@ -20,6 +20,7 @@ interface ShuffledTarotCard {
 
 interface YesNoTarotDraw {
   timestamp: number;
+  question?: string;
   card: ShuffledTarotCard;
 }
 
@@ -195,7 +196,7 @@ export default function YesNoTarotResult() {
     setCard(rehydrateTarotCard(draw.card));
 
     // 读取用户问题
-    const savedQuestion = localStorage.getItem(STORAGE_KEY_QUESTION) || '';
+    const savedQuestion = draw.question ?? localStorage.getItem(STORAGE_KEY_QUESTION) ?? '';
     setQuestion(savedQuestion);
 
     setUseAI(savedQuestion.trim().length > 0);

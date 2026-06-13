@@ -137,10 +137,7 @@ export default function ThreeCardRevealPage() {
     
     setResult(saved);
 
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    if (savedQuestion) {
-      setQuestion(savedQuestion);
-    }
+    setQuestion(saved.question ?? localStorage.getItem(QUESTION_STORAGE_KEY) ?? '');
   }, [router]);
 
   const handleRedraw = () => {

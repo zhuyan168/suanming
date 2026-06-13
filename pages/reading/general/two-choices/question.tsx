@@ -30,22 +30,29 @@ export default function TwoChoicesQuestionPage() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
     
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
+    const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY) || '';
+    const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY) || '';
     const existingResult = localStorage.getItem(RESULT_STORAGE_KEY);
     if (existingResult) {
       try {
         const result = JSON.parse(existingResult);
-        if (result.cards && result.cards.length === 5) {
+        if (
+          result.cards &&
+          result.cards.length === 5 &&
+          (result.question ?? '') === savedQuestion &&
+          (result.optionA ?? '') === savedOptionA &&
+          (result.optionB ?? '') === savedOptionB
+        ) {
           router.replace('/reading/general/two-choices/result');
           return;
         }
+        localStorage.removeItem(RESULT_STORAGE_KEY);
       } catch (error) {
         console.error('Failed to parse existing result:', error);
+        localStorage.removeItem(RESULT_STORAGE_KEY);
       }
     }
-    
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
-    const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
     
     if (savedQuestion) setQuestion(savedQuestion);
     if (savedOptionA) setOptionA(savedOptionA);

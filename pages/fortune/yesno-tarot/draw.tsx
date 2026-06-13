@@ -140,6 +140,7 @@ const STORAGE_KEY_QUESTION = 'yesno_tarot_question_v1';
 // 结果数据接口
 interface YesNoTarotDraw {
   timestamp: number;
+  question?: string;
   card: ShuffledTarotCard;
 }
 
@@ -263,11 +264,14 @@ export default function YesNoTarotDraw() {
     setQuestion(savedQuestion);
 
     const saved = loadYesNoTarotDraw();
-    if (saved) {
+    if (saved && (saved.question ?? '') === savedQuestion) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCard(saved.card);
     } else {
+      if (saved) {
+        localStorage.removeItem(STORAGE_KEY_DRAW);
+      }
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
@@ -301,6 +305,7 @@ export default function YesNoTarotDraw() {
     // 保存抽牌结果
     const result: YesNoTarotDraw = {
       timestamp: Date.now(),
+      question,
       card,
     };
     saveYesNoTarotDraw(result);

@@ -138,17 +138,20 @@ export default function HorseshoeDrawPage() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
 
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
     if (savedQuestion) {
       setQuestion(savedQuestion);
     }
 
     const saved = loadResult();
-    if (saved) {
+    if (saved && (saved.question ?? '') === savedQuestion) {
       setSavedResult(saved);
       setHasDrawn(true);
       setSelectedCards(saved.cards);
     } else {
+      if (saved) {
+        localStorage.removeItem(RESULT_STORAGE_KEY);
+      }
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);

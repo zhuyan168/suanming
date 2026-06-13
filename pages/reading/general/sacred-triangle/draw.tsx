@@ -55,6 +55,7 @@ const generateSessionId = (): string => {
 };
 
 const STORAGE_KEY = 'general_sacred_triangle_result';
+const QUESTION_STORAGE_KEY = 'general_sacred_triangle_question';
 
 interface SacredTriangleResult {
   sessionId: string;
@@ -124,8 +125,9 @@ export default function SacredTriangleDraw() {
     if (typeof window === 'undefined') return;
     if (accessLoading || !allowed) return;
 
+    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
     const saved = loadSacredTriangleResult();
-    if (saved) {
+    if (saved && (saved.question ?? '') === savedQuestion) {
       if (saved.cards && saved.cards.length === 3) {
         router.replace('/reading/general/sacred-triangle/result');
         return;
@@ -135,6 +137,9 @@ export default function SacredTriangleDraw() {
       setSessionId(saved.sessionId);
       setSelectedCards(saved.cards);
     } else {
+      if (saved) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
       const newSessionId = generateSessionId();
       setSessionId(newSessionId);
       const shuffled = shuffleCards(tarotCards);
@@ -183,7 +188,7 @@ export default function SacredTriangleDraw() {
 
     const updatedCardCount = newSelectedCards.filter(c => c !== null).length;
     if (updatedCardCount === 3) {
-      const question = localStorage.getItem('general_sacred_triangle_question') || '';
+      const question = localStorage.getItem(QUESTION_STORAGE_KEY) || '';
       const result: SacredTriangleResult = {
         sessionId,
         timestamp: Date.now(),

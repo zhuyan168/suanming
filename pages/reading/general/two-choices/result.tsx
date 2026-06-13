@@ -90,13 +90,9 @@ export default function TwoChoicesResultPage() {
     }
     setResult(saved);
 
-    const savedQuestion = localStorage.getItem(QUESTION_STORAGE_KEY);
-    const savedOptionA = localStorage.getItem(OPTION_A_STORAGE_KEY);
-    const savedOptionB = localStorage.getItem(OPTION_B_STORAGE_KEY);
-    
-    if (savedQuestion) setQuestion(savedQuestion);
-    if (savedOptionA) setOptionA(savedOptionA);
-    if (savedOptionB) setOptionB(savedOptionB);
+    setQuestion(saved.question ?? localStorage.getItem(QUESTION_STORAGE_KEY) ?? '');
+    setOptionA(saved.optionA ?? localStorage.getItem(OPTION_A_STORAGE_KEY) ?? '');
+    setOptionB(saved.optionB ?? localStorage.getItem(OPTION_B_STORAGE_KEY) ?? '');
   }, [router]);
 
   const handleRedraw = () => {
