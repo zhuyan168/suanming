@@ -341,10 +341,6 @@ export default function YesNoTarotDraw() {
     router.back();
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   const handleReset = () => {
     if (typeof window === 'undefined') return;
     if (!confirm(texts.confirmReset)) return;
@@ -382,22 +378,13 @@ export default function YesNoTarotDraw() {
         <div className="font-display bg-background-dark min-h-screen text-white" style={{ backgroundColor: '#191022' }}>
           {/* 顶部导航 */}
           <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-solid border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-background-dark/80 backdrop-blur-sm" style={{ backgroundColor: 'rgba(25, 16, 34, 0.8)' }}>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleReturnToQuestion}
-                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-              >
-                <span className="material-symbols-outlined">arrow_back</span>
-                <span className="text-sm font-medium">{texts.back}</span>
-              </button>
-              <button
-                onClick={handleBackToHome}
-                className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-              >
-                <span className="material-symbols-outlined">home</span>
-                <span className="text-sm font-medium hidden sm:inline">{isEn ? 'Home' : '首页'}</span>
-              </button>
-            </div>
+            <button
+              onClick={handleReturnToQuestion}
+              className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined">arrow_back</span>
+              <span className="text-sm font-medium">{texts.back}</span>
+            </button>
             
             <div className="flex items-center gap-4 text-white">
               <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">FateAura</h2>

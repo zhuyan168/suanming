@@ -31,14 +31,14 @@ export default function CardItem({ card, index, onClick, isDisabled, isSelected 
   // - md: w-32 = 128px, 重叠 64px
   // z-index: 前面的卡牌（index小）层级更高，后面的卡牌（index大）层级更低
   // 这样前面的卡牌会遮挡后面的卡牌，形成堆叠效果
-  const zIndex = isSelected ? 1000 : 200 - index; // 选中卡牌最高，其他按顺序递减（前面的卡牌层级更高）
+  const zIndex = isSelected ? 45 : Math.max(1, 40 - index); // Keep the deck below sticky navigation.
   
   return (
     <motion.button
       onClick={() => !isDisabled && onClick(index)}
       disabled={isDisabled}
       animate={isSelected ? { y: -8, scale: 1.05 } : { y: 0, scale: 1 }}
-      whileHover={!isDisabled && !isSelected ? { y: -8, scale: 1.05, zIndex: 999 } : {}}
+      whileHover={!isDisabled && !isSelected ? { y: -8, scale: 1.05, zIndex: 45 } : {}}
       whileTap={!isDisabled ? { scale: 0.98 } : {}}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className={`
