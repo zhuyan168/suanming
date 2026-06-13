@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { getSacredTriangleT } from '../../../../lib/sacredTriangleI18n';
+import { getTarotQuestionPolicyText, isRestrictedTarotQuestion } from '../../../../lib/tarotQuestionPolicy';
 
 const QUESTION_STORAGE_KEY = 'general_sacred_triangle_question';
 const RESULT_STORAGE_KEY = 'general_sacred_triangle_result';
@@ -11,6 +12,7 @@ const RESULT_STORAGE_KEY = 'general_sacred_triangle_result';
 export default function SacredTriangleQuestionPage() {
   const router = useRouter();
   const t = getSacredTriangleT(router.locale);
+  const policyText = getTarotQuestionPolicyText(router.locale);
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'sacred-triangle',
@@ -19,6 +21,7 @@ export default function SacredTriangleQuestionPage() {
 
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [questionError, setQuestionError] = useState('');
   const maxChars = 200;
 
   useEffect(() => {
@@ -51,12 +54,19 @@ export default function SacredTriangleQuestionPage() {
     if (value.length <= maxChars) {
       setQuestion(value);
       setCharCount(value.length);
+      setQuestionError('');
     }
   };
 
   const handleStartDraw = () => {
+    const trimmedQuestion = question.trim();
+    if (trimmedQuestion && isRestrictedTarotQuestion(trimmedQuestion)) {
+      setQuestionError(policyText.blocked);
+      return;
+    }
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem(QUESTION_STORAGE_KEY, question.trim());
+      localStorage.setItem(QUESTION_STORAGE_KEY, trimmedQuestion);
     }
     router.push('/reading/general/sacred-triangle/draw');
   };
@@ -137,6 +147,14 @@ export default function SacredTriangleQuestionPage() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
+                <p className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-100">
+                  {policyText.notice}
+                </p>
+                {questionError && (
+                  <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {questionError}
+                  </p>
+                )}
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
                     {question.trim() ? t.question.hintWithQ : t.question.hintNoQ}

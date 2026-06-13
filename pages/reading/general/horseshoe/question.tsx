@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getTarotQuestionPolicyText, isRestrictedTarotQuestion } from '../../../../lib/tarotQuestionPolicy';
 
 // LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_horseshoe_question';
@@ -11,6 +12,7 @@ const RESULT_STORAGE_KEY = 'general_horseshoe_draw_result';
 export default function HorseshoeQuestionPage() {
   const router = useRouter();
   const isEn = router.locale === 'en';
+  const policyText = getTarotQuestionPolicyText(router.locale);
   const texts = {
     hint: isEn
       ? 'For a more focused reading, enter your question below. You can also start without a question.'
@@ -36,6 +38,7 @@ export default function HorseshoeQuestionPage() {
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [questionError, setQuestionError] = useState('');
   const maxChars = 200;
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -74,13 +77,20 @@ export default function HorseshoeQuestionPage() {
     if (value.length <= maxChars) {
       setQuestion(value);
       setCharCount(value.length);
+      setQuestionError('');
     }
   };
 
   const handleStartDraw = () => {
+    const trimmedQuestion = question.trim();
+    if (trimmedQuestion && isRestrictedTarotQuestion(trimmedQuestion)) {
+      setQuestionError(policyText.blocked);
+      return;
+    }
+
     // 保存问题到 localStorage（即使为空）
     if (typeof window !== 'undefined') {
-      localStorage.setItem(QUESTION_STORAGE_KEY, question.trim());
+      localStorage.setItem(QUESTION_STORAGE_KEY, trimmedQuestion);
     }
     // 跳转到抽牌页
     router.push('/reading/general/horseshoe/draw');
@@ -171,6 +181,14 @@ export default function HorseshoeQuestionPage() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
+                <p className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-100">
+                  {policyText.notice}
+                </p>
+                {questionError && (
+                  <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {questionError}
+                  </p>
+                )}
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
                     {question.trim() ? texts.hintWithQ : texts.hint}

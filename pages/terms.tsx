@@ -60,6 +60,8 @@ export default function TermsPage() {
         title: '2. For Reflection Only',
         paragraphs: [
           'FateAura readings are not medical, legal, financial, psychological, or other professional advice.',
+          'You should not use FateAura to ask for decisions or predictions about health, fertility, legal matters, missing persons, gambling, betting, lotteries, or similar high-risk topics.',
+          'If your situation involves safety, health, legal rights, financial risk, or a missing person, please contact qualified professionals, emergency services, or appropriate real-world support channels.',
           'Some readings may be generated or assisted by AI. For serious decisions, please consider real-world facts and seek qualified professional support when needed.',
         ],
       },
@@ -130,6 +132,8 @@ export default function TermsPage() {
         title: '2. 仅供参考',
         paragraphs: [
           'FateAura 的解读内容不构成医疗、法律、财务、心理或其他专业建议。',
+          '请不要使用 FateAura 咨询或预测健康、生育、法律、失踪、赌博、博彩、彩票或类似高风险问题。',
+          '如果你的情况涉及人身安全、健康、法律权利、财务风险或失踪人员，请联系专业人士、紧急服务或合适的现实求助渠道。',
           '部分解读可能由 AI 生成或辅助生成。面对重要决定时，请结合现实信息，并在必要时寻求专业人士帮助。',
         ],
       },

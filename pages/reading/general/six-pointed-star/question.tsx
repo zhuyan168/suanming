@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
+import { getTarotQuestionPolicyText, isRestrictedTarotQuestion } from '../../../../lib/tarotQuestionPolicy';
 
 // LocalStorage Keys
 const QUESTION_STORAGE_KEY = 'general_six_pointed_star_question';
@@ -10,6 +11,7 @@ const RESULT_STORAGE_KEY = 'general_six_pointed_star_draw_result';
 export default function SixPointedStarQuestionPage() {
   const router = useRouter();
   const isEn = router.locale === 'en';
+  const policyText = getTarotQuestionPolicyText(router.locale);
   const texts = {
     pageTitle: isEn ? 'Six-Pointed Star Spread - Enter Your Question | FateAura' : '六芒星牌阵 - 问题输入 | FateAura',
     metaDesc: isEn ? 'Enter your question for a more focused tarot reading.' : '输入你的问题，获得更精准的塔罗占卜解读',
@@ -33,6 +35,7 @@ export default function SixPointedStarQuestionPage() {
   };
   const [question, setQuestion] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [questionError, setQuestionError] = useState('');
   const maxChars = 200;
 
   useEffect(() => {
@@ -65,12 +68,19 @@ export default function SixPointedStarQuestionPage() {
     if (value.length <= maxChars) {
       setQuestion(value);
       setCharCount(value.length);
+      setQuestionError('');
     }
   };
 
   const handleStartDraw = () => {
+    const trimmedQuestion = question.trim();
+    if (trimmedQuestion && isRestrictedTarotQuestion(trimmedQuestion)) {
+      setQuestionError(policyText.blocked);
+      return;
+    }
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem(QUESTION_STORAGE_KEY, question.trim());
+      localStorage.setItem(QUESTION_STORAGE_KEY, trimmedQuestion);
     }
     router.push('/reading/general/six-pointed-star/draw');
   };
@@ -155,6 +165,14 @@ export default function SixPointedStarQuestionPage() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={4}
                 />
+                <p className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-100">
+                  {policyText.notice}
+                </p>
+                {questionError && (
+                  <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {questionError}
+                  </p>
+                )}
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
                     {question.trim() ? texts.hintWithQ : texts.hint}

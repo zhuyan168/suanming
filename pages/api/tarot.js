@@ -123,7 +123,7 @@ export default async function handler(req, res) {
       console.error('Request URL:', 'https://api.deepseek.com/chat/completions');
       console.error('Request headers:', {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.substring(0, 10)}...` // 只显示前10个字符
+        'Authorization': apiKey ? 'Bearer [configured]' : 'Bearer [missing]'
       });
       
       return res.status(500).json({ 

@@ -1,18 +1,12 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-
-// 用户状态类型定义
-interface User {
-  id?: string;
-  membership?: 'free' | 'premium' | 'vip';
-  isPaid?: boolean;
-}
+import { useMembership } from '../../hooks/useMembership';
 
 export default function MonthlyFortune() {
   const router = useRouter();
   const isEn = router.locale === 'en';
+  const { isMember } = useMembership();
 
   const texts = isEn ? {
     pageTitle: 'Monthly Tarot Readings — FateAura',
@@ -43,34 +37,6 @@ export default function MonthlyFortune() {
     memberButtonLocked: '解锁完整占卜',
     memberBadge: '会员',
   };
-
-  // 用户状态（后续从全局状态管理或 API 获取）
-  const [user, setUser] = useState<User | null>(null);
-  const [isPaid, setIsPaid] = useState(false);
-
-  // 会员判断逻辑
-  const isMember = user?.membership === 'premium' || user?.membership === 'vip' || user?.isPaid === true;
-
-  // 初始化用户状态（示例：从 localStorage 或 API 获取）
-  useEffect(() => {
-    // TODO: 从全局状态管理（如 Context、Redux、Zustand）或 API 获取用户信息
-    // 示例：从 localStorage 获取
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsPaid(parsedUser.membership === 'premium' || parsedUser.membership === 'vip' || parsedUser.isPaid === true);
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-      }
-    }
-    // 如果没有用户数据，默认为免费用户
-    if (!userData) {
-      setUser({ membership: 'free', isPaid: false });
-      setIsPaid(false);
-    }
-  }, []);
 
   const handleBackToHome = () => {
     router.push('/');

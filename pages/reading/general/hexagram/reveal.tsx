@@ -398,30 +398,32 @@ export default function HexagramRevealPage() {
               </div>
 
               {/* 付费提示区域 */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-                className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="material-symbols-outlined text-amber-400 text-2xl mt-1">
-                    workspace_premium
-                  </span>
-                  <div className="flex-1">
-                    <h3 className="text-white font-semibold mb-2 text-lg">
-                      {texts.memberTitle}
-                    </h3>
-                    <p className="text-white/80 text-sm leading-relaxed mb-3">
-                      {texts.memberDesc}
-                    </p>
-                    <div className="flex items-center gap-2 text-amber-400/90 text-xs">
-                      <span className="material-symbols-outlined text-sm">info</span>
-                      <span>{texts.memberComingSoon}</span>
+              {!isMember && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 1.0 }}
+                  className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm p-6"
+                >
+                  <div className="flex items-start gap-4">
+                    <span className="material-symbols-outlined text-amber-400 text-2xl mt-1">
+                      workspace_premium
+                    </span>
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold mb-2 text-lg">
+                        {texts.memberTitle}
+                      </h3>
+                      <p className="text-white/80 text-sm leading-relaxed mb-3">
+                        {texts.memberDesc}
+                      </p>
+                      <div className="flex items-center gap-2 text-amber-400/90 text-xs">
+                        <span className="material-symbols-outlined text-sm">info</span>
+                        <span>{texts.memberComingSoon}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              )}
 
               {/* 操作按钮区域 */}
               <motion.div

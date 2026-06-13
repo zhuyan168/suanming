@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { getTwoChoicesT } from '../../../../lib/twoChoicesI18n';
+import { getTarotQuestionPolicyText, isRestrictedTarotQuestion } from '../../../../lib/tarotQuestionPolicy';
 
 const QUESTION_STORAGE_KEY = 'general_two_choices_question';
 const OPTION_A_STORAGE_KEY = 'general_two_choices_option_a';
@@ -13,6 +14,7 @@ const RESULT_STORAGE_KEY = 'general_two_choices_draw_result';
 export default function TwoChoicesQuestionPage() {
   const router = useRouter();
   const t = getTwoChoicesT(router.locale);
+  const policyText = getTarotQuestionPolicyText(router.locale);
 
   const { loading: accessLoading, allowed } = useSpreadAccess({
     spreadKey: 'two-choices',
@@ -22,6 +24,7 @@ export default function TwoChoicesQuestionPage() {
   const [question, setQuestion] = useState('');
   const [optionA, setOptionA] = useState('');
   const [optionB, setOptionB] = useState('');
+  const [questionError, setQuestionError] = useState('');
   const [errors, setErrors] = useState({ optionA: '', optionB: '', same: '' });
   const maxChars = 200;
   const maxOptionChars = 50;
@@ -63,6 +66,7 @@ export default function TwoChoicesQuestionPage() {
     const value = e.target.value;
     if (value.length <= maxChars) {
       setQuestion(value);
+      setQuestionError('');
       setErrors({ optionA: '', optionB: '', same: '' });
     }
   };
@@ -71,6 +75,7 @@ export default function TwoChoicesQuestionPage() {
     const value = e.target.value;
     if (value.length <= maxOptionChars) {
       setOptionA(value);
+      setQuestionError('');
       setErrors({ ...errors, optionA: '', same: '' });
     }
   };
@@ -79,6 +84,7 @@ export default function TwoChoicesQuestionPage() {
     const value = e.target.value;
     if (value.length <= maxOptionChars) {
       setOptionB(value);
+      setQuestionError('');
       setErrors({ ...errors, optionB: '', same: '' });
     }
   };
@@ -87,6 +93,11 @@ export default function TwoChoicesQuestionPage() {
     const trimmedQuestion = question.trim();
     const trimmedOptionA = optionA.trim();
     const trimmedOptionB = optionB.trim();
+    const policyTarget = [trimmedQuestion, trimmedOptionA, trimmedOptionB].filter(Boolean).join(' ');
+    if (policyTarget && isRestrictedTarotQuestion(policyTarget)) {
+      setQuestionError(policyText.blocked);
+      return;
+    }
     
     const newErrors = { optionA: '', optionB: '', same: '' };
     
@@ -192,6 +203,14 @@ export default function TwoChoicesQuestionPage() {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                   rows={3}
                 />
+                <p className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-100">
+                  {policyText.notice}
+                </p>
+                {questionError && (
+                  <p className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {questionError}
+                  </p>
+                )}
                 <div className="flex justify-between items-center mt-2">
                   <span className="text-xs text-white/50">
                     {question.trim() ? t.question.hintWithQ : t.question.hintNoQ}

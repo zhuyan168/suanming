@@ -168,6 +168,10 @@ function addUtcDays(from: Date, days: number): string {
   return date.toISOString();
 }
 
+function addMilliseconds(from: Date, milliseconds: number): string {
+  return new Date(from.getTime() + milliseconds).toISOString();
+}
+
 function subtractUtcDays(from: Date, days: number): string {
   const date = new Date(from.getTime());
   date.setUTCDate(date.getUTCDate() - days);
@@ -197,6 +201,7 @@ async function extendMembershipFromCurrentProfile(params: {
   productId: string;
   eventId: string;
   subscriptionId: string | null;
+  periodStart: string | null;
   periodEnd: string | null;
   payload: CreemWebhookPayload;
 }): Promise<{ expiresAt: string | null; skipped: boolean; error: unknown | null }> {
@@ -215,7 +220,25 @@ async function extendMembershipFromCurrentProfile(params: {
   const currentRaw = profile?.membership_expires_at;
   const currentExp = currentRaw ? new Date(currentRaw as string) : null;
   const base = currentExp && !Number.isNaN(currentExp.getTime()) && currentExp > now ? currentExp : now;
-  const newExpiresAt = addUtcDays(base, params.durationDays);
+  const periodStart = params.periodStart ? new Date(params.periodStart) : null;
+  const periodEnd = params.periodEnd ? new Date(params.periodEnd) : null;
+  const hasValidPeriod =
+    periodStart &&
+    periodEnd &&
+    !Number.isNaN(periodStart.getTime()) &&
+    !Number.isNaN(periodEnd.getTime()) &&
+    periodEnd > periodStart;
+
+  const periodDurationMs = hasValidPeriod ? periodEnd.getTime() - periodStart.getTime() : null;
+  const newExpiresAt =
+    periodDurationMs !== null && periodStart !== null && base > periodStart
+      ? addMilliseconds(base, periodDurationMs)
+      : periodEnd && !Number.isNaN(periodEnd.getTime()) && periodEnd > now
+        ? periodEnd.toISOString()
+        : addUtcDays(base, params.durationDays);
+  const daysDelta = periodDurationMs
+    ? Math.max(1, Math.round(periodDurationMs / 86_400_000))
+    : params.durationDays;
 
   const { data: ledgerRow, error: ledgerError } = await supabaseService
     .from('membership_ledger')
@@ -223,7 +246,7 @@ async function extendMembershipFromCurrentProfile(params: {
       user_id: params.userId,
       source: 'creem',
       action: 'extend',
-      days_delta: params.durationDays,
+      days_delta: daysDelta,
       expires_before: currentRaw || null,
       expires_after: newExpiresAt,
       plan_key: params.planKey,
@@ -582,6 +605,7 @@ export default async function handler(
       productId,
       eventId,
       subscriptionId,
+      periodStart,
       periodEnd,
       payload,
     });
