@@ -40,12 +40,12 @@ export default function GuestTrialBanner() {
             <>
               Your free trial ends in{' '}
               <span className="font-semibold text-purple-300">{timeText}</span>.{' '}
-              Sign up to save your readings.
+              You can try up to 8 readings, including some member-only spreads. Sign up to get a daily free reading allowance.
             </>
           ) : (
             <>
               免费试用还剩{' '}
-              <span className="font-semibold text-purple-300">{timeText}</span>。注册即可保存你的占卜记录。
+              <span className="font-semibold text-purple-300">{timeText}</span>，可体验 8 次解读，部分会员牌阵也可试用。注册后每日可获得免费次数。
             </>
           )}
         </p>
@@ -54,7 +54,7 @@ export default function GuestTrialBanner() {
             href="/register"
             className="inline-flex items-center h-8 px-4 rounded-md bg-[#7f13ec] text-white text-sm font-semibold hover:bg-[#6b0fd4] transition-colors whitespace-nowrap"
           >
-            {isEn ? 'Save My Readings' : '保存我的记录'}
+            {isEn ? 'Get More Free Readings' : '获得更多免费次数'}
           </Link>
           <button
             type="button"

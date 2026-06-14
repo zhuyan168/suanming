@@ -475,16 +475,17 @@ export default function AccountPage() {
               </Link>
             </div>
 
-            {/* Change Password */}
-            <div className="mt-3">
-              <Link
-                href="/change-password"
-                className="w-full rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-3.5 text-white/70 text-sm font-medium hover:bg-white/[0.06] hover:text-white/90 hover:border-white/20 transition-all flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">lock_reset</span>
-                {texts.changePassword}
-              </Link>
-            </div>
+            {!isGoogleUser && (
+              <div className="mt-3">
+                <Link
+                  href="/change-password"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-3.5 text-white/70 text-sm font-medium hover:bg-white/[0.06] hover:text-white/90 hover:border-white/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-lg">lock_reset</span>
+                  {texts.changePassword}
+                </Link>
+              </div>
+            )}
 
             {/* Sign Out */}
             <div className="mt-3">
