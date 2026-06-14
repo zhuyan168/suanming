@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -390,7 +390,6 @@ export default function MonthlyMemberFortune() {
     if (emptySlotIndex === -1) return;
 
     const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
     
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;
@@ -436,7 +435,6 @@ export default function MonthlyMemberFortune() {
       setShowCards(false);
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('✅ 七张牌抽取完成，已保存到localStorage');
       }
     }
   };
@@ -468,36 +466,6 @@ export default function MonthlyMemberFortune() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style dangerouslySetInnerHTML={{ __html: `
           html.dark, html.dark body { background-color: #191022; }
-        ` }} />
-        <script dangerouslySetInnerHTML={{ __html: `
-          if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-            window.tailwindConfigSet = true;
-            (function() {
-              var script = document.createElement('script');
-              script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-              script.async = true;
-              script.onload = function() {
-                if (window.tailwind) {
-                  window.tailwind.config = {
-                    darkMode: 'class',
-                    theme: {
-                      extend: {
-                        colors: {
-                          primary: '#7f13ec',
-                          'background-light': '#f7f6f8',
-                          'background-dark': '#191022',
-                        },
-                        fontFamily: {
-                          display: ['Spline Sans', 'sans-serif'],
-                        },
-                      }
-                    }
-                  };
-                }
-              };
-              document.head.appendChild(script);
-            })();
-          }
         ` }} />
       </Head>
       
@@ -632,3 +600,4 @@ export default function MonthlyMemberFortune() {
     </>
   );
 }
+

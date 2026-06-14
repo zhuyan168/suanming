@@ -103,7 +103,7 @@ export default async function handler(
     .from('profiles')
     .select('membership_expires_at')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (profileReadErr) {
     console.error('[api/membership/redeem] read profile', profileReadErr);
@@ -145,8 +145,7 @@ export default async function handler(
 
   const { error: profUpdErr } = await supabaseService
     .from('profiles')
-    .update({ membership_expires_at: newIso })
-    .eq('id', user.id);
+    .upsert({ id: user.id, membership_expires_at: newIso }, { onConflict: 'id' });
 
   if (profUpdErr) {
     console.error('[api/membership/redeem] profile update after consume', profUpdErr);

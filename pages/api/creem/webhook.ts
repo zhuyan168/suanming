@@ -209,7 +209,7 @@ async function extendMembershipFromCurrentProfile(params: {
     .from('profiles')
     .select('membership_expires_at')
     .eq('id', params.userId)
-    .single();
+    .maybeSingle();
 
   if (readError) {
     console.error('[api/creem/webhook] profile read failed', readError);
@@ -274,8 +274,7 @@ async function extendMembershipFromCurrentProfile(params: {
 
   const { error: updateError } = await supabaseService
     .from('profiles')
-    .update({ membership_expires_at: newExpiresAt })
-    .eq('id', params.userId);
+    .upsert({ id: params.userId, membership_expires_at: newExpiresAt }, { onConflict: 'id' });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile membership extension failed', updateError);
@@ -381,7 +380,7 @@ async function reverseMembershipForRefund(params: {
     .from('profiles')
     .select('membership_expires_at')
     .eq('id', originalLedger.user_id)
-    .single();
+    .maybeSingle();
 
   if (readError) {
     console.error('[api/creem/webhook] profile read for refund failed', readError);
@@ -430,8 +429,7 @@ async function reverseMembershipForRefund(params: {
 
   const { error: updateError } = await supabaseService
     .from('profiles')
-    .update({ membership_expires_at: newExpiresAt })
-    .eq('id', originalLedger.user_id);
+    .upsert({ id: originalLedger.user_id, membership_expires_at: newExpiresAt }, { onConflict: 'id' });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile refund reversal failed', updateError);

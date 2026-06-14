@@ -151,7 +151,6 @@ JSON 结构示例：
       fortuneData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Raw Content:', content);
       return res.status(500).json({ error: '解析运势数据失败' });
     }
 

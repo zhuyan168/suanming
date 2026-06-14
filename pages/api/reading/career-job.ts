@@ -1,6 +1,6 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 export default async function handler(
@@ -126,16 +126,15 @@ export default async function handler(
     const data = await response.json();
     const reading = parseAIJson(data.choices[0].message.content);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'career-job',
-        question: question || null,
-        cards,
-        readingResult: reading,
-        resultPath: '/themed-readings/career-study/skills-direction/result'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'career-skills-direction',
+      spreadType: 'career-job',
+      question: question || null,
+      cards,
+      readingResult: reading,
+      resultPath: '/themed-readings/career-study/skills-direction/result'
+    });
 
     return res.status(200).json(reading);
   } catch (error: any) {

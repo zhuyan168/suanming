@@ -148,7 +148,6 @@ export default function CurrentWealthStatusDraw() {
         drawnCount: 'Cards drawn:',
         startReading: 'Start Reading',
         note: '✨ Look deeper into your money energy and spot useful opportunities.',
-        comingSoon: 'Reading feature coming soon',
         resetConfirm: 'Start over? Your current draw will be cleared.',
       }
     : {
@@ -163,7 +162,6 @@ export default function CurrentWealthStatusDraw() {
         drawnCount: '已抽牌：',
         startReading: '开始解读',
         note: '✨ 深度洞察金钱能量，把握财富机遇',
-        comingSoon: '解读功能即将上线',
         resetConfirm: '确定要重新开始吗？当前结果将被清空。',
       };
   const { loading: accessLoading, allowed } = useSpreadAccess({
@@ -173,7 +171,6 @@ export default function CurrentWealthStatusDraw() {
   const [hasDrawn, setHasDrawn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [scrollValue, setScrollValue] = useState(0);
-  const [toastVisible, setToastVisible] = useState(false);
   
   const [selectedCards, setSelectedCards] = useState<(ShuffledTarotCard | null)[]>([null, null, null]);
   const [isAnimating, setIsAnimating] = useState<boolean[]>([false, false, false]);
@@ -363,14 +360,6 @@ export default function CurrentWealthStatusDraw() {
             )}
           </div>
         </main>
-      </div>
-
-      {/* Toast */}
-      <div className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${toastVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-        <div className="px-6 py-3 rounded-full bg-background-dark/90 border border-white/10 backdrop-blur-md text-white shadow-glow flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">info</span>
-          <span className="text-sm font-bold">{text.comingSoon}</span>
-        </div>
       </div>
 
       <style jsx global>{`

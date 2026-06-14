@@ -1,6 +1,6 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson, AIJsonParseError } from '../../../lib/parseAIJson';
 
 export default async function handler(
@@ -184,26 +184,21 @@ export default async function handler(
     const data = await response.json();
     const content = data.choices[0].message.content;
     
-    // 记录原始返回内容用于调试
-    console.log('DeepSeek raw response:', content);
-    
     try {
       const reading = parseAIJson(content);
-      if (accessStatus.userId) {
-        await recordReadingHistory({
-          userId: accessStatus.userId,
-          spreadType: 'three-card-universal',
-          question: question || null,
-          cards,
-          readingResult: reading,
-          resultPath: '/reading/general/three-card-universal/reading'
-        });
-      }
+      await recordSuccessfulReading({
+        accessStatus,
+        featureKey: 'three-card-general',
+        spreadType: 'three-card-universal',
+        question: question || null,
+        cards,
+        readingResult: reading,
+        resultPath: '/reading/general/three-card-universal/reading'
+      });
       return res.status(200).json(reading);
     } catch (parseError: unknown) {
       if (parseError instanceof AIJsonParseError) {
         console.error('JSON parse error:', parseError.message);
-        console.error('Content that failed to parse:', parseError.rawContent);
       } else {
         console.error('Unexpected parse error:', parseError);
       }

@@ -1,5 +1,5 @@
 import { isEnglishRequest } from '../../lib/aiLanguage';
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { getYesNoByCard, getAnswerText } from '../../utils/yesno-tarot-logic';
 
 const getAnswerTextEn = (answer) => {
@@ -44,30 +44,22 @@ export default async function handler(req, res) {
         interpretation,
       };
 
-      if (accessStatus.userId) {
-        await recordReadingHistory({
-          userId: accessStatus.userId,
-          spreadType: 'yesno-tarot',
-          cards: [{ name: cardName, orientation }],
-          readingResult: { answer: localResult.answer, interpretation },
-          resultPath: '/fortune/yesno-tarot/result',
-        });
-      }
+      await recordSuccessfulReading({
+        accessStatus,
+        featureKey: 'divination-yesno',
+        spreadType: 'yesno-tarot',
+        cards: [{ name: cardName, orientation }],
+        readingResult: { answer: localResult.answer, interpretation },
+        resultPath: '/fortune/yesno-tarot/result',
+      });
 
       return res.status(200).json(result);
     }
 
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-    
-    // 调试信息（仅开发环境）
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API Key exists:', !!apiKey);
-      console.log('API Key length:', apiKey ? apiKey.length : 0);
-    }
+    const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found in environment variables');
-      console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('DEEPSEEK')));
       return res.status(500).json({ 
         error: 'API Key 未配置',
         debug: process.env.NODE_ENV === 'development' ? '请检查 .env.local 文件是否存在且包含 DEEPSEEK_API_KEY' : undefined
@@ -120,11 +112,6 @@ export default async function handler(req, res) {
       
       console.error('DeepSeek API error status:', response.status);
       console.error('DeepSeek API error response:', errorData);
-      console.error('Request URL:', 'https://api.deepseek.com/chat/completions');
-      console.error('Request headers:', {
-        'Content-Type': 'application/json',
-        'Authorization': apiKey ? 'Bearer [configured]' : 'Bearer [missing]'
-      });
       
       return res.status(500).json({ 
         error: 'DeepSeek API 调用失败',
@@ -180,16 +167,15 @@ export default async function handler(req, res) {
       interpretation: interpretation || content,
     };
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'yesno-tarot',
-        question,
-        cards: [{ name: cardName, orientation }],
-        readingResult: result,
-        resultPath: '/fortune/yesno-tarot/result'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'divination-yesno',
+      spreadType: 'yesno-tarot',
+      question,
+      cards: [{ name: cardName, orientation }],
+      readingResult: result,
+      resultPath: '/fortune/yesno-tarot/result'
+    });
 
     return res.status(200).json(result);
 

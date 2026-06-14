@@ -62,7 +62,7 @@ async function fixMalformedJSON(apiKey, rawContent) {
   }
 }
 
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -233,27 +233,23 @@ JSON 结构（严格遵循）：
       readingData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Raw Content:', content);
       
       try {
-        console.log('Attempting to fix JSON...');
         readingData = await fixMalformedJSON(apiKey, content);
-        console.log('JSON fixed successfully');
       } catch (fixError) {
         console.error('JSON fix failed:', fixError);
         return res.status(500).json({ ok: false, error: '解析解读数据失败，请重试' });
       }
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'what-they-think',
-        cards,
-        readingResult: readingData,
-        resultPath: '/themed-readings/love/what-they-think/result'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'love-what-they-think',
+      spreadType: 'what-they-think',
+      cards,
+      readingResult: readingData,
+      resultPath: '/themed-readings/love/what-they-think/result'
+    });
 
     // 返回成功响应
     return res.status(200).json({ ok: true, reading: readingData });

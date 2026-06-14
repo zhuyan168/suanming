@@ -13,7 +13,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { generateAnnualReading, validateInterpretation } from '../../../utils/annual-interpretation';
 import type { TarotCard, AnnualInterpretation } from '../../../types/annual-fortune';
 import { isMemberPlaceholder } from '../../../utils/membership-placeholder';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 interface InterpretRequest {
@@ -179,7 +179,6 @@ ${monthCardsText}
       interpretation = parseAIJson(content);
     } catch (parseError) {
       console.error('❌ Failed to parse DeepSeek response as JSON:', parseError);
-      console.error('Response content:', content);
       return null;
     }
 
@@ -189,7 +188,6 @@ ${monthCardsText}
       return null;
     }
 
-    console.log('✅ Successfully generated interpretation with DeepSeek');
     return interpretation;
 
   } catch (error) {
@@ -206,7 +204,7 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member' });
+  const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'member', spreadKey: 'fortune-yearly' });
   if (!accessStatus) return;
 
   try {
@@ -230,21 +228,15 @@ export default async function handler(
     let method = 'local';
 
     // TODO: 会员功能 - LLM 增强解读
-    // 检查用户是否为会员（当前永远为 false）
+    // 检查用户是否为会员（当前占位逻辑永远为 false）
     const isMember = isMemberPlaceholder();
 
-    // 临时启用 LLM（用于测试和开发）
-    // 正式上线后，需要恢复会员检查
-    const enableLLM = process.env.ENABLE_LLM_FOR_ALL === 'true' || isMember;
-
-    if (enableLLM) {
-      // 会员用户或临时启用：尝试使用 LLM 生成个性化解读
-      console.log('🤖 Attempting LLM interpretation...');
+    if (isMember) {
+      // 会员用户：尝试使用 LLM 生成个性化解读
       interpretation = await generateWithLLM(themeCard, monthCards, currentYear, isEn);
       
       if (interpretation) {
         method = 'llm';
-        console.log('✅ LLM interpretation generated successfully');
       } else {
         // LLM 失败，fallback 到本地规则
         console.warn('⚠️ LLM failed, falling back to local rules');
@@ -254,20 +246,18 @@ export default async function handler(
 
     // 非会员或 LLM 失败：使用本地规则生成
     if (!interpretation) {
-      console.log('📋 Generating interpretation with local rules...');
       interpretation = generateAnnualReading(themeCard, monthCards);
     }
 
-    if (accessStatus.userId) {
-      const allCards = { themeCard, ...monthCards };
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'annual-fortune',
-        cards: allCards,
-        readingResult: interpretation,
-        resultPath: '/annual-fortune'
-      });
-    }
+    const allCards = { themeCard, ...monthCards };
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'fortune-yearly',
+      spreadType: 'annual-fortune',
+      cards: allCards,
+      readingResult: interpretation,
+      resultPath: '/annual-fortune'
+    });
 
     // 返回结果
     return res.status(200).json({

@@ -249,9 +249,6 @@ export default async function handler(
     const data = await response.json();
     const content = data.choices[0].message.content;
     
-    // 记录原始返回内容用于调试
-    console.log('DeepSeek raw response:', content);
-    
     try {
       const reading = parseAIJson(content);
       await recordSuccessfulReading({
@@ -267,7 +264,6 @@ export default async function handler(
     } catch (parseError: unknown) {
       if (parseError instanceof AIJsonParseError) {
         console.error('JSON parse error:', parseError.message);
-        console.error('Content that failed to parse:', parseError.rawContent);
       } else {
         console.error('Unexpected parse error:', parseError);
       }

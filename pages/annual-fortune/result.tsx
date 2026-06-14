@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 年度运势结果页
  * 路由: /annual-fortune/result
  */
@@ -121,7 +121,6 @@ export default function AnnualFortuneResultPage() {
 
     try {
       // 1. 优先使用本地规则生成
-      console.log('📋 Generating interpretation with local rules...');
       const localInterpretation = generateAnnualReading(
         readingData.themeCard,
         readingData.monthCards
@@ -138,7 +137,6 @@ export default function AnnualFortuneResultPage() {
       // 保存到 localStorage
       saveReadingToLocal(readingData, localInterpretation);
 
-      console.log('✅ Interpretation generated successfully');
 
       // 2. 可选：后台调用 LLM 升级解读（异步，不阻塞 UI）
       tryUpgradeWithLLM(readingData, localInterpretation);
@@ -184,7 +182,6 @@ export default function AnnualFortuneResultPage() {
         
         // 检查是否为会员且使用了 LLM
         if (data.isMember && data.method === 'llm' && validateInterpretation(data.interpretation)) {
-          console.log('✅ Upgraded interpretation with LLM (member feature)');
           setInterpretation(data.interpretation);
           saveReadingToLocal(readingData, data.interpretation);
         }
@@ -400,40 +397,7 @@ function PageLayout({ title, children, isEn = false }: { title: string; children
             }
           `
         }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                          }
-                        }
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
 
       <div className="dark">
@@ -491,4 +455,5 @@ function LoadingSpinner() {
     </div>
   );
 }
+
 

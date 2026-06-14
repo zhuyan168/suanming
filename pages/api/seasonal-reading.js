@@ -242,7 +242,6 @@ ${cardsInfo}
       readingData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Raw Content:', content);
       return res.status(500).json({ error: '解析解读数据失败' });
     }
 

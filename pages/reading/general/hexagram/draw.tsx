@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -171,7 +171,6 @@ export default function HexagramDrawPage() {
     if (emptySlotIndex === -1) return;
 
     const orientation = card.orientation;
-    console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
     
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;

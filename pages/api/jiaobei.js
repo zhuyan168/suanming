@@ -1,4 +1,4 @@
-﻿import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+﻿import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 
 export default async function handler(req, res) {
@@ -33,22 +33,21 @@ export default async function handler(req, res) {
             yin: '暂缓行事，宜再思量。此时不宜轻举妄动，建议沉淀思考，等待更好的时机。',
             xiao: '神明含笑未答，再问一次吧。或许你的问题需要更明确，或者神明希望你再思考一下。',
           };
-      if (accessStatus.userId) {
-        await recordReadingHistory({
-          userId: accessStatus.userId,
-          spreadType: 'divination-jiaobei',
-          question: question || null,
-          cards: [],
-          readingResult: {
-            type: result,
-            title: (isEn
-              ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
-              : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
-            description: defaultInterpretations[result] || defaultInterpretations.sheng,
-          },
-          resultPath: `/divination/jiaobei/result?type=${result}`,
-        });
-      }
+      await recordSuccessfulReading({
+        accessStatus,
+        featureKey: 'divination-jiaobei',
+        spreadType: 'divination-jiaobei',
+        question: question || null,
+        cards: [],
+        readingResult: {
+          type: result,
+          title: (isEn
+            ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
+            : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
+          description: defaultInterpretations[result] || defaultInterpretations.sheng,
+        },
+        resultPath: `/divination/jiaobei/result?type=${result}`,
+      });
 
       return res.status(200).json({
         interpretation: defaultInterpretations[result] || defaultInterpretations.sheng,
@@ -147,25 +146,24 @@ export default async function handler(req, res) {
       // Plain text is the expected response for this endpoint.
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'divination-jiaobei',
-        question: question || null,
-        cards: [],
-        readingResult: {
-          type: result,
-          title: (isEn
-            ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
-            : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
-          description: (isEn
-            ? { sheng: 'This looks favorable. Move forward with care.', yin: 'Pause and reflect before acting.', xiao: 'The answer is unclear. Ask again with a clearer question.' }
-            : { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' })[result] || '',
-          aiInterpretation: interpretation,
-        },
-        resultPath: `/divination/jiaobei/result?type=${result}`,
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'divination-jiaobei',
+      spreadType: 'divination-jiaobei',
+      question: question || null,
+      cards: [],
+      readingResult: {
+        type: result,
+        title: (isEn
+          ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
+          : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
+        description: (isEn
+          ? { sheng: 'This looks favorable. Move forward with care.', yin: 'Pause and reflect before acting.', xiao: 'The answer is unclear. Ask again with a clearer question.' }
+          : { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' })[result] || '',
+        aiInterpretation: interpretation,
+      },
+      resultPath: `/divination/jiaobei/result?type=${result}`,
+    });
 
     return res.status(200).json({
       interpretation,

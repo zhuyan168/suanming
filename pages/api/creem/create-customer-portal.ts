@@ -42,8 +42,9 @@ function getAccessTokenFromRequest(req: NextApiRequest): string | null {
   return null;
 }
 
-function getCreemApiBaseUrl(): string {
-  return (process.env.CREEM_API_BASE_URL || 'https://test-api.creem.io').replace(/\/$/, '');
+function getCreemApiBaseUrl(): string | null {
+  const baseUrl = process.env.CREEM_API_BASE_URL;
+  return baseUrl ? baseUrl.replace(/\/$/, '') : null;
 }
 
 function getPortalUrl(payload: any): string | null {
@@ -88,8 +89,8 @@ function getCustomerId(payload: any): string | null {
   return null;
 }
 
-async function findCreemCustomerIdByEmail(email: string, apiKey: string): Promise<string | null> {
-  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/customers?email=${encodeURIComponent(email)}`, {
+async function findCreemCustomerIdByEmail(email: string, apiKey: string, creemApiBaseUrl: string): Promise<string | null> {
+  const creemRes = await fetch(`${creemApiBaseUrl}/v1/customers?email=${encodeURIComponent(email)}`, {
     method: 'GET',
     headers: {
       'x-api-key': apiKey,
@@ -114,8 +115,8 @@ async function findCreemCustomerIdByEmail(email: string, apiKey: string): Promis
   return getCustomerId(creemPayload);
 }
 
-async function createPortalForCustomer(customerId: string, apiKey: string): Promise<PortalResult> {
-  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/customers/billing`, {
+async function createPortalForCustomer(customerId: string, apiKey: string, creemApiBaseUrl: string): Promise<PortalResult> {
+  const creemRes = await fetch(`${creemApiBaseUrl}/v1/customers/billing`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -154,6 +155,11 @@ export default async function handler(
     return res.status(500).json({ error: 'Creem API key is not configured' });
   }
 
+  const creemApiBaseUrl = getCreemApiBaseUrl();
+  if (!creemApiBaseUrl) {
+    return res.status(500).json({ error: 'Creem API base URL is not configured' });
+  }
+
   const token = getAccessTokenFromRequest(req);
   if (!token) {
     return res.status(401).json({ error: 'Please sign in before managing your subscription.' });
@@ -189,7 +195,7 @@ export default async function handler(
   ));
 
   if (user.email) {
-    const customerIdFromEmail = await findCreemCustomerIdByEmail(user.email, apiKey);
+    const customerIdFromEmail = await findCreemCustomerIdByEmail(user.email, apiKey, creemApiBaseUrl);
     if (customerIdFromEmail && !customerIds.includes(customerIdFromEmail)) {
       customerIds.push(customerIdFromEmail);
     }
@@ -201,7 +207,7 @@ export default async function handler(
 
   const failedAttempts: Array<{ customerId: string; status: number; payload: any }> = [];
   for (const customerId of customerIds) {
-    const portalResult = await createPortalForCustomer(customerId, apiKey);
+    const portalResult = await createPortalForCustomer(customerId, apiKey, creemApiBaseUrl);
     if (portalResult.portalUrl) {
       return res.status(200).json({ portalUrl: portalResult.portalUrl });
     }

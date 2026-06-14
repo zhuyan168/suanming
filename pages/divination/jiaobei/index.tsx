@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
@@ -147,44 +147,7 @@ export default function JiaoBeiPage() {
           }
         `
         }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          },
-                        },
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
       <div className="dark">
         <div className="font-display bg-background-dark min-h-screen">
@@ -324,3 +287,4 @@ export default function JiaoBeiPage() {
     </>
   );
 }
+

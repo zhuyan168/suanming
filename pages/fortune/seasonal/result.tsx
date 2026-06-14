@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
@@ -309,7 +309,6 @@ export default function SeasonalResult() {
             if (allRecords[currentQuarter]) {
               allRecords[currentQuarter].reading = readingData;
               localStorage.setItem(storageKey, JSON.stringify(allRecords));
-              console.log(`✅ ${currentQuarter} 解读结果已保存到 localStorage`);
             }
           } catch (e) {
             console.error('Failed to save reading to localStorage:', e);
@@ -368,12 +367,10 @@ export default function SeasonalResult() {
       // 检查是否已有解读结果
       if (parsedResult.reading) {
         // 直接使用已保存的解读结果
-        console.log('📖 使用已保存的解读结果');
         setReading(parsedResult.reading);
         setIsLoadingReading(false);
       } else {
         // 如果没有解读结果，才调用 API 获取
-        console.log('🔮 首次获取解读结果');
         fetchReading(validatedCards as ShuffledTarotCard[]);
       }
     } catch (e) {
@@ -451,44 +448,7 @@ export default function SeasonalResult() {
             background-color: #191022;
           }
         ` }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          },
-                        },
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
 
       <div className="dark">
@@ -723,3 +683,4 @@ export default function SeasonalResult() {
     </>
   );
 }
+

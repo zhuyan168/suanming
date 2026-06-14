@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -714,7 +714,6 @@ const shuffleCards = (cards: TarotCard[]): ShuffledTarotCard[] => {
   // 统计正逆位分布（开发环境显示）
   const uprightCount = cardsWithOrientation.filter(c => c.orientation === 'upright').length;
   const reversedCount = cardsWithOrientation.filter(c => c.orientation === 'reversed').length;
-  console.log(`🃏 洗牌完成 - 正位: ${uprightCount}张 (${(uprightCount/78*100).toFixed(1)}%), 逆位: ${reversedCount}张 (${(reversedCount/78*100).toFixed(1)}%)`);
   
   // 然后打乱顺序
   return shuffleArray(cardsWithOrientation);
@@ -864,7 +863,6 @@ export default function DailyFortune() {
 
     // 使用洗牌时预设的正逆位
     const orientation = card.orientation;
-    console.log(`🎴 抽到卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
     
     // 将抽到的卡添加到 drawnCards 数组
     setDrawnCards(prev => [...prev, card]);
@@ -896,8 +894,6 @@ export default function DailyFortune() {
 
     try {
       if (process.env.NODE_ENV === 'development') {
-        console.log('🎴 准备调用API...');
-        console.log('📝 请求参数:', { cardName: card.name, orientation, baseMeaning });
       }
 
       const headers = await getAuthHeaders();
@@ -913,13 +909,11 @@ export default function DailyFortune() {
       });
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('📡 API响应状态:', response.status);
       }
 
       const data = await response.json();
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('📦 API返回数据:', data);
       }
 
       if (!response.ok) {
@@ -937,8 +931,6 @@ export default function DailyFortune() {
       };
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('✅ 运势解读成功!');
-        console.log('💾 保存结果到localStorage...');
       }
 
       // 保存到 localStorage
@@ -1031,44 +1023,7 @@ export default function DailyFortune() {
             background-color: #191022;
           }
         ` }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          },
-                        },
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
       
       <div className="dark">
@@ -1319,3 +1274,4 @@ function FortuneCard({ icon, title, content, delay, compact = false }: FortuneCa
     </motion.div>
   );
 }
+

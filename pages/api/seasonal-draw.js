@@ -860,8 +860,6 @@ async function saveSeasonalRecord(userId, cards) {
   //   cards: cards,
   //   createdAt: new Date()
   // });
-  
-  console.log('[预留] 保存四季牌阵记录:', { userId, cardsCount: cards.length });
 }
 
 // =============================================================================
@@ -977,9 +975,6 @@ export default async function handler(req, res) {
     if (drawnCardIds.size >= 5) {
       // 立即清理当前session，避免影响下次抽牌
       sessionDrawnCards.delete(currentSessionId);
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[四季牌阵] Session ${currentSessionId} 已完成5张抽牌，已清理`);
-      }
     }
     
     // -------------------------------------------------------------------------

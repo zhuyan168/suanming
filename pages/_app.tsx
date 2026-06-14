@@ -29,6 +29,7 @@ function shouldNoIndex(pathname: string): boolean {
     "/reset-password",
     "/change-password",
     "/auth",
+    "/annual-fortune",
   ].some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
@@ -110,6 +111,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content={DEFAULT_DESCRIPTION} key="description" />
         <meta name="robots" content={robotsContent} key="robots" />
         <link rel="canonical" href={canonicalUrl} key="canonical" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         <meta property="og:type" content="website" key="og:type" />
         <meta property="og:site_name" content="FateAura" key="og:site_name" />
@@ -117,6 +120,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:description" content={DEFAULT_DESCRIPTION} key="og:description" />
         <meta property="og:url" content={canonicalUrl} key="og:url" />
         <meta property="og:image" content={DEFAULT_OG_IMAGE} key="og:image" />
+        <meta property="og:image:type" content="image/png" key="og:image:type" />
+        <meta property="og:image:width" content="512" key="og:image:width" />
+        <meta property="og:image:height" content="512" key="og:image:height" />
 
         <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
         <meta name="twitter:title" content={DEFAULT_TITLE} key="twitter:title" />

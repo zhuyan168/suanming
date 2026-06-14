@@ -31,8 +31,6 @@ export async function saveReadingHistory(params: SaveReadingParams): Promise<voi
 
     if (error) {
       console.error('[saveReadingHistory] 写入失败:', error)
-    } else {
-      console.log('[saveReadingHistory] 写入成功:', params.spreadType)
     }
   } catch (err) {
     console.error('[saveReadingHistory] 异常:', err)

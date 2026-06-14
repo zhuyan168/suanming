@@ -1,6 +1,6 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 export default async function handler(
@@ -118,15 +118,14 @@ ${cardsInfo}`;
     }));
     result.actionSuggestions = result.actionSuggestions.map(soften);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'wealth-status',
-        cards,
-        readingResult: result,
-        resultPath: '/themed-readings/wealth/current-wealth-status/reading'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'wealth-current-status',
+      spreadType: 'wealth-status',
+      cards,
+      readingResult: result,
+      resultPath: '/themed-readings/wealth/current-wealth-status/reading'
+    });
 
     return res.status(200).json(result);
   } catch (error) {

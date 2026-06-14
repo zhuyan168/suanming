@@ -1,5 +1,5 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -164,19 +164,17 @@ ${cardsInfo}
       readingData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Raw Content:', content);
       return res.status(500).json({ error: '解析解读数据失败' });
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'future-lover',
-        cards,
-        readingResult: readingData,
-        resultPath: '/themed-readings/love/future-lover/result',
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'love-future-lover',
+      spreadType: 'future-lover',
+      cards,
+      readingResult: readingData,
+      resultPath: '/themed-readings/love/future-lover/result',
+    });
 
     return res.status(200).json(readingData);
 

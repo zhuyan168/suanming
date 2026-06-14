@@ -50,8 +50,9 @@ function getRequestOrigin(req: NextApiRequest): string {
   return `${protocol}://${hostname}`;
 }
 
-function getCreemApiBaseUrl(): string {
-  return (process.env.CREEM_API_BASE_URL || 'https://test-api.creem.io').replace(/\/$/, '');
+function getCreemApiBaseUrl(): string | null {
+  const baseUrl = process.env.CREEM_API_BASE_URL;
+  return baseUrl ? baseUrl.replace(/\/$/, '') : null;
 }
 
 function getStringId(value: unknown): string | null {
@@ -82,6 +83,11 @@ export default async function handler(
     return res.status(500).json({ error: 'Creem API key is not configured' });
   }
 
+  const creemApiBaseUrl = getCreemApiBaseUrl();
+  if (!creemApiBaseUrl) {
+    return res.status(500).json({ error: 'Creem API base URL is not configured' });
+  }
+
   const token = getAccessTokenFromRequest(req);
   if (!token) {
     return res.status(401).json({ error: 'Please sign in before purchasing membership.' });
@@ -100,7 +106,7 @@ export default async function handler(
     .from('profiles')
     .select('membership_expires_at')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     console.error('[api/creem/create-checkout] Profile lookup failed', profileError);
@@ -128,7 +134,7 @@ export default async function handler(
   const origin = getRequestOrigin(req);
   const successUrl = `${origin}/membership?checkout=success&plan=${encodeURIComponent(plan.key)}`;
 
-  const creemRes = await fetch(`${getCreemApiBaseUrl()}/v1/checkouts`, {
+  const creemRes = await fetch(`${creemApiBaseUrl}/v1/checkouts`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 测试页面
  * 访问 /annual-fortune/test 运行测试
  */
@@ -73,40 +73,7 @@ export default function TestPage() {
             }
           `
         }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                          }
-                        }
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
 
       <div className="dark">
@@ -226,4 +193,5 @@ export default function TestPage() {
     </>
   );
 }
+
 

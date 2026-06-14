@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -285,7 +285,6 @@ export default function YesNoTarotDraw() {
     if (!card) return;
 
     const orientation = card.orientation;
-    console.log(`🎴 抽到卡牌: ${card.name}, 正逆位: ${orientation === 'upright' ? '正位' : '逆位'}`);
     
     setSelectedCard(card);
     setIsAnimating(true);

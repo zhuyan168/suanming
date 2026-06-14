@@ -14,6 +14,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res }) => {
     'Disallow: /account',
     'Disallow: /history',
     'Disallow: /auth/',
+    'Disallow: /annual-fortune',
     '',
     `Sitemap: ${siteUrl}/sitemap.xml`,
     '',

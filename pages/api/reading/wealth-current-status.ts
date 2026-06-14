@@ -1,6 +1,6 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 /**
@@ -98,15 +98,14 @@ async function handler(
     const data = await response.json();
     const content = parseAIJson(data.choices[0].message.content);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'wealth-current-status',
-        cards,
-        readingResult: content,
-        resultPath: '/themed-readings/wealth/current-wealth-status/reading'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'wealth-current-status',
+      spreadType: 'wealth-current-status',
+      cards,
+      readingResult: content,
+      resultPath: '/themed-readings/wealth/current-wealth-status/reading'
+    });
 
     return res.status(200).json(content);
   } catch (error: any) {

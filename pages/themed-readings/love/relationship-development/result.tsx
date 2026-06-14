@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -162,28 +162,28 @@ export default function RelationshipDev8Result() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Relationship Development - Reading | FateAura' : '??????? - ???? | FateAura',
-    metaDesc: isEn ? 'Understand the true state and natural direction of this relationship.' : '????????????????',
-    loadingTitle: isEn ? 'Loading... - Relationship Development' : '???... - ???????',
-    loading: isEn ? 'Loading...' : '???...',
-    loadingData: isEn ? 'Loading data...' : '?????...',
-    header: isEn ? 'Relationship Development' : '???????',
-    reset: isEn ? 'Reset' : '??',
-    h1: isEn ? 'Relationship Development' : '???????',
-    subtitle: isEn ? 'Understand the true state and natural direction of the relationship' : '??????????????',
-    retry: isEn ? 'Retry' : '????',
-    generatingTitle: isEn ? 'Reading the true state of this relationship...' : '???????????????',
-    generatingDesc: isEn ? 'This may take a moment. Please wait.' : '?????????????',
-    spreadExplanation: isEn ? 'Spread Explanation' : '????',
-    cardReading: isEn ? 'Card Reading' : '????',
-    integration: isEn ? 'Relationship Dynamics' : '??????',
-    theme: isEn ? 'Current Relationship Theme' : '????????',
-    drivingForce: isEn ? 'Core Driving Force' : '?????????',
-    tension: isEn ? 'The Tension That Needs Attention' : '???????????',
-    shortTermTrend: isEn ? 'Short-Term Trend' : '??????',
-    closingTitle: isEn ? 'Final Message' : '????',
-    closingFallback: isEn ? 'The cards reflect the current state of this relationship. May this understanding help you find your own rhythm.' : '??????????????????????????????',
-    backLove: isEn ? 'Back to Love Readings' : '??????',
+    title: isEn ? 'Relationship Development - Reading | FateAura' : '关系发展 - 解读 | FateAura',
+    metaDesc: isEn ? 'Understand the true state and natural direction of this relationship.' : '理解这段关系的真实状态与自然走向。',
+    loadingTitle: isEn ? 'Loading... - Relationship Development' : '加载中... - 关系发展',
+    loading: isEn ? 'Loading...' : '加载中...',
+    loadingData: isEn ? 'Loading data...' : '正在加载数据...',
+    header: isEn ? 'Relationship Development' : '关系发展',
+    reset: isEn ? 'Reset' : '重置',
+    h1: isEn ? 'Relationship Development' : '关系发展',
+    subtitle: isEn ? 'Understand the true state and natural direction of the relationship' : '理解这段关系的真实状态与自然走向',
+    retry: isEn ? 'Retry' : '重试',
+    generatingTitle: isEn ? 'Reading the true state of this relationship...' : '正在解读这段关系的真实状态...',
+    generatingDesc: isEn ? 'This may take a moment. Please wait.' : '这可能需要一点时间，请稍候。',
+    spreadExplanation: isEn ? 'Spread Explanation' : '牌阵说明',
+    cardReading: isEn ? 'Card Reading' : '单牌解读',
+    integration: isEn ? 'Relationship Dynamics' : '关系动态',
+    theme: isEn ? 'Current Relationship Theme' : '当前关系主题',
+    drivingForce: isEn ? 'Core Driving Force' : '核心推动力',
+    tension: isEn ? 'The Tension That Needs Attention' : '需要留意的张力',
+    shortTermTrend: isEn ? 'Short-Term Trend' : '短期趋势',
+    closingTitle: isEn ? 'Final Message' : '最后提醒',
+    closingFallback: isEn ? 'The cards reflect the current state of this relationship. May this understanding help you find your own rhythm.' : '牌面反映了这段关系当下的状态。愿这份理解帮助你找到自己的节奏。',
+    backLove: isEn ? 'Back to Love Readings' : '返回爱情占卜',
     upright: isEn ? 'Upright' : '正位',
     reversed: isEn ? 'Reversed' : '逆位',
   };
@@ -361,47 +361,6 @@ export default function RelationshipDev8Result() {
         <title>{pageText.title}</title>
         <meta name="description" content={pageText.metaDesc} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          }
-                        }
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
-        <style dangerouslySetInnerHTML={{ __html: `
-          html.dark, html.dark body { background-color: #191022; }
-        ` }} />
       </Head>
 
       <div className="dark">
@@ -712,4 +671,5 @@ export default function RelationshipDev8Result() {
     </>
   );
 }
+
 

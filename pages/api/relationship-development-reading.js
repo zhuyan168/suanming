@@ -331,12 +331,9 @@ ${cardsInfo}
       readingData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
-      console.error('Raw Content:', content);
       
       try {
-        console.log('Attempting to fix JSON...');
         readingData = await fixMalformedJSON(apiKey, content);
-        console.log('JSON fixed successfully');
       } catch (fixError) {
         console.error('JSON fix failed:', fixError);
         return res.status(500).json({ ok: false, error: '解析解读数据失败，请重试' });

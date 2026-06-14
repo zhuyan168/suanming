@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1034,7 +1034,6 @@ export default function SeasonalFortune() {
     setSessionId(userSessionId);
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[初始化] 当前季度: ${quarter}, sessionId: ${userSessionId}`);
     }
 
     // 读取所有季度的历史记录
@@ -1157,7 +1156,6 @@ export default function SeasonalFortune() {
     const pickValue = 5 - currentCardCount;
 
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[抽牌请求] slot=${emptySlotIndex + 1}, pick=${pickValue}, sessionId=${currentSessionId}`);
     }
 
     setIsLoading(true);
@@ -1188,7 +1186,6 @@ export default function SeasonalFortune() {
         orientation: data.card.orientation,
       };
 
-      console.log(`🎴 抽到第${emptySlotIndex + 1}张卡牌: ${drawnCard.name}, 正逆位: ${drawnCard.orientation === 'upright' ? '正位' : '逆位'}`);
       
       // 更新selectedCards
       const newSelectedCards = [...selectedCards];
@@ -1248,7 +1245,6 @@ export default function SeasonalFortune() {
         setShowCards(false);
         
         if (process.env.NODE_ENV === 'development') {
-          console.log(`✅ ${currentQuarter} 五张牌抽取完成，已保存到localStorage（解读将在查看结果时生成）`);
         }
       }
     } catch (err) {
@@ -1309,44 +1305,7 @@ export default function SeasonalFortune() {
             background-color: #191022;
           }
         ` }} />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined' && !window.tailwindConfigSet) {
-                window.tailwindConfigSet = true;
-                (function() {
-                  var script = document.createElement('script');
-                  script.src = 'https://cdn.tailwindcss.com?plugins=forms,container-queries';
-                  script.async = true;
-                  script.onload = function() {
-                    if (window.tailwind) {
-                      window.tailwind.config = {
-                        darkMode: 'class',
-                        theme: {
-                          extend: {
-                            colors: {
-                              primary: '#7f13ec',
-                              'background-light': '#f7f6f8',
-                              'background-dark': '#191022',
-                            },
-                            fontFamily: {
-                              display: ['Spline Sans', 'sans-serif'],
-                            },
-                            borderRadius: { DEFAULT: '0.25rem', lg: '0.5rem', xl: '0.75rem', full: '9999px' },
-                            boxShadow: {
-                              glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
-                            },
-                          },
-                        },
-                      };
-                    }
-                  };
-                  document.head.appendChild(script);
-                })();
-              }
-            `,
-          }}
-        />
+        
       </Head>
       
       <div className="dark">
@@ -1586,4 +1545,5 @@ export default function SeasonalFortune() {
     </>
   );
 }
+
 

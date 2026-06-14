@@ -1,6 +1,6 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../../lib/aiLanguage';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAccessOrRespond, recordReadingHistory } from '../../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../../lib/accessServer';
 import { parseAIJson } from '../../../lib/parseAIJson';
 
 async function handler(
@@ -128,16 +128,15 @@ async function handler(
     const data = await response.json();
     const reading = parseAIJson(data.choices[0].message.content);
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'interview-exam',
-        question: question || null,
-        cards,
-        readingResult: reading,
-        resultPath: '/themed-readings/career-study/interview-exam-key-reminders/reading'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'career-interview-exam',
+      spreadType: 'interview-exam',
+      question: question || null,
+      cards,
+      readingResult: reading,
+      resultPath: '/themed-readings/career-study/interview-exam-key-reminders/reading'
+    });
 
     return res.status(200).json(reading);
   } catch (error: any) {

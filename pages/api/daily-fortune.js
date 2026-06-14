@@ -1,5 +1,5 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
-import { requireAccessOrRespond, recordReadingHistory } from '../../lib/accessServer';
+import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
 
 export default async function handler(req, res) {
@@ -21,12 +21,7 @@ export default async function handler(req, res) {
 
     const isEn = isEnglishRequest(req);
 
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-    
-    // 调试信息（仅开发环境）
-    if (process.env.NODE_ENV === 'development') {
-      console.log('API Key exists:', !!apiKey);
-    }
+    const apiKey = process.env.DEEPSEEK_API_KEY;
     
     if (!apiKey) {
       console.error('DEEPSEEK_API_KEY not found in environment variables');
@@ -137,7 +132,6 @@ Return JSON only. Do not include any Chinese text.` : `用户今天抽到的塔�
       fortuneData = parseAIJson(content);
     } catch (parseError) {
       console.error('JSON 解析失败:', parseError);
-      console.error('原始内容:', content);
       return res.status(500).json({ error: '解析运势数据失败' });
     }
 
@@ -153,15 +147,14 @@ Return JSON only. Do not include any Chinese text.` : `用户今天抽到的塔�
       });
     }
 
-    if (accessStatus.userId) {
-      await recordReadingHistory({
-        userId: accessStatus.userId,
-        spreadType: 'fortune-daily',
-        cards: [{ cardName, orientation }],
-        readingResult: fortuneData,
-        resultPath: '/fortune/daily'
-      });
-    }
+    await recordSuccessfulReading({
+      accessStatus,
+      featureKey: 'fortune-daily',
+      spreadType: 'fortune-daily',
+      cards: [{ cardName, orientation }],
+      readingResult: fortuneData,
+      resultPath: '/fortune/daily'
+    });
 
     return res.status(200).json({
       success: true,

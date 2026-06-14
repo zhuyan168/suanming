@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -147,7 +147,6 @@ export default function ThreeCardDrawPage() {
     if (emptySlotIndex === -1) return;
 
     const orientation = card.orientation;
-    console.log(`🎴 Drew card ${emptySlotIndex + 1}: ${card.name}, orientation: ${orientation}`);
     
     const newSelectedCards = [...selectedCards];
     newSelectedCards[emptySlotIndex] = card;

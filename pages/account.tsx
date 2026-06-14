@@ -247,47 +247,29 @@ export default function AccountPage() {
 
     const payload = { id: user.id, username: trimmed, updated_at: new Date().toISOString() }
 
-    console.log('[account] user.id:', user.id)
-    console.log('[account] 准备写入 payload:', JSON.stringify(payload, null, 2))
-    console.log('[account] 操作方式: update profiles set username, updated_at where id = user.id')
-
-    const { data, error, status, statusText } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ username: trimmed, updated_at: payload.updated_at })
       .eq('id', user.id)
       .select()
 
-    console.log('[account] Supabase 响应 status:', status, statusText)
-    console.log('[account] Supabase 响应 data:', JSON.stringify(data, null, 2))
-
     setSaving(false)
 
     if (error) {
-      console.error('[account] 昵称保存失败 error 全量:', JSON.stringify(error, null, 2))
-      console.error('[account] error.message:', error.message)
-      console.error('[account] error.code:', error.code)
-      console.error('[account] error.details:', error.details)
-      console.error('[account] error.hint:', (error as any).hint)
+      console.error('[account] 昵称保存失败:', error.message)
       setToast({ type: 'error', text: texts.nicknameSaveFail(error.message) })
       return
     }
 
     if (!data || data.length === 0) {
       console.warn('[account] update 返回 0 行，profiles 中可能不存在 id =', user.id, '的记录，尝试 insert')
-      const { data: insertData, error: insertError, status: insertStatus } = await supabase
+      const { error: insertError } = await supabase
         .from('profiles')
         .insert(payload)
         .select()
 
-      console.log('[account] insert 响应 status:', insertStatus)
-      console.log('[account] insert 响应 data:', JSON.stringify(insertData, null, 2))
-
       if (insertError) {
-        console.error('[account] insert 也失败:', JSON.stringify(insertError, null, 2))
-        console.error('[account] insertError.message:', insertError.message)
-        console.error('[account] insertError.code:', insertError.code)
-        console.error('[account] insertError.details:', insertError.details)
-        console.error('[account] insertError.hint:', (insertError as any).hint)
+        console.error('[account] 昵称创建失败:', insertError.message)
         setToast({ type: 'error', text: texts.nicknameSaveFail(insertError.message) })
         return
       }

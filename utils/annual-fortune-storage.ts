@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 年度运势数据存储工具
  * 使用 sessionStorage 和 localStorage
  */
@@ -33,7 +33,6 @@ export function saveReadingToLocal(reading: AnnualFortuneReading, interpretation
     };
     
     localStorage.setItem(key, JSON.stringify(data));
-    console.log(`✅ Saved reading to localStorage: ${key}`);
   } catch (error) {
     console.error('❌ Failed to save to localStorage:', error);
   }
@@ -63,7 +62,6 @@ export function loadReadingFromLocal(year?: number): {
       return null;
     }
     
-    console.log(`✅ Loaded reading from localStorage: ${key}`);
     return data;
   } catch (error) {
     console.error('❌ Failed to load from localStorage:', error);
@@ -79,7 +77,6 @@ export function saveReadingToSession(reading: AnnualFortuneReading): void {
   
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(reading));
-    console.log('✅ Saved reading to sessionStorage');
   } catch (error) {
     console.error('❌ Failed to save to sessionStorage:', error);
   }
@@ -104,7 +101,6 @@ export function loadReadingFromSession(): AnnualFortuneReading | null {
       return null;
     }
     
-    console.log('✅ Loaded reading from sessionStorage');
     return reading;
   } catch (error) {
     console.error('❌ Failed to load from sessionStorage:', error);
@@ -120,7 +116,6 @@ export function clearSession(): void {
   
   try {
     sessionStorage.removeItem(SESSION_KEY);
-    console.log('✅ Cleared sessionStorage');
   } catch (error) {
     console.error('❌ Failed to clear sessionStorage:', error);
   }
@@ -141,7 +136,6 @@ export async function getAnnualFortuneReading(readingId?: string): Promise<{
       const response = await fetch(`/api/annual-fortune/readings/${readingId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Loaded reading from API');
         return { ...data, source: 'api' };
       }
     } catch (error) {

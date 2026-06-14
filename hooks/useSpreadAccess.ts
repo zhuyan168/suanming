@@ -180,6 +180,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
 
     try {
       let spreadAccess: SpreadAccess = 'free';
+      let resolvedKey: string | null = null;
 
       if (spreadKey) {
         const spreadMeta = getSpreadByKey(spreadKey);
@@ -189,6 +190,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
           return;
         }
         spreadAccess = spreadMeta.access;
+        resolvedKey = spreadKey;
       } else if (theme && spreadId) {
         const spreadConfig = getSpreadConfig(theme, spreadId);
         if (!spreadConfig) {
@@ -197,6 +199,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
           return;
         }
         spreadAccess = spreadConfig.access ?? 'free';
+        resolvedKey = spreadConfig.spreadType || `${theme}-${spreadId}`;
       } else {
         console.warn('[useSpreadAccess] 未提供 spreadKey 或 theme + spreadId');
         setState({ loading: false, allowed: true, isMember: false, userId: null });
@@ -210,7 +213,6 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       // relative to the user's local clock rather than a fixed server timezone.
       params.set('tz', Intl.DateTimeFormat().resolvedOptions().timeZone);
       // Send spread key for per-feature guest trial limit checking
-      const resolvedKey = spreadKey || (theme && spreadId ? `${theme}-${spreadId}` : null);
       if (resolvedKey) params.set('spreadKey', resolvedKey);
 
       const response = await fetch(`/api/access/check?${params.toString()}`, {
