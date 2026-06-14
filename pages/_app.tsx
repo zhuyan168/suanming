@@ -111,8 +111,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content={DEFAULT_DESCRIPTION} key="description" />
         <meta name="robots" content={robotsContent} key="robots" />
         <link rel="canonical" href={canonicalUrl} key="canonical" />
-        <link rel="icon" href="/favicon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.png?v=20260614" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260614" />
 
         <meta property="og:type" content="website" key="og:type" />
         <meta property="og:site_name" content="FateAura" key="og:site_name" />
