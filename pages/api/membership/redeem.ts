@@ -36,6 +36,36 @@ function addUtcCalendarDays(from: Date, days: number): Date {
   return d;
 }
 
+async function writeMembershipProfile(params: {
+  userId: string;
+  email?: string | null;
+  membershipExpiresAt: string;
+}): Promise<{ error: unknown | null }> {
+  const payload = {
+    membership_expires_at: params.membershipExpiresAt,
+    is_member: true,
+  };
+
+  const { data: updated, error: updateError } = await supabaseService
+    .from('profiles')
+    .update(payload)
+    .eq('id', params.userId)
+    .select('id');
+
+  if (updateError) return { error: updateError };
+  if (updated?.length) return { error: null };
+
+  const { error: insertError } = await supabaseService
+    .from('profiles')
+    .insert({
+      id: params.userId,
+      email: params.email ?? null,
+      ...payload,
+    });
+
+  return { error: insertError ?? null };
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<RedeemSuccess | RedeemError>
@@ -73,7 +103,7 @@ export default async function handler(
 
   const { data: row, error: selErr } = await supabaseService
     .from('membership_codes')
-    .select('id, duration_days, is_used, expires_at')
+    .select('id, duration_days, is_used, used_by, used_at, expires_at')
     .eq('code', normalizedCode)
     .maybeSingle();
 
@@ -83,9 +113,6 @@ export default async function handler(
   }
   if (!row) {
     return res.status(404).json({ error: '会员码不存在' });
-  }
-  if (row.is_used) {
-    return res.status(400).json({ error: '会员码已使用' });
   }
   if (row.expires_at) {
     const codeExp = new Date(row.expires_at as string);
@@ -111,9 +138,59 @@ export default async function handler(
   }
 
   const now = new Date();
-  let base: Date;
   const currentExpRaw = profile?.membership_expires_at;
   const currentExp = currentExpRaw ? new Date(currentExpRaw as string) : null;
+
+  if (row.is_used) {
+    if (row.used_by !== user.id) {
+      return res.status(400).json({ error: 'Membership code has already been used' });
+    }
+
+    const usedAtRaw = row.used_at as string | null | undefined;
+    const originalUsedAt = usedAtRaw ? new Date(usedAtRaw) : now;
+    const repairBase = !Number.isNaN(originalUsedAt.getTime()) ? originalUsedAt : now;
+    const repairExpires = addUtcCalendarDays(repairBase, durationDays);
+    const repairIso = repairExpires.toISOString();
+
+    if (currentExp && !Number.isNaN(currentExp.getTime()) && currentExp >= repairExpires) {
+      return res.status(200).json({ success: true, newMembershipExpiresAt: currentExp.toISOString() });
+    }
+
+    const { error: repairErr } = await writeMembershipProfile({
+      userId: user.id,
+      email: user.email,
+      membershipExpiresAt: repairIso,
+    });
+
+    if (repairErr) {
+      console.error('[api/membership/redeem] repair profile for consumed code', repairErr);
+      return res.status(500).json({ error: 'Redemption repair failed. Please contact support.' });
+    }
+
+    const { error: repairLedgerErr } = await supabaseService
+      .from('membership_ledger')
+      .insert({
+        user_id: user.id,
+        source: 'code',
+        action: 'extend',
+        days_delta: durationDays,
+        expires_before: currentExpRaw || null,
+        expires_after: repairIso,
+        membership_code_id: row.id,
+        metadata: {
+          code_expires_at: row.expires_at || null,
+          repaired_consumed_code: true,
+        },
+      });
+
+    if (repairLedgerErr) {
+      console.error('[api/membership/redeem] repair ledger insert failed', repairLedgerErr);
+    }
+
+    return res.status(200).json({ success: true, newMembershipExpiresAt: repairIso });
+  }
+
+  let base: Date;
   if (currentExp && !Number.isNaN(currentExp.getTime()) && currentExp > now) {
     base = currentExp;
   } else {
@@ -143,12 +220,28 @@ export default async function handler(
     return res.status(400).json({ error: '会员码已使用' });
   }
 
-  const { error: profUpdErr } = await supabaseService
-    .from('profiles')
-    .upsert({ id: user.id, membership_expires_at: newIso }, { onConflict: 'id' });
+  const { error: profUpdErr } = await writeMembershipProfile({
+    userId: user.id,
+    email: user.email,
+    membershipExpiresAt: newIso,
+  });
 
   if (profUpdErr) {
     console.error('[api/membership/redeem] profile update after consume', profUpdErr);
+    const { error: rollbackErr } = await supabaseService
+      .from('membership_codes')
+      .update({
+        is_used: false,
+        used_by: null,
+        used_at: null,
+      })
+      .eq('id', row.id)
+      .eq('used_by', user.id);
+
+    if (rollbackErr) {
+      console.error('[api/membership/redeem] rollback consumed code failed', rollbackErr);
+    }
+
     return res.status(500).json({ error: '兑换处理异常，请稍后再试或联系客服' });
   }
 
