@@ -35,6 +35,7 @@ export default function CardItem({ card, index, onClick, isDisabled, isSelected 
   
   return (
     <motion.button
+      type="button"
       onClick={() => !isDisabled && onClick(index)}
       disabled={isDisabled}
       animate={isSelected ? { y: -8, scale: 1.05 } : { y: 0, scale: 1 }}

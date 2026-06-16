@@ -402,13 +402,6 @@ export default function WealthObstaclesReadingPage() {
       </main>
 
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
-        
-        body {
-          font-family: 'Noto Sans SC', sans-serif;
-          background-color: #191022;
-        }
-
         .animate-spin-slow {
           animation: spin 3s linear infinite;
         }
@@ -424,10 +417,6 @@ export default function WealthObstaclesReadingPage() {
 
         .shadow-glow-sm {
           box-shadow: 0 0 15px rgba(127, 19, 236, 0.15);
-        }
-
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
       `}</style>
     </div>

@@ -162,6 +162,39 @@ export async function recordReadingHistory(params: {
   }
 }
 
+export async function findReadingHistoryByClientRequestId(params: {
+  userId: string;
+  spreadType: string;
+  clientRequestId?: string | null;
+}): Promise<any | null> {
+  const { userId, spreadType, clientRequestId } = params;
+  if (!clientRequestId || typeof clientRequestId !== 'string' || !clientRequestId.trim()) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await supabaseService
+      .from('reading_history')
+      .select('reading_result')
+      .eq('user_id', userId)
+      .eq('spread_type', spreadType)
+      .filter('reading_result->>clientRequestId', 'eq', clientRequestId.trim())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[accessServer] findReadingHistoryByClientRequestId failed:', error);
+      return null;
+    }
+
+    return data?.reading_result ?? null;
+  } catch (err) {
+    console.error('[accessServer] findReadingHistoryByClientRequestId exception:', err);
+    return null;
+  }
+}
+
 export async function ensureAccessForRequest(params: {
   req: NextApiRequest;
   spreadAccess?: SpreadAccess;

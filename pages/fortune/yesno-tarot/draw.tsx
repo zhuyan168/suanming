@@ -140,6 +140,7 @@ const STORAGE_KEY_QUESTION = 'yesno_tarot_question_v1';
 // 结果数据接口
 interface YesNoTarotDraw {
   timestamp: number;
+  requestId: string;
   question?: string;
   card: ShuffledTarotCard;
 }
@@ -172,6 +173,13 @@ const loadYesNoTarotQuestion = (): string => {
     console.error('Failed to load yes/no tarot question:', error);
     return '';
   }
+};
+
+const generateRequestId = (): string => {
+  if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `yesno_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 };
 
 export default function YesNoTarotDraw() {
@@ -304,6 +312,7 @@ export default function YesNoTarotDraw() {
     // 保存抽牌结果
     const result: YesNoTarotDraw = {
       timestamp: Date.now(),
+      requestId: generateRequestId(),
       question,
       card,
     };

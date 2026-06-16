@@ -425,22 +425,6 @@ export default function OfferDecisionReading() {
         </AnimatePresence>
       </main>
 
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
-        
-        :root {
-          --primary: #7f13ec;
-        }
-        
-        body {
-          font-family: 'Noto Sans SC', sans-serif;
-          background-color: #191022;
-        }
-
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
     </div>
   );
 }

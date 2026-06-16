@@ -77,23 +77,37 @@ export default function MembershipPage() {
   const [portalError, setPortalError] = useState<string | null>(null)
 
   const texts = isEn ? {
-    title: 'Membership Pricing - FateAura',
-    metaDesc: 'View FateAura membership pricing before signing up: monthly, quarterly, and annual subscription plans.',
-    heading: 'FateAura Membership Pricing',
-    subtitle: 'View subscription costs before signing up. Choose a monthly, quarterly, or annual plan.',
-    alreadyMember: 'You are already a member.',
+    title: 'FateAura Membership',
+    metaDesc: 'View FateAura membership benefits and pricing before signing up: unlimited daily readings, member-only reading types, and monthly, quarterly, or annual plans.',
+    heading: 'FateAura Membership',
+    subtitle: 'Unlock deeper tarot readings and enjoy unlimited daily readings. Review pricing and benefits before subscribing.',
+    alreadyMember: 'Your membership is active.',
     memberExpires: 'Membership expires on: ',
-    notMember: 'Choose a plan above to unlock member benefits.',
+    notMember: 'Subscribe to unlock unlimited readings and member-only reading types.',
     loginPrompt: 'You can review all prices before signing in. Sign in is only required when you subscribe or redeem a code.',
     loginBtn: 'Sign In',
     benefitsTitle: 'Member Benefits',
-    benefit1: 'Access advanced spreads including Hexagram, Horseshoe, Celtic Cross, and more.',
-    benefit2: 'Receive deeper readings for complex questions and long-term themes.',
-    benefit3: 'Keep access to new member features and future experience improvements.',
+    benefit1Title: 'Unlimited daily readings',
+    benefit1: 'Free users can complete 3 readings per day. Members are not limited by the daily free quota.',
+    benefit2Title: 'Unlock member-only reading types',
+    benefit2: 'Includes Hexagram, Horseshoe, Celtic Cross, relationship readings, career decisions, wealth obstacles, seasonal readings, yearly readings, and more.',
+    benefit3Title: 'Built for complex questions',
+    benefit3: 'Member readings usually use more cards and fuller layouts for love, career, wealth, and long-term themes.',
+    benefit4Title: 'Ongoing member features',
+    benefit4: 'Use new member-only experiences and improvements while your membership is active.',
+    comparisonTitle: 'Free Plan vs Member Plan',
+    freeUserTitle: 'Free User',
+    freeUserPoint1: '3 free readings per day',
+    freeUserPoint2: 'Use free reading types',
+    freeUserPoint3: 'Best for quick daily guidance',
+    memberUserTitle: 'Member',
+    memberUserPoint1: 'Unlimited daily readings',
+    memberUserPoint2: 'Use both free and member-only reading types',
+    memberUserPoint3: 'Best for deep questions and long-term trends',
     aiNoticeTitle: 'AI Transparency',
     aiNoticeBody: 'FateAura readings may be generated or assisted by AI. They are provided for entertainment, self-reflection, and personal insight only, and should not be considered medical, legal, financial, or other professional advice.',
     paymentTitle: 'Subscription Plans',
-    choosePlan: 'Subscriptions renew automatically. You can cancel anytime; paid access remains until the current billing period ends. Any final tax or payment details are shown by Creem at checkout before payment.',
+    choosePlan: 'All plans include the same benefits. Only the billing period differs. Subscriptions renew automatically and can be canceled anytime; access remains active until the end of the paid period. Any final tax or payment details are shown by Creem at checkout before payment.',
     activeMemberPlanNotice: 'You already have an active membership. Use subscription management below for renewal or cancellation details.',
     subscribe: 'Subscribe',
     signInToSubscribe: 'Sign in to subscribe',
@@ -116,23 +130,37 @@ export default function MembershipPage() {
     errorRedeemFailed: 'Redemption failed. Please try again.',
     errorNetwork: 'Network error. Please check your connection and try again.',
   } : {
-    title: '会员价格 - FateAura',
-    metaDesc: '查看 FateAura 会员订阅价格：月度、季度和年度方案。',
-    heading: 'FateAura 会员价格',
-    subtitle: '注册或付款前即可查看完整订阅费用，可选择月度、季度或年度方案。',
-    alreadyMember: '您当前已经是会员。',
+    title: 'FateAura 会员',
+    metaDesc: '查看 FateAura 会员权益和订阅价格：不限次数每日解读、会员专享牌阵，以及月度、季度和年度方案。',
+    heading: 'FateAura 会员',
+    subtitle: '解锁更多深度牌阵，获得不限次数的每日解读体验。你可以先查看价格和权益，再决定是否开通。',
+    alreadyMember: '你当前已是会员，会员权益已生效。',
     memberExpires: '会员有效期至：',
-    notMember: '选择上方方案即可解锁会员权益。',
+    notMember: '开通会员后即可解锁不限次数解读和会员专享牌阵。',
     loginPrompt: '您无需登录也可以查看全部价格。只有订阅或兑换会员码时才需要登录。',
     loginBtn: '去登录',
     benefitsTitle: '会员权益',
-    benefit1: '解锁六芒星、马蹄铁、凯尔特十字等高级牌阵。',
-    benefit2: '获得更深入的解读内容，适合复杂问题和长期趋势判断。',
-    benefit3: '持续享受后续新增的会员功能和体验优化。',
+    benefit1Title: '每日不限次数解读',
+    benefit1: '普通用户每天可免费完成 3 次解读；会员不受每日次数限制。',
+    benefit2Title: '解锁会员专享牌阵',
+    benefit2: '包含六芒星、马蹄铁、凯尔特十字、关系发展、复合可能、Offer 抉择、去留抉择、财富障碍、四季运、年运等深度牌阵。',
+    benefit3Title: '更适合复杂问题',
+    benefit3: '会员牌阵通常牌数更多、结构更完整，适合感情、事业、财富和长期趋势类问题。',
+    benefit4Title: '持续享受新增会员功能',
+    benefit4: '会员期内可使用后续上线的会员专属体验和功能优化。',
+    comparisonTitle: '普通用户 vs 会员',
+    freeUserTitle: '普通用户',
+    freeUserPoint1: '每日 3 次免费解读',
+    freeUserPoint2: '可使用免费牌阵',
+    freeUserPoint3: '适合日常快速占卜',
+    memberUserTitle: '会员用户',
+    memberUserPoint1: '每日不限次数解读',
+    memberUserPoint2: '可使用免费牌阵 + 会员牌阵',
+    memberUserPoint3: '适合深度问题、长期趋势和复杂关系分析',
     aiNoticeTitle: 'AI 透明度说明',
     aiNoticeBody: 'FateAura 的部分解读可能由 AI 生成或辅助生成，仅用于娱乐、自我反思和个人洞察，不构成医疗、法律、财务或其他专业建议。',
     paymentTitle: '订阅方案',
-    choosePlan: '订阅会自动续费，可随时取消；取消后，当前已付账期内的会员权益仍会保留。税费或支付细节如有变化，会在 Creem 付款页支付前展示。',
+    choosePlan: '所有会员方案享受相同权益，仅订阅周期不同。订阅会自动续费，可随时取消；取消后，当前已付周期内权益仍会保留。税费或支付细节如有变化，会在 Creem 付款页支付前展示。',
     activeMemberPlanNotice: '您当前已经是会员。如需查看续费或取消订阅，请使用下方的管理订阅按钮。',
     subscribe: '订阅',
     signInToSubscribe: '登录后订阅',
@@ -405,30 +433,89 @@ export default function MembershipPage() {
                 <span className="material-symbols-outlined text-primary text-lg">auto_awesome</span>
                 {texts.benefitsTitle}
               </h2>
-              <ul className="space-y-3 text-white/70 text-sm leading-relaxed">
+              <ul className="space-y-4 text-white/70 text-sm leading-relaxed">
                 <li className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg shrink-0">style</span>
-                  <span>{texts.benefit1}</span>
+                  <span>
+                    <span className="block font-semibold text-white/90">{texts.benefit1Title}</span>
+                    <span>{texts.benefit1}</span>
+                  </span>
                 </li>
                 <li className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg shrink-0">psychology</span>
-                  <span>{texts.benefit2}</span>
+                  <span>
+                    <span className="block font-semibold text-white/90">{texts.benefit2Title}</span>
+                    <span>{texts.benefit2}</span>
+                  </span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="material-symbols-outlined text-primary text-lg shrink-0">schema</span>
+                  <span>
+                    <span className="block font-semibold text-white/90">{texts.benefit3Title}</span>
+                    <span>{texts.benefit3}</span>
+                  </span>
                 </li>
                 <li className="flex gap-3">
                   <span className="material-symbols-outlined text-primary text-lg shrink-0">update</span>
-                  <span>{texts.benefit3}</span>
+                  <span>
+                    <span className="block font-semibold text-white/90">{texts.benefit4Title}</span>
+                    <span>{texts.benefit4}</span>
+                  </span>
                 </li>
               </ul>
             </section>
 
-            <section className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-6">
-              <h2 className="text-sm font-semibold text-amber-100/95 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="material-symbols-outlined text-amber-200 text-lg">policy</span>
-                {texts.aiNoticeTitle}
+            <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <h2 className="text-sm font-semibold text-white/90 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-lg">compare_arrows</span>
+                {texts.comparisonTitle}
               </h2>
-              <p className="text-white/70 text-sm leading-relaxed">{texts.aiNoticeBody}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-white/10 bg-black/10 p-4">
+                  <h3 className="text-sm font-semibold text-white mb-3">{texts.freeUserTitle}</h3>
+                  <ul className="space-y-2 text-sm leading-relaxed text-white/65">
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-white/40 text-base shrink-0">check</span>
+                      <span>{texts.freeUserPoint1}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-white/40 text-base shrink-0">check</span>
+                      <span>{texts.freeUserPoint2}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-white/40 text-base shrink-0">check</span>
+                      <span>{texts.freeUserPoint3}</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
+                  <h3 className="text-sm font-semibold text-white mb-3">{texts.memberUserTitle}</h3>
+                  <ul className="space-y-2 text-sm leading-relaxed text-white/75">
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+                      <span>{texts.memberUserPoint1}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+                      <span>{texts.memberUserPoint2}</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
+                      <span>{texts.memberUserPoint3}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </section>
           </div>
+
+          <section className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-6 mb-6">
+            <h2 className="text-sm font-semibold text-amber-100/95 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span className="material-symbols-outlined text-amber-200 text-lg">policy</span>
+              {texts.aiNoticeTitle}
+            </h2>
+            <p className="text-white/70 text-sm leading-relaxed">{texts.aiNoticeBody}</p>
+          </section>
 
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-10">
             <h2 className="text-sm font-semibold text-white/90 mb-4">{texts.redeemTitle}</h2>

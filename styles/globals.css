@@ -3,13 +3,21 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --primary: #7f13ec;
+  }
+
   body {
     margin: 0;
-    font-family: 'Spline Sans', sans-serif;
+    font-family: 'Spline Sans', 'Noto Sans SC', sans-serif;
   }
   html.dark,
   html.dark body {
     background-color: #191022;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
 }
 

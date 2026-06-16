@@ -5,6 +5,14 @@ import { getAuthHeaders } from '../../../lib/apiHeaders';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
 
+interface JiaobeiReadingCache {
+  requestId: string;
+  type: ResultType;
+  question: string;
+  locale: 'en' | 'zh';
+  interpretation: string;
+}
+
 interface ResultInfo {
   title: string;
   subtitle: string;
@@ -72,6 +80,34 @@ const resultData: Record<'en' | 'zh', Record<ResultType, ResultInfo>> = {
   },
 };
 
+const STORAGE_KEY_READING_PREFIX = 'jiaobei_reading_v1:';
+
+const getReadingCacheKey = (requestId: string) => `${STORAGE_KEY_READING_PREFIX}${requestId}`;
+
+const getQueryString = (value: string | string[] | undefined): string => {
+  if (Array.isArray(value)) return value[0] ?? '';
+  return value ?? '';
+};
+
+const getFallbackRequestId = (resultType: ResultType, userQuestion: string, locale: 'en' | 'zh') =>
+  `legacy_${locale}_${resultType}_${encodeURIComponent(userQuestion)}`;
+
+const loadReadingCache = (requestId: string): JiaobeiReadingCache | null => {
+  if (typeof window === 'undefined' || !requestId) return null;
+  try {
+    const raw = localStorage.getItem(getReadingCacheKey(requestId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const saveReadingCache = (data: JiaobeiReadingCache) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(getReadingCacheKey(data.requestId), JSON.stringify(data));
+};
+
 export default function ResultPage() {
   const router = useRouter();
   const isEn = router.locale !== 'zh';
@@ -95,7 +131,7 @@ export default function ResultPage() {
         tryAgain: '再掷一次',
         disclaimer: '占卜仅供参考，最终决策请结合实际情况谨慎判断',
       };
-  const { type, question } = router.query;
+  const { type, question, rid } = router.query;
   const [isVisible, setIsVisible] = useState(false);
   const [result, setResult] = useState<ResultInfo | null>(null);
   const [aiInterpretation, setAiInterpretation] = useState<string>('');
@@ -116,21 +152,36 @@ export default function ResultPage() {
         setTimeout(() => setIsVisible(true), 100);
         
         // 检查免费次数后再决定是否继续
-        checkAndProceed(resultType, question as string | undefined);
+        checkAndProceed(
+          resultType,
+          getQueryString(question).trim(),
+          getQueryString(rid) || getFallbackRequestId(resultType, getQueryString(question).trim(), locale)
+        );
       } else {
         router.push('/');
       }
     }
-  }, [type, question, router, locale]);
+  }, [type, question, rid, router, locale]);
 
-  const checkAndProceed = (resultType: ResultType, userQuestion?: string) => {
+  const checkAndProceed = (resultType: ResultType, userQuestion: string, requestId: string) => {
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
 
-    fetchInterpretation(resultType, userQuestion?.trim() || '');
+    const cached = loadReadingCache(requestId);
+    if (
+      cached &&
+      cached.type === resultType &&
+      cached.question === userQuestion &&
+      cached.locale === locale
+    ) {
+      setAiInterpretation(cached.interpretation);
+      return;
+    }
+
+    fetchInterpretation(resultType, userQuestion, requestId);
   };
 
-  const fetchInterpretation = async (resultType: ResultType, userQuestion: string) => {
+  const fetchInterpretation = async (resultType: ResultType, userQuestion: string, requestId: string) => {
     const hasQuestion = userQuestion.length > 0;
     if (hasQuestion) setIsLoadingAI(true);
 
@@ -143,6 +194,7 @@ export default function ResultPage() {
           question: userQuestion || '',
           result: resultType,
           locale: isEn ? 'en' : 'zh',
+          clientRequestId: requestId,
         }),
       });
 
@@ -150,6 +202,13 @@ export default function ResultPage() {
 
       if (response.ok && data.interpretation) {
         setAiInterpretation(data.interpretation);
+        saveReadingCache({
+          requestId,
+          type: resultType,
+          question: userQuestion,
+          locale,
+          interpretation: data.interpretation,
+        });
       } else if (!response.ok) {
         console.error('解读请求失败:', data);
       }
@@ -204,14 +263,6 @@ export default function ResultPage() {
           }
           .animate-pulse-ring {
             animation: pulse-ring 2s ease-in-out infinite;
-          }
-          body {
-            margin: 0;
-            font-family: 'Spline Sans', sans-serif;
-          }
-          html.dark,
-          html.dark body {
-            background-color: #191022;
           }
         `
         }} />

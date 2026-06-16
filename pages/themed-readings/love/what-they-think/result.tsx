@@ -226,7 +226,7 @@ export default function WhatTheyThinkResult() {
   }, [router]);
 
   const handleReturnToList = () => {
-    router.back();
+    router.push('/themed-readings/love');
   };
 
   const handleDrawAgain = () => {

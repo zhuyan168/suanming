@@ -1,5 +1,5 @@
 import { isEnglishRequest } from '../../lib/aiLanguage';
-import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
+import { findReadingHistoryByClientRequestId, requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { getYesNoByCard, getAnswerText } from '../../utils/yesno-tarot-logic';
 
 const getAnswerTextEn = (answer) => {
@@ -27,13 +27,28 @@ export default async function handler(req, res) {
   if (!accessStatus) return;
 
   try {
-    const { question, cardName, orientation } = req.body;
+    const { question, cardName, orientation, clientRequestId } = req.body;
 
     if (!cardName || !orientation) {
       return res.status(400).json({ error: '缺少必需参数：cardName, orientation' });
     }
 
     const isEn = isEnglishRequest(req);
+    const existingResult = accessStatus.userId
+      ? await findReadingHistoryByClientRequestId({
+          userId: accessStatus.userId,
+          spreadType: 'yesno-tarot',
+          clientRequestId,
+        })
+      : null;
+
+    if (existingResult?.answer && existingResult?.interpretation) {
+      return res.status(200).json({
+        answer: existingResult.displayAnswer || existingResult.answer,
+        interpretation: existingResult.interpretation,
+        reused: true,
+      });
+    }
 
     // 无问题时走本地规则
     if (!question || !question.trim()) {
@@ -49,7 +64,13 @@ export default async function handler(req, res) {
         featureKey: 'divination-yesno',
         spreadType: 'yesno-tarot',
         cards: [{ name: cardName, orientation }],
-        readingResult: { answer: localResult.answer, interpretation },
+        readingResult: {
+          ...result,
+          answer: localResult.answer,
+          displayAnswer: result.answer,
+          interpretation,
+          clientRequestId: typeof clientRequestId === 'string' ? clientRequestId : undefined,
+        },
         resultPath: '/fortune/yesno-tarot/result',
       });
 
@@ -173,7 +194,10 @@ export default async function handler(req, res) {
       spreadType: 'yesno-tarot',
       question,
       cards: [{ name: cardName, orientation }],
-      readingResult: result,
+      readingResult: {
+        ...result,
+        clientRequestId: typeof clientRequestId === 'string' ? clientRequestId : undefined,
+      },
       resultPath: '/fortune/yesno-tarot/result'
     });
 

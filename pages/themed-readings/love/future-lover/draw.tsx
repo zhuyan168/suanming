@@ -334,7 +334,7 @@ export default function FutureLoverDraw() {
   };
 
   const handleReturnToList = () => {
-    router.back();
+    router.push('/themed-readings/love');
   };
 
   const handleReset = () => {

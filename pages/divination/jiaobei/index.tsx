@@ -5,6 +5,13 @@ import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 type ResultType = 'sheng' | 'yin' | 'xiao';
 
+const generateRequestId = (): string => {
+  if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `jiaobei_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+};
+
 export default function JiaoBeiPage() {
   const router = useRouter();
   const isEn = router.locale !== 'zh';
@@ -90,7 +97,7 @@ export default function JiaoBeiPage() {
 
     // 延迟 1.5 秒后跳转到结果页，携带问题参数
     setTimeout(() => {
-      const params = new URLSearchParams({ type: result });
+      const params = new URLSearchParams({ type: result, rid: generateRequestId() });
       if (question.trim()) {
         params.append('question', question.trim());
       }
@@ -137,14 +144,6 @@ export default function JiaoBeiPage() {
             }
           }
           
-          body {
-            margin: 0;
-            font-family: 'Spline Sans', sans-serif;
-          }
-          html.dark,
-          html.dark body {
-            background-color: #191022;
-          }
         `
         }} />
         

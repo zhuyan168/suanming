@@ -210,7 +210,7 @@ export default function FutureLoverResult() {
   }, [router]);
 
   const handleReturnToList = () => {
-    router.back();
+    router.push('/themed-readings/love');
   };
 
   const handleDrawAgain = () => {

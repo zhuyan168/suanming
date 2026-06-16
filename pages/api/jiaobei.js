@@ -1,4 +1,4 @@
-﻿import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
+import { findReadingHistoryByClientRequestId, requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
 
 export default async function handler(req, res) {
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (!accessStatus) return;
 
   try {
-    const { question, result } = req.body;
+    const { question, result, clientRequestId } = req.body;
 
     // 验证必需参数
     if (!result) {
@@ -19,6 +19,20 @@ export default async function handler(req, res) {
     }
 
     const isEn = isEnglishRequest(req);
+    const existingResult = accessStatus.userId
+      ? await findReadingHistoryByClientRequestId({
+          userId: accessStatus.userId,
+          spreadType: 'divination-jiaobei',
+          clientRequestId,
+        })
+      : null;
+
+    if (existingResult?.type && (existingResult?.aiInterpretation || existingResult?.description)) {
+      return res.status(200).json({
+        interpretation: existingResult.aiInterpretation || existingResult.description,
+        reused: true,
+      });
+    }
 
     // 如果没有问题，返回默认解释
     if (!question || !question.trim()) {
@@ -45,6 +59,7 @@ export default async function handler(req, res) {
             ? { sheng: 'Sheng Jiao', yin: 'Yin Jiao', xiao: 'Xiao Jiao' }
             : { sheng: '圣筊', yin: '阴筊', xiao: '笑筊' })[result] || result,
           description: defaultInterpretations[result] || defaultInterpretations.sheng,
+          clientRequestId: typeof clientRequestId === 'string' ? clientRequestId : undefined,
         },
         resultPath: `/divination/jiaobei/result?type=${result}`,
       });
@@ -161,6 +176,7 @@ export default async function handler(req, res) {
           ? { sheng: 'This looks favorable. Move forward with care.', yin: 'Pause and reflect before acting.', xiao: 'The answer is unclear. Ask again with a clearer question.' }
           : { sheng: '此事可行，顺势而为。', yin: '暂缓行事，宜再思量。', xiao: '神明含笑未答，再问一次吧。' })[result] || '',
         aiInterpretation: interpretation,
+        clientRequestId: typeof clientRequestId === 'string' ? clientRequestId : undefined,
       },
       resultPath: `/divination/jiaobei/result?type=${result}`,
     });
@@ -177,4 +193,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

@@ -20,13 +20,24 @@ interface ShuffledTarotCard {
 
 interface YesNoTarotDraw {
   timestamp: number;
+  requestId?: string;
   question?: string;
   card: ShuffledTarotCard;
+}
+
+interface YesNoTarotReadingCache {
+  requestId: string;
+  question: string;
+  cardName: string;
+  orientation: 'upright' | 'reversed';
+  answer: YesNoAnswer;
+  interpretation: string;
 }
 
 // LocalStorage keys
 const STORAGE_KEY_DRAW = 'yesno_tarot_draw_v1';
 const STORAGE_KEY_QUESTION = 'yesno_tarot_question_v1';
+const STORAGE_KEY_READING_PREFIX = 'yesno_tarot_reading_v1:';
 const CARD_BACK_IMAGE = '/assets/card-back.png';
 
 const majorArcanaMap: Record<string, keyof typeof tarotImagesFlat> = {
@@ -118,6 +129,31 @@ const rehydrateTarotCard = (card: ShuffledTarotCard): ShuffledTarotCard => {
   return card;
 };
 
+const getReadingCacheKey = (requestId: string) => `${STORAGE_KEY_READING_PREFIX}${requestId}`;
+
+const loadReadingCache = (requestId?: string): YesNoTarotReadingCache | null => {
+  if (typeof window === 'undefined' || !requestId) return null;
+  try {
+    const raw = localStorage.getItem(getReadingCacheKey(requestId));
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const saveReadingCache = (data: YesNoTarotReadingCache) => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(getReadingCacheKey(data.requestId), JSON.stringify(data));
+};
+
+const generateRequestId = (): string => {
+  if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `yesno_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+};
+
 export default function YesNoTarotResult() {
   const router = useRouter();
   const isEn = router.locale === 'en';
@@ -193,6 +229,10 @@ export default function YesNoTarotResult() {
     }
 
     const draw: YesNoTarotDraw = JSON.parse(drawData);
+    if (!draw.requestId) {
+      draw.requestId = generateRequestId();
+      localStorage.setItem(STORAGE_KEY_DRAW, JSON.stringify(draw));
+    }
     setCard(rehydrateTarotCard(draw.card));
 
     // 读取用户问题
@@ -201,10 +241,23 @@ export default function YesNoTarotResult() {
 
     setUseAI(savedQuestion.trim().length > 0);
 
-    fetchResult(savedQuestion, draw.card);
+    const cached = loadReadingCache(draw.requestId);
+    if (
+      cached &&
+      cached.question === savedQuestion &&
+      cached.cardName === draw.card.name &&
+      cached.orientation === draw.card.orientation
+    ) {
+      setAnswer(cached.answer);
+      setInterpretation(cached.interpretation);
+      setIsLoading(false);
+      return;
+    }
+
+    fetchResult(savedQuestion, draw.card, draw.requestId);
   }, [router]);
 
-  const fetchResult = async (userQuestion: string, drawnCard: ShuffledTarotCard) => {
+  const fetchResult = async (userQuestion: string, drawnCard: ShuffledTarotCard, requestId?: string) => {
     try {
       const headers = await getAuthHeaders();
       const response = await fetch('/api/tarot', {
@@ -215,6 +268,7 @@ export default function YesNoTarotResult() {
           cardName: drawnCard.name,
           orientation: drawnCard.orientation,
           locale: isEn ? 'en' : 'zh',
+          clientRequestId: requestId,
         }),
       });
 
@@ -233,7 +287,18 @@ export default function YesNoTarotResult() {
       }
 
       setAnswer(parsedAnswer);
-      setInterpretation(data.interpretation || data.answer);
+      const finalInterpretation = data.interpretation || data.answer;
+      setInterpretation(finalInterpretation);
+      if (requestId) {
+        saveReadingCache({
+          requestId,
+          question: userQuestion,
+          cardName: drawnCard.name,
+          orientation: drawnCard.orientation,
+          answer: parsedAnswer,
+          interpretation: finalInterpretation,
+        });
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('获取解读失败:', error);
@@ -246,7 +311,18 @@ export default function YesNoTarotResult() {
             ? texts.fallbackNo
             : texts.fallbackMaybe
         : result.reason;
-      setInterpretation(fallbackReason + texts.fallbackNote);
+      const fallbackInterpretation = fallbackReason + texts.fallbackNote;
+      setInterpretation(fallbackInterpretation);
+      if (requestId) {
+        saveReadingCache({
+          requestId,
+          question: userQuestion,
+          cardName: drawnCard.name,
+          orientation: drawnCard.orientation,
+          answer: result.answer,
+          interpretation: fallbackInterpretation,
+        });
+      }
       setIsLoading(false);
     }
   };
