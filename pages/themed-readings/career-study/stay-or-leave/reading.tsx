@@ -312,7 +312,7 @@ export default function StayOrLeaveReading() {
                           <img 
                             src={result?.cards[idx].image} 
                             alt={isEn ? (result?.cards[idx]?.name || detail.cardName) : detail.cardName}
-                            className={`w-full h-full object-cover ${result?.cards[idx]?.orientation === 'reversed' ? 'rotate-180' : ''}`}
+                            className={`w-full h-full object-contain ${result?.cards[idx]?.orientation === 'reversed' ? 'rotate-180' : ''}`}
                           />
                         </div>
                         <span className="text-[10px] text-white/40 font-bold tracking-widest px-3 py-1 bg-white/5 rounded-full uppercase">

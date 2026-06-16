@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 年度运势牌阵展示组件
  * 展示中心年度主题牌 + 12个月份牌的环形布局
  */
@@ -132,7 +132,7 @@ export default function AnnualSpreadView({
                     <img
                       src={card.imageUrl}
                       alt={card.name}
-                      className={`w-full h-full object-cover ${
+                      className={`w-full h-full object-contain ${
                         card.isReversed ? 'transform rotate-180' : ''
                       }`}
                       style={{ backgroundColor: 'white' }}

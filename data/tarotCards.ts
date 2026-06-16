@@ -1,4 +1,4 @@
-import { TarotCard } from '../components/fortune/CardItem';
+﻿import { TarotCard } from '../components/fortune/CardItem';
 
 /**
  * 完整的78张塔罗牌静态数据
@@ -14,7 +14,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 0, 
     name: '0. The Fool', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_fool.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_fool.webp',
     upright: {
       keywords: ['纯真', '自由', '机会'],
       meaning: '通常与全新开始、冒险尝试，以及对未知保持开放好奇的心态有关。'
@@ -27,7 +27,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 1, 
     name: 'I. The Magician', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_magician.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_magician.webp',
     upright: {
       keywords: ['行动', '意志', '显化'],
       meaning: '常与资源整合、将想法付诸实践，以及运用技能达成目标有关。'
@@ -40,7 +40,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 2, 
     name: 'II. The High Priestess', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_priestess.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_priestess.webp',
     upright: {
       keywords: ['直觉', '秘密', '平衡'],
       meaning: '通常涉及隐藏的信息、内在智慧的倾听，以及在行动前保持静观的状态。'
@@ -53,7 +53,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 3, 
     name: 'III. The Empress', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_empress.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_empress.webp',
     upright: {
       keywords: ['丰盛', '创造', '滋养'],
       meaning: '常与富足生机、创造力的自然流动，以及被温暖滋养的感受有关。'
@@ -66,7 +66,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 4, 
     name: 'IV. The Emperor', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_emperor.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_emperor.webp',
     upright: {
       keywords: ['权威', '结构', '掌控'],
       meaning: '通常涉及秩序建立、理性决策，以及通过规则和计划掌握局面。'
@@ -79,7 +79,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 5, 
     name: 'V. The Hierophant', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hierophant.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_hierophant.webp',
     upright: {
       keywords: ['传统', '信仰', '教导'],
       meaning: '常与既有体系的遵循、精神层面的指引，以及向经验学习有关。'
@@ -92,7 +92,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 6, 
     name: 'VI. The Lovers', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_lovers.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_lovers.webp',
     upright: {
       keywords: ['爱情', '选择', '连结'],
       meaning: '通常涉及重要的抉择时刻、深层情感连结，以及价值观的统一与确认。'
@@ -105,7 +105,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 7, 
     name: 'VII. The Chariot', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_chariot.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_chariot.webp',
     upright: {
       keywords: ['胜利', '意志', '前进'],
       meaning: '常与坚定的意志驱动、克服障碍推进，以及即将到来的成功有关。'
@@ -118,7 +118,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 8, 
     name: 'VIII. Strength', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_strength.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_strength.webp',
     upright: {
       keywords: ['勇气', '耐心', '温柔'],
       meaning: '通常涉及内在力量的展现、以温柔驯服冲动，以及耐心应对挑战。'
@@ -131,7 +131,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 9, 
     name: 'IX. The Hermit', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hermit.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_hermit.webp',
     upright: {
       keywords: ['内省', '智慧', '独处'],
       meaning: '常与暂时退隐、通过独处寻找答案，以及内在智慧的觉醒有关。'
@@ -144,7 +144,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 10, 
     name: 'X. Wheel of Fortune', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_fortune.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_fortune.webp',
     upright: {
       keywords: ['命运', '变化', '循环'],
       meaning: '通常涉及事态转折、生命周期的自然流转，以及时机的到来。'
@@ -157,7 +157,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 11, 
     name: 'XI. Justice', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_justice.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_justice.webp',
     upright: {
       keywords: ['正义', '平衡', '真相'],
       meaning: '常与因果法则、客观评判，以及真相被揭示的时刻有关。'
@@ -170,7 +170,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 12, 
     name: 'XII. The Hanged Man', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hanged.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_hanged.webp',
     upright: {
       keywords: ['等待', '换位', '牺牲'],
       meaning: '通常涉及暂停行动、从不同视角观察，以及通过放下获得领悟。'
@@ -183,7 +183,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 13, 
     name: 'XIII. Death', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_death.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_death.webp',
     upright: {
       keywords: ['转化', '结束', '重生'],
       meaning: '常与彻底的结束、深层转化，以及为新生腾出空间的过程有关。'
@@ -196,7 +196,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 14, 
     name: 'XIV. Temperance', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_temperance.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_temperance.webp',
     upright: {
       keywords: ['平衡', '节制', '和谐'],
       meaning: '通常涉及不同元素的调和、适度的掌握，以及耐心维持平衡的过程。'
@@ -209,7 +209,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 15, 
     name: 'XV. The Devil', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_devil.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_devil.webp',
     upright: {
       keywords: ['诱惑', '束缚', '欲望'],
       meaning: '常与欲望的沉溺、依赖关系，以及明知不利却难以挣脱的困境有关。'
@@ -222,7 +222,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 16, 
     name: 'XVI. The Tower', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_tower.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_tower.webp',
     upright: {
       keywords: ['崩溃', '启示', '重建'],
       meaning: '通常涉及假象的突然破碎、震荡性的真相揭示，以及在混乱中重建的开端。'
@@ -235,7 +235,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 17, 
     name: 'XVII. The Star', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_star.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_star.webp',
     upright: {
       keywords: ['希望', '灵感', '信心'],
       meaning: '常与困境后的希望重现、内心平静的恢复，以及对未来的信心有关。'
@@ -248,7 +248,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 18, 
     name: 'XVIII. The Moon', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_moon.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_moon.webp',
     upright: {
       keywords: ['幻觉', '直觉', '未知'],
       meaning: '通常涉及迷雾笼罩的状态、依赖直觉辨别真实，以及未知领域的探索。'
@@ -261,7 +261,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 19, 
     name: 'XIX. The Sun', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_sun.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_sun.webp',
     upright: {
       keywords: ['成功', '喜悦', '活力'],
       meaning: '常与事态的积极发展、充沛的生命能量，以及发自内心的喜悦有关。'
@@ -274,7 +274,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 20, 
     name: 'XX. Judgement', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_judgement.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_judgement.webp',
     upright: {
       keywords: ['觉醒', '反思', '重生'],
       meaning: '通常涉及对过往的重新审视、从经历中获得教训，以及迎接新生的准备。'
@@ -287,7 +287,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 21, 
     name: 'XXI. The World', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_world.png',
+    image: '/assets/tarot-webp-optimized/major_arcana_world.webp',
     upright: {
       keywords: ['完成', '成就', '圆满'],
       meaning: '常与重要阶段的圆满结束、成就的达成，以及整合后的完整感有关。'
@@ -302,7 +302,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 22, 
     name: 'Ace of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_ace.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_ace.webp',
     upright: {
       keywords: ['爱', '直觉', '情感'],
       meaning: '常与新情感关系的萌芽、创意灵感的涌现，以及内心被爱意填满有关。'
@@ -315,7 +315,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 23, 
     name: 'Two of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_2.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_2.webp',
     upright: {
       keywords: ['伙伴', '连结', '平衡'],
       meaning: '通常涉及深刻的情感连结、彼此尊重的关系，以及相互吸引的能量。'
@@ -328,7 +328,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 24, 
     name: 'Three of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_3.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_3.webp',
     upright: {
       keywords: ['庆祝', '友谊', '创造'],
       meaning: '常与共享快乐的时刻、友谊中的放松氛围，以及集体创造有关。'
@@ -341,7 +341,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 25, 
     name: 'Four of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_4.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_4.webp',
     upright: {
       keywords: ['沉思', '不满', '内省'],
       meaning: '通常涉及对现状的倦怠感、重新思考价值，以及内在评估的过程。'
@@ -354,7 +354,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 26, 
     name: 'Five of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_5.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_5.webp',
     upright: {
       keywords: ['失去', '悲伤', '遗憾'],
       meaning: '常与沉浸于失去的痛苦、只关注已逝去的部分，以及忽略仍存在的事物有关。'
@@ -367,7 +367,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 27, 
     name: 'Six of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_6.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_6.webp',
     upright: {
       keywords: ['回忆', '纯真', '怀旧'],
       meaning: '通常涉及美好记忆的浮现、温暖的怀旧感，或是旧人旧事的重现。'
@@ -380,7 +380,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 28, 
     name: 'Seven of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_7.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_7.webp',
     upright: {
       keywords: ['幻想', '选择', '迷惑'],
       meaning: '常与过多诱人选项、难以辨别真实可行性，以及在幻想中迷失有关。'
@@ -393,7 +393,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 29, 
     name: 'Eight of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_8.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_8.webp',
     upright: {
       keywords: ['离开', '寻找', '放弃'],
       meaning: '通常涉及意识到现状无法满足、决定离开，以及寻找更深层意义的旅程。'
@@ -406,7 +406,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 30, 
     name: 'Nine of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_9.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_9.webp',
     upright: {
       keywords: ['满足', '愿望', '幸福'],
       meaning: '常与愿望的实现、内心满足感，以及幸福感受的获得有关。'
@@ -419,7 +419,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 31, 
     name: 'Ten of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_10.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_10.webp',
     upright: {
       keywords: ['家庭', '和谐', '幸福'],
       meaning: '通常涉及深厚的情感纽带、归属感的获得，以及完整的幸福体验。'
@@ -432,7 +432,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 32, 
     name: 'Page of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_page.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_page.webp',
     upright: {
       keywords: ['创意', '直觉', '消息'],
       meaning: '常与情感相关的消息、新创意想法的涌现，以及直觉的萌发有关。'
@@ -445,7 +445,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 33, 
     name: 'Knight of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_knight.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_knight.webp',
     upright: {
       keywords: ['浪漫', '追求', '理想'],
       meaning: '通常涉及带有浪漫幻想的追求、充满诗意和热情的行动。'
@@ -458,7 +458,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 34, 
     name: 'Queen of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_queen.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_queen.webp',
     upright: {
       keywords: ['同理心', '直觉', '关怀'],
       meaning: '常与深刻感受他人情绪、以温柔提供支持，以及直觉敏锐有关。'
@@ -471,7 +471,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 35, 
     name: 'King of Cups', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_cups_king.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_cups_king.webp',
     upright: {
       keywords: ['平衡', '智慧', '掌控'],
       meaning: '通常涉及情感丰富与理性并存、以智慧处理关系，以及情绪的稳定掌控。'
@@ -486,7 +486,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 36, 
     name: 'Ace of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_ace.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_ace.webp',
     upright: {
       keywords: ['机会', '繁荣', '物质'],
       meaning: '常与新机会的出现、物质收获的可能，以及稳定开端有关。'
@@ -499,7 +499,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 37, 
     name: 'Two of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_2.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_2.webp',
     upright: {
       keywords: ['平衡', '适应', '灵活'],
       meaning: '通常涉及多任务间的平衡努力、保持灵活适应性，以及事务的并行处理。'
@@ -512,7 +512,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 38, 
     name: 'Three of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_3.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_3.webp',
     upright: {
       keywords: ['合作', '技能', '学习'],
       meaning: '常与团队协作、通过学习提升技能，以及获得认可有关。'
@@ -525,7 +525,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 39, 
     name: 'Four of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_4.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_4.webp',
     upright: {
       keywords: ['安全', '控制', '保守'],
       meaning: '通常涉及紧紧抓住所拥有的、因害怕失去而不敢冒险的状态。'
@@ -538,7 +538,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 40, 
     name: 'Five of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_5.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_5.webp',
     upright: {
       keywords: ['困难', '贫困', '孤立'],
       meaning: '常与物质或精神困境、被排斥在温暖之外的感受有关。'
@@ -551,7 +551,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 41, 
     name: 'Six of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_6.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_6.webp',
     upright: {
       keywords: ['慷慨', '施予', '平衡'],
       meaning: '通常涉及给予或接受帮助、资源的流动，以及关系中的平衡感。'
@@ -564,7 +564,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 42, 
     name: 'Seven of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_7.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_7.webp',
     upright: {
       keywords: ['等待', '投资', '耐心'],
       meaning: '常与已付出努力后的等待、耐心守候收获时机有关。'
@@ -577,7 +577,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 43, 
     name: 'Eight of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_8.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_8.webp',
     upright: {
       keywords: ['努力', '技艺', '专注'],
       meaning: '通常涉及专注打磨技能、通过不断练习追求卓越的过程。'
@@ -590,7 +590,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 44, 
     name: 'Nine of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_9.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_9.webp',
     upright: {
       keywords: ['独立', '富足', '优雅'],
       meaning: '常与通过努力获得的独立、自给自足的满足感，以及物质精神的富足有关。'
@@ -603,7 +603,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 45, 
     name: 'Ten of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_10.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_10.webp',
     upright: {
       keywords: ['财富', '家族', '传承'],
       meaning: '通常涉及稳定的物质基础、家族支持，以及长久安全感的体验。'
@@ -616,7 +616,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 46, 
     name: 'Page of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_page.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_page.webp',
     upright: {
       keywords: ['学习', '计划', '机会'],
       meaning: '常与学习新技能、制定计划，以及对未来发展的好奇和热情有关。'
@@ -629,7 +629,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 47, 
     name: 'Knight of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_knight.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_knight.webp',
     upright: {
       keywords: ['勤奋', '责任', '可靠'],
       meaning: '通常涉及踏实稳定的前进、虽缓慢但扎实的每一步。'
@@ -642,7 +642,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 48, 
     name: 'Queen of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_queen.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_queen.webp',
     upright: {
       keywords: ['养育', '实际', '安全'],
       meaning: '常与用务实方式照顾他人、创造温暖稳定环境有关。'
@@ -655,7 +655,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 49, 
     name: 'King of Pentacles', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_pentacles_king.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_pentacles_king.webp',
     upright: {
       keywords: ['财富', '成功', '领导'],
       meaning: '通常涉及物质世界的成功、稳健管理资源，以及引领他人的能力。'
@@ -670,7 +670,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 50, 
     name: 'Ace of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_ace.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_ace.webp',
     upright: {
       keywords: ['清晰', '突破', '真相'],
       meaning: '常与新想法或洞察的突然出现、看清事情本质有关。'
@@ -683,7 +683,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 51, 
     name: 'Two of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_2.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_2.webp',
     upright: {
       keywords: ['僵局', '抉择', '平衡'],
       meaning: '通常涉及两难的选择、暂时回避现实，以及在对立中寻求平衡的状态。'
@@ -696,7 +696,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 52, 
     name: 'Three of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_3.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_3.webp',
     upright: {
       keywords: ['心碎', '悲伤', '痛苦'],
       meaning: '常与深刻的情感伤痛、分离背叛，以及某种失去的经历有关。'
@@ -709,7 +709,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 53, 
     name: 'Four of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_4.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_4.webp',
     upright: {
       keywords: ['休息', '恢复', '沉思'],
       meaning: '通常涉及暂时停下来休息、给自己充电时间，以及恢复和反思的状态。'
@@ -722,7 +722,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 54, 
     name: 'Five of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_5.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_5.webp',
     upright: {
       keywords: ['冲突', '失败', '不和'],
       meaning: '常与争执中的空虚胜利、人际关系的破裂，以及冲突带来的失落有关。'
@@ -735,7 +735,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 55, 
     name: 'Six of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_6.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_6.webp',
     upright: {
       keywords: ['过渡', '离开', '前进'],
       meaning: '通常涉及离开困难处境、虽不舍但必要的过渡，以及向前的移动。'
@@ -748,7 +748,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 56, 
     name: 'Seven of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_7.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_7.webp',
     upright: {
       keywords: ['欺骗', '策略', '逃避'],
       meaning: '常与使用不光彩手段、选择逃避而非正面应对有关。'
@@ -761,7 +761,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 57, 
     name: 'Eight of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_8.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_8.webp',
     upright: {
       keywords: ['束缚', '限制', '受困'],
       meaning: '通常涉及被困住的感受、很多限制来自内在思维而非外界的状况。'
@@ -774,7 +774,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 58, 
     name: 'Nine of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_9.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_9.webp',
     upright: {
       keywords: ['焦虑', '担忧', '噩梦'],
       meaning: '常与被焦虑和恐惧包围、夜深时担忧格外沉重的体验有关。'
@@ -787,7 +787,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 59, 
     name: 'Ten of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_10.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_10.webp',
     upright: {
       keywords: ['结束', '背叛', '崩溃'],
       meaning: '通常涉及某阶段走到尽头、直面失去，或是情绪低谷的经历。'
@@ -800,7 +800,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 60, 
     name: 'Page of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_page.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_page.webp',
     upright: {
       keywords: ['好奇', '警觉', '新想法'],
       meaning: '常与对周围保持敏锐观察、充满好奇心和探索欲望有关。'
@@ -813,7 +813,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 61, 
     name: 'Knight of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_knight.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_knight.webp',
     upright: {
       keywords: ['雄心', '冲动', '快速'],
       meaning: '通常涉及带着强烈决心快速前进、可能忽略细节和他人感受。'
@@ -826,7 +826,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 62, 
     name: 'Queen of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_queen.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_queen.webp',
     upright: {
       keywords: ['独立', '清晰', '客观'],
       meaning: '常与用清晰思维和客观态度看待问题、不被情绪左右有关。'
@@ -839,7 +839,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 63, 
     name: 'King of Swords', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_swords_king.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_swords_king.webp',
     upright: {
       keywords: ['权威', '真相', '道德'],
       meaning: '通常涉及用理性和公正做出决策、坚守道德和原则。'
@@ -854,7 +854,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 64, 
     name: 'Ace of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_ace.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_ace.webp',
     upright: {
       keywords: ['灵感', '创造', '开始'],
       meaning: '常与新热情和灵感的涌现、充满活力准备新冒险有关。'
@@ -867,7 +867,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 65, 
     name: 'Two of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_2.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_2.webp',
     upright: {
       keywords: ['计划', '决定', '发现'],
       meaning: '通常涉及站在新起点、规划未来方向和可能性。'
@@ -880,7 +880,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 66, 
     name: 'Three of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_3.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_3.webp',
     upright: {
       keywords: ['扩展', '远见', '领导'],
       meaning: '常与视野的扩展、为未来做好准备，以及等待机会到来有关。'
@@ -893,7 +893,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 67, 
     name: 'Four of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_4.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_4.webp',
     upright: {
       keywords: ['庆祝', '和谐', '家'],
       meaning: '通常涉及达到值得庆祝的里程碑、感受和谐与归属的喜悦。'
@@ -906,7 +906,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 68, 
     name: 'Five of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_5.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_5.webp',
     upright: {
       keywords: ['竞争', '冲突', '紧张'],
       meaning: '常与处于竞争激烈的环境、到处都是意见碰撞和冲突有关。'
@@ -919,7 +919,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 69, 
     name: 'Six of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_6.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_6.webp',
     upright: {
       keywords: ['胜利', '成功', '认可'],
       meaning: '通常涉及努力得到认可、享受成功带来的荣耀和肯定。'
@@ -932,7 +932,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 70, 
     name: 'Seven of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_7.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_7.webp',
     upright: {
       keywords: ['挑战', '坚持', '防御'],
       meaning: '常与面对来自各方的挑战、坚守立场和信念有关。'
@@ -945,7 +945,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 71, 
     name: 'Eight of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_8.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_8.webp',
     upright: {
       keywords: ['快速', '进展', '变化'],
       meaning: '通常涉及事情的快速发展、收到一连串消息或经历迅速变化。'
@@ -958,7 +958,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 72, 
     name: 'Nine of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_9.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_9.webp',
     upright: {
       keywords: ['韧性', '勇气', '坚持'],
       meaning: '常与经历很多挑战后、虽疲惫但依然坚持，以及胜利在眼前有关。'
@@ -971,7 +971,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 73, 
     name: 'Ten of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_10.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_10.webp',
     upright: {
       keywords: ['负担', '责任', '压力'],
       meaning: '通常涉及肩负沉重的责任和压力、可能需要放下不必要负担。'
@@ -984,7 +984,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 74, 
     name: 'Page of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_page.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_page.webp',
     upright: {
       keywords: ['热情', '探索', '消息'],
       meaning: '常与充满热情和好奇心、准备探索新领域和可能性有关。'
@@ -997,7 +997,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 75, 
     name: 'Knight of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_knight.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_knight.webp',
     upright: {
       keywords: ['冒险', '精力', '冲动'],
       meaning: '通常涉及充满冒险精神和旺盛精力、渴望快速行动追求目标。'
@@ -1010,7 +1010,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 76, 
     name: 'Queen of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_queen.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_queen.webp',
     upright: {
       keywords: ['自信', '独立', '热情'],
       meaning: '常与充满自信和魅力、能够独立自主追求目标有关。'
@@ -1023,7 +1023,7 @@ export const tarotCards: TarotCard[] = [
   { 
     id: 77, 
     name: 'King of Wands', 
-    image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/minor_arcana_wands_king.png',
+    image: '/assets/tarot-webp-optimized/minor_arcana_wands_king.webp',
     upright: {
       keywords: ['领导', '愿景', '企业家'],
       meaning: '通常涉及拥有清晰愿景和领导力、能够激励他人实现宏大目标。'

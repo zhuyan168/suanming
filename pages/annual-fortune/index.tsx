@@ -15,19 +15,19 @@ import { saveReadingToSession } from '../../utils/annual-fortune-storage';
 
 // 模拟 78 张塔罗牌数据（简化版，仅用于测试）
 const MOCK_TAROT_CARDS = [
-  { id: 0, name: '0. The Fool', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_fool.png', keywords: ['纯真', '自由', '机会'] },
-  { id: 1, name: 'I. The Magician', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_magician.png', keywords: ['行动', '意志', '显化'] },
-  { id: 2, name: 'II. The High Priestess', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_priestess.png', keywords: ['直觉', '秘密', '平衡'] },
-  { id: 3, name: 'III. The Empress', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_empress.png', keywords: ['丰盛', '创造', '滋养'] },
-  { id: 4, name: 'IV. The Emperor', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_emperor.png', keywords: ['权威', '秩序', '稳定'] },
-  { id: 5, name: 'V. The Hierophant', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hierophant.png', keywords: ['传统', '指引', '规范'] },
-  { id: 6, name: 'VI. The Lovers', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_lovers.png', keywords: ['关系', '信任', '选择'] },
-  { id: 7, name: 'VII. The Chariot', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_chariot.png', keywords: ['意志', '目标', '胜利'] },
-  { id: 8, name: 'VIII. Strength', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_strength.png', keywords: ['力量', '耐心', '控制'] },
-  { id: 9, name: 'IX. The Hermit', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hermit.png', keywords: ['内省', '真理', '指引'] },
-  { id: 10, name: 'X. Wheel of Fortune', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_fortune.png', keywords: ['命运', '循环', '变化'] },
-  { id: 11, name: 'XI. Justice', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_justice.png', keywords: ['正义', '平衡', '责任'] },
-  { id: 12, name: 'XII. The Hanged Man', image: 'https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/major_arcana_hanged.png', keywords: ['等待', '牺牲', '视角'] },
+  { id: 0, name: '0. The Fool', image: '/assets/tarot-webp-optimized/major_arcana_fool.webp', keywords: ['纯真', '自由', '机会'] },
+  { id: 1, name: 'I. The Magician', image: '/assets/tarot-webp-optimized/major_arcana_magician.webp', keywords: ['行动', '意志', '显化'] },
+  { id: 2, name: 'II. The High Priestess', image: '/assets/tarot-webp-optimized/major_arcana_priestess.webp', keywords: ['直觉', '秘密', '平衡'] },
+  { id: 3, name: 'III. The Empress', image: '/assets/tarot-webp-optimized/major_arcana_empress.webp', keywords: ['丰盛', '创造', '滋养'] },
+  { id: 4, name: 'IV. The Emperor', image: '/assets/tarot-webp-optimized/major_arcana_emperor.webp', keywords: ['权威', '秩序', '稳定'] },
+  { id: 5, name: 'V. The Hierophant', image: '/assets/tarot-webp-optimized/major_arcana_hierophant.webp', keywords: ['传统', '指引', '规范'] },
+  { id: 6, name: 'VI. The Lovers', image: '/assets/tarot-webp-optimized/major_arcana_lovers.webp', keywords: ['关系', '信任', '选择'] },
+  { id: 7, name: 'VII. The Chariot', image: '/assets/tarot-webp-optimized/major_arcana_chariot.webp', keywords: ['意志', '目标', '胜利'] },
+  { id: 8, name: 'VIII. Strength', image: '/assets/tarot-webp-optimized/major_arcana_strength.webp', keywords: ['力量', '耐心', '控制'] },
+  { id: 9, name: 'IX. The Hermit', image: '/assets/tarot-webp-optimized/major_arcana_hermit.webp', keywords: ['内省', '真理', '指引'] },
+  { id: 10, name: 'X. Wheel of Fortune', image: '/assets/tarot-webp-optimized/major_arcana_fortune.webp', keywords: ['命运', '循环', '变化'] },
+  { id: 11, name: 'XI. Justice', image: '/assets/tarot-webp-optimized/major_arcana_justice.webp', keywords: ['正义', '平衡', '责任'] },
+  { id: 12, name: 'XII. The Hanged Man', image: '/assets/tarot-webp-optimized/major_arcana_hanged.webp', keywords: ['等待', '牺牲', '视角'] },
 ];
 
 export default function AnnualFortuneEntryPage() {

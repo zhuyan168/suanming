@@ -323,7 +323,7 @@ export default function SkillsDirectionResult() {
                               <img
                                 src={cardData.image}
                                 alt={displayCard}
-                                className="w-full h-full object-cover shadow-lg border border-white/10"
+                                className="w-full h-full object-contain shadow-lg border border-white/10"
                               />
                             </div>
                           ) : (

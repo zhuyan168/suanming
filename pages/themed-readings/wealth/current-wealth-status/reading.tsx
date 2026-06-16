@@ -299,7 +299,7 @@ export default function WealthCurrentStatusReadingPage() {
                               <img
                                 src={cardData.image}
                                 alt={isEn ? (cardData?.name || pos.card_name_zh) : pos.card_name_zh}
-                                className="w-full h-full object-cover shadow-lg border border-white/10"
+                                className="w-full h-full object-contain shadow-lg border border-white/10"
                               />
                             </div>
                           ) : (

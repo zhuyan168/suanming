@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 年度运势解读面板组件
  * 包含：年度总运、月度运势（Accordion）、全年总结
  */
@@ -244,7 +244,7 @@ export default function AnnualInterpretationPanel({
                               <img
                                 src={card.imageUrl}
                                 alt={card.name}
-                                className={`w-full h-full object-cover ${
+                                className={`w-full h-full object-contain ${
                                   card.isReversed ? 'transform rotate-180' : ''
                                 }`}
                                 style={{ backgroundColor: 'white' }}

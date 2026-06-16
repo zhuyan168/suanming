@@ -436,7 +436,7 @@ export default function WhatTheyThinkResult() {
                                     <img
                                       src={card?.image}
                                       alt={card?.name}
-                                      className={`w-full h-full object-cover ${
+                                      className={`w-full h-full object-contain ${
                                         card?.orientation === 'reversed' ? 'rotate-180' : ''
                                       }`}
                                       style={{ backgroundColor: 'white' }}

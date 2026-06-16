@@ -372,7 +372,7 @@ export default function FutureLoverResult() {
                           <img
                             src={savedResult.cards[0].image}
                             alt={savedResult.cards[0].name}
-                            className={`w-full h-full object-cover ${
+                            className={`w-full h-full object-contain ${
                               savedResult.cards[0].orientation === 'reversed' ? 'rotate-180' : ''
                             }`}
                             style={{
@@ -440,7 +440,7 @@ export default function FutureLoverResult() {
                               <img
                                 src={card.image}
                                 alt={card.name}
-                                className={`w-full h-full object-cover ${
+                                className={`w-full h-full object-contain ${
                                   card.orientation === 'reversed' ? 'rotate-180' : ''
                                 }`}
                                 style={{

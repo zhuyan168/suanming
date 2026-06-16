@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -334,7 +334,7 @@ export default function ReconciliationResultPage() {
                               <img
                                 src={card.image}
                                 alt={card.name}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                                 style={{
                                   backgroundColor: 'white',
                                   transform: card.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
@@ -406,7 +406,7 @@ export default function ReconciliationResultPage() {
                             <img
                               src={guideCard.image}
                               alt={guideCard.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                               style={{
                                 transform: guideCard.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                               }}

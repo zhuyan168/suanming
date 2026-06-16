@@ -331,7 +331,7 @@ export default function WealthObstaclesReadingPage() {
                                 <img
                                   src={cardData.image}
                                   alt={isEn ? (cardData?.name || cardReading.card) : cardReading.card}
-                                  className="w-full h-full object-cover border border-white/10"
+                                  className="w-full h-full object-contain border border-white/10"
                                 />
                               </div>
                             ) : (

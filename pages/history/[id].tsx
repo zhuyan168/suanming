@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -342,7 +342,7 @@ function CardRow({
             <img
               src={imageUrl}
               alt={cardName}
-              className={`w-full h-full object-cover ${orientation === 'reversed' ? 'rotate-180' : ''}`}
+              className={`w-full h-full object-contain ${orientation === 'reversed' ? 'rotate-180' : ''}`}
             />
           </div>
         ) : (
@@ -431,7 +431,7 @@ function DailyFortuneView({ record }: { record: HistoryRecord }) {
         <div className="flex flex-col items-center gap-4">
           {imageUrl ? (
             <div className="w-44 h-64 rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_30px_rgba(127,19,236,0.3)]">
-              <img src={imageUrl} alt={cardRef?.name ?? ''} className={`w-full h-full object-cover ${orientation === 'reversed' ? 'rotate-180' : ''}`} />
+              <img src={imageUrl} alt={cardRef?.name ?? ''} className={`w-full h-full object-contain ${orientation === 'reversed' ? 'rotate-180' : ''}`} />
             </div>
           ) : (
             <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
@@ -504,7 +504,7 @@ function FortuneMonthlyBasicView({ record }: { record: HistoryRecord }) {
                 <p className="text-xs font-bold text-primary/80 uppercase tracking-wider">{cardLabels[i]}</p>
                 {img ? (
                   <div className="w-20 h-28 rounded-lg overflow-hidden border border-white/15 shadow-md">
-                    <img src={img} alt={card.name ?? ''} className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
+                    <img src={img} alt={card.name ?? ''} className={`w-full h-full object-contain ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
                   <div className="w-20 h-28 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
@@ -600,7 +600,7 @@ function FortuneSeasonalView({ record }: { record: HistoryRecord }) {
               <div key={i} className="flex flex-col items-center gap-1.5">
                 {img ? (
                   <div className="w-16 rounded-lg overflow-hidden border border-white/20 shadow-[0_0_12px_rgba(127,19,236,0.2)]" style={{ height: '6rem' }}>
-                    <img src={img} alt={card.name ?? ''} className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
+                    <img src={img} alt={card.name ?? ''} className={`w-full h-full object-contain ${card.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
                   <div className="w-16 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center" style={{ height: '6rem' }}>
@@ -763,7 +763,7 @@ function FortuneYearlyView({ record }: { record: HistoryRecord }) {
               <div className="shrink-0">
                 {getCardImage(card) ? (
                   <div className={`rounded-lg overflow-hidden border-2 ${isTheme ? 'w-20 border-primary/50' : 'w-16 border-white/20'}`} style={{ height: isTheme ? '7.5rem' : '6rem' }}>
-                    <img src={getCardImage(card)!} alt={card?.name ?? ''} className={`w-full h-full object-cover ${card?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
+                    <img src={getCardImage(card)!} alt={card?.name ?? ''} className={`w-full h-full object-contain ${card?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
                   <div className={`rounded-lg bg-white/5 border border-white/10 flex items-center justify-center ${isTheme ? 'w-20' : 'w-16'}`} style={{ height: isTheme ? '7.5rem' : '6rem' }}>
@@ -1117,7 +1117,7 @@ function SectionedReadingView({ record }: { record: HistoryRecord }) {
               <div key={i} className="flex flex-col items-center gap-1">
                 {img ? (
                   <div className="w-12 rounded-md overflow-hidden border border-white/15" style={{ height: '4.5rem' }}>
-                    <img src={img} alt={getCardDisplayName(card)} className={`w-full h-full object-cover ${getCardOrientation(card) === 'reversed' ? 'rotate-180' : ''}`} />
+                    <img src={img} alt={getCardDisplayName(card)} className={`w-full h-full object-contain ${getCardOrientation(card) === 'reversed' ? 'rotate-180' : ''}`} />
                   </div>
                 ) : (
                   <div className="w-12 rounded-md bg-white/5 border border-white/10 flex items-center justify-center" style={{ height: '4.5rem' }}>
@@ -1322,7 +1322,7 @@ function YesNoView({ record }: { record: HistoryRecord }) {
         <div className="flex flex-col gap-4 items-center">
           {imageUrl ? (
             <div className="w-44 h-64 overflow-hidden rounded-2xl border-2 border-primary/30 shadow-[0_0_30px_rgba(127,19,236,0.4)]">
-              <img src={imageUrl} alt={cardData?.name ?? ''} className={`w-full h-full object-cover ${cardData?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
+              <img src={imageUrl} alt={cardData?.name ?? ''} className={`w-full h-full object-contain ${cardData?.orientation === 'reversed' ? 'rotate-180' : ''}`} />
             </div>
           ) : (
             <div className="w-44 h-64 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
@@ -135,7 +135,7 @@ export default function SixCardSlots({
                   <img
                     src={card.image}
                     alt={card.name}
-                    className={`w-full h-full object-cover ${
+                    className={`w-full h-full object-contain ${
                       card.orientation === 'reversed' ? 'rotate-180' : ''
                     }`}
                     style={{

@@ -1,15 +1,13 @@
-//这串代码是gpt生成的，用于获取塔罗牌图片
-// tarotimages.ts — Full 78-Card Mapping (Flat + Grouped)
-// 封雪专属版本：完全无重复、按你项目结构优化过
+// tarotimages.ts - Full 78-card mapping (flat + grouped).
+// These images are served from local optimized WebP assets.
 
-export const SUPABASE_TAROT_BASE_URL =
-  "https://utmlglwizzoofkbmlnbs.supabase.co/storage/v1/object/public/tarotimage/";
+export const TAROT_IMAGE_BASE_URL = "/assets/tarot-webp-optimized/";
 
 export const getTarotImageUrl = (fileName: string) =>
-  `${SUPABASE_TAROT_BASE_URL}${fileName}`;
+  `${TAROT_IMAGE_BASE_URL}${fileName.replace(/\.png$/i, ".webp")}`;
 
 // ---------------------------------------------------------
-// FLAT STRUCTURE — 完整 78 张
+// FLAT STRUCTURE - 78 cards
 // ---------------------------------------------------------
 export const tarotImagesFlat = {
   // Major Arcana (22)
@@ -36,7 +34,7 @@ export const tarotImagesFlat = {
   "major_arcana_judgement": getTarotImageUrl("major_arcana_judgement.png"),
   "major_arcana_world": getTarotImageUrl("major_arcana_world.png"),
 
-  // Cups — 圣杯 (14)
+  // Cups (14)
   "minor_arcana_cups_2": getTarotImageUrl("minor_arcana_cups_2.png"),
   "minor_arcana_cups_3": getTarotImageUrl("minor_arcana_cups_3.png"),
   "minor_arcana_cups_4": getTarotImageUrl("minor_arcana_cups_4.png"),
@@ -52,7 +50,7 @@ export const tarotImagesFlat = {
   "minor_arcana_cups_queen": getTarotImageUrl("minor_arcana_cups_queen.png"),
   "minor_arcana_cups_king": getTarotImageUrl("minor_arcana_cups_king.png"),
 
-  // Pentacles — 星币 (14)
+  // Pentacles (14)
   "minor_arcana_pentacles_2": getTarotImageUrl("minor_arcana_pentacles_2.png"),
   "minor_arcana_pentacles_3": getTarotImageUrl("minor_arcana_pentacles_3.png"),
   "minor_arcana_pentacles_4": getTarotImageUrl("minor_arcana_pentacles_4.png"),
@@ -68,7 +66,7 @@ export const tarotImagesFlat = {
   "minor_arcana_pentacles_queen": getTarotImageUrl("minor_arcana_pentacles_queen.png"),
   "minor_arcana_pentacles_king": getTarotImageUrl("minor_arcana_pentacles_king.png"),
 
-  // Swords — 宝剑 (14)
+  // Swords (14)
   "minor_arcana_swords_2": getTarotImageUrl("minor_arcana_swords_2.png"),
   "minor_arcana_swords_3": getTarotImageUrl("minor_arcana_swords_3.png"),
   "minor_arcana_swords_4": getTarotImageUrl("minor_arcana_swords_4.png"),
@@ -84,7 +82,7 @@ export const tarotImagesFlat = {
   "minor_arcana_swords_queen": getTarotImageUrl("minor_arcana_swords_queen.png"),
   "minor_arcana_swords_king": getTarotImageUrl("minor_arcana_swords_king.png"),
 
-  // Wands — 权杖 (14)
+  // Wands (14)
   "minor_arcana_wands_2": getTarotImageUrl("minor_arcana_wands_2.png"),
   "minor_arcana_wands_3": getTarotImageUrl("minor_arcana_wands_3.png"),
   "minor_arcana_wands_4": getTarotImageUrl("minor_arcana_wands_4.png"),
@@ -102,7 +100,7 @@ export const tarotImagesFlat = {
 }
 
 // ---------------------------------------------------------
-// GROUPED STRUCTURE — 按牌系分类，适合四季牌阵等复杂占卜
+// GROUPED STRUCTURE - grouped by card suit for spread layouts
 // ---------------------------------------------------------
 export const tarotImages = {
     major: {

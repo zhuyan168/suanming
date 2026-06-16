@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 牌面详情弹窗组件
  * 用于展示单张牌的详细信息
  */
@@ -79,7 +79,7 @@ export default function CardDetailModal({ card, monthLabel, onClose }: CardDetai
                 <img
                   src={card.imageUrl}
                   alt={card.name}
-                  className={`w-full h-full object-cover ${
+                  className={`w-full h-full object-contain ${
                     card.isReversed ? 'transform rotate-180' : ''
                   }`}
                   style={{

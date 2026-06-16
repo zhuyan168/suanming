@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TarotCard } from './CardItem';
 
@@ -104,7 +104,7 @@ export default function TriangleThreeCardSlots({
                       <img
                         src={cards[0].image}
                         alt={cards[0].name}
-                        className={`w-full h-full object-cover ${
+                        className={`w-full h-full object-contain ${
                           cards[0].orientation === 'reversed' ? 'rotate-180' : ''
                         }`}
                         style={{
@@ -212,7 +212,7 @@ export default function TriangleThreeCardSlots({
                       <img
                         src={cards[2].image}
                         alt={cards[2].name}
-                        className={`w-full h-full object-cover ${
+                        className={`w-full h-full object-contain ${
                           cards[2].orientation === 'reversed' ? 'rotate-180' : ''
                         }`}
                         style={{
@@ -317,7 +317,7 @@ export default function TriangleThreeCardSlots({
                       <img
                         src={cards[1].image}
                         alt={cards[1].name}
-                        className={`w-full h-full object-cover ${
+                        className={`w-full h-full object-contain ${
                           cards[1].orientation === 'reversed' ? 'rotate-180' : ''
                         }`}
                         style={{

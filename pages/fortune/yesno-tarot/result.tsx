@@ -170,7 +170,7 @@ export default function YesNoTarotResult() {
     answerLabel: 'Answer',
     unknown: 'Unknown',
     interpretationLabel: 'Interpretation',
-    disclaimer: '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.',
+    disclaimer: 'Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.',
     backToHistory: 'Back to My Readings',
     home: 'Home',
     newReading: 'New Reading',
@@ -275,7 +275,7 @@ export default function YesNoTarotResult() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || '获取解读失败');
+        throw new Error(data.message || '解读失败');
       }
 
       const aiAnswer = (data.answer || '').toLowerCase();
@@ -301,7 +301,7 @@ export default function YesNoTarotResult() {
       }
       setIsLoading(false);
     } catch (error) {
-      console.error('获取解读失败:', error);
+      console.error('解读失败', error);
       const result = getYesNoByCard(drawnCard.name, drawnCard.orientation);
       setAnswer(result.answer);
       const fallbackReason = isEn
@@ -435,7 +435,7 @@ export default function YesNoTarotResult() {
                     <img
                       src={frontImage}
                       alt={card.name}
-                      className={`w-full h-full object-cover ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
+                      className={`w-full h-full object-contain ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
                     />
                   </div>
                 </div>
