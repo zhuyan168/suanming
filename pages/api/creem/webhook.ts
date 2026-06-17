@@ -179,6 +179,12 @@ function subtractUtcDays(from: Date, days: number): string {
   return date.toISOString();
 }
 
+function shiftUtcDays(iso: string, days: number): string {
+  const date = new Date(iso);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString();
+}
+
 async function findUserIdFromSubscription(subscriptionId: string | null): Promise<string | null> {
   if (!subscriptionId) return null;
   const { data, error } = await supabaseService
@@ -240,6 +246,35 @@ async function extendMembershipFromCurrentProfile(params: {
   const daysDelta = periodDurationMs
     ? Math.max(1, Math.round(periodDurationMs / 86_400_000))
     : params.durationDays;
+
+  if (params.subscriptionId && params.periodEnd) {
+    const { data: existingPeriodLedger, error: existingPeriodError } = await supabaseService
+      .from('membership_ledger')
+      .select('id, creem_event_id, creem_period_end')
+      .eq('source', 'creem')
+      .eq('action', 'extend')
+      .eq('creem_subscription_id', params.subscriptionId)
+      .gte('creem_period_end', shiftUtcDays(params.periodEnd, -1))
+      .lte('creem_period_end', shiftUtcDays(params.periodEnd, 1))
+      .limit(1)
+      .maybeSingle();
+
+    if (existingPeriodError) {
+      console.error('[api/creem/webhook] membership ledger period check failed', existingPeriodError);
+      return { expiresAt: null, skipped: false, error: existingPeriodError };
+    }
+
+    if (existingPeriodLedger) {
+      console.info('[api/creem/webhook] membership extension period already recorded', {
+        eventId: params.eventId,
+        existingEventId: existingPeriodLedger.creem_event_id,
+        subscriptionId: params.subscriptionId,
+        periodEnd: params.periodEnd,
+        existingPeriodEnd: existingPeriodLedger.creem_period_end,
+      });
+      return { expiresAt: null, skipped: true, error: null };
+    }
+  }
 
   const { data: ledgerRow, error: ledgerError } = await supabaseService
     .from('membership_ledger')
@@ -535,10 +570,15 @@ export default async function handler(
 
   if (eventInsertError) {
     if ((eventInsertError as any).code === '23505') {
-      return res.status(200).json({ received: true });
+      console.info('[api/creem/webhook] event already recorded, checking whether processing can be completed', {
+        eventType,
+        eventId,
+        subscriptionId,
+      });
+    } else {
+      console.error('[api/creem/webhook] event insert failed', eventInsertError);
+      return res.status(500).json({ received: false, error: 'Unable to record webhook event' });
     }
-    console.error('[api/creem/webhook] event insert failed', eventInsertError);
-    return res.status(500).json({ received: false, error: 'Unable to record webhook event' });
   }
 
   if (REFUND_EVENT_TYPES.has(eventType)) {
@@ -644,7 +684,12 @@ export default async function handler(
 
   await supabaseService
     .from('creem_webhook_events')
-    .update({ processed_at: new Date().toISOString() })
+    .update({
+      processed_at: new Date().toISOString(),
+      event_type: eventType || 'unknown',
+      creem_subscription_id: subscriptionId,
+      payload,
+    })
     .eq('creem_event_id', eventId);
 
   return res.status(200).json({ received: true });
