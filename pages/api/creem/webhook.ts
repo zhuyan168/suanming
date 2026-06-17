@@ -31,6 +31,7 @@ const ACTIVE_EVENT_TYPES = new Set([
 ]);
 
 const MEMBERSHIP_EXTENSION_EVENT_TYPES = new Set([
+  'checkout.completed',
   'subscription.paid',
 ]);
 
@@ -274,7 +275,12 @@ async function extendMembershipFromCurrentProfile(params: {
 
   const { error: updateError } = await supabaseService
     .from('profiles')
-    .upsert({ id: params.userId, membership_expires_at: newExpiresAt }, { onConflict: 'id' });
+    .upsert({
+      id: params.userId,
+      membership_expires_at: newExpiresAt,
+      is_member: true,
+      member_type: params.planKey,
+    }, { onConflict: 'id' });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile membership extension failed', updateError);
@@ -427,9 +433,15 @@ async function reverseMembershipForRefund(params: {
     return { reversed: false, error: ledgerError };
   }
 
+  const isStillMember = new Date(newExpiresAt).getTime() > Date.now();
   const { error: updateError } = await supabaseService
     .from('profiles')
-    .upsert({ id: originalLedger.user_id, membership_expires_at: newExpiresAt }, { onConflict: 'id' });
+    .upsert({
+      id: originalLedger.user_id,
+      membership_expires_at: newExpiresAt,
+      is_member: isStillMember,
+      member_type: isStillMember ? originalLedger.plan_key : null,
+    }, { onConflict: 'id' });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile refund reversal failed', updateError);
