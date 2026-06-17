@@ -124,14 +124,21 @@ function getCustomerId(obj: any): string | null {
   );
 }
 
+function getCustomerEmail(obj: any): string | null {
+  const email = obj?.customer?.email || obj?.email || obj?.subscription?.customer?.email;
+  return typeof email === 'string' && email.trim() ? email : null;
+}
+
 function getMetadata(obj: any): Record<string, any> {
   const metadata = obj?.metadata || obj?.subscription?.metadata || obj?.checkout?.metadata;
   return metadata && typeof metadata === 'object' ? metadata : {};
 }
 
 function parseDate(value: unknown): string | null {
-  if (typeof value !== 'string' || !value.trim()) return null;
-  const date = new Date(value);
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  if (typeof value === 'string' && !value.trim()) return null;
+  const numericValue = typeof value === 'number' && value < 10_000_000_000 ? value * 1000 : value;
+  const date = new Date(numericValue);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
@@ -145,6 +152,8 @@ function getPeriodEnd(obj: any): string | null {
     parseDate(obj?.periodEnd) ||
     parseDate(obj?.next_transaction_date) ||
     parseDate(obj?.nextTransactionDate) ||
+    parseDate(obj?.last_transaction?.period_end) ||
+    parseDate(obj?.lastTransaction?.periodEnd) ||
     parseDate(obj?.subscription?.current_period_end) ||
     parseDate(obj?.subscription?.currentPeriodEnd) ||
     parseDate(obj?.subscription?.current_period_end_date) ||
@@ -156,10 +165,16 @@ function getPeriodStart(obj: any): string | null {
   return (
     parseDate(obj?.current_period_start) ||
     parseDate(obj?.currentPeriodStart) ||
+    parseDate(obj?.current_period_start_date) ||
+    parseDate(obj?.currentPeriodStartDate) ||
     parseDate(obj?.period_start) ||
     parseDate(obj?.periodStart) ||
+    parseDate(obj?.last_transaction?.period_start) ||
+    parseDate(obj?.lastTransaction?.periodStart) ||
     parseDate(obj?.subscription?.current_period_start) ||
-    parseDate(obj?.subscription?.currentPeriodStart)
+    parseDate(obj?.subscription?.currentPeriodStart) ||
+    parseDate(obj?.subscription?.current_period_start_date) ||
+    parseDate(obj?.subscription?.currentPeriodStartDate)
   );
 }
 
@@ -183,6 +198,74 @@ function shiftUtcDays(iso: string, days: number): string {
   const date = new Date(iso);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString();
+}
+
+function laterIso(a: string | null | undefined, b: string): string {
+  if (!a) return b;
+  const aTime = new Date(a).getTime();
+  const bTime = new Date(b).getTime();
+  if (!Number.isFinite(aTime)) return b;
+  if (!Number.isFinite(bTime)) return a;
+  return aTime >= bTime ? a : b;
+}
+
+async function findExistingCreemPeriodLedger(params: {
+  subscriptionId: string | null;
+  periodEnd: string | null;
+}): Promise<{ ledger: any | null; error: unknown | null }> {
+  if (!params.subscriptionId || !params.periodEnd) {
+    return { ledger: null, error: null };
+  }
+
+  const { data, error } = await supabaseService
+    .from('membership_ledger')
+    .select('id, creem_event_id, creem_period_end, expires_after, plan_key')
+    .eq('source', 'creem')
+    .eq('action', 'extend')
+    .eq('creem_subscription_id', params.subscriptionId)
+    .gte('creem_period_end', shiftUtcDays(params.periodEnd, -1))
+    .lte('creem_period_end', shiftUtcDays(params.periodEnd, 1))
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[api/creem/webhook] membership ledger period check failed', error);
+    return { ledger: null, error };
+  }
+
+  return { ledger: data || null, error: null };
+}
+
+async function writeMembershipProfile(params: {
+  userId: string;
+  email: string | null;
+  membershipExpiresAt: string;
+  planKey: string;
+}): Promise<{ error: unknown | null }> {
+  const payload = {
+    membership_expires_at: params.membershipExpiresAt,
+    is_member: true,
+    member_type: params.planKey,
+  };
+
+  const { data: updated, error: updateError } = await supabaseService
+    .from('profiles')
+    .update(payload)
+    .eq('id', params.userId)
+    .select('id');
+
+  if (updateError) return { error: updateError };
+  if (updated?.length) return { error: null };
+
+  const { error: insertError } = await supabaseService
+    .from('profiles')
+    .insert({
+      id: params.userId,
+      email: params.email,
+      ...payload,
+    });
+
+  return { error: insertError ?? null };
 }
 
 async function findUserIdFromSubscription(subscriptionId: string | null): Promise<string | null> {
@@ -210,6 +293,7 @@ async function extendMembershipFromCurrentProfile(params: {
   subscriptionId: string | null;
   periodStart: string | null;
   periodEnd: string | null;
+  email: string | null;
   payload: CreemWebhookPayload;
 }): Promise<{ expiresAt: string | null; skipped: boolean; error: unknown | null }> {
   const { data: profile, error: readError } = await supabaseService
@@ -247,33 +331,40 @@ async function extendMembershipFromCurrentProfile(params: {
     ? Math.max(1, Math.round(periodDurationMs / 86_400_000))
     : params.durationDays;
 
-  if (params.subscriptionId && params.periodEnd) {
-    const { data: existingPeriodLedger, error: existingPeriodError } = await supabaseService
-      .from('membership_ledger')
-      .select('id, creem_event_id, creem_period_end')
-      .eq('source', 'creem')
-      .eq('action', 'extend')
-      .eq('creem_subscription_id', params.subscriptionId)
-      .gte('creem_period_end', shiftUtcDays(params.periodEnd, -1))
-      .lte('creem_period_end', shiftUtcDays(params.periodEnd, 1))
-      .limit(1)
-      .maybeSingle();
+  const { ledger: existingPeriodLedger, error: existingPeriodError } = await findExistingCreemPeriodLedger({
+    subscriptionId: params.subscriptionId,
+    periodEnd: params.periodEnd,
+  });
 
-    if (existingPeriodError) {
-      console.error('[api/creem/webhook] membership ledger period check failed', existingPeriodError);
-      return { expiresAt: null, skipped: false, error: existingPeriodError };
+  if (existingPeriodError) {
+    return { expiresAt: null, skipped: false, error: existingPeriodError };
+  }
+
+  if (existingPeriodLedger) {
+    const repairExpiresAt = laterIso(
+      currentRaw,
+      existingPeriodLedger.expires_after || params.periodEnd || newExpiresAt
+    );
+    const { error: repairError } = await writeMembershipProfile({
+      userId: params.userId,
+      email: params.email,
+      membershipExpiresAt: repairExpiresAt,
+      planKey: existingPeriodLedger.plan_key || params.planKey,
+    });
+
+    if (repairError) {
+      console.error('[api/creem/webhook] profile repair for existing membership ledger failed', repairError);
+      return { expiresAt: null, skipped: false, error: repairError };
     }
 
-    if (existingPeriodLedger) {
-      console.info('[api/creem/webhook] membership extension period already recorded', {
-        eventId: params.eventId,
-        existingEventId: existingPeriodLedger.creem_event_id,
-        subscriptionId: params.subscriptionId,
-        periodEnd: params.periodEnd,
-        existingPeriodEnd: existingPeriodLedger.creem_period_end,
-      });
-      return { expiresAt: null, skipped: true, error: null };
-    }
+    console.info('[api/creem/webhook] membership extension period already recorded', {
+      eventId: params.eventId,
+      existingEventId: existingPeriodLedger.creem_event_id,
+      subscriptionId: params.subscriptionId,
+      periodEnd: params.periodEnd,
+      existingPeriodEnd: existingPeriodLedger.creem_period_end,
+    });
+    return { expiresAt: repairExpiresAt, skipped: true, error: null };
   }
 
   const { data: ledgerRow, error: ledgerError } = await supabaseService
@@ -308,14 +399,12 @@ async function extendMembershipFromCurrentProfile(params: {
     return { expiresAt: null, skipped: false, error: ledgerError };
   }
 
-  const { error: updateError } = await supabaseService
-    .from('profiles')
-    .upsert({
-      id: params.userId,
-      membership_expires_at: newExpiresAt,
-      is_member: true,
-      member_type: params.planKey,
-    }, { onConflict: 'id' });
+  const { error: updateError } = await writeMembershipProfile({
+    userId: params.userId,
+    email: params.email,
+    membershipExpiresAt: newExpiresAt,
+    planKey: params.planKey,
+  });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile membership extension failed', updateError);
@@ -625,6 +714,7 @@ export default async function handler(
   const periodStart = getPeriodStart(eventObject);
   const periodEnd = getPeriodEnd(eventObject) || addUtcDays(new Date(), plan.fallbackDurationDays);
   const customerId = getCustomerId(eventObject);
+  const customerEmail = getCustomerEmail(eventObject);
 
   let status = eventObject?.status || eventType || 'unknown';
   if (ACTIVE_EVENT_TYPES.has(eventType)) status = 'active';
@@ -657,6 +747,7 @@ export default async function handler(
       subscriptionId,
       periodStart,
       periodEnd,
+      email: customerEmail,
       payload,
     });
 
