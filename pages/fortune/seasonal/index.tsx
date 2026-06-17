@@ -9,7 +9,7 @@ import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard, CardMeaning } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
-import { getAuthHeaders } from '../../../lib/apiHeaders';
+import { getAuthHeaders, getClientCacheIdentity } from '../../../lib/apiHeaders';
 
 // 完整的78张塔罗牌数据（仅用于UI渲染背面卡片）
 const tarotCards = [
@@ -948,6 +948,25 @@ interface SeasonalRecords {
   [quarter: string]: SeasonalResult;
 }
 
+const buildSeasonalResultFromHistory = (
+  record: any,
+  quarter: string
+): SeasonalResult | null => {
+  const cards = Array.isArray(record?.cards) ? record.cards : null;
+  if (!cards || cards.length !== 5) return null;
+
+  return {
+    userId: null,
+    cards: cards.map((card: any) => ({
+      ...card,
+      orientation: card.orientation === 'reversed' ? 'reversed' : 'upright',
+    })),
+    reading: record?.reading_result,
+    createdAt: record?.created_at ? new Date(record.created_at).getTime() : Date.now(),
+    quarter,
+  };
+};
+
 export default function SeasonalFortune() {
   const router = useRouter();
   const isEn = router.locale === 'en';
@@ -1036,67 +1055,10 @@ export default function SeasonalFortune() {
     if (process.env.NODE_ENV === 'development') {
     }
 
-    // 读取所有季度的历史记录
-    const storageKey = 'seasonal_fortune_records';
-    const stored = localStorage.getItem(storageKey);
-    
-    if (stored) {
-      try {
-        const records = JSON.parse(stored) as SeasonalRecords;
-        const currentQuarterResult = records[quarter];
-        
-        // 如果当前季度已经抽过牌
-        if (currentQuarterResult) {
-          // 验证并修复卡牌数据
-          const validatedCards = currentQuarterResult.cards.map(card => {
-            const key = getCardKeyFromUrl(card.image);
-            const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
-            
-            const baseCard = tarotCards.find(tc => tc.id === card.id);
-            
-            if (newImage && baseCard) {
-              return {
-                ...baseCard,
-                image: newImage,
-                orientation: card.orientation
-              };
-            }
+    let cancelled = false;
 
-            if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
-              if (baseCard) {
-                return {
-                  id: baseCard.id,
-                  name: baseCard.name,
-                  image: baseCard.image,
-                  upright: baseCard.upright,
-                  reversed: baseCard.reversed,
-                  keywords: baseCard.keywords,
-                  orientation: card.orientation,
-                };
-              }
-            }
-            return card;
-          });
-          
-          setSavedResult({ ...currentQuarterResult, cards: validatedCards });
-          setHasDrawn(true);
-          setShowCards(false);
-          
-          const cardsWithOrientation: ShuffledTarotCard[] = validatedCards.map(card => ({
-            ...card,
-            orientation: card.orientation,
-          }));
-          setSelectedCards(cardsWithOrientation);
-          return;
-        }
-      } catch (e) {
-        console.error('Failed to parse stored records:', e);
-        // 不删除整个记录，只是本次初始化失败
-      }
-    }
-    
-    // 如果当前季度没有抽过牌，初始化牌堆
-    if (typeof window !== 'undefined') {
+    const initializeDeck = () => {
+      if (cancelled) return;
       const updatedTarotCards = tarotCards.map(c => {
         const key = getCardKeyFromUrl(c.image);
         if (key && tarotImagesFlat[key as keyof typeof tarotImagesFlat]) {
@@ -1107,7 +1069,100 @@ export default function SeasonalFortune() {
 
       const shuffled = shuffleCards(updatedTarotCards);
       setUiSlots(shuffled);
-    }
+    };
+
+    const loadServerResult = async () => {
+      const cacheIdentity = await getClientCacheIdentity();
+      const storageKey = `seasonal_fortune_records_${cacheIdentity}`;
+      const stored = localStorage.getItem(storageKey);
+
+      if (stored) {
+        try {
+          const records = JSON.parse(stored) as SeasonalRecords;
+          const currentQuarterResult = records[quarter];
+
+          if (currentQuarterResult) {
+            const validatedCards = currentQuarterResult.cards.map(card => {
+              const key = getCardKeyFromUrl(card.image);
+              const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
+              const baseCard = tarotCards.find(tc => tc.id === card.id);
+
+              if (newImage && baseCard) {
+                return {
+                  ...baseCard,
+                  image: newImage,
+                  orientation: card.orientation,
+                };
+              }
+
+              if (!card.image || !card.name || !card.upright || !card.reversed || !card.keywords) {
+                if (baseCard) {
+                  return {
+                    id: baseCard.id,
+                    name: baseCard.name,
+                    image: baseCard.image,
+                    upright: baseCard.upright,
+                    reversed: baseCard.reversed,
+                    keywords: baseCard.keywords,
+                    orientation: card.orientation,
+                  };
+                }
+              }
+              return card;
+            });
+
+            setSavedResult({ ...currentQuarterResult, cards: validatedCards });
+            setHasDrawn(true);
+            setShowCards(false);
+            setSelectedCards(validatedCards as ShuffledTarotCard[]);
+            return;
+          }
+        } catch (e) {
+          console.error('Failed to parse stored records:', e);
+        }
+      }
+
+      try {
+        const headers = await getAuthHeaders();
+        const response = await fetch(
+          `/api/periodic-reading/current?spreadKey=fortune-seasonal&tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone || '')}`,
+          { headers }
+        );
+
+        if (!response.ok || cancelled) {
+          initializeDeck();
+          return;
+        }
+
+        const data = await response.json();
+        const serverResult = data?.existingRecord
+          ? buildSeasonalResultFromHistory(data.existingRecord, quarter)
+          : null;
+
+        if (!serverResult || cancelled) {
+          initializeDeck();
+          return;
+        }
+
+        const existingRecords = stored ? JSON.parse(stored) as SeasonalRecords : {};
+        existingRecords[quarter] = serverResult;
+        localStorage.setItem(storageKey, JSON.stringify(existingRecords));
+
+        setSavedResult(serverResult);
+        setHasDrawn(true);
+        setShowCards(false);
+        setSelectedCards(serverResult.cards as ShuffledTarotCard[]);
+      } catch (error) {
+        console.error('Failed to load server seasonal result:', error);
+        initializeDeck();
+      }
+    };
+
+    loadServerResult();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const drawCard = async (slotIndex: number) => {
@@ -1224,7 +1279,8 @@ export default function SeasonalFortune() {
         };
 
         // 读取现有的所有季度记录
-        const storageKey = 'seasonal_fortune_records';
+        const cacheIdentity = await getClientCacheIdentity();
+        const storageKey = `seasonal_fortune_records_${cacheIdentity}`;
         let allRecords: SeasonalRecords = {};
         
         try {

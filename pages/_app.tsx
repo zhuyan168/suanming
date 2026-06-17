@@ -17,7 +17,7 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://fateaura.com").re
 const DEFAULT_TITLE = "FateAura - Tarot Readings & Intuitive Guidance";
 const DEFAULT_DESCRIPTION =
   "Ask what is on your mind and receive thoughtful tarot guidance for love, career, money, decisions, and life's turning points.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/assets/card-back.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 function shouldNoIndex(pathname: string): boolean {
   return [
@@ -111,6 +111,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content={DEFAULT_DESCRIPTION} key="description" />
         <meta name="robots" content={robotsContent} key="robots" />
         <link rel="canonical" href={canonicalUrl} key="canonical" />
+        <link rel="shortcut icon" href="/favicon.ico?v=20260617" />
         <link rel="icon" href="/favicon.png?v=20260614" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260614" />
 
@@ -121,8 +122,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta property="og:url" content={canonicalUrl} key="og:url" />
         <meta property="og:image" content={DEFAULT_OG_IMAGE} key="og:image" />
         <meta property="og:image:type" content="image/png" key="og:image:type" />
-        <meta property="og:image:width" content="512" key="og:image:width" />
-        <meta property="og:image:height" content="512" key="og:image:height" />
+        <meta property="og:image:width" content="1200" key="og:image:width" />
+        <meta property="og:image:height" content="630" key="og:image:height" />
 
         <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
         <meta name="twitter:title" content={DEFAULT_TITLE} key="twitter:title" />

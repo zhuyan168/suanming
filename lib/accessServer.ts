@@ -77,6 +77,23 @@ function getAccessTokenFromRequest(req: NextApiRequest): string | null {
   return null;
 }
 
+export async function getAuthenticatedUserIdFromRequest(req: NextApiRequest): Promise<string | null> {
+  const token = getAccessTokenFromRequest(req);
+  if (!token) return null;
+
+  const {
+    data: { user },
+    error,
+  } = await supabaseService.auth.getUser(token);
+
+  if (error || !user) {
+    console.error('[accessServer] getAuthenticatedUserIdFromRequest failed:', error);
+    return null;
+  }
+
+  return user.id;
+}
+
 /**
  * Compute the UTC ISO string for 00:00:00 of "today" in the given IANA timezone.
  *
@@ -191,6 +208,108 @@ export async function findReadingHistoryByClientRequestId(params: {
     return data?.reading_result ?? null;
   } catch (err) {
     console.error('[accessServer] findReadingHistoryByClientRequestId exception:', err);
+    return null;
+  }
+}
+
+export type PeriodicReadingPeriod = 'day' | 'month' | 'season' | 'year';
+
+function getLocalDateParts(timeZone: string): { year: number; month: number; day: number } {
+  const now = new Date();
+  const localDateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+  const [year, month, day] = localDateStr.split('-').map(Number);
+  return { year, month, day };
+}
+
+function getOffsetMinutesForTimezone(timeZone: string): number {
+  const now = new Date();
+  const tzPart =
+    new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
+      .formatToParts(now)
+      .find(p => p.type === 'timeZoneName')?.value ?? 'GMT+0';
+
+  const match = tzPart.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  if (!match) return 0;
+  const sign = match[1] === '+' ? 1 : -1;
+  const hours = Number(match[2]);
+  const minutes = match[3] ? Number(match[3]) : 0;
+  return sign * (hours * 60 + minutes);
+}
+
+function getLocalMidnightUtcIso(timeZone: string, year: number, month: number, day: number): string {
+  const offsetMinutes = getOffsetMinutesForTimezone(timeZone);
+  const utcMidnight = Date.UTC(year, month - 1, day) - offsetMinutes * 60 * 1_000;
+  return new Date(utcMidnight).toISOString();
+}
+
+function getPeriodStartIso(period: PeriodicReadingPeriod, timeZone: string): string {
+  const { year, month, day } = getLocalDateParts(timeZone);
+
+  if (period === 'day') {
+    return getLocalMidnightUtcIso(timeZone, year, month, day);
+  }
+
+  if (period === 'month') {
+    return getLocalMidnightUtcIso(timeZone, year, month, 1);
+  }
+
+  if (period === 'year') {
+    return getLocalMidnightUtcIso(timeZone, year, 1, 1);
+  }
+
+  if (month >= 3 && month <= 5) {
+    return getLocalMidnightUtcIso(timeZone, year, 3, 1);
+  }
+  if (month >= 6 && month <= 8) {
+    return getLocalMidnightUtcIso(timeZone, year, 6, 1);
+  }
+  if (month >= 9 && month <= 11) {
+    return getLocalMidnightUtcIso(timeZone, year, 9, 1);
+  }
+  if (month === 12) {
+    return getLocalMidnightUtcIso(timeZone, year, 12, 1);
+  }
+  return getLocalMidnightUtcIso(timeZone, year - 1, 12, 1);
+}
+
+export async function findPeriodicReadingForUser(params: {
+  req: NextApiRequest;
+  userId?: string | null;
+  spreadTypes: string[];
+  period: PeriodicReadingPeriod;
+}): Promise<any | null> {
+  const { req, userId, spreadTypes, period } = params;
+  if (!userId || !spreadTypes.length) return null;
+
+  const rawBodyTz = typeof req.body === 'object' && req.body ? (req.body as any).tz : undefined;
+  const rawTz = Array.isArray(req.query.tz) ? req.query.tz[0] : (req.query.tz ?? rawBodyTz);
+  const timeZone = sanitizeTimezone(rawTz);
+  const periodStart = getPeriodStartIso(period, timeZone);
+
+  try {
+    const { data, error } = await supabaseService
+      .from('reading_history')
+      .select('id, spread_type, question, cards, reading_result, result_path, created_at')
+      .eq('user_id', userId)
+      .in('spread_type', spreadTypes)
+      .gte('created_at', periodStart)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[accessServer] findPeriodicReadingForUser failed:', error);
+      return null;
+    }
+
+    return data ?? null;
+  } catch (err) {
+    console.error('[accessServer] findPeriodicReadingForUser exception:', err);
     return null;
   }
 }

@@ -1,11 +1,40 @@
 ﻿import { isEnglishRequest, withAiOutputLanguage } from '../../lib/aiLanguage';
-import { requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
+import { findPeriodicReadingForUser, getAuthenticatedUserIdFromRequest, requireAccessOrRespond, recordSuccessfulReading } from '../../lib/accessServer';
 import { parseAIJson } from '../../lib/parseAIJson';
+
+const isCompleteDailyFortune = (fortune) => {
+  return fortune
+    && typeof fortune.overall === 'string'
+    && typeof fortune.love === 'string'
+    && typeof fortune.career === 'string'
+    && typeof fortune.wealth === 'string'
+    && typeof fortune.health === 'string'
+    && typeof fortune.luckyColor === 'string'
+    && fortune.luckyNumber !== undefined
+    && fortune.luckyNumber !== null
+    && typeof fortune.quote === 'string';
+};
 
 export default async function handler(req, res) {
   // 只允许 POST 请求
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const existingReading = await findPeriodicReadingForUser({
+    req,
+    userId: await getAuthenticatedUserIdFromRequest(req),
+    spreadTypes: ['fortune-daily', 'daily-fortune'],
+    period: 'day',
+  });
+  if (existingReading) {
+    return res.status(200).json({
+      success: true,
+      existing: true,
+      complete: isCompleteDailyFortune(existingReading.reading_result),
+      fortune: existingReading.reading_result,
+      existingRecord: existingReading,
+    });
   }
 
   const accessStatus = await requireAccessOrRespond({ req, res, spreadAccess: 'free' });

@@ -7,6 +7,7 @@ import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
+import { getAuthHeaders, getClientCacheIdentity } from '../../../../lib/apiHeaders';
 // 注意：不再导入 TarotCard 类型，使用本地定义的 LocalTarotCard 以兼容旧数据格式
 
 // 完整的78张塔罗牌数据
@@ -102,8 +103,8 @@ const getCurrentYear = () => {
 // ============ localStorage 存取函数 ============
 
 // 获取年度运势的 key
-const getYearAheadKey = (year: string): string => {
-  return `year_ahead_${year}`;
+const getYearAheadKey = (year: string, cacheIdentity: string): string => {
+  return `year_ahead_${year}_${cacheIdentity}`;
 };
 
 // 本地卡牌类型定义（与实际数据格式匹配）
@@ -172,9 +173,9 @@ interface YearAheadResult {
 }
 
 // 加载年度运势数据
-const loadYearAheadResult = (year: string): YearAheadResult | null => {
+const loadYearAheadResult = (year: string, cacheIdentity: string): YearAheadResult | null => {
   if (typeof window === 'undefined') return null;
-  const key = getYearAheadKey(year);
+  const key = getYearAheadKey(year, cacheIdentity);
   const stored = localStorage.getItem(key);
   if (!stored) return null;
   
@@ -192,9 +193,9 @@ const loadYearAheadResult = (year: string): YearAheadResult | null => {
 };
 
 // 保存年度运势数据
-const saveYearAheadResult = (data: YearAheadResult): void => {
+const saveYearAheadResult = (data: YearAheadResult, cacheIdentity: string): void => {
   if (typeof window === 'undefined') return;
-  const key = getYearAheadKey(data.year);
+  const key = getYearAheadKey(data.year, cacheIdentity);
   
   // 确保 cards 包含 orientation
   const validatedData = {
@@ -206,6 +207,25 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
   };
   
   localStorage.setItem(key, JSON.stringify(validatedData));
+};
+
+const buildYearAheadResultFromHistory = (
+  record: any,
+  year: string
+): YearAheadResult | null => {
+  const cards = Array.isArray(record?.cards) ? record.cards : null;
+  if (!cards || cards.length !== 13) return null;
+
+  return {
+    userId: null,
+    year,
+    cards: cards.map((card: any) => ({
+      ...card,
+      orientation: card.orientation === 'reversed' ? 'reversed' : 'upright',
+    })),
+    result: record?.reading_result,
+    createdAt: record?.created_at ? new Date(record.created_at).getTime() : Date.now(),
+  };
 };
 
 export default function YearAheadFortune() {
@@ -293,29 +313,72 @@ export default function YearAheadFortune() {
   // 初始化：检查本年是否已经抽过牌
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!currentYear) return;
     
-    if (currentYear) {
-      const stored = loadYearAheadResult(currentYear);
-      if (stored && stored.cards.length === 13) {
-        const validatedCards: ShuffledTarotCard[] = stored.cards.map(card => ({
-          ...card,
-          orientation: card.orientation || 'upright'
-        }));
-        
-        setSavedResult(stored);
-        setHasDrawnThisYear(true);
-        setShowCards(false);
-        setSelectedCards(validatedCards);
-        return;
-      }
-    }
-    
-    // 重新洗牌
-    if (typeof window !== 'undefined') {
+    let cancelled = false;
+
+    const initializeDeck = () => {
+      if (cancelled) return;
       const shuffled = shuffleCards(tarotCards);
       setDeck(shuffled);
       setUiSlots(shuffled);
+    };
+
+    const initialize = async () => {
+    const cacheIdentity = await getClientCacheIdentity();
+    if (cancelled) return;
+    const stored = loadYearAheadResult(currentYear, cacheIdentity);
+    if (stored && stored.cards.length === 13) {
+      const validatedCards: ShuffledTarotCard[] = stored.cards.map(card => ({
+        ...card,
+        orientation: card.orientation || 'upright'
+      }));
+      
+      setSavedResult(stored);
+      setHasDrawnThisYear(true);
+      setShowCards(false);
+      setSelectedCards(validatedCards);
+      return;
     }
+
+      try {
+        const headers = await getAuthHeaders();
+        const response = await fetch(
+          `/api/periodic-reading/current?spreadKey=fortune-yearly&tz=${encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone || '')}`,
+          { headers }
+        );
+
+        if (!response.ok || cancelled) {
+          initializeDeck();
+          return;
+        }
+
+        const data = await response.json();
+        const serverResult = data?.existingRecord
+          ? buildYearAheadResultFromHistory(data.existingRecord, currentYear)
+          : null;
+
+        if (!serverResult || cancelled) {
+          initializeDeck();
+          return;
+        }
+
+        saveYearAheadResult(serverResult, cacheIdentity);
+        setSavedResult(serverResult);
+        setHasDrawnThisYear(true);
+        setShowCards(false);
+        setSelectedCards(serverResult.cards as ShuffledTarotCard[]);
+      } catch (error) {
+        console.error('Failed to load server yearly result:', error);
+        initializeDeck();
+      }
+    };
+
+    initialize();
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentYear]);
 
   const drawCard = async (slotIndex: number) => {
@@ -365,7 +428,8 @@ export default function YearAheadFortune() {
         createdAt: Date.now(),
       };
 
-      saveYearAheadResult(result);
+      const cacheIdentity = await getClientCacheIdentity();
+      saveYearAheadResult(result, cacheIdentity);
       
       setSavedResult(result);
       setHasDrawnThisYear(true);

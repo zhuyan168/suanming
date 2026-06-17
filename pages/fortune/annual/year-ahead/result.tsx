@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import YearAheadSlots from '../../../../components/fortune/YearAheadSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
-import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getAuthHeaders, getClientCacheIdentity } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
@@ -102,8 +102,8 @@ const getCurrentYear = () => {
 // ============ localStorage 存取函数 ============
 
 // 获取年度运势的 key
-const getYearAheadKey = (year: string): string => {
-  return `year_ahead_${year}`;
+const getYearAheadKey = (year: string, cacheIdentity: string): string => {
+  return `year_ahead_${year}_${cacheIdentity}`;
 };
 
 // API返回的详细解读卡片结构
@@ -147,9 +147,9 @@ interface ShuffledTarotCard {
 }
 
 // 加载年度运势数据
-const loadYearAheadResult = (year: string): YearAheadResult | null => {
+const loadYearAheadResult = (year: string, cacheIdentity: string): YearAheadResult | null => {
   if (typeof window === 'undefined') return null;
-  const key = getYearAheadKey(year);
+  const key = getYearAheadKey(year, cacheIdentity);
   const stored = localStorage.getItem(key);
   if (!stored) return null;
   
@@ -167,9 +167,9 @@ const loadYearAheadResult = (year: string): YearAheadResult | null => {
 };
 
 // 保存年度运势数据
-const saveYearAheadResult = (data: YearAheadResult): void => {
+const saveYearAheadResult = (data: YearAheadResult, cacheIdentity: string): void => {
   if (typeof window === 'undefined') return;
-  const key = getYearAheadKey(data.year);
+  const key = getYearAheadKey(data.year, cacheIdentity);
   
   // 确保 cards 包含 orientation
   const validatedData = {
@@ -181,6 +181,25 @@ const saveYearAheadResult = (data: YearAheadResult): void => {
   };
   
   localStorage.setItem(key, JSON.stringify(validatedData));
+};
+
+const buildYearAheadResultFromHistory = (
+  record: any,
+  year: string
+): YearAheadResult | null => {
+  const cards = Array.isArray(record?.cards) ? record.cards : null;
+  if (!cards || cards.length !== 13) return null;
+
+  return {
+    userId: null,
+    year,
+    cards: cards.map((card: any) => ({
+      ...card,
+      orientation: card.orientation === 'reversed' ? 'reversed' : 'upright',
+    })),
+    result: record?.reading_result,
+    createdAt: record?.created_at ? new Date(record.created_at).getTime() : Date.now(),
+  };
 };
 
 // Loading组件
@@ -341,7 +360,12 @@ export default function YearAheadResultPage() {
 
   // 初始化：读取localStorage中的数据
   useEffect(() => {
-    const result = loadYearAheadResult(currentYear);
+    let cancelled = false;
+
+    const initialize = async () => {
+    const cacheIdentity = await getClientCacheIdentity();
+    if (cancelled) return;
+    const result = loadYearAheadResult(currentYear, cacheIdentity);
 
     // 如果没有数据，跳回抽牌页
     if (!result) {
@@ -353,14 +377,21 @@ export default function YearAheadResultPage() {
 
     // 如果没有解析结果，调用API生成
     if (!result.result) {
-      generateFortune(result);
+      generateFortune(result, cacheIdentity);
     } else {
       setIsLoading(false);
     }
+    };
+
+    initialize();
+
+    return () => {
+      cancelled = true;
+    };
 
   }, [currentYear, router]);
 
-  const generateFortune = async (result: YearAheadResult) => {
+  const generateFortune = async (result: YearAheadResult, cacheIdentity: string) => {
     setIsGenerating(true);
     setError(null);
 
@@ -387,6 +418,15 @@ export default function YearAheadResultPage() {
       }
 
       const data = await response.json();
+
+      if (data.existing && data.existingRecord) {
+        const existingResult = buildYearAheadResultFromHistory(data.existingRecord, currentYear);
+        if (existingResult) {
+          saveYearAheadResult(existingResult, cacheIdentity);
+          setSavedResult(existingResult);
+          return;
+        }
+      }
       
       // 更新结果并保存到localStorage
       const updatedResult: YearAheadResult = {
@@ -394,7 +434,7 @@ export default function YearAheadResultPage() {
         result: data,
       };
 
-      saveYearAheadResult(updatedResult);
+      saveYearAheadResult(updatedResult, cacheIdentity);
       setSavedResult(updatedResult);
 
     } catch (err: any) {

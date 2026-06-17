@@ -8,7 +8,8 @@ import SelectedCardSlot from '../../components/fortune/SelectedCardSlot';
 import { TarotCard } from '../../components/fortune/CardItem';
 import { useHistoryBack } from '../../hooks/useHistoryBack';
 import { useSpreadAccess } from '../../hooks/useSpreadAccess';
-import { getAuthHeaders } from '../../lib/apiHeaders';
+import { getAuthHeaders, getClientCacheIdentity } from '../../lib/apiHeaders';
+import { supabase } from '../../lib/supabase';
 import { getLocalizedKeywords, getLocalizedMeaning } from '../../lib/tarotCardI18n';
 
 // 兼容旧数据格式的辅助函数：获取含义文本
@@ -736,7 +737,47 @@ interface DrawResult {
   fortune: FortuneResult;
   date: string;
   locale?: string;
+  cacheIdentity?: string;
 }
+
+const getDailyStorageKey = (locale: string, cacheIdentity: string): string => {
+  return `dailyFortuneResult_${locale}_${cacheIdentity}`;
+};
+
+const getLocalDayStartIso = (): string => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+};
+
+const isCompleteFortune = (fortune: any): fortune is FortuneResult => {
+  return !!fortune
+    && typeof fortune.overall === 'string'
+    && typeof fortune.love === 'string'
+    && typeof fortune.career === 'string'
+    && typeof fortune.wealth === 'string'
+    && typeof fortune.health === 'string'
+    && typeof fortune.luckyColor === 'string'
+    && fortune.luckyNumber !== undefined
+    && fortune.luckyNumber !== null
+    && typeof fortune.quote === 'string';
+};
+
+const buildDailyResultFromHistory = (record: any, locale: string): DrawResult | null => {
+  const firstCard = Array.isArray(record?.cards) ? record.cards[0] : null;
+  const cardName = firstCard?.cardName || firstCard?.name;
+  const card = tarotCards.find(c => c.name === cardName);
+  const fortune = record?.reading_result;
+
+  if (!card || !isCompleteFortune(fortune)) return null;
+
+  return {
+    card,
+    orientation: firstCard?.orientation === 'reversed' ? 'reversed' : 'upright',
+    fortune,
+    date: getTodayDateString(),
+    locale,
+  };
+};
 
 export default function DailyFortune() {
   const router = useRouter();
@@ -798,6 +839,7 @@ export default function DailyFortune() {
 
   const [hasDrawnToday, setHasDrawnToday] = useState(false);
   const [todayResult, setTodayResult] = useState<DrawResult | null>(null);
+  const [existingRecordId, setExistingRecordId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCards, setShowCards] = useState(true);
@@ -822,29 +864,108 @@ export default function DailyFortune() {
   useEffect(() => {
     if (accessLoading || !allowed) return;
 
-    const todayDate = getTodayDateString();
-    const storageKey = isEn ? 'dailyFortuneResult_en' : 'dailyFortuneResult_zh';
-    const stored = localStorage.getItem(storageKey);
-    
-    if (stored) {
-      try {
-        const result = JSON.parse(stored);
-        if (result.date === todayDate && (result.locale || (isEn ? 'en' : 'zh')) === (isEn ? 'en' : 'zh')) {
-          setHasDrawnToday(true);
-          setTodayResult(result);
-          setShowCards(false);
-          return;
-        } else {
+    const locale = isEn ? 'en' : 'zh';
+    let cancelled = false;
+    const loadServerResult = async () => {
+      const todayDate = getTodayDateString();
+      const cacheIdentity = await getClientCacheIdentity();
+      const storageKey = getDailyStorageKey(locale, cacheIdentity);
+      const stored = localStorage.getItem(storageKey);
+
+      if (stored) {
+        try {
+          const result = JSON.parse(stored);
+          if (
+            result.date === todayDate
+            && result.locale === locale
+            && result.cacheIdentity === cacheIdentity
+            && isCompleteFortune(result.fortune)
+          ) {
+            setHasDrawnToday(true);
+            setTodayResult(result);
+            setShowCards(false);
+            return;
+          }
+
+          localStorage.removeItem(storageKey);
+        } catch (e) {
+          console.error('Failed to parse stored result:', e);
           localStorage.removeItem(storageKey);
         }
-      } catch (e) {
-        console.error('Failed to parse stored result:', e);
-        localStorage.removeItem(storageKey);
       }
-    }
-    const shuffled = shuffleCards(tarotCards);
-    setDeck(shuffled);
-    setUiSlots(shuffled);
+
+      const applyExistingRecord = (record: any): boolean => {
+        if (!record) return false;
+        const serverResult = buildDailyResultFromHistory(record, locale);
+        setHasDrawnToday(true);
+        setShowCards(false);
+        setExistingRecordId(record.id || null);
+
+        if (serverResult) {
+          serverResult.cacheIdentity = cacheIdentity;
+          localStorage.setItem(storageKey, JSON.stringify(serverResult));
+          setTodayResult(serverResult);
+        }
+
+        return true;
+      };
+
+      const loadExistingFromHistory = async (): Promise<boolean> => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+
+        const { data, error } = await supabase
+          .from('reading_history')
+          .select('id, spread_type, question, cards, reading_result, result_path, created_at')
+          .eq('user_id', user.id)
+          .in('spread_type', ['fortune-daily', 'daily-fortune'])
+          .gte('created_at', getLocalDayStartIso())
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Failed to load daily fortune directly from history:', error);
+          return false;
+        }
+
+        return applyExistingRecord(data);
+      };
+
+      try {
+        const headers = await getAuthHeaders();
+        const params = new URLSearchParams({
+          spreadKey: 'fortune-daily',
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
+        const response = await fetch(`/api/periodic-reading/current?${params.toString()}`, {
+          headers,
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (!cancelled && data.exists && applyExistingRecord(data.existingRecord)) {
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load daily fortune from server history:', error);
+      }
+
+      if (!cancelled && await loadExistingFromHistory()) {
+        return;
+      }
+
+      if (!cancelled) {
+        const shuffled = shuffleCards(tarotCards);
+        setDeck(shuffled);
+        setUiSlots(shuffled);
+      }
+    };
+
+    loadServerResult();
+    return () => {
+      cancelled = true;
+    };
   }, [accessLoading, allowed, isEn]);
 
 
@@ -905,6 +1026,7 @@ export default function DailyFortune() {
           orientation,
           baseMeaning,
           locale: isEn ? 'en' : 'zh',
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 
@@ -920,6 +1042,24 @@ export default function DailyFortune() {
         throw new Error(data.error || texts.errorFetch);
       }
 
+      if (data.existing && data.existingRecord) {
+        const serverResult = buildDailyResultFromHistory(data.existingRecord, isEn ? 'en' : 'zh');
+        const locale = isEn ? 'en' : 'zh';
+        const cacheIdentity = await getClientCacheIdentity();
+        setHasDrawnToday(true);
+        setShowCards(false);
+        setExistingRecordId(data.existingRecord.id || null);
+
+        if (serverResult) {
+          serverResult.cacheIdentity = cacheIdentity;
+          localStorage.setItem(getDailyStorageKey(locale, cacheIdentity), JSON.stringify(serverResult));
+          setTodayResult(serverResult);
+        }
+
+        setIsAnimating(false);
+        return;
+      }
+
       // 提取基本卡牌信息（不包含 orientation，因为它在 DrawResult 中单独存储）
       const { orientation: _, ...baseCard } = card;
       const result: DrawResult = {
@@ -928,13 +1068,14 @@ export default function DailyFortune() {
         fortune: data.fortune,
         date: getTodayDateString(),
         locale: isEn ? 'en' : 'zh',
+        cacheIdentity: await getClientCacheIdentity(),
       };
 
       if (process.env.NODE_ENV === 'development') {
       }
 
       // 保存到 localStorage
-      localStorage.setItem(isEn ? 'dailyFortuneResult_en' : 'dailyFortuneResult_zh', JSON.stringify(result));
+      localStorage.setItem(getDailyStorageKey(result.locale || 'zh', result.cacheIdentity || 'guest_anonymous'), JSON.stringify(result));
       
       setTodayResult(result);
       setHasDrawnToday(true);
@@ -1234,6 +1375,29 @@ export default function DailyFortune() {
                     >
                       <p>{texts.footerHint}</p>
                     </motion.div>
+                  </motion.div>
+                )}
+                {!showCards && !todayResult && existingRecordId && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="max-w-2xl mx-auto rounded-3xl border border-primary/30 bg-white/[0.04] p-8 text-center"
+                  >
+                    <h2 className="text-2xl font-bold text-white mb-3">
+                      {isEn ? "Today's reading already exists" : '今日运势已抽取'}
+                    </h2>
+                    <p className="text-white/60 leading-relaxed mb-6">
+                      {isEn
+                        ? 'You already have a Daily Fortune record for today. You can view it from My Readings.'
+                        : '你今天已经有一条每日运势记录，不能重复抽取。可以前往占卜记录查看。'}
+                    </p>
+                    <button
+                      onClick={() => router.push(`/history/${existingRecordId}`)}
+                      className="rounded-xl bg-primary px-6 py-3 text-white font-bold hover:bg-primary/90 transition-colors"
+                    >
+                      {isEn ? 'View Today\'s Reading' : '查看今日记录'}
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

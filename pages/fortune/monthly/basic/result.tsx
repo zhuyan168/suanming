@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
 import { tarotImagesFlat } from '../../../../utils/tarotimages';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
-import { getAuthHeaders } from '../../../../lib/apiHeaders';
+import { getAuthHeaders, getClientCacheIdentity } from '../../../../lib/apiHeaders';
 import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 // 本地卡牌类型定义（兼容字符串格式的 upright/reversed）
@@ -37,15 +37,15 @@ const getCurrentMonth = () => {
 // ============ localStorage 存取函数 ============
 
 // 获取三张牌月度运势的 key
-const getMonthlyBasicKey = (year: number, month: number): string => {
+const getMonthlyBasicKey = (year: number, month: number, cacheIdentity: string): string => {
   const monthStr = String(month).padStart(2, '0');
-  return `monthly_basic_${year}-${monthStr}`;
+  return `monthly_basic_${year}-${monthStr}_${cacheIdentity}`;
 };
 
 // 加载三张牌月度运势数据
-const loadMonthlyBasicResult = (year: number, month: number): MonthlyBasicResult | null => {
+const loadMonthlyBasicResult = (year: number, month: number, cacheIdentity: string): MonthlyBasicResult | null => {
   if (typeof window === 'undefined') return null;
-  const key = getMonthlyBasicKey(year, month);
+  const key = getMonthlyBasicKey(year, month, cacheIdentity);
   const stored = localStorage.getItem(key);
   if (!stored) return null;
   
@@ -62,10 +62,10 @@ const loadMonthlyBasicResult = (year: number, month: number): MonthlyBasicResult
 };
 
 // 保存三张牌月度运势数据
-const saveMonthlyBasicResult = (data: MonthlyBasicResult): void => {
+const saveMonthlyBasicResult = (data: MonthlyBasicResult, cacheIdentity: string): void => {
   if (typeof window === 'undefined') return;
   const [year, month] = data.month.split('-').map(Number);
-  const key = getMonthlyBasicKey(year, month);
+  const key = getMonthlyBasicKey(year, month, cacheIdentity);
   
   const validatedData = {
     ...data,
@@ -188,6 +188,25 @@ interface MonthlyBasicResult {
   createdAt: number;
 }
 
+const buildMonthlyBasicResultFromHistory = (
+  record: any,
+  currentMonth: string
+): MonthlyBasicResult | null => {
+  const cards = Array.isArray(record?.cards) ? record.cards : null;
+  if (!cards || cards.length !== 3) return null;
+
+  return {
+    userId: null,
+    month: currentMonth,
+    cards: cards.map((card: any) => ({
+      ...card,
+      orientation: card.orientation === 'reversed' ? 'reversed' : 'upright',
+    })),
+    result: record?.reading_result,
+    createdAt: record?.created_at ? new Date(record.created_at).getTime() : Date.now(),
+  };
+};
+
 interface ShuffledTarotCard {
   id: number;
   name: string;
@@ -267,81 +286,79 @@ export default function MonthlyBasicResult() {
 
   // 初始化：读取localStorage中的数据
   useEffect(() => {
-    // NOTE: Old monthly fortune key deprecated.
-    // We no longer read or migrate `tarotMonthlyResult`.
-    // Only use `monthly_basic_YYYY-MM`.
-    
-    const storageKey = `monthly_basic_${currentMonth}`;
-    const stored = localStorage.getItem(storageKey);
-    
-    let result: MonthlyBasicResult | null = null;
+    let cancelled = false;
 
-    // 读取新版 key (monthly_basic_YYYY-MM)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as MonthlyBasicResult;
-        if (parsed.month === currentMonth && parsed.cards.length === 3) {
-          result = parsed;
+    const initialize = async () => {
+      const cacheIdentity = await getClientCacheIdentity();
+      const storageKey = `monthly_basic_${currentMonth}_${cacheIdentity}`;
+      const stored = localStorage.getItem(storageKey);
+
+      let result: MonthlyBasicResult | null = null;
+
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as MonthlyBasicResult;
+          if (parsed.month === currentMonth && parsed.cards.length === 3) {
+            result = parsed;
+          }
+        } catch (e) {
+          console.error('Failed to parse stored result:', e);
         }
-      } catch (e) {
-        console.error('Failed to parse stored result:', e);
       }
-    }
 
-    // 如果没有数据，跳回抽牌页
-    if (!result) {
-      router.push('/fortune/monthly/basic');
-      return;
-    }
-
-    // 3. 统一修复图片 URL
-    const validatedCards = result.cards.map(card => {
-      // 尝试使用新图片路径修复
-      const key = getCardKeyFromUrl(card.image);
-      const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
-      
-      if (newImage) {
-         return { ...card, image: newImage };
+      if (!result || cancelled) {
+        router.push('/fortune/monthly/basic');
+        return;
       }
-      
-      // 如果没有找到新图片，尝试用 id 找回原卡信息
-      const fullCard = tarotCards.find(tc => tc.id === card.id);
-      if (fullCard) {
-        // 这里我们再次尝试从 fullCard.image 提取 key
-        const fullCardKey = getCardKeyFromUrl(fullCard.image);
-        const fullCardNewImage = fullCardKey && tarotImagesFlat[fullCardKey as keyof typeof tarotImagesFlat];
-        
-        return {
-          ...card,
-          ...fullCard,
-          image: fullCardNewImage || card.image,
-          orientation: card.orientation,
-        };
-      }
-      
-      return card;
-    });
 
-    // 更新状态
-    const updatedResult = { ...result, cards: validatedCards };
-    
-    // 如果数据有变动（例如修复了图片），更新 localStorage
-    if (JSON.stringify(updatedResult) !== JSON.stringify(result) || !stored) {
+      const validatedCards = result.cards.map(card => {
+        const key = getCardKeyFromUrl(card.image);
+        const newImage = key && tarotImagesFlat[key as keyof typeof tarotImagesFlat];
+
+        if (newImage) {
+          return { ...card, image: newImage };
+        }
+
+        const fullCard = tarotCards.find(tc => tc.id === card.id);
+        if (fullCard) {
+          const fullCardKey = getCardKeyFromUrl(fullCard.image);
+          const fullCardNewImage = fullCardKey && tarotImagesFlat[fullCardKey as keyof typeof tarotImagesFlat];
+
+          return {
+            ...card,
+            ...fullCard,
+            image: fullCardNewImage || card.image,
+            orientation: card.orientation,
+          };
+        }
+
+        return card;
+      });
+
+      const updatedResult = { ...result, cards: validatedCards };
+
+      if (JSON.stringify(updatedResult) !== JSON.stringify(result) || !stored) {
         localStorage.setItem(storageKey, JSON.stringify(updatedResult));
-    }
-    
-    setSavedResult(updatedResult);
+      }
 
-    // 如果没有解析结果，调用API生成
-    if (!updatedResult.result) {
-      generateFortune(updatedResult);
-    } else {
-      setIsLoading(false);
-    }
+      setSavedResult(updatedResult);
+
+      if (!updatedResult.result) {
+        generateFortune(updatedResult, cacheIdentity);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    initialize();
+
+    return () => {
+      cancelled = true;
+    };
 
   }, [currentMonth, router]);
 
-  const generateFortune = async (result: MonthlyBasicResult) => {
+  const generateFortune = async (result: MonthlyBasicResult, cacheIdentity: string) => {
     setIsGenerating(true);
     setError(null);
 
@@ -362,6 +379,15 @@ export default function MonthlyBasicResult() {
       }
 
       const data = await response.json();
+
+      if (data.existing && data.existingRecord) {
+        const existingResult = buildMonthlyBasicResultFromHistory(data.existingRecord, currentMonth);
+        if (existingResult) {
+          saveMonthlyBasicResult(existingResult, cacheIdentity);
+          setSavedResult(existingResult);
+          return;
+        }
+      }
       
       // 更新结果并保存到localStorage
       const updatedResult: MonthlyBasicResult = {
@@ -369,7 +395,7 @@ export default function MonthlyBasicResult() {
         result: data.fortune,
       };
 
-      saveMonthlyBasicResult(updatedResult);
+      saveMonthlyBasicResult(updatedResult, cacheIdentity);
       setSavedResult(updatedResult);
 
     } catch (err: any) {

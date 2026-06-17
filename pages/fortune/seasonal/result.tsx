@@ -6,7 +6,7 @@ import FiveCardSlots from '../../../components/fortune/FiveCardSlots';
 import { TarotCard } from '../../../components/fortune/CardItem';
 import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
-import { getAuthHeaders } from '../../../lib/apiHeaders';
+import { getAuthHeaders, getClientCacheIdentity } from '../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 import { getLocalizedKeywords, getLocalizedMeaning } from '../../../lib/tarotCardI18n';
 
@@ -301,7 +301,8 @@ export default function SeasonalResult() {
       // 保存解读结果到 localStorage（按季度）
       if (typeof window !== 'undefined') {
         const currentQuarter = getCurrentQuarter();
-        const storageKey = 'seasonal_fortune_records';
+        const cacheIdentity = await getClientCacheIdentity();
+        const storageKey = `seasonal_fortune_records_${cacheIdentity}`;
         const stored = localStorage.getItem(storageKey);
         if (stored) {
           try {
@@ -326,11 +327,15 @@ export default function SeasonalResult() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const currentQuarter = getCurrentQuarter();
-    const storageKey = 'seasonal_fortune_records';
-    const stored = localStorage.getItem(storageKey);
+    let cancelled = false;
 
-    if (!stored) {
+    const initialize = async () => {
+      const currentQuarter = getCurrentQuarter();
+      const cacheIdentity = await getClientCacheIdentity();
+      const storageKey = `seasonal_fortune_records_${cacheIdentity}`;
+      const stored = localStorage.getItem(storageKey);
+
+    if (!stored || cancelled) {
       // 如果没有数据，跳转回抽牌页面
       router.push('/fortune/seasonal');
       return;
@@ -340,7 +345,7 @@ export default function SeasonalResult() {
       const allRecords = JSON.parse(stored) as SeasonalRecords;
       const parsedResult = allRecords[currentQuarter];
       
-      if (!parsedResult) {
+      if (!parsedResult || cancelled) {
         // 如果当前季度没有记录，跳转回抽牌页面
         router.push('/fortune/seasonal');
         return;
@@ -377,6 +382,13 @@ export default function SeasonalResult() {
       console.error('Failed to parse stored result:', e);
       router.push('/fortune/seasonal');
     }
+    };
+
+    initialize();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router, fetchReading]);
 
   const handleBackToHome = () => {
