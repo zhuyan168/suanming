@@ -268,6 +268,32 @@ async function writeMembershipProfile(params: {
   return { error: insertError ?? null };
 }
 
+async function writeMembershipStatus(params: {
+  userId: string;
+  membershipExpiresAt: string;
+  isMember: boolean;
+  memberType: string | null;
+}): Promise<{ error: unknown | null }> {
+  const { data: updated, error } = await supabaseService
+    .from('profiles')
+    .update({
+      membership_expires_at: params.membershipExpiresAt,
+      is_member: params.isMember,
+      member_type: params.memberType,
+    })
+    .eq('id', params.userId)
+    .select('id');
+
+  if (error) return { error };
+  if (!updated?.length) {
+    return {
+      error: new Error(`Profile not found while updating membership status for ${params.userId}`),
+    };
+  }
+
+  return { error: null };
+}
+
 async function findUserIdFromSubscription(subscriptionId: string | null): Promise<string | null> {
   if (!subscriptionId) return null;
   const { data, error } = await supabaseService
@@ -493,6 +519,40 @@ async function reverseMembershipForRefund(params: {
   productId: string | null;
   payload: CreemWebhookPayload;
 }): Promise<{ reversed: boolean; error: unknown | null }> {
+  const { data: existingReversal, error: existingReversalError } = await supabaseService
+    .from('membership_ledger')
+    .select('id, user_id, expires_after, plan_key')
+    .eq('source', 'refund')
+    .eq('action', 'reverse')
+    .eq('creem_event_id', params.eventId)
+    .maybeSingle();
+
+  if (existingReversalError) {
+    console.error('[api/creem/webhook] find existing refund reversal failed', existingReversalError);
+    return { reversed: false, error: existingReversalError };
+  }
+
+  if (existingReversal) {
+    const isStillMember = new Date(existingReversal.expires_after).getTime() > Date.now();
+    const { error: repairError } = await writeMembershipStatus({
+      userId: existingReversal.user_id,
+      membershipExpiresAt: existingReversal.expires_after,
+      isMember: isStillMember,
+      memberType: isStillMember ? existingReversal.plan_key : null,
+    });
+
+    if (repairError) {
+      console.error('[api/creem/webhook] repair profile for existing refund reversal failed', repairError);
+      return { reversed: false, error: repairError };
+    }
+
+    console.info('[api/creem/webhook] refund reversal already recorded and profile repaired', {
+      eventId: params.eventId,
+      subscriptionId: params.subscriptionId,
+    });
+    return { reversed: false, error: null };
+  }
+
   const originalLedger = await findLatestUnreversedCreemLedgerForRefund({
     subscriptionId: params.subscriptionId,
     productId: params.productId,
@@ -558,14 +618,12 @@ async function reverseMembershipForRefund(params: {
   }
 
   const isStillMember = new Date(newExpiresAt).getTime() > Date.now();
-  const { error: updateError } = await supabaseService
-    .from('profiles')
-    .upsert({
-      id: originalLedger.user_id,
-      membership_expires_at: newExpiresAt,
-      is_member: isStillMember,
-      member_type: isStillMember ? originalLedger.plan_key : null,
-    }, { onConflict: 'id' });
+  const { error: updateError } = await writeMembershipStatus({
+    userId: originalLedger.user_id,
+    membershipExpiresAt: newExpiresAt,
+    isMember: isStillMember,
+    memberType: isStillMember ? originalLedger.plan_key : null,
+  });
 
   if (updateError) {
     console.error('[api/creem/webhook] profile refund reversal failed', updateError);
