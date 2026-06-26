@@ -15,7 +15,7 @@
   },
   "hero": {
     "title": "Find Clarity in the Cards",
-    "subtitle": "Ask what is on your mind, draw your cards, and receive thoughtful guidance for love, work, money, and life's turning points.",
+    "subtitle": "Ask what is on your mind, draw the cards yourself, and receive thoughtful guidance for love, work, money, and life's turning points.",
     "cta": "Begin Reading"
   },
   "section": {
@@ -74,7 +74,7 @@
       "metaTitle": "Love Readings - FateAura",
       "metaDesc": "Explore love, attraction, relationship dynamics, and emotional clarity through tarot.",
       "subtitle": "Choose a reading and gently explore what is moving beneath the surface.",
-      "tagline": "The cards can reflect the emotional current. The choice remains yours."
+      "tagline": "The cards can reflect the flow of emotions, but real closeness still comes from sincerity meeting sincerity."
     },
     "career": {
       "metaTitle": "Career & Study Readings - FateAura",
@@ -84,7 +84,7 @@
     "wealth": {
       "metaTitle": "Wealth Readings - FateAura",
       "metaDesc": "Explore money patterns, financial blocks, and grounded next steps through tarot.",
-      "tagline": "Readings can reveal patterns. Lasting change comes from your choices and daily actions."
+      "tagline": "The cards can reveal signs in your money flow, but lasting wealth grows from clear judgment and steady action."
     }
   }
 }

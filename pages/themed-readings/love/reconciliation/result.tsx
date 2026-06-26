@@ -73,10 +73,10 @@ export default function ReconciliationResultPage() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Reconciliation Potential - Reading | FateAura' : '复合的可能性 - 解读结果 | FateAura',
-    metaDesc: isEn ? 'A deep reading for the path of reconnection.' : '深度解读你们的重新联结之路',
+    title: isEn ? 'Will We Get Back Together? - Reading | FateAura' : '我们还会复合吗？- 解读结果 | FateAura',
+    metaDesc: isEn ? 'Explore whether there is still room to reconnect and what needs to be faced.' : '看看彼此之间还有没有靠近的空间，以及复合需要面对什么。',
     loading: isEn ? 'Opening the space between past and present...' : '正在开启时空之间...',
-    h1: isEn ? 'Reconciliation Potential' : '复合的可能性',
+    h1: isEn ? 'Will We Get Back Together?' : '我们还会复合吗？',
     generatingTitle: isEn ? 'Generating your deep reconciliation reading...' : '正在深度链接潜意识...',
     generatingDesc: isEn ? 'This usually takes 20-40 seconds. Please wait a moment.' : '这通常需要 20-40 秒，请静心等待',
     retry: isEn ? 'Retry' : '重试生成',
@@ -240,7 +240,9 @@ export default function ReconciliationResultPage() {
           {/* 牌阵展示区 */}
           <section className="mb-12">
             <div className="text-center mb-10">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-3 block">Reconciliation Potential Spread</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-3 block">
+                {isEn ? 'Will We Get Back Together?' : '我们还会复合吗？'}
+              </span>
               <h1 className="text-3xl sm:text-4xl font-black mb-4">{pageText.h1}</h1>
               <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>

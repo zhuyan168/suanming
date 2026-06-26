@@ -173,10 +173,10 @@ export default function OfferDecisionDraw() {
   const router = useRouter();
   const isEn = router.locale === 'en';
   const text = isEn ? {
-    title: 'Should I Accept This Offer?',
-    pageTitle: 'Should I Accept This Offer? - FateAura',
-    description: 'When an opportunity is already in front of you, this spread helps you see what you may truly face after accepting it.',
-    intro: 'When an opportunity is already in front of you, this spread helps you see what you may truly face after accepting it. Draw 6 cards from the deck below.',
+    title: 'Should I Take This Offer?',
+    pageTitle: 'Should I Take This Offer? - FateAura',
+    description: 'Look at whether this opportunity fits you, and what growth, pressure, or cost may come with it.',
+    intro: 'Look at whether this opportunity fits you, and what growth, pressure, or cost may come with it. Draw 6 cards from the deck below.',
     completed: 'Cards drawn. Continue to review your spread.',
     back: 'Back',
     reset: 'Reset',
@@ -184,12 +184,12 @@ export default function OfferDecisionDraw() {
     loading: 'Loading...',
     drawn: 'Cards drawn:',
     startReading: 'Start Reading',
-    note: 'See the real shape of the opportunity and make a clearer choice',
+    note: 'See the fit, pressure, and possible cost behind this opportunity.',
   } : {
-    title: '我已经拿到offer了，要不要接受？',
-    pageTitle: '我已经拿到offer了，要不要接受？',
-    description: '当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。',
-    intro: '当机会已经摆在眼前，这组牌将帮助你看清：接受之后，你真正要面对的是什么。请从下方牌堆中抽取 6 张牌。',
+    title: '这个 Offer 我该接吗？',
+    pageTitle: '这个 Offer 我该接吗？',
+    description: '看看这个机会适不适合你，以及接受之后可能带来的成长、压力和代价。',
+    intro: '看看这个机会适不适合你，以及接受之后可能带来的成长、压力和代价。请从下方牌堆中抽取 6 张牌。',
     completed: '抽牌已完成，请查看你的牌阵。',
     back: '返回',
     reset: '重置',
@@ -197,7 +197,7 @@ export default function OfferDecisionDraw() {
     loading: '加载中...',
     drawn: '已抽牌：',
     startReading: '开始解读',
-    note: '✨ 看清机会背后的真实面貌，做出更明智的选择',
+    note: '✨ 看清机会背后的契合度、压力和代价',
   };
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({

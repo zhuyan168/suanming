@@ -53,14 +53,14 @@ export default function OfferDecisionReading() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Offer Decision Reading | FateAura' : '我已经拿到 offer 了，要不要接受？ - 解读 | FateAura',
-    metaDesc: isEn ? 'Clarify what this opportunity may bring without letting tarot make the decision for you.' : '帮助你看清这项机会的真实面貌，而不是替你做决定',
+    title: isEn ? 'Should I Take This Offer? - Reading | FateAura' : '这个 Offer 我该接吗？- 解读 | FateAura',
+    metaDesc: isEn ? 'Look at whether this opportunity fits you, and what growth, pressure, or cost may come with it.' : '看看这个机会适不适合你，以及接受之后可能带来的成长、压力和代价。',
     noCardsTitle: isEn ? 'No Cards Drawn Yet' : '你还没有完成抽牌',
     noCardsDesc: isEn ? 'Please finish drawing your cards before viewing the reading.' : '请先完成抽牌，才能查看解读结果',
     goDraw: isEn ? 'Go to Draw Page' : '前往抽牌页',
     backList: isEn ? 'Back to List' : '返回列表页',
-    header: isEn ? 'Offer Decision Reading' : 'Offer 决策解读',
-    h1: isEn ? 'Should I Accept This Offer?' : '我已经拿到 offer 了，要不要接受？',
+    header: isEn ? 'Should I Take This Offer?' : '这个 Offer 我该接吗？',
+    h1: isEn ? 'Should I Take This Offer?' : '这个 Offer 我该接吗？',
     intro: isEn
       ? 'This reading helps you understand the likely influence of this opportunity, without replacing your own decision.'
       : '这份解读将围绕你所抽到的牌，帮助你理解这项机会可能带来的影响，而不是替你做出决定。',
@@ -263,7 +263,9 @@ export default function OfferDecisionReading() {
             className="mb-6 sm:mb-8"
           >
             <div className="text-center mb-3 sm:mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">Offer Decision Reading</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">
+                {isEn ? 'Should I Take This Offer?' : '这个 Offer 我该接吗？'}
+              </span>
               <h1 className="text-2xl sm:text-3xl font-black mb-2 px-4 leading-tight">
                 {pageText.h1}
               </h1>

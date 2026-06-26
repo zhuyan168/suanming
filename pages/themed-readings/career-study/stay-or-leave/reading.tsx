@@ -120,8 +120,8 @@ export default function StayOrLeaveReading() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Stay or Leave Reading | FateAura' : '职业发展全景解读 - FateAura',
-    h1: isEn ? 'Is This Job Still Worth Continuing?' : '这份工作是否值得继续做下去？',
+    title: isEn ? 'Should I Stay or Leave This Job? - Reading | FateAura' : '这份工作，我该留下还是离开？- 解读 | FateAura',
+    h1: isEn ? 'Should I Stay or Leave This Job?' : '这份工作，我该留下还是离开？',
     loadingLine: isEn ? 'Connecting the dots and organizing your career reading...' : '正在链接灵感，整理你的职业档案...',
     overviewTitle: isEn ? 'Current Situation Review' : '现状深度复盘',
     deepTitle: isEn ? 'Deep Reading' : '深度解读',
@@ -174,7 +174,7 @@ export default function StayOrLeaveReading() {
         headers,
         body: JSON.stringify({
           cards,
-          questionTitle: isEn ? 'Is this job still worth staying in?' : '这份工作是否值得继续做下去？',
+          questionTitle: isEn ? 'Should I stay or leave this job?' : '这份工作，我该留下还是离开？',
           locale: isEn ? 'en' : 'zh',
         })
       });

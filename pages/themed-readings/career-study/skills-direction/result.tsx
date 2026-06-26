@@ -59,9 +59,9 @@ export default function SkillsDirectionResult() {
   const texts = getReadingUiText(router.locale);
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Career Direction Reading - What Job or Skill Fits Me?' : '职业解读 - 我应该找什么样的工作？/学什么技能？',
-    header: isEn ? 'Career Direction Reading' : '职业方向解读',
-    h1: isEn ? 'What Kind of Work or Skill Should I Move Toward?' : '我应该找什么样的工作 / 学什么技能？',
+    title: isEn ? 'Which Direction Fits Me Best? - Reading | FateAura' : '我适合往哪个方向发展？- 解读 | FateAura',
+    header: isEn ? 'Which Direction Fits Me Best?' : '我适合往哪个方向发展？',
+    h1: isEn ? 'Which Direction Fits Me Best?' : '我适合往哪个方向发展？',
     scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读',
     loadingTitle: isEn ? 'Reading your career direction...' : '正在洞察职业天机...',
     aiInsight: isEn ? 'AI Core Insight' : 'AI 核心洞察',

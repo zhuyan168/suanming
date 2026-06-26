@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import TwoChoicesSlots from '../../../../components/fortune/TwoChoicesSlots';
 import { TarotCard } from '../../../../components/fortune/CardItem';
+import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { getTwoChoicesT } from '../../../../lib/twoChoicesI18n';
 import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
@@ -74,6 +75,10 @@ export default function TwoChoicesResultPage() {
   const router = useRouter();
   const t = getTwoChoicesT(router.locale);
   const isZh = router.locale === 'zh';
+  const { loading: accessLoading, isMember } = useSpreadAccess({
+    spreadKey: 'two-choices',
+    redirectOnDenied: false,
+  });
 
   const [result, setResult] = useState<TwoChoicesResult | null>(null);
   const [question, setQuestion] = useState<string>('');
@@ -301,26 +306,28 @@ export default function TwoChoicesResultPage() {
                 ))}
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-                className="mt-12 mx-auto max-w-3xl"
-              >
-                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-sm p-6">
-                  <div className="flex items-start gap-4">
-                    <span className="material-symbols-outlined text-amber-400 text-2xl mt-0.5">
-                      stars
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="text-amber-400 font-bold mb-2 text-lg">{t.result.reminderTitle}</h3>
-                      <p className="text-white/80 text-sm leading-relaxed">
-                        {t.result.reminderText}
-                      </p>
+              {!accessLoading && !isMember && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 1.0 }}
+                  className="mt-12 mx-auto max-w-3xl"
+                >
+                  <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 backdrop-blur-sm p-6">
+                    <div className="flex items-start gap-4">
+                      <span className="material-symbols-outlined text-amber-400 text-2xl mt-0.5">
+                        stars
+                      </span>
+                      <div className="flex-1">
+                        <h3 className="text-amber-400 font-bold mb-2 text-lg">{t.result.reminderTitle}</h3>
+                        <p className="text-white/80 text-sm leading-relaxed">
+                          {t.result.reminderText}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              )}
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -339,9 +346,11 @@ export default function TwoChoicesResultPage() {
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
                       {t.result.startReadingBtn}
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
-                        {t.result.memberBadge}
-                      </span>
+                      {!accessLoading && !isMember && (
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
+                          {t.result.memberBadge}
+                        </span>
+                      )}
                     </span>
                   </motion.button>
                   

@@ -129,14 +129,14 @@ export default function WhatTheyThinkResult() {
   const texts = getReadingUiText(router.locale);
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    loadingTitle: isEn ? 'Loading... - What They Think' : '加载中... - 对方在想什么',
+    loadingTitle: isEn ? 'Loading... - How Do They See Me?' : '加载中... - TA 是怎么看我的？',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'What They Think - Reading Result' : '对方在想什么 - 解读结果',
-    metaDesc: isEn ? 'We do not guess. We look at signals, evidence, and emotions.' : '我们不猜测，我们看证据与情绪',
-    header: isEn ? 'What They Think' : '对方在想什么',
+    title: isEn ? 'How Do They See Me? - Reading Result' : 'TA 是怎么看我的？- 解读结果',
+    metaDesc: isEn ? 'Explore their thoughts, feelings, and possible short-term direction toward you.' : '看看对方对你的真实想法、感受，以及短期内可能的态度变化。',
+    header: isEn ? 'How Do They See Me?' : 'TA 是怎么看我的？',
     reset: isEn ? 'Reset' : '重置',
-    h1: isEn ? 'What They Think' : '对方在想什么',
-    subtitle: isEn ? 'We do not guess. We look at signals, evidence, and emotions.' : '我们不猜测，我们看证据与情绪',
+    h1: isEn ? 'How Do They See Me?' : 'TA 是怎么看我的？',
+    subtitle: isEn ? 'Explore their thoughts, feelings, and possible short-term direction toward you.' : '看看对方对你的真实想法、感受，以及短期内可能的态度变化。',
     generatingTitle: isEn ? 'Reading the true state of this relationship...' : '正在为你解读这段关系里的真实状态',
     generatingDesc: isEn ? 'This may take a moment. Please wait.' : '这需要一点时间，请放心等待',
     overview: isEn ? 'Overview' : '总览',
@@ -567,5 +567,4 @@ export default function WhatTheyThinkResult() {
     </>
   );
 }
-
 

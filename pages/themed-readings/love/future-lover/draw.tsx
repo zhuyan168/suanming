@@ -173,15 +173,15 @@ export default function FutureLoverDraw() {
   const text = isEn
     ? {
         loading: 'Loading...',
-        pageTitle: 'Future Lover Spread - Draw Cards',
-        metaDescription: 'Explore your future lover and how you may meet.',
+        pageTitle: 'Where Is My Future Lover? - Draw Cards',
+        metaDescription: 'Explore how you may meet them and how this connection may come closer.',
         back: 'Back',
         reset: 'Reset',
-        completedTitle: 'Future Lover Spread Complete',
+        completedTitle: 'Where Is My Future Lover? - Complete',
         drawTitle: 'Draw Six Tarot Cards',
         completedDescription: 'Your cards are ready. Continue to view the full reading.',
         drawDescription:
-          'Take a quiet moment, then choose 6 cards from the 78-card deck to explore your future lover and meeting path.',
+          'Take a quiet moment, then choose 6 cards to explore how you may meet them and how this connection may come closer.',
         drawnCount: 'Cards drawn:',
         viewReading: 'View Reading',
         completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
@@ -189,11 +189,11 @@ export default function FutureLoverDraw() {
       }
     : {
         loading: '加载中...',
-        pageTitle: '未来恋人牌阵 - 抽牌',
-        metaDescription: '探索你的未来恋人',
+        pageTitle: '我未来的恋人在哪里？- 抽牌',
+        metaDescription: '看看你可能如何遇见 TA，以及这段缘分会以什么方式靠近。',
         back: '返回',
         reset: '重置',
-        completedTitle: '未来恋人牌阵已完成',
+        completedTitle: '我未来的恋人在哪里？- 已完成',
         drawTitle: '抽取六张塔罗牌',
         completedDescription: '你已完成抽牌，点击下方按钮查看详细解读。',
         drawDescription: '静心感受，从下方78张牌中选择6张，探索你的未来恋人与相遇路径。',
@@ -404,7 +404,9 @@ export default function FutureLoverDraw() {
             <div className="mx-auto max-w-7xl">
               {/* 标题介绍区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">Future Lover Spread</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">
+                  {isEn ? 'Where Is My Future Lover?' : '我未来的恋人在哪里？'}
+                </p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
                   {hasDrawn ? text.completedTitle : text.drawTitle}
                 </h1>

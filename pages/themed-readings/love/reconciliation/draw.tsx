@@ -185,18 +185,18 @@ export default function ReconciliationDraw() {
   const isEn = router.locale === 'en';
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
-    pageTitle: isEn ? 'Reconciliation Potential - Draw Cards' : '复合的可能性 - 抽牌',
-    metaDescription: isEn ? 'Evaluate the space, cost, and path for reconnecting.' : '评估重新靠近的空间与代价，给你更稳的选择',
+    pageTitle: isEn ? 'Will We Get Back Together? - Draw Cards' : '我们还会复合吗？- 抽牌',
+    metaDescription: isEn ? 'Explore whether there is still room to reconnect and what needs to be faced.' : '看看彼此之间还有没有靠近的空间，以及复合需要面对什么。',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
     titleComplete: isEn ? 'Cards Drawn' : '抽牌已完成',
-    titleStart: isEn ? 'Can This Relationship Begin Again?' : '「这段关系，还能不能重新走一次？」',
+    titleStart: isEn ? 'Will We Get Back Together?' : '我们还会复合吗？',
     descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
-    descStart: isEn ? 'Take a quiet moment with the past and present of this relationship, then draw 10 cards from the deck below.' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌。',
+    descStart: isEn ? 'Take a quiet moment with the past and present of this relationship, then draw 10 cards to see whether reconnection is still possible.' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌，看看是否还有重新靠近的可能。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
-    note: isEn ? 'Reconciliation spread: explore the path of reconnection in depth' : '✨ 复合牌阵：深度透视你们的重新联结之路',
+    note: isEn ? 'Explore whether there is still room to reconnect, and what needs to be faced.' : '✨ 看看彼此之间还有没有靠近的空间，以及复合需要面对什么。',
   };
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed, isMember } = useSpreadAccess({
@@ -356,7 +356,9 @@ export default function ReconciliationDraw() {
         <main className="px-4 py-6 sm:py-10">
           <div className="mx-auto max-w-7xl">
             <div className="text-center mb-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reconciliation Potential</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-primary mb-2">
+                {isEn ? 'Will We Get Back Together?' : '我们还会复合吗？'}
+              </p>
               <h1 className="text-2xl sm:text-3xl font-black mb-2">
                 {hasDrawn ? text.titleComplete : text.titleStart}
               </h1>

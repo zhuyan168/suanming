@@ -10,6 +10,19 @@ const STORAGE_KEY_SESSION_ID = 'guest_trial_session_id';
 const STORAGE_KEY_EXPIRES_AT = 'guest_trial_expires_at';
 const TRIAL_USAGE_LIMIT = 8;
 
+type StartTrialErrorReason =
+  | 'trial_expired'
+  | 'trial_limit_exceeded'
+  | 'session_check_failed'
+  | 'session_create_failed'
+  | 'internal_error'
+  | 'method_not_allowed'
+  | 'unknown';
+
+type StartTrialResult =
+  | { success: true }
+  | { success: false; reason: StartTrialErrorReason };
+
 interface GuestTrialState {
   sessionId: string | null;
   expiresAt: string | null;
@@ -20,8 +33,8 @@ interface GuestTrialState {
   hoursLeft: number;
   minutesLeft: number;
   isLoading: boolean;
-  /** Returns true if session was created successfully */
-  startTrial: () => Promise<boolean>;
+  /** Returns whether the trial was started, or why it could not be started */
+  startTrial: () => Promise<StartTrialResult>;
   refreshTrialStatus: () => Promise<void>;
   clearTrial: () => void;
 }
@@ -97,7 +110,7 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
     }
   }, [clearTrial]);
 
-  const startTrial = useCallback(async (): Promise<boolean> => {
+  const startTrial = useCallback(async (): Promise<StartTrialResult> => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/guest-trial/start', {
@@ -116,14 +129,14 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
         setTotalUsed(0);
         setTotalRemaining(TRIAL_USAGE_LIMIT);
         setIsExpired(false);
-        return true;
+        return { success: true };
       } else {
         console.error('[GuestTrialContext] startTrial failed', data.error);
-        return false;
+        return { success: false, reason: data.reason ?? 'unknown' };
       }
     } catch (err) {
       console.error('[GuestTrialContext] startTrial unexpected error', err);
-      return false;
+      return { success: false, reason: 'unknown' };
     } finally {
       setIsLoading(false);
     }

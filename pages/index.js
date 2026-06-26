@@ -893,11 +893,12 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [startTrialError, setStartTrialError] = useState(false);
+  const [startTrialErrorReason, setStartTrialErrorReason] = useState(null);
 
   const {
     isActive: isTrialActive,
     hoursLeft: trialHoursLeft,
+    totalRemaining: trialTotalRemaining,
     isLoading: isTrialLoading,
     startTrial,
   } = useGuestTrial();
@@ -971,16 +972,24 @@ export default function Home() {
   };
 
   const handleHeroCtaClick = async () => {
-    setStartTrialError(false);
-    if (user || isTrialActive) {
+    setStartTrialErrorReason(null);
+    if (user) {
       scrollToReadingOptions();
       return;
     }
-    const ok = await startTrial();
-    if (ok) {
+    if (isTrialActive) {
+      if (trialTotalRemaining <= 0) {
+        setStartTrialErrorReason('trial_limit_exceeded');
+        return;
+      }
+      scrollToReadingOptions();
+      return;
+    }
+    const result = await startTrial();
+    if (result.success) {
       scrollToReadingOptions();
     } else {
-      setStartTrialError(true);
+      setStartTrialErrorReason(result.reason);
     }
   };
 
@@ -1254,9 +1263,13 @@ export default function Home() {
                           )}
 
                           {/* startTrial 失败时的轻量提示 */}
-                          {startTrialError && (
+                          {startTrialErrorReason && (
                             <p className="text-red-400/90 text-xs leading-tight">
-                              {isEn ? 'Unable to start your free trial. Please try again.' : '暂时无法开启免费试用，请稍后再试。'}
+                              {startTrialErrorReason === 'trial_expired' || startTrialErrorReason === 'trial_limit_exceeded'
+                                ? (isEn
+                                    ? "You've used all free trial readings. Sign up to continue and save your readings."
+                                    : '您的 72 小时免费试用次数已用完。注册账号后可继续使用并保存解读记录。')
+                                : (isEn ? 'Unable to start your free trial. Please try again.' : '暂时无法开启免费试用，请稍后再试。')}
                             </p>
                           )}
                         </div>

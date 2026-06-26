@@ -101,11 +101,11 @@ export default function FutureLoverResult() {
   const texts = getReadingUiText(router.locale);
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    loadingTitle: isEn ? 'Loading... - Future Lover Spread' : '加载中... - 未来恋人牌阵',
+    loadingTitle: isEn ? 'Loading... - Where Is My Future Lover?' : '加载中... - 我未来的恋人在哪里？',
     loading: isEn ? 'Loading...' : '加载中...',
-    title: isEn ? 'Future Lover Spread - Reading Result' : '未来恋人牌阵 - 解读结果',
-    metaDesc: isEn ? 'Explore the energy around your future lover.' : '探索你的未来恋人',
-    header: isEn ? 'Future Lover Spread' : '未来恋人牌阵',
+    title: isEn ? 'Where Is My Future Lover? - Reading Result' : '我未来的恋人在哪里？- 解读结果',
+    metaDesc: isEn ? 'Explore how you may meet them and how this connection may come closer.' : '看看你可能如何遇见 TA，以及这段缘分会以什么方式靠近。',
+    header: isEn ? 'Where Is My Future Lover?' : '我未来的恋人在哪里？',
     result: isEn ? 'Reading Result' : '解读结果',
     redraw: isEn ? 'Draw Again' : '重抽',
     summaryFallback: isEn ? 'One-Sentence Summary' : '一句话总结',
@@ -116,8 +116,8 @@ export default function FutureLoverResult() {
     actionTitle: isEn ? 'Action Suggestions' : '行动建议',
     aboutTitle: isEn ? 'About This Reading' : '关于这次占卜',
     aboutDesc: isEn
-      ? 'Tarot reflects current energy and tendencies, not absolute fate. The Future Lover Spread helps you clarify your expectations, current state, and possible path. Real connection still depends on staying open, sincere, and willing to act when the timing is right.'
-      : '塔罗牌反映的是当下的能量与趋势，而非绝对的命运。未来恋人牌阵帮助你看清自己的期待、当下的状态以及可能的路径。请记住，真正的相遇需要你保持开放、真诚，并在合适的时机采取行动。',
+      ? 'Tarot reflects current energy and tendencies, not absolute fate. This reading helps you clarify your expectations, current state, and possible meeting path. Real connection still depends on staying open, sincere, and willing to act when the timing is right.'
+      : '塔罗牌反映的是当下的能量与趋势，而非绝对的命运。这次解读帮助你看清自己的期待、当下的状态以及可能的相遇路径。请记住，真正的相遇需要你保持开放、真诚，并在合适的时机采取行动。',
     backLove: isEn ? 'Back to Love Readings' : '返回爱情占卜',
   };
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
@@ -543,5 +543,4 @@ export default function FutureLoverResult() {
     </>
   );
 }
-
 

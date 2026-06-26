@@ -59,6 +59,8 @@ export default function LoginPage() {
     metaDesc: 'Sign in to your FateAura account',
     back: 'Back to Home',
     heading: 'Welcome Back',
+    subtitle: 'Sign in to save readings and manage your account.',
+    privacyNote: 'Email is enough to use your account. No birthday, real name, or extra personal details required.',
     successTitle: 'Signed in successfully.',
     successSub: 'Redirecting to home...',
     labelEmail: 'Email',
@@ -83,6 +85,8 @@ export default function LoginPage() {
     metaDesc: '登录你的 FateAura 账号',
     back: '返回首页',
     heading: '欢迎回来',
+    subtitle: '登录后可继续保存解读记录并管理账号。',
+    privacyNote: '只需邮箱即可使用账号，不需要填写生日、真实姓名或其他个人资料。',
     successTitle: '登录成功',
     successSub: '正在跳转到首页…',
     labelEmail: '邮箱',
@@ -205,8 +209,9 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
             <p className="mt-2 text-white/50 text-sm">
-              {isEn ? 'Sign in to save readings and manage your account.' : '登录以继续你的神秘洞察之旅'}
+              {texts.subtitle}
             </p>
+            <p className="mt-2 text-white/40 text-xs leading-relaxed">{texts.privacyNote}</p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">

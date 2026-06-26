@@ -101,6 +101,7 @@ export default function RegisterPage() {
     back: 'Back to Home',
     heading: 'Create Account',
     subtitle: 'Create an account to save your readings and manage your membership.',
+    privacyNote: 'Email is enough to sign up. No birthday, real name, or extra personal details required.',
     successTitle: 'Account created! Please verify your email.',
     successBody1: "We've sent a verification email to",
     successBody2: '. Please open it and click the link to complete registration.',
@@ -131,7 +132,8 @@ export default function RegisterPage() {
     metaDesc: '创建你的 FateAura 账号',
     back: '返回首页',
     heading: '创建账号',
-    subtitle: '开启你的神秘洞察之旅',
+    subtitle: '创建账号，保存你的解读记录并管理会员权益。',
+    privacyNote: '只需邮箱即可注册，不需要填写生日、真实姓名或其他个人资料。',
     successTitle: '注册成功，请验证邮箱',
     successBody1: '我们已向',
     successBody2: ' 发送了一封验证邮件，请前往邮箱点击验证链接完成注册。',
@@ -263,6 +265,7 @@ export default function RegisterPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
             <p className="mt-2 text-white/50 text-sm">{texts.subtitle}</p>
+            <p className="mt-2 text-white/40 text-xs leading-relaxed">{texts.privacyNote}</p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">

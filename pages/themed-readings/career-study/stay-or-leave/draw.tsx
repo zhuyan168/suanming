@@ -182,17 +182,17 @@ export default function StayOrLeaveDraw() {
   const isEn = router.locale === 'en';
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
-    pageTitle: isEn ? 'Stay or Leave - Draw Cards | FateAura' : '这份工作是否值得继续做下去？ - FateAura',
-    metaDescription: isEn ? 'Review the meaning, cost, and turning points of staying in this job.' : '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。',
+    pageTitle: isEn ? 'Should I Stay or Leave This Job? - Draw Cards | FateAura' : '这份工作，我该留下还是离开？- FateAura',
+    metaDescription: isEn ? 'Explore the meaning, exhaustion, turning points, and what to consider before leaving.' : '看看继续留下的意义、消耗、转机，以及离开前需要想清楚的事。',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
-    title: isEn ? 'Is This Job Still Worth Continuing?' : '这份工作是否值得继续做下去？',
+    title: isEn ? 'Should I Stay or Leave This Job?' : '这份工作，我该留下还是离开？',
     descComplete: isEn ? 'Cards drawn. Continue to view the deep reading.' : '抽牌已完成，点击下方按钮开始深度解读。',
-    descStart: isEn ? 'Review the meaning, cost, and turning points of staying in this job. Draw 7 cards from the deck below.' : '评估继续投入的意义、消耗与转机，判断坚持是否仍然值得。请从下方牌堆中抽取 7 张牌。',
+    descStart: isEn ? 'Explore the meaning, exhaustion, turning points, and what to consider before leaving. Draw 7 cards from the deck below.' : '看看继续留下的意义、消耗、转机，以及离开前需要想清楚的事。请从下方牌堆中抽取 7 张牌。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
-    note: isEn ? 'See the wider career picture and make a clearer choice' : '✨ 看清职业全景，做出更明智的选择',
+    note: isEn ? 'See what staying costs, what leaving asks, and what choice fits you now.' : '✨ 看清留下的消耗、离开的代价，以及当下更适合你的选择',
   };
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({

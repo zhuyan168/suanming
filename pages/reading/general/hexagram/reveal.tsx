@@ -398,7 +398,7 @@ export default function HexagramRevealPage() {
               </div>
 
               {/* 付费提示区域 */}
-              {!isMember && (
+              {!accessLoading && !isMember && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -444,9 +444,11 @@ export default function HexagramRevealPage() {
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
                       {texts.startReading}
-                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
-                        {texts.memberBadge}
-                      </span>
+                      {!accessLoading && !isMember && (
+                        <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-500/30 border border-amber-500/50">
+                          {texts.memberBadge}
+                        </span>
+                      )}
                     </span>
                   </motion.button>
                   

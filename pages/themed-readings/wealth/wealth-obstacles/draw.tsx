@@ -139,19 +139,19 @@ export default function WealthObstaclesDraw() {
   const isEn = router.locale === 'en';
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
-    pageTitle: isEn ? 'What Is Blocking My Wealth Right Now? - Draw Cards' : '我现在的财富阻碍是什么？ - 抽牌',
+    pageTitle: isEn ? 'What Is Blocking My Money Flow? - Draw Cards' : '是什么挡住了我的财运？- 抽牌',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
-    titleComplete: isEn ? 'Wealth Obstacles Spread Complete' : '财富阻碍牌阵已完成',
-    titleStart: isEn ? 'What Is Blocking My Wealth Right Now?' : '我现在的财富阻碍是什么？',
+    titleComplete: isEn ? 'What Is Blocking My Money Flow? - Complete' : '是什么挡住了我的财运？- 已完成',
+    titleStart: isEn ? 'What Is Blocking My Money Flow?' : '是什么挡住了我的财运？',
     descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
     descStart: isEn
-      ? 'Look at your current situation, outside influences, attitude, and blocks to find a practical breakthrough. Draw 5 cards from the deck below.'
-      : '从现状、外在影响、你的态度与阻碍点出发，找到财务改善的突破口。请从下方牌堆中抽取 5 张牌。',
+      ? 'Explore what practical factors, habits, or mindset may be affecting your income, opportunities, and financial improvement. Draw 5 cards from the deck below.'
+      : '看看哪些现实因素、习惯或心态正在影响你的收入、机会和财务改善。请从下方牌堆中抽取 5 张牌。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
-    note: isEn ? 'Explore your wealth blocks and find a clearer path forward' : '✨ 深度洞察财富阻碍，开启丰盛人生',
+    note: isEn ? 'Find what may be slowing your money flow and where improvement can begin.' : '✨ 找到影响财运流动的原因，看清改善可以从哪里开始',
   };
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const { loading: accessLoading, allowed } = useSpreadAccess({

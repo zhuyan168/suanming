@@ -59,9 +59,9 @@ export default function InterviewExamReadingPageNew() {
   const texts = getReadingUiText(router.locale);
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Interview & Exam Reminders - Reading Result' : '面试考试关键提醒 - 解读结果',
-    header: isEn ? 'Interview & Exam Reminders' : '面试/考试关键提醒',
-    h1: isEn ? 'Interview & Exam Key Reminders' : '面试/考试关键提醒',
+    title: isEn ? 'What Should I Watch For in This Interview or Exam? - Reading Result' : '这次面试或考试，我要注意什么？- 解读结果',
+    header: isEn ? 'What Should I Watch For in This Interview or Exam?' : '这次面试或考试，我要注意什么？',
+    h1: isEn ? 'What Should I Watch For in This Interview or Exam?' : '这次面试或考试，我要注意什么？',
     scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读',
     loadingTitle: isEn ? 'Reading your key reminders...' : '正在解读关键提醒...',
     aiInsight: isEn ? 'AI Core Insight' : 'AI 核心洞察',
@@ -209,7 +209,9 @@ export default function InterviewExamReadingPageNew() {
             className="mb-6 sm:mb-8"
           >
             <div className="text-center mb-3 sm:mb-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">Interview & Exam Key Reminders</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-1 block">
+                {isEn ? 'What Should I Watch For in This Interview or Exam?' : '这次面试或考试，我要注意什么？'}
+              </span>
               <h1 className="text-2xl sm:text-3xl font-black mb-2 px-4 leading-tight">{pageText.h1}</h1>
               <div className="h-1 w-16 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>

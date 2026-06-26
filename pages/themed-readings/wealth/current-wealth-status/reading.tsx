@@ -48,9 +48,9 @@ export default function WealthCurrentStatusReadingPage() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Current Wealth Status - Reading | FateAura' : '我现在的财运如何？ - 解读结果 | FateAura',
-    header: isEn ? 'Current Wealth Reading' : '财运现状解读',
-    h1: isEn ? 'How Is My Wealth Energy Right Now?' : '我现在的财运如何？',
+    title: isEn ? 'How Is My Money Luck Right Now? - Reading | FateAura' : '我现在的财运怎么样？- 解读结果 | FateAura',
+    header: isEn ? 'How Is My Money Luck Right Now?' : '我现在的财运怎么样？',
+    h1: isEn ? 'How Is My Money Luck Right Now?' : '我现在的财运怎么样？',
     scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
     loadingTitle: isEn ? 'Reading your wealth clues...' : '正在整理你的财运线索...',
     overallTitle: isEn ? 'Wealth Overview' : '财运总览',
@@ -202,7 +202,9 @@ export default function WealthCurrentStatusReadingPage() {
             className="mb-8"
           >
             <div className="text-center mb-6">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">Current Wealth Status Reading</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">
+                {isEn ? 'How Is My Money Luck Right Now?' : '我现在的财运怎么样？'}
+              </span>
               <h1 className="text-2xl sm:text-4xl font-black mb-3 px-4 leading-tight text-white">{pageText.h1}</h1>
               <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>

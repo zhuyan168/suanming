@@ -162,15 +162,15 @@ export default function RelationshipDev8Result() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Relationship Development - Reading | FateAura' : '关系发展 - 解读 | FateAura',
-    metaDesc: isEn ? 'Understand the true state and natural direction of this relationship.' : '理解这段关系的真实状态与自然走向。',
-    loadingTitle: isEn ? 'Loading... - Relationship Development' : '加载中... - 关系发展',
+    title: isEn ? 'Will We Be Together? - Reading | FateAura' : '我们会在一起吗？- 解读 | FateAura',
+    metaDesc: isEn ? 'Look at the current state, obstacles, and possible next direction of this connection.' : '看看这段关系现在的状态、阻碍，以及接下来可能怎么发展。',
+    loadingTitle: isEn ? 'Loading... - Will We Be Together?' : '加载中... - 我们会在一起吗？',
     loading: isEn ? 'Loading...' : '加载中...',
     loadingData: isEn ? 'Loading data...' : '正在加载数据...',
-    header: isEn ? 'Relationship Development' : '关系发展',
+    header: isEn ? 'Will We Be Together?' : '我们会在一起吗？',
     reset: isEn ? 'Reset' : '重置',
-    h1: isEn ? 'Relationship Development' : '关系发展',
-    subtitle: isEn ? 'Understand the true state and natural direction of the relationship' : '理解这段关系的真实状态与自然走向',
+    h1: isEn ? 'Will We Be Together?' : '我们会在一起吗？',
+    subtitle: isEn ? 'Look at the current state, obstacles, and possible next direction of this connection' : '看看这段关系现在的状态、阻碍，以及接下来可能怎么发展',
     retry: isEn ? 'Retry' : '重试',
     generatingTitle: isEn ? 'Reading the true state of this relationship...' : '正在解读这段关系的真实状态...',
     generatingDesc: isEn ? 'This may take a moment. Please wait.' : '这可能需要一点时间，请稍候。',

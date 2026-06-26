@@ -54,12 +54,12 @@ export default function WealthObstaclesReadingPage() {
   const isEn = router.locale !== 'zh';
   const slotConfig = isEn ? SLOT_CONFIG_EN : SLOT_CONFIG;
   const pageText = {
-    title: isEn ? 'Wealth Obstacles Reading | FateAura' : '财富阻碍解读 - FateAura',
-    header: isEn ? 'Wealth Obstacles Reading' : '财富阻碍解读',
-    h1: isEn ? 'What Is Blocking My Wealth Right Now?' : '我现在的财富阻碍是什么？',
+    title: isEn ? 'What Is Blocking My Money Flow? - Reading | FateAura' : '是什么挡住了我的财运？- 解读 | FateAura',
+    header: isEn ? 'What Is Blocking My Money Flow?' : '是什么挡住了我的财运？',
+    h1: isEn ? 'What Is Blocking My Money Flow?' : '是什么挡住了我的财运？',
     scrollHint: isEn ? 'Scroll down to view your reading' : '下滑查看解读内容',
-    loadingTitle: isEn ? 'Reading your wealth energy in depth...' : '正在深度洞察你的财富能量...',
-    overallTitle: isEn ? 'Wealth Energy Overview' : '财富能量总览',
+    loadingTitle: isEn ? 'Reading the blocks around your money flow...' : '正在梳理影响财运流动的因素...',
+    overallTitle: isEn ? 'Money Flow Overview' : '财运流动总览',
     position: isEn ? 'Position' : '牌位',
     backHome: isEn ? 'Back Home' : '返回首页',
     backWealth: isEn ? 'Back to Wealth Readings' : '返回财富主页',
@@ -222,7 +222,9 @@ export default function WealthObstaclesReadingPage() {
             className="mb-12"
           >
             <div className="text-center mb-8">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">Wealth Obstacles Reading</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-2 block">
+                {isEn ? 'What Is Blocking My Money Flow?' : '是什么挡住了我的财运？'}
+              </span>
               <h1 className="text-2xl sm:text-4xl font-black mb-4 px-4 leading-tight text-white">{pageText.h1}</h1>
               <div className="h-1 w-24 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]"></div>
             </div>

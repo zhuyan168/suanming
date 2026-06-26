@@ -242,15 +242,15 @@ export default function WhatTheyThinkDraw() {
   const text = isEn
     ? {
         loading: 'Loading...',
-        pageTitle: 'What They Think - Draw Cards',
-        metaDescription: 'Explore what they may truly think and feel right now.',
+        pageTitle: 'How Do They See Me? - Draw Cards',
+        metaDescription: 'Explore their thoughts, feelings, and possible short-term direction toward you.',
         back: 'Back',
         reset: 'Reset',
-        completedTitle: 'What They Think - Complete',
+        completedTitle: 'How Do They See Me? - Complete',
         drawTitle: 'Draw Six Tarot Cards',
         completedDescription: 'Your cards are ready. Continue to look deeper into their inner world.',
         drawDescription:
-          'Take a quiet moment, then choose 6 cards from the 78-card deck to explore their thoughts, feelings, actions, and short-term direction.',
+          'Take a quiet moment, then choose 6 cards to explore how they see you and where their attitude may be heading.',
         drawnCount: 'Cards drawn:',
         viewReading: 'View Reading',
         completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
@@ -258,14 +258,14 @@ export default function WhatTheyThinkDraw() {
       }
     : {
         loading: '加载中...',
-        pageTitle: '对方在想什么 - 抽牌',
-        metaDescription: '探索对方此刻的真实想法与情绪',
+        pageTitle: 'TA 是怎么看我的？- 抽牌',
+        metaDescription: '看看对方对你的真实想法、感受，以及短期内可能的态度变化。',
         back: '返回',
         reset: '重置',
-        completedTitle: '对方在想什么 - 已完成',
+        completedTitle: 'TA 是怎么看我的？- 已完成',
         drawTitle: '抽取六张塔罗牌',
         completedDescription: '牌已经就位，现在，让我们一起看看 TA 的内心。',
-        drawDescription: '静心感受，从下方78张牌中选择6张，探索对方的真实想法、感受与关系走向。',
+        drawDescription: '静心感受，从下方78张牌中选择6张，看看 TA 是怎么看你的，以及接下来态度可能怎么变化。',
         drawnCount: '已抽牌：',
         viewReading: '查看解读',
         completedNote: '✨ 已完成抽牌，可随时重新占卜',
@@ -476,7 +476,9 @@ export default function WhatTheyThinkDraw() {
             <div className="mx-auto max-w-7xl">
               {/* 标题介绍区域 */}
               <div className="text-center mb-12">
-                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">What They Think Spread</p>
+                <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-4">
+                  {isEn ? 'How Do They See Me?' : 'TA 是怎么看我的？'}
+                </p>
                 <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-4">
                   {hasDrawn ? text.completedTitle : text.drawTitle}
                 </h1>
@@ -605,4 +607,3 @@ export default function WhatTheyThinkDraw() {
     </>
   );
 }
-
