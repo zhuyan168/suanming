@@ -25,6 +25,15 @@ export default function MyDocument({ locale = 'en' }: MyDocumentProps) {
         />
       </Head>
       <body>
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: 'none' }}
+            src="https://www.facebook.com/tr?id=1361599962602343&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
         <Main />
         <NextScript />
       </body>

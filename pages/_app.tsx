@@ -13,6 +13,7 @@ import GuestTrialBanner from "../components/guest-trial/GuestTrialBanner";
 import "../styles/globals.css";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const META_PIXEL_ID = "1361599962602343";
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://fateaura.com").replace(/\/$/, "");
 const DEFAULT_TITLE = "FateAura - Tarot Readings & Intuitive Guidance";
 const DEFAULT_DESCRIPTION =
@@ -96,6 +97,24 @@ function PageTitleBrandGuard() {
   return null;
 }
 
+function MetaPixelPageViews() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const trackPageView = () => {
+      const fbq = (window as typeof window & {
+        fbq?: (action: string, event: string) => void;
+      }).fbq;
+      fbq?.("track", "PageView");
+    };
+
+    router.events.on("routeChangeComplete", trackPageView);
+    return () => router.events.off("routeChangeComplete", trackPageView);
+  }, [router.events]);
+
+  return null;
+}
+
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const cleanPath = router.asPath.split("?")[0].split("#")[0] || "/";
@@ -153,6 +172,21 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
 
+      <Script id="meta-pixel" strategy="afterInteractive">
+        {`
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window,document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${META_PIXEL_ID}');
+          fbq('track', 'PageView');
+        `}
+      </Script>
+
       {GA_ID && (
         <>
           <Script
@@ -175,6 +209,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
       <GuestTrialBanner />
       <Component {...pageProps} />
+      <MetaPixelPageViews />
       <PageTitleBrandGuard />
       <GlobalHomeButton />
     </GuestTrialProvider>

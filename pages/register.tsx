@@ -214,6 +214,13 @@ export default function RegisterPage() {
         return
       }
 
+      const fbq = (window as typeof window & {
+        fbq?: (action: string, event: string, params?: Record<string, number>) => void
+      }).fbq
+      fbq?.('track', 'CompleteRegistration', {
+        value: 1,
+      })
+
       setSuccess(true)
     } catch (err) {
       console.error('注册请求异常:', err)
