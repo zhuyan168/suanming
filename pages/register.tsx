@@ -217,7 +217,7 @@ export default function RegisterPage() {
       const fbq = (window as typeof window & {
         fbq?: (action: string, event: string, params?: Record<string, number>) => void
       }).fbq
-      fbq?.('track', 'CompleteRegistration', {
+      fbq?.('track', 'Subscribe', {
         value: 1,
       })
 
