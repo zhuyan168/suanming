@@ -6,6 +6,7 @@ import CardItem, { TarotCard } from '../../../../components/fortune/CardItem';
 import EmptySlot from '../../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../../components/fortune/ScrollBar';
 import ThreeCardSlots from '../../../../components/fortune/ThreeCardSlots';
+import SpreadAccessStatus from '../../../../components/fortune/SpreadAccessStatus';
 import { tarotCards } from '../../../../data/tarotCards';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
 import { getThreeCardT } from '../../../../lib/threeCardI18n';
@@ -75,7 +76,7 @@ export default function ThreeCardDrawPage() {
   const router = useRouter();
   const t = getThreeCardT(router.locale);
 
-  const { loading: accessLoading, allowed } = useSpreadAccess({
+  const { loading: accessLoading, allowed, reason: accessReason, retry: retryAccess } = useSpreadAccess({
     spreadKey: 'three-card-general',
     redirectPath: '/reading/general',
   });
@@ -223,9 +224,12 @@ export default function ThreeCardDrawPage() {
 
   if (accessLoading || !allowed) {
     return (
-      <div className="min-h-screen bg-[#0f0f23] text-white flex items-center justify-center">
-        <div className="text-white/60">{t.loading}</div>
-      </div>
+      <SpreadAccessStatus
+        loading={accessLoading}
+        failed={!accessLoading && !allowed && !accessReason}
+        retry={retryAccess}
+        locale={router.locale}
+      />
     );
   }
 

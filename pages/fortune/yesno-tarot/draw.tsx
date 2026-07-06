@@ -6,6 +6,7 @@ import CardItem, { TarotCard } from '../../../components/fortune/CardItem';
 import EmptySlot from '../../../components/fortune/EmptySlot';
 import ScrollBar from '../../../components/fortune/ScrollBar';
 import SelectedCardSlot from '../../../components/fortune/SelectedCardSlot';
+import SpreadAccessStatus from '../../../components/fortune/SpreadAccessStatus';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
 
 // 完整的78张塔罗牌数据
@@ -222,7 +223,7 @@ export default function YesNoTarotDraw() {
     questionLabel: '你的问题',
   };
 
-  const { loading: accessLoading, allowed } = useSpreadAccess({
+  const { loading: accessLoading, allowed, reason: accessReason, retry: retryAccess } = useSpreadAccess({
     spreadKey: 'divination-yesno',
     redirectPath: '/',
   });
@@ -237,6 +238,7 @@ export default function YesNoTarotDraw() {
   // 单卡槽的状态
   const [selectedCard, setSelectedCard] = useState<ShuffledTarotCard | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isOpeningReading, setIsOpeningReading] = useState(false);
   
   // deck: 实际剩余可抽的牌
   const [deck, setDeck] = useState<ShuffledTarotCard[]>([]);
@@ -336,8 +338,17 @@ export default function YesNoTarotDraw() {
     }, 100);
   };
 
-  const handleStartReading = () => {
-    router.push('/fortune/yesno-tarot/result');
+  const handleStartReading = async () => {
+    if (isOpeningReading) return;
+    setIsOpeningReading(true);
+    try {
+      const changed = await router.push('/fortune/yesno-tarot/result');
+      if (!changed) setIsOpeningReading(false);
+    } catch (error) {
+      console.error('Failed to open yes/no reading:', error);
+      setIsOpeningReading(false);
+      alert(router.locale === 'zh' ? '页面打开失败，请重新尝试。' : 'Unable to open the reading. Please try again.');
+    }
   };
 
   const handleReturnToQuestion = () => {
@@ -367,11 +378,13 @@ export default function YesNoTarotDraw() {
 
   if (accessLoading || !allowed) {
     return (
-      <div className="dark">
-        <div className="font-display bg-background-dark min-h-screen text-white flex items-center justify-center" style={{ backgroundColor: '#191022' }}>
-          <div className="text-white/60">{texts.loading}</div>
-        </div>
-      </div>
+      <SpreadAccessStatus
+        loading={accessLoading}
+        failed={!accessLoading && !allowed && !accessReason}
+        retry={retryAccess}
+        locale={router.locale}
+        backgroundColor="#191022"
+      />
     );
   }
 
@@ -500,10 +513,14 @@ export default function YesNoTarotDraw() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={handleStartReading}
-                      className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)]"
+                      disabled={isOpeningReading}
+                      aria-busy={isOpeningReading}
+                      className="px-8 py-4 rounded-xl bg-primary text-white font-semibold text-lg transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_20px_rgba(127,19,236,0.5)] disabled:cursor-wait disabled:opacity-70"
                       style={{ backgroundColor: '#7f13ec' }}
                     >
-                      {texts.startReading}
+                      {isOpeningReading
+                        ? (router.locale === 'zh' ? '正在打开解读…' : 'Opening Reading…')
+                        : texts.startReading}
                     </motion.button>
                   </div>
 

@@ -19,6 +19,7 @@ export interface SpreadAccessState {
   isMember: boolean;
   userId: string | null;
   remaining?: number;
+  retry: () => Promise<void>;
 }
 
 // Codes that the access-check API (or any middleware in front of it) may return
@@ -94,7 +95,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
   const { theme, spreadId, spreadKey, onDenied, redirectOnDenied = true, redirectPath } = options;
   const router = useRouter();
 
-  const [state, setState] = useState<SpreadAccessState>({
+  const [state, setState] = useState<Omit<SpreadAccessState, 'retry'>>({
     loading: true,
     allowed: false,
     isMember: false,
@@ -280,6 +281,11 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
     }
   }, [theme, spreadId, spreadKey, redirectPath]);
 
+  const retry = useCallback(async () => {
+    setState((current) => ({ ...current, loading: true, reason: undefined }));
+    await checkAccess();
+  }, [checkAccess]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -326,5 +332,5 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
   }, [checkAccess]);
 
-  return state;
+  return { ...state, retry };
 }

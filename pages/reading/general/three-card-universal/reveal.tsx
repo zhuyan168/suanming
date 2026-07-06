@@ -125,6 +125,7 @@ export default function ThreeCardRevealPage() {
 
   const [result, setResult] = useState<ThreeCardResult | null>(null);
   const [question, setQuestion] = useState<string>('');
+  const [isOpeningReading, setIsOpeningReading] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -151,8 +152,17 @@ export default function ThreeCardRevealPage() {
     router.push('/reading/general/three-card-universal/question');
   };
 
-  const handleStartInterpretation = () => {
-    router.push('/reading/general/three-card-universal/reading');
+  const handleStartInterpretation = async () => {
+    if (isOpeningReading) return;
+    setIsOpeningReading(true);
+    try {
+      const changed = await router.push('/reading/general/three-card-universal/reading');
+      if (!changed) setIsOpeningReading(false);
+    } catch (error) {
+      console.error('Failed to open three-card reading:', error);
+      setIsOpeningReading(false);
+      alert(isZh ? '页面打开失败，请重新尝试。' : 'Unable to open the reading. Please try again.');
+    }
   };
 
   const handleBackToHome = () => {
@@ -324,12 +334,16 @@ export default function ThreeCardRevealPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleStartInterpretation}
-                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)]"
+                    disabled={isOpeningReading}
+                    aria-busy={isOpeningReading}
+                    className="flex-1 px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all duration-300 hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(127,19,236,0.6)] disabled:cursor-wait disabled:opacity-70"
                     style={{ backgroundColor: '#7f13ec' }}
                   >
                     <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined text-xl">auto_awesome</span>
-                      {t.reveal.startReadingBtn}
+                      {isOpeningReading
+                        ? (isZh ? '正在打开解读…' : 'Opening Reading…')
+                        : t.reveal.startReadingBtn}
                     </span>
                   </motion.button>
                   
