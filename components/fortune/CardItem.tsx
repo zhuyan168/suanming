@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export interface CardMeaning {
   keywords: string[];
@@ -31,24 +30,23 @@ export default function CardItem({ card, index, onClick, isDisabled, isSelected 
   // - md: w-32 = 128px, 重叠 64px
   // z-index: 前面的卡牌（index小）层级更高，后面的卡牌（index大）层级更低
   // 这样前面的卡牌会遮挡后面的卡牌，形成堆叠效果
-  const zIndex = isSelected ? 45 : Math.max(1, 40 - index); // Keep the deck below sticky navigation.
+  // Every card needs a unique level. Reusing the same level after card 40
+  // makes the browser reverse the overlap direction in the middle of the deck.
+  const zIndex = isSelected ? 101 : 100 - index;
   
   return (
-    <motion.button
+    <button
       type="button"
       onClick={() => !isDisabled && onClick(index)}
       disabled={isDisabled}
-      animate={isSelected ? { y: -8, scale: 1.05 } : { y: 0, scale: 1 }}
-      whileHover={!isDisabled && !isSelected ? { y: -8, scale: 1.05, zIndex: 45 } : {}}
-      whileTap={!isDisabled ? { scale: 0.98 } : {}}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      aria-label={`Select card ${index + 1}`}
       className={`
         relative flex-shrink-0 w-24 h-36 sm:w-28 sm:h-42 md:w-32 md:h-48
-        rounded-lg overflow-hidden border-2 transition-all duration-300
+        rounded-lg overflow-hidden border-2 transition-transform duration-150
         ${index === 0 ? '' : '-ml-12 sm:-ml-14 md:-ml-16'} 
         ${isSelected 
-          ? 'border-primary shadow-[0_0_20px_rgba(127,19,236,0.6)]' 
-          : 'border-white/20 hover:border-primary/50'
+          ? '-translate-y-2 scale-105 border-primary shadow-[0_0_20px_rgba(127,19,236,0.6)]'
+          : 'border-white/20 active:scale-[0.98] md:hover:-translate-y-2 md:hover:scale-105 md:hover:border-primary/50'
         }
         ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}
       `}
@@ -78,15 +76,8 @@ export default function CardItem({ card, index, onClick, isDisabled, isSelected 
       </div>
       
       {/* 选中时的光晕效果 */}
-      {isSelected && (
-        <motion.div
-          className="absolute inset-0 bg-primary/20 rounded-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.5, 0.3] }}
-          transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse' }}
-        />
-      )}
-    </motion.button>
+      {isSelected && <div className="absolute inset-0 rounded-lg bg-primary/30" />}
+    </button>
   );
 }
 

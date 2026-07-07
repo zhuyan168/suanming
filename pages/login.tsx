@@ -192,8 +192,8 @@ export default function LoginPage() {
       </Head>
 
       <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-secondary/8 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/3 hidden h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none sm:block" />
+        <div className="absolute bottom-1/4 right-1/4 hidden h-[400px] w-[400px] rounded-full bg-secondary/8 blur-[100px] pointer-events-none sm:block" />
 
         <div className="relative z-10 w-full max-w-md">
           <div className="mb-6">

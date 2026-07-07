@@ -22,6 +22,11 @@
 }
 
 @layer utilities {
+  /* Keep card z-index values inside the deck so they never cover sticky navigation. */
+  .card-container-wrapper {
+    isolation: isolate;
+  }
+
   @keyframes flow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }

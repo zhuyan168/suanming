@@ -13,7 +13,7 @@ import UnlockModal from '../../../components/themed-readings/UnlockModal';
  * 爱情主题占卜页面
  */
 export default function LoveThemePage() {
-  const { isMember, userId } = useMembership();
+  const { isMember, userId, loading: membershipLoading } = useMembership();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation('common');
 
@@ -26,6 +26,11 @@ export default function LoveThemePage() {
       </div>
     );
   }
+
+  const orderedSpreads = [
+    ...themeConfig.spreads.filter((spread) => spread.id === 'reconciliation'),
+    ...themeConfig.spreads.filter((spread) => spread.id !== 'reconciliation'),
+  ];
 
   return (
     <>
@@ -57,12 +62,13 @@ export default function LoveThemePage() {
             </div>
 
             <SpreadsGrid>
-              {themeConfig.spreads.map((spread) => (
+              {orderedSpreads.map((spread) => (
                 <SpreadCard
                   key={spread.id}
                   spread={spread}
                   theme="love"
                   isMember={isMember}
+                  membershipLoading={membershipLoading}
                   userId={userId}
                   onLockedClick={() => setIsModalOpen(true)}
                 />
