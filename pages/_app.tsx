@@ -130,8 +130,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="description" content={DEFAULT_DESCRIPTION} key="description" />
         <meta name="robots" content={robotsContent} key="robots" />
         <link rel="canonical" href={canonicalUrl} key="canonical" />
-        <link rel="shortcut icon" href="/favicon.ico?v=20260617" />
-        <link rel="icon" href="/favicon.png?v=20260614" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.png?v=20260707" type="image/png" />
+        <link rel="icon" href="/favicon.png?v=20260707" type="image/png" sizes="64x64" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260614" />
 
         <meta property="og:type" content="website" key="og:type" />
@@ -150,19 +150,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} key="twitter:image" />
       </Head>
 
-      <Script
-        src="https://plausible.io/js/pa-LgxI65kqy0AEp-XDiJnWA.js"
-        strategy="afterInteractive"
-      />
-      <Script id="plausible-analytics" strategy="afterInteractive">
-        {`
-          window.plausible = window.plausible || function(){(plausible.q = plausible.q || []).push(arguments)};
-          plausible.init = plausible.init || function(i){plausible.o = i || {}};
-          plausible.init();
-        `}
-      </Script>
-
-      <Script id="microsoft-clarity" strategy="afterInteractive">
+      <Script id="microsoft-clarity" strategy="lazyOnload">
         {`
           (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -172,7 +160,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
 
-      <Script id="meta-pixel" strategy="afterInteractive">
+      <Script id="meta-pixel" strategy="lazyOnload">
         {`
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -191,9 +179,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
-          <Script id="google-analytics" strategy="afterInteractive">
+          <Script id="google-analytics" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}

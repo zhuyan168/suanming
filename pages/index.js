@@ -1,9 +1,11 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next/pages';
 import { serverSideTranslations } from 'next-i18next/pages/serverSideTranslations';
+import { CircleDollarSign, GraduationCap, Heart, Menu, RefreshCw, Sparkles, User, Wand2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useGuestTrial } from '../context/GuestTrialContext';
 
@@ -676,7 +678,7 @@ const FeatureToast = ({ visible, title, message, onClose }) => {
       className={`fixed bottom-6 right-6 z-[70] w-72 rounded-2xl border border-white/10 bg-background-dark/90 p-4 text-white shadow-glow backdrop-blur transition-all duration-300 ${visible ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'}`}
     >
       <div className="flex items-start gap-3">
-        <span className="material-symbols-outlined text-2xl text-primary">auto_fix_high</span>
+        <Wand2 className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
         <div className="flex-1">
           <p className="text-sm font-semibold leading-tight">{title}</p>
           <p className="mt-1 text-xs text-white/70 leading-relaxed">{message}</p>
@@ -686,7 +688,7 @@ const FeatureToast = ({ visible, title, message, onClose }) => {
           onClick={onClose}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white/70 transition hover:border-white/20 hover:text-white"
         >
-          <span className="material-symbols-outlined notranslate text-base">close</span>
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -800,7 +802,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
           type="button"
           onClick={handleClose}
         >
-          <span className="material-symbols-outlined notranslate text-xl">close</span>
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
         <header className="mb-8 flex flex-col gap-3 text-center">
@@ -859,12 +861,12 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
             >
               {isLoading ? (
                 <>
-                  <span className="material-symbols-outlined text-xl animate-spin">refresh</span>
+                  <RefreshCw className="h-5 w-5 animate-spin" aria-hidden="true" />
                   {isEn ? 'Preparing...' : '准备中...'}
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                  <Sparkles className="h-5 w-5" aria-hidden="true" />
                   {isEn ? 'Draw Card' : '抽牌'}
                 </>
               )}
@@ -1070,7 +1072,7 @@ export default function Home() {
                           href="/account"
                           className="flex items-center gap-1.5 text-white/70 text-sm font-medium hover:text-primary transition-colors"
                         >
-                          <span className="material-symbols-outlined text-base">person</span>
+                          <User className="h-4 w-4" aria-hidden="true" />
                           {t('nav.account')}
                         </Link>
                         <button
@@ -1107,7 +1109,7 @@ export default function Home() {
                   aria-label={t('nav.openMenu')}
                   className="md:hidden flex items-center justify-center rounded-lg h-10 w-10 bg-white/10 text-white hover:bg-white/20 transition-colors shrink-0"
                 >
-                  <span className="material-symbols-outlined">menu</span>
+                  <Menu className="h-6 w-6" aria-hidden="true" />
                 </button>
               </header>
               {mobileNavOpen && (
@@ -1133,7 +1135,7 @@ export default function Home() {
                         aria-label={t('nav.closeMenu')}
                         className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
                       >
-                        <span className="material-symbols-outlined">close</span>
+                        <X className="h-6 w-6" aria-hidden="true" />
                       </button>
                     </div>
                     <div className="flex flex-col gap-1 p-4 pt-3">
@@ -1168,7 +1170,7 @@ export default function Home() {
                             onClick={closeMobileNav}
                             className="flex items-center gap-2 rounded-lg px-3 py-3 text-white/90 text-base font-medium hover:bg-white/10 hover:text-primary transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xl">person</span>
+                            <User className="h-5 w-5" aria-hidden="true" />
                             {t('nav.account')}
                           </Link>
                           <button
@@ -1221,7 +1223,15 @@ export default function Home() {
                       className="relative overflow-hidden flex min-h-[380px] flex-col gap-6 rounded-xl bg-cover bg-center bg-no-repeat items-center justify-center p-4 text-center"
                       data-alt="A mystical, abstract background with swirling purple and blue cosmic nebulae and faint star patterns."
                     >
-                      <div className="absolute inset-0 bg-[url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfEGBzoDokXgRS6Ba5Wj5HBFKsltQO-dubX9obltWaFOskDIiYL50bM9mCNa1PvetW_ExXEUA7n6J3-cbJWM82pH2jWwEoEjz3gIbHr9pIf55jVLkszkslsFu-Qg_pac6MBGsLT-rLuG2kYFb3md79b-JSYgwQ9lVfZKrtzCU7hq5hc6iD8WrXQYAHyggiWU4M2ZFmkZNocAAaxwXdnY3i9ZSon_4A1RpdUEqvwVEjTQ4D-SDbmBkjEYFVBE5E3aHfz8TvdtQ12d8')] bg-cover bg-center animate-flow [background-size:200%_200%] opacity-80"></div>
+                      <Image
+                        src="/home-hero.webp"
+                        alt=""
+                        fill
+                        preload
+                        sizes="(max-width: 768px) calc(100vw - 32px), (max-width: 1280px) calc(100vw - 128px), 1152px"
+                        quality={70}
+                        className="object-cover object-center opacity-80"
+                      />
                       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(25,16,34,0.4)] to-[rgba(25,16,34,0.7)]"></div>
                       <div className="relative z-10 flex flex-col gap-6 items-center">
                         <div className="flex flex-col gap-2">
@@ -1396,7 +1406,7 @@ export default function Home() {
                             onClick={() => router.push('/themed-readings/love')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xl">favorite</span>
+                            <Heart className="h-5 w-5" aria-hidden="true" />
                             <span className="truncate">{t('section.themed.love')}</span>
                           </button>
                           <button
@@ -1404,7 +1414,7 @@ export default function Home() {
                             onClick={() => router.push('/themed-readings/career-study')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xl">school</span>
+                            <GraduationCap className="h-5 w-5" aria-hidden="true" />
                             <span className="truncate">{t('section.themed.career')}</span>
                           </button>
                           <button
@@ -1412,7 +1422,7 @@ export default function Home() {
                             onClick={() => router.push('/themed-readings/wealth')}
                             className="flex w-full min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-4 bg-white/10 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary transition-colors"
                           >
-                            <span className="material-symbols-outlined text-xl">paid</span>
+                            <CircleDollarSign className="h-5 w-5" aria-hidden="true" />
                             <span className="truncate">{t('section.themed.wealth')}</span>
                           </button>
                         </div>
@@ -1427,7 +1437,7 @@ export default function Home() {
                       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-full bg-primary/10 blur-3xl rounded-full pointer-events-none"></div>
                       
                       {/* 左侧装饰星 - 带旋转动画 */}
-                      <span className="material-symbols-outlined text-primary/80 text-xl sm:text-2xl animate-pulse" style={{ animationDuration: '3s' }}>auto_awesome</span>
+                      <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary/80 animate-pulse" style={{ animationDuration: '3s' }} aria-hidden="true" />
                       
                       {/* 文字 */}
                       <p className="relative z-10 text-white/90 text-sm sm:text-lg font-medium text-center tracking-wide leading-relaxed animate-text-glow">
@@ -1435,7 +1445,7 @@ export default function Home() {
                       </p>
                       
                       {/* 右侧装饰星 - 带旋转动画 */}
-                      <span className="material-symbols-outlined text-primary/80 text-xl sm:text-2xl animate-pulse" style={{ animationDuration: '3s', animationDelay: '1.5s' }}>auto_awesome</span>
+                      <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary/80 animate-pulse" style={{ animationDuration: '3s', animationDelay: '1.5s' }} aria-hidden="true" />
                     </div>
                   </div>
                 </div>

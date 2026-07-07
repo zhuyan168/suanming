@@ -9,7 +9,7 @@
 
   body {
     margin: 0;
-    font-family: 'Spline Sans', 'Noto Sans SC', sans-serif;
+    font-family: 'Spline Sans', 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
   }
   html.dark,
   html.dark body {

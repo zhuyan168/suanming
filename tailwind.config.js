@@ -19,7 +19,7 @@ module.exports = {
         'background-dark': '#191022',
       },
       fontFamily: {
-        display: ['Spline Sans', 'sans-serif'],
+        display: ['Spline Sans', 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Arial', 'sans-serif'],
       },
       boxShadow: {
         glow: '0 0 15px 0 rgba(234, 179, 8, 0.2), 0 0 5px 0 rgba(234, 179, 8, 0.1)',
