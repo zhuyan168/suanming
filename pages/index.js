@@ -1227,7 +1227,8 @@ export default function Home() {
                         src="/home-hero.webp"
                         alt=""
                         fill
-                        preload
+                        loading="eager"
+                        fetchPriority="high"
                         sizes="(max-width: 768px) calc(100vw - 32px), (max-width: 1280px) calc(100vw - 128px), 1152px"
                         quality={70}
                         className="object-cover object-center opacity-80"

@@ -2,28 +2,13 @@ import Document, { Html, Head, Main, NextScript, type DocumentContext, type Docu
 
 type MyDocumentProps = DocumentInitialProps & {
   locale?: string
-  loadExternalFonts?: boolean
 }
 
-export default function MyDocument({ locale = 'en', loadExternalFonts = true }: MyDocumentProps) {
+export default function MyDocument({ locale = 'en' }: MyDocumentProps) {
   return (
     <Html lang={locale} className="dark">
       <Head>
         {/* 全局字体和图标 */}
-        {loadExternalFonts ? (
-          <>
-            <link rel="preconnect" href="https://fonts.googleapis.com" />
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
-            />
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Spline+Sans:wght@400;500;700;800&display=swap"
-            />
-          </>
-        ) : null}
       </Head>
       <body>
         <noscript>
@@ -47,7 +32,6 @@ MyDocument.getInitialProps = async (ctx: DocumentContext): Promise<MyDocumentPro
   return {
     ...initialProps,
     locale: ctx.locale || ctx.defaultLocale || 'en',
-    loadExternalFonts: ctx.pathname !== '/',
   }
 }
 
