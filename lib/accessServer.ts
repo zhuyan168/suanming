@@ -28,6 +28,8 @@ export interface ApiAccessStatus {
   totalUsed?: number;
   featureUsed?: number;
   featureRemaining?: number;
+  trackingLocale?: string;
+  trackingPagePath?: string;
 }
 
 /** Fallback timezone when the client sends nothing or an invalid value. */
@@ -509,6 +511,13 @@ export async function requireAccessOrRespond(params: {
   });
 
   if (status.allowed) {
+    status.trackingLocale = isEnglishRequest(req) ? 'en' : 'zh';
+    const referer = req.headers.referer;
+    try {
+      status.trackingPagePath = referer ? new URL(referer).pathname : undefined;
+    } catch {
+      status.trackingPagePath = undefined;
+    }
     return status;
   }
 
@@ -543,6 +552,25 @@ export async function recordSuccessfulReading(params: {
 }): Promise<void> {
   const { accessStatus, spreadType, featureKey, question, cards, readingResult, resultPath } = params;
 
+  const trimmedQuestion = typeof question === 'string' ? question.trim().slice(0, 2000) : '';
+  if (trimmedQuestion && (accessStatus.userId || accessStatus.guestSessionId)) {
+    const category = spreadType.startsWith('love-') ? 'love'
+      : spreadType.startsWith('career-') ? 'career'
+      : spreadType.startsWith('wealth-') ? 'wealth'
+      : spreadType.startsWith('fortune-') ? 'fortune'
+      : null;
+    const { error } = await supabaseService.from('reading_question_events').insert({
+      user_id: accessStatus.userId ?? null,
+      guest_id: accessStatus.guestSessionId ?? null,
+      question_text: trimmedQuestion,
+      question_category: category,
+      spread_type: spreadType,
+      locale: accessStatus.trackingLocale ?? 'zh',
+      page_path: accessStatus.trackingPagePath ?? resultPath,
+    });
+    if (error) console.error('[readingQuestionEvents] insert failed', error);
+  }
+
   if (accessStatus.userId) {
     await recordReadingHistory({
       userId: accessStatus.userId,
@@ -552,10 +580,7 @@ export async function recordSuccessfulReading(params: {
       readingResult: readingResult ?? null,
       resultPath,
     });
-    return;
-  }
-
-  if (
+  } else if (
     accessStatus.accessType === 'guest_trial' &&
     accessStatus.guestSessionId &&
     featureKey

@@ -13,7 +13,6 @@ export async function getAuthHeaders(baseHeaders?: Record<string, string>): Prom
     const accessToken = data?.session?.access_token;
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`;
-      return headers;
     }
   } catch (error) {
     console.error('[apiHeaders] getSession failed', error);

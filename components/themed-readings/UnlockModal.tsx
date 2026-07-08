@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next/pages';
+import { trackReadingFunnelEvent } from '../../lib/readingQuestionEvents';
 
 interface UnlockModalProps {
   isOpen: boolean;
@@ -9,6 +11,10 @@ interface UnlockModalProps {
 export default function UnlockModal({ isOpen, onClose }: UnlockModalProps) {
   const router = useRouter();
   const { t } = useTranslation('common');
+
+  useEffect(() => {
+    if (isOpen) void trackReadingFunnelEvent('paywall_shown');
+  }, [isOpen]);
 
   if (typeof window === 'undefined') return null;
   if (!isOpen || isOpen !== true) return null;

@@ -8,6 +8,7 @@ import { appWithTranslation } from "next-i18next/pages";
 import nextI18NextConfig from "../next-i18next.config";
 import { GuestTrialProvider } from "../context/GuestTrialContext";
 import GuestTrialBanner from "../components/guest-trial/GuestTrialBanner";
+import ReadingFunnelTracker from "../components/ReadingFunnelTracker";
 
 // ✅ 关键：全局 Tailwind 样式只需要在这里引入一次
 import "../styles/globals.css";
@@ -201,6 +202,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <Component {...pageProps} />
       <MetaPixelPageViews />
       <PageTitleBrandGuard />
+      <ReadingFunnelTracker />
       <GlobalHomeButton />
     </GuestTrialProvider>
   );

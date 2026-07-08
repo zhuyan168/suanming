@@ -214,6 +214,10 @@ export default function RegisterPage() {
         return
       }
 
+      void import('../lib/readingQuestionEvents').then(({ trackReadingFunnelEvent }) =>
+        trackReadingFunnelEvent('signup_after_result')
+      )
+
       const fbq = (window as typeof window & {
         fbq?: (action: string, event: string, params?: Record<string, number>) => void
       }).fbq
@@ -233,6 +237,7 @@ export default function RegisterPage() {
   async function handleGoogleRegister() {
     setError('')
     setGoogleLoading(true)
+    sessionStorage.setItem('reading_funnel_signup_pending', '1')
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -242,6 +247,7 @@ export default function RegisterPage() {
     })
 
     if (oauthError) {
+      sessionStorage.removeItem('reading_funnel_signup_pending')
       setGoogleLoading(false)
       setError(toLocalizedError(oauthError.message, isEn))
     }

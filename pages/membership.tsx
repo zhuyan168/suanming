@@ -246,6 +246,9 @@ export default function MembershipPage() {
 
     setCheckoutError(null)
     setCheckoutLoadingPlan(planKey)
+    void import('../lib/readingQuestionEvents').then(({ trackReadingFunnelEvent }) =>
+      trackReadingFunnelEvent('subscribe_clicked')
+    )
 
     try {
       const headers = await getAuthHeaders()
