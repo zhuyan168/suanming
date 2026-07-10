@@ -489,8 +489,8 @@ const ACCESS_DENIED_MESSAGES: DenialMessages = {
   allowed_by_guest_trial:     { status: 200, zh: '',                                              en: '' },
   guest_trial_invalid:        { status: 401, zh: '游客试用会话无效，请重新开始试用',                 en: 'Guest trial session is invalid. Please start a new trial.' },
   guest_trial_expired:        { status: 403, zh: '游客试用已过期，注册账号后可继续使用',              en: 'Your free trial has ended. Sign up to continue.' },
-  guest_trial_limit_exceeded: { status: 403, zh: '72 小时免费试用次数已用完，注册账号后可继续使用',   en: "You've used all free trial readings. Sign up to continue." },
-  feature_trial_limit_exceeded: { status: 403, zh: '该功能的试用次数已用完，注册账号后可继续使用',   en: "You've used your free trial for this spread. Sign up or upgrade to continue." },
+  guest_trial_limit_exceeded: { status: 403, zh: '3 次免注册免费解读已用完，注册账号后可获得更多每日免费次数', en: "You've used your 3 free readings. Create a free account to continue." },
+  feature_trial_limit_exceeded: { status: 403, zh: '免注册免费解读已用完，注册账号后可继续使用', en: "You've used your free readings. Create a free account to continue." },
   unknown:                    { status: 403, zh: '权限校验未通过',                                 en: 'Unable to verify access. Please try again later.' },
 };
 

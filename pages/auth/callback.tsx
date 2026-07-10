@@ -15,7 +15,7 @@ function toFriendlyError(msg: string, isEn: boolean): string {
   for (const [key, value] of Object.entries(callbackErrorMap)) {
     if (lower.includes(key)) return isEn ? value.en : value.zh
   }
-  return isEn ? 'Something went wrong during sign-in. Please try again.' : '登录过程中出现问题，请重新尝试'
+  return isEn ? 'Something went wrong while continuing. Please try again.' : '继续过程中出现问题，请重新尝试'
 }
 
 async function pollSession(maxAttempts = 5, intervalMs = 400): Promise<boolean> {
@@ -27,21 +27,28 @@ async function pollSession(maxAttempts = 5, intervalMs = 400): Promise<boolean> 
   return false
 }
 
+function getSafeNextPath(next: unknown): string {
+  const value = Array.isArray(next) ? next[0] : next
+  if (typeof value !== 'string') return '/'
+  if (!value.startsWith('/') || value.startsWith('//')) return '/'
+  return value
+}
+
 export default function AuthCallbackPage() {
   const router = useRouter()
   const isEn = router.locale === 'en'
   const text = isEn ? {
-    failedTitle: 'Sign-In Failed - FateAura',
-    failedHeading: 'Sign-In Failed',
-    returnLogin: 'Back to Sign In',
-    loadingTitle: 'Signing In... - FateAura',
-    loading: 'Completing sign-in. Please wait...',
-    networkError: 'A network error occurred during sign-in. Please try again.',
+    failedTitle: 'Continue Failed - FateAura',
+    failedHeading: 'Continue Failed',
+    returnLogin: 'Back to Continue',
+    loadingTitle: 'Continuing... - FateAura',
+    loading: 'Completing your request. Please wait...',
+    networkError: 'A network error occurred. Please try again.',
     noAuth: 'No authorization information was found. Please sign in again.',
   } : {
     failedTitle: '登录失败 - FateAura',
     failedHeading: '登录失败',
-    returnLogin: '返回登录',
+    returnLogin: '返回继续',
     loadingTitle: '登录中… - FateAura',
     loading: '正在完成登录，请稍候…',
     networkError: '登录过程中出现网络异常，请重新尝试',
@@ -54,6 +61,9 @@ export default function AuthCallbackPage() {
       if (!router.isReady) return
 
       const code = router.query.code as string | undefined
+      const nextPath =
+        getSafeNextPath(router.query.next) ||
+        (typeof window !== 'undefined' ? getSafeNextPath(sessionStorage.getItem('auth_redirect_next')) : '/')
 
       if (code) {
         try {
@@ -66,7 +76,8 @@ export default function AuthCallbackPage() {
           setError(text.networkError)
           return
         }
-        router.replace('/')
+        if (typeof window !== 'undefined') sessionStorage.removeItem('auth_redirect_next')
+        router.replace(nextPath)
         return
       }
 
@@ -74,7 +85,8 @@ export default function AuthCallbackPage() {
       // 这里轮询等待 session 就绪
       const hasSession = await pollSession()
       if (hasSession) {
-        router.replace('/')
+        if (typeof window !== 'undefined') sessionStorage.removeItem('auth_redirect_next')
+        router.replace(nextPath)
         return
       }
 
@@ -82,7 +94,7 @@ export default function AuthCallbackPage() {
     }
 
     handleCallback()
-  }, [router.isReady, router.query.code, router, isEn, text.networkError, text.noAuth])
+  }, [router.isReady, router.query.code, router.query.next, router, isEn, text.networkError, text.noAuth])
 
   if (error) {
     return (

@@ -7,8 +7,11 @@ import Script from "next/script";
 import { appWithTranslation } from "next-i18next/pages";
 import nextI18NextConfig from "../next-i18next.config";
 import { GuestTrialProvider } from "../context/GuestTrialContext";
+import { AccessPromptProvider } from "../context/AccessPromptContext";
 import GuestTrialBanner from "../components/guest-trial/GuestTrialBanner";
 import ReadingFunnelTracker from "../components/ReadingFunnelTracker";
+import ClientErrorTracker from "../components/ClientErrorTracker";
+import GlobalErrorBoundary from "../components/GlobalErrorBoundary";
 
 // ✅ 关键：全局 Tailwind 样式只需要在这里引入一次
 import "../styles/globals.css";
@@ -125,6 +128,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <GuestTrialProvider>
+      <AccessPromptProvider>
       <Head>
         <title>{DEFAULT_TITLE}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -198,12 +202,16 @@ function MyApp({ Component, pageProps }: AppProps) {
         </>
       )}
 
-      <GuestTrialBanner />
-      <Component {...pageProps} />
-      <MetaPixelPageViews />
-      <PageTitleBrandGuard />
-      <ReadingFunnelTracker />
-      <GlobalHomeButton />
+        <GuestTrialBanner />
+        <GlobalErrorBoundary>
+          <Component {...pageProps} />
+        </GlobalErrorBoundary>
+        <MetaPixelPageViews />
+        <PageTitleBrandGuard />
+        <ReadingFunnelTracker />
+        <ClientErrorTracker />
+        <GlobalHomeButton />
+      </AccessPromptProvider>
     </GuestTrialProvider>
   );
 }

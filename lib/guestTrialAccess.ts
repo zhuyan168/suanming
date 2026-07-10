@@ -13,7 +13,7 @@ import { supabaseService } from './supabaseServer';
 // Config
 // ---------------------------------------------------------------------------
 
-export const TRIAL_TOTAL_LIMIT = 8;
+export const TRIAL_TOTAL_LIMIT = 3;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -29,17 +29,17 @@ export const GUEST_TRIAL_FEATURE_LIMITS: Record<string, number> = {
   'career-offer-decision': 3,
   'career-stay-or-leave': 3,
   'wealth-obstacles': 3,
-  // 大型深度牌阵 — 每个最多 1 次
-  'celtic-cross': 1,
-  'hexagram': 1,
-  'horseshoe': 1,
-  // 周期运势类 — 每个最多 1 次
-  'fortune-monthly-member': 1,
-  'fortune-seasonal': 1,
-  'fortune-yearly': 1,
+  // Larger spreads still share the global 3-reading allowance.
+  'celtic-cross': 3,
+  'hexagram': 3,
+  'horseshoe': 3,
+  // Periodic readings still share the global 3-reading allowance.
+  'fortune-monthly-member': 3,
+  'fortune-seasonal': 3,
+  'fortune-yearly': 3,
 };
 
-const DEFAULT_FEATURE_LIMIT = 2;
+const DEFAULT_FEATURE_LIMIT = 3;
 
 export function getFeatureLimit(spreadKey: string): number {
   return GUEST_TRIAL_FEATURE_LIMITS[spreadKey] ?? DEFAULT_FEATURE_LIMIT;

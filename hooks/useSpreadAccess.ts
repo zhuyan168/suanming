@@ -5,6 +5,7 @@ import { getSpreadConfig } from '../config/themedReadings';
 import { getSpreadByKey, type SpreadAccess } from '../lib/spreads';
 import { getAuthHeaders } from '../lib/apiHeaders';
 import { supabase } from '../lib/supabase';
+import { useAccessPrompt } from '../context/AccessPromptContext';
 
 export interface SpreadAccessState {
   loading: boolean;
@@ -94,6 +95,15 @@ interface UseSpreadAccessOptions {
 export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessState {
   const { theme, spreadId, spreadKey, onDenied, redirectOnDenied = true, redirectPath } = options;
   const router = useRouter();
+  const { showAccessPrompt } = useAccessPrompt();
+
+  const getCurrentPath = () => (
+    typeof window !== 'undefined'
+      ? `${window.location.pathname}${window.location.search}`
+      : router.asPath
+  );
+
+  const authRedirectHref = (pathname: string) => `${pathname}?next=${encodeURIComponent(getCurrentPath())}`;
 
   const [state, setState] = useState<Omit<SpreadAccessState, 'retry'>>({
     loading: true,
@@ -140,33 +150,51 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
         string
       > = {
         guest_trial_expired: isEn
-          ? 'Your free trial has ended. Sign up to save your readings and continue.'
+          ? 'Create a free account to get more daily readings and save your results.'
           : '您的免费试用已结束。注册账号即可保存解读记录并继续使用。',
         guest_trial_limit_exceeded: isEn
-          ? "You've used all 8 free trial readings. Sign up to continue and save your readings."
-          : '您的 8 次免费试用解读已用完。注册账号即可继续使用并保存解读记录。',
+          ? "You've used your 3 free readings. Create a free account to get more daily readings and save your results."
+          : '您的 3 次免注册免费解读已用完。注册账号即可获得更多每日免费次数并保存结果。',
         feature_trial_limit_exceeded: isEn
-          ? "You've used your free trial for this spread. Sign up to unlock more readings and save your results."
+          ? "You've used your free readings. Create a free account to continue and save your results."
           : '这个牌阵的免费体验次数已用完。注册或开通会员后，可继续使用并保存解读记录。',
       };
-      alert(guestDenialMessages[reason as 'guest_trial_expired' | 'guest_trial_limit_exceeded' | 'feature_trial_limit_exceeded']);
-      router.replace('/register');
+      showAccessPrompt({
+        title: isEn ? 'Free readings used' : '免费次数已用完',
+        message: guestDenialMessages[reason as 'guest_trial_expired' | 'guest_trial_limit_exceeded' | 'feature_trial_limit_exceeded'],
+        primaryLabel: isEn ? 'Create free account' : '免费注册',
+        primaryHref: authRedirectHref('/register'),
+        secondaryLabel: isEn ? 'Maybe later' : '稍后再说',
+        icon: 'auto_awesome',
+      });
       return;
     }
 
-    let message = isEn
-      ? 'Please sign in to continue your reading.'
-      : '请先登录账号以继续占卜';
     if (reason === 'daily_limit') {
-      message = isEn
-        ? "You've used your free readings for today. Upgrade to continue."
-        : '今日免费次数已用完，开通会员后可继续使用';
+      showAccessPrompt({
+        title: isEn ? 'Daily free limit reached' : '今日免费次数已用完',
+        message: isEn
+          ? "You've used your free readings for today. Upgrade to continue with unlimited readings."
+          : '今日免费次数已用完。开通会员后，可以继续使用更多深度牌阵和不限次数解读。',
+        primaryLabel: isEn ? 'View membership' : '查看会员',
+        primaryHref: '/membership',
+        secondaryLabel: isEn ? 'Not now' : '暂时不用',
+        icon: 'workspace_premium',
+      });
+      return;
     }
 
-    alert(message);
-
     if (reason === 'not_logged_in') {
-      router.replace('/login');
+      showAccessPrompt({
+        title: isEn ? 'Continue to finish' : '继续完成解读',
+        message: isEn
+          ? 'Continue with Google or email to finish this reading and keep your result.'
+          : '使用 Google 或邮箱继续，即可完成这次解读并保存结果。',
+        primaryLabel: isEn ? 'Continue' : '继续',
+        primaryHref: authRedirectHref('/login'),
+        secondaryLabel: isEn ? 'Maybe later' : '稍后再说',
+        icon: 'login',
+      });
       return;
     }
 
@@ -279,7 +307,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
       // Show a neutral error state so the user isn't wrongly redirected.
       setState({ loading: false, allowed: false, reason: undefined, isMember: false, userId: null });
     }
-  }, [theme, spreadId, spreadKey, redirectPath]);
+  }, [theme, spreadId, spreadKey, redirectPath, router, onDenied, redirectOnDenied, showAccessPrompt]);
 
   const retry = useCallback(async () => {
     setState((current) => ({ ...current, loading: true, reason: undefined }));

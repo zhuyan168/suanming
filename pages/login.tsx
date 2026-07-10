@@ -1,187 +1,249 @@
-import { type FormEvent, useCallback, useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 
-const authErrorMapZh: Record<string, string> = {
-  'Invalid login credentials': '邮箱或密码错误',
-  'User not found': '该用户不存在',
-  'Too many requests': '请求过于频繁，请稍后再试',
-  'Email rate limit exceeded': '发送邮件次数过多，请稍后再试',
-  'User already registered': '该邮箱已被注册',
-  'Signup requires a valid password': '请输入有效的密码',
-  'Password should be at least 6 characters': '密码至少需要 6 个字符',
+function getSafeNextPath(next: unknown): string {
+  const value = Array.isArray(next) ? next[0] : next
+  if (typeof value !== 'string') return '/'
+  if (!value.startsWith('/') || value.startsWith('//')) return '/'
+  return value
 }
 
-const authErrorMapEn: Record<string, string> = {
-  'Invalid login credentials': 'Incorrect email or password.',
-  'User not found': 'User not found.',
-  'Too many requests': 'Too many requests. Please try again later.',
-  'Email rate limit exceeded': 'Too many emails sent. Please try again later.',
-  'User already registered': 'This email is already registered.',
-  'Signup requires a valid password': 'Please enter a valid password.',
-  'Password should be at least 6 characters': 'Password must be at least 6 characters.',
+function isInvalidCredentials(message: string): boolean {
+  return message.toLowerCase().includes('invalid login credentials')
 }
 
-function isEmailNotConfirmedError(msg: string): boolean {
-  return msg.toLowerCase().includes('email not confirmed')
+function isAlreadyRegistered(message: string): boolean {
+  return message.toLowerCase().includes('user already registered')
 }
 
-function toLocalizedError(msg: string, isEn: boolean): string {
-  if (isEmailNotConfirmedError(msg)) {
+function isEmailNotConfirmed(message: string): boolean {
+  return message.toLowerCase().includes('email not confirmed')
+}
+
+function toFriendlyAuthError(message: string, isEn: boolean): string {
+  const lower = message.toLowerCase()
+
+  if (isEmailNotConfirmed(message)) {
     return isEn
-      ? 'Your email is not verified. Please check your inbox and complete verification before signing in.'
-      : '邮箱尚未验证，请先前往邮箱完成验证后再登录'
+      ? 'Please check your inbox and confirm your email before continuing.'
+      : '请先到邮箱完成验证后再继续。'
   }
-  const map = isEn ? authErrorMapEn : authErrorMapZh
-  for (const [key, val] of Object.entries(map)) {
-    if (msg.toLowerCase().includes(key.toLowerCase())) return val
+
+  if (lower.includes('too many requests') || lower.includes('email rate limit exceeded')) {
+    return isEn
+      ? 'Too many attempts. Please wait a few minutes and try again.'
+      : '操作过于频繁，请稍等几分钟后再试。'
   }
-  return msg
+
+  if (lower.includes('password should be at least 6 characters') || lower.includes('signup requires a valid password')) {
+    return isEn
+      ? 'Password must be at least 6 characters.'
+      : '密码至少需要 6 个字符。'
+  }
+
+  if (isInvalidCredentials(message)) {
+    return isEn
+      ? 'Incorrect password. You can try again or reset your password.'
+      : '密码不正确。你可以重试，或通过邮箱找回密码。'
+  }
+
+  return message || (isEn ? 'Unable to continue. Please try again.' : '暂时无法继续，请稍后再试。')
 }
 
 export default function LoginPage() {
   const router = useRouter()
   const isEn = router.locale === 'en'
+  const nextPath = getSafeNextPath(router.query.next)
+  const [step, setStep] = useState<'email' | 'password' | 'success'>('email')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [emailNotConfirmed, setEmailNotConfirmed] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [resending, setResending] = useState(false)
-  const [resendResult, setResendResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const texts = isEn ? {
-    title: 'Sign In - FateAura',
-    metaDesc: 'Sign in to your FateAura account',
+    title: 'Continue - FateAura',
+    metaDesc: 'Continue to FateAura',
     back: 'Back to Home',
-    heading: 'Welcome Back',
-    subtitle: 'Sign in to save readings and manage your account.',
-    privacyNote: 'Email is enough to use your account. No birthday, real name, or extra personal details required.',
-    successTitle: 'Signed in successfully.',
-    successSub: 'Redirecting to home...',
-    labelEmail: 'Email',
-    labelPassword: 'Password',
-    forgotPassword: 'Forgot password?',
-    placeholderPassword: 'Enter your password',
-    resending: 'Sending...',
-    resendBtn: 'Resend Verification Email',
-    resendSuccess: 'Verification email sent. Please check your inbox.',
-    submitting: 'Signing in...',
-    submit: 'Sign In',
-    divider: 'or',
+    heading: 'Continue',
+    subtitle: 'Use Google or email to continue your reading.',
+    privacyNote: 'Use an email you can access. Password reset links will be sent there if you ever need them.',
+    googleBtn: 'Continue with Google',
     googleLoading: 'Redirecting...',
-    googleBtn: 'Sign in with Google',
-    noAccount: "Don't have an account yet?",
-    register: 'Sign Up',
+    divider: 'or',
+    labelEmail: 'Email',
+    emailPlaceholder: 'your@email.com',
+    emailContinue: 'Continue with Email',
+    labelPassword: 'Password',
+    passwordPlaceholder: 'At least 6 characters',
+    passwordContinue: 'Continue',
+    passwordHelp: "If this email already has an account, we'll sign you in. If not, we'll create one.",
+    forgotPassword: 'Forgot password?',
+    changeEmail: 'Use a different email',
+    submitting: 'Continuing...',
+    successTitle: 'Done.',
+    successSub: 'Returning to your reading...',
     validateEmail: 'Please enter your email.',
     validateEmailFormat: 'Please enter a valid email address.',
     validatePassword: 'Please enter your password.',
+    validatePasswordLen: 'Password must be at least 6 characters.',
+    createdNotice: 'Account created. Returning to your reading...',
+    signedInNotice: 'Signed in. Returning to your reading...',
   } : {
-    title: '登录 - FateAura',
-    metaDesc: '登录你的 FateAura 账号',
+    title: '继续 - FateAura',
+    metaDesc: '继续使用 FateAura',
     back: '返回首页',
-    heading: '欢迎回来',
-    subtitle: '登录后可继续保存解读记录并管理账号。',
-    privacyNote: '只需邮箱即可使用账号，不需要填写生日、真实姓名或其他个人资料。',
-    successTitle: '登录成功',
-    successSub: '正在跳转到首页…',
-    labelEmail: '邮箱',
-    labelPassword: '密码',
-    forgotPassword: '忘记密码？',
-    placeholderPassword: '请输入密码',
-    resending: '发送中...',
-    resendBtn: '重新发送验证邮件',
-    resendSuccess: '验证邮件已发送，请前往邮箱查看',
-    submitting: '登录中...',
-    submit: '登录',
+    heading: '继续',
+    subtitle: '使用 Google 或邮箱继续你的解读。',
+    privacyNote: '请填写你能收到邮件的邮箱，忘记密码时会用它找回账号。',
+    googleBtn: '使用 Google 继续',
+    googleLoading: '正在跳转...',
     divider: '或',
-    googleLoading: '跳转中...',
-    googleBtn: '使用 Google 登录',
-    noAccount: '还没有账号？',
-    register: '去注册',
-    validateEmail: '请输入邮箱地址',
-    validateEmailFormat: '邮箱格式不正确',
-    validatePassword: '请输入密码',
+    labelEmail: '邮箱',
+    emailPlaceholder: 'your@email.com',
+    emailContinue: '使用邮箱继续',
+    labelPassword: '密码',
+    passwordPlaceholder: '至少 6 个字符',
+    passwordContinue: '继续',
+    passwordHelp: '如果这个邮箱已有账号，我们会为你登录；如果还没有账号，我们会自动创建。',
+    forgotPassword: '忘记密码？',
+    changeEmail: '换一个邮箱',
+    submitting: '正在继续...',
+    successTitle: '完成',
+    successSub: '正在返回你的解读...',
+    validateEmail: '请输入邮箱。',
+    validateEmailFormat: '请输入有效的邮箱地址。',
+    validatePassword: '请输入密码。',
+    validatePasswordLen: '密码至少需要 6 个字符。',
+    createdNotice: '账号已创建，正在返回你的解读...',
+    signedInNotice: '已登录，正在返回你的解读...',
   }
 
-  function validate(): string | null {
+  function validateEmail(): string | null {
     if (!email.trim()) return texts.validateEmail
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return texts.validateEmailFormat
-    if (!password) return texts.validatePassword
     return null
   }
 
-  const handleResendVerification = useCallback(async () => {
-    if (!email.trim()) return
-    setResending(true)
-    setResendResult(null)
-    const { error: resendError } = await supabase.auth.resend({
-      type: 'signup',
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-      },
-    })
-    setResending(false)
-    if (resendError) {
-      setResendResult({ type: 'error', text: toLocalizedError(resendError.message, isEn) })
-    } else {
-      setResendResult({ type: 'success', text: texts.resendSuccess })
-    }
-  }, [email, isEn, texts.resendSuccess])
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError('')
-    setEmailNotConfirmed(false)
-    setResendResult(null)
-
-    const validationError = validate()
-    if (validationError) {
-      setError(validationError)
-      return
-    }
-
-    setLoading(true)
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
-
-    setLoading(false)
-
-    if (signInError) {
-      if (isEmailNotConfirmedError(signInError.message)) {
-        setEmailNotConfirmed(true)
-      }
-      setError(toLocalizedError(signInError.message, isEn))
-      return
-    }
-
-    setSuccess(true)
-    setTimeout(() => router.push('/'), 800)
+  function validatePassword(): string | null {
+    if (!password) return texts.validatePassword
+    if (password.length < 6) return texts.validatePasswordLen
+    return null
   }
 
   async function handleGoogleLogin() {
     setError('')
     setGoogleLoading(true)
+    sessionStorage.setItem('auth_redirect_next', nextPath)
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     })
 
     if (oauthError) {
       setGoogleLoading(false)
-      setError(toLocalizedError(oauthError.message, isEn))
+      setError(toFriendlyAuthError(oauthError.message, isEn))
     }
+  }
+
+  function handleEmailStep(e: FormEvent) {
+    e.preventDefault()
+    setError('')
+    setNotice('')
+
+    const validationError = validateEmail()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    setStep('password')
+  }
+
+  async function handlePasswordStep(e: FormEvent) {
+    e.preventDefault()
+    setError('')
+    setNotice('')
+
+    const emailError = validateEmail()
+    if (emailError) {
+      setError(emailError)
+      setStep('email')
+      return
+    }
+
+    const passwordError = validatePassword()
+    if (passwordError) {
+      setError(passwordError)
+      return
+    }
+
+    setLoading(true)
+
+    const normalizedEmail = email.trim()
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    })
+
+    if (!signInError) {
+      setNotice(texts.signedInNotice)
+      setStep('success')
+      router.replace(nextPath)
+      return
+    }
+
+    if (!isInvalidCredentials(signInError.message)) {
+      setLoading(false)
+      setError(toFriendlyAuthError(signInError.message, isEn))
+      return
+    }
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+      },
+    })
+
+    if (signUpError) {
+      setLoading(false)
+      if (isAlreadyRegistered(signUpError.message)) {
+        setError(toFriendlyAuthError(signInError.message, isEn))
+      } else {
+        setError(toFriendlyAuthError(signUpError.message, isEn))
+      }
+      return
+    }
+
+    void import('../lib/readingQuestionEvents').then(({ trackReadingFunnelEvent }) =>
+      trackReadingFunnelEvent('signup_after_result')
+    )
+
+    const fbq = (window as typeof window & {
+      fbq?: (action: string, event: string, params?: Record<string, number>) => void
+    }).fbq
+    fbq?.('track', 'Subscribe', { value: 1 })
+
+    if (data.session) {
+      setNotice(texts.createdNotice)
+      setStep('success')
+      router.replace(nextPath)
+      return
+    }
+
+    setLoading(false)
+    setNotice(isEn
+      ? 'Account created. Please check your email, then come back to continue.'
+      : '账号已创建。请查看邮箱后回来继续。')
   }
 
   return (
@@ -208,102 +270,21 @@ export default function LoginPage() {
 
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
-            <p className="mt-2 text-white/50 text-sm">
-              {texts.subtitle}
-            </p>
+            <p className="mt-2 text-white/50 text-sm">{texts.subtitle}</p>
             <p className="mt-2 text-white/40 text-xs leading-relaxed">{texts.privacyNote}</p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">
-            {success ? (
+            {step === 'success' ? (
               <div className="text-center py-6 animate-fade-in">
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
                   check_circle
                 </span>
                 <h2 className="text-xl font-semibold text-white mb-2">{texts.successTitle}</h2>
-                <p className="text-white/60 text-sm">{texts.successSub}</p>
+                <p className="text-white/60 text-sm">{notice || texts.successSub}</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label htmlFor="email" className="block text-sm text-white/70 mb-1.5">
-                    {texts.labelEmail}
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="password" className="block text-sm text-white/70">
-                      {texts.labelPassword}
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-xs text-white/40 hover:text-secondary transition-colors"
-                    >
-                      {texts.forgotPassword}
-                    </Link>
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder={texts.placeholderPassword}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
-                  />
-                </div>
-
-                {error && (
-                  <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm animate-fade-in space-y-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base shrink-0">error</span>
-                      {error}
-                    </div>
-                    {emailNotConfirmed && (
-                      <div className="space-y-2">
-                        <button
-                          type="button"
-                          onClick={handleResendVerification}
-                          disabled={resending}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-white/5 border border-white/10 px-3 py-1.5 text-white/60 text-xs font-medium hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <span className="material-symbols-outlined text-sm">send</span>
-                          {resending ? texts.resending : texts.resendBtn}
-                        </button>
-                        {resendResult && (
-                          <p className={`text-xs ${resendResult.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {resendResult.text}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading || googleLoading}
-                  className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {loading ? texts.submitting : texts.submit}
-                </button>
-
-                <div className="relative flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-xs text-white/30">{texts.divider}</span>
-                  <div className="flex-1 h-px bg-white/10" />
-                </div>
-
+              <div className="space-y-5">
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
@@ -324,18 +305,118 @@ export default function LoginPage() {
                     </>
                   )}
                 </button>
-              </form>
+
+                <div className="relative flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-xs text-white/30">{texts.divider}</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                {step === 'email' ? (
+                  <form onSubmit={handleEmailStep} className="space-y-5">
+                    <div>
+                      <label htmlFor="email" className="block text-sm text-white/70 mb-1.5">
+                        {texts.labelEmail}
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder={texts.emailPlaceholder}
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      />
+                    </div>
+
+                    {error && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm animate-fade-in">
+                        <span className="material-symbols-outlined text-base">error</span>
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={googleLoading}
+                      className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {texts.emailContinue}
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handlePasswordStep} className="space-y-5">
+                    <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+                      <p className="text-xs text-white/40">{texts.labelEmail}</p>
+                      <div className="mt-1 flex items-center justify-between gap-3">
+                        <p className="min-w-0 truncate text-sm text-white/80">{email}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStep('email')
+                            setPassword('')
+                            setError('')
+                            setNotice('')
+                          }}
+                          className="shrink-0 text-xs text-secondary hover:text-accent transition-colors"
+                        >
+                          {texts.changeEmail}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label htmlFor="password" className="block text-sm text-white/70">
+                          {texts.labelPassword}
+                        </label>
+                        <Link
+                          href={{ pathname: '/forgot-password', query: { next: nextPath } }}
+                          className="text-xs text-white/40 hover:text-secondary transition-colors"
+                        >
+                          {texts.forgotPassword}
+                        </Link>
+                      </div>
+                      <input
+                        id="password"
+                        type="password"
+                        autoComplete="current-password"
+                        placeholder={texts.passwordPlaceholder}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
+                      />
+                      <p className="mt-2 text-xs leading-relaxed text-white/35">{texts.passwordHelp}</p>
+                    </div>
+
+                    {notice && (
+                      <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 text-emerald-300 text-sm animate-fade-in">
+                        <span className="material-symbols-outlined text-base">check_circle</span>
+                        {notice}
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="space-y-2 rounded-lg bg-red-500/10 border border-red-500/20 px-4 py-3 text-red-400 text-sm animate-fade-in">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-base">error</span>
+                          {error}
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loading || googleLoading}
+                      className="w-full rounded-lg bg-primary py-3 text-white text-sm font-medium hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {loading ? texts.submitting : texts.passwordContinue}
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
-
-          {!success && (
-            <p className="mt-6 text-center text-sm text-white/40">
-              {texts.noAccount}
-              <Link href="/register" className="text-secondary hover:text-accent ml-1 transition-colors">
-                {texts.register}
-              </Link>
-            </p>
-          )}
         </div>
       </div>
     </>

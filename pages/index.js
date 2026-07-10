@@ -898,11 +898,8 @@ export default function Home() {
   const [startTrialErrorReason, setStartTrialErrorReason] = useState(null);
 
   const {
-    isActive: isTrialActive,
-    hoursLeft: trialHoursLeft,
     totalRemaining: trialTotalRemaining,
     isLoading: isTrialLoading,
-    startTrial,
   } = useGuestTrial();
 
   useEffect(() => {
@@ -975,24 +972,10 @@ export default function Home() {
 
   const handleHeroCtaClick = async () => {
     setStartTrialErrorReason(null);
-    if (user) {
-      scrollToReadingOptions();
-      return;
+    if (!user && trialTotalRemaining <= 0) {
+      setStartTrialErrorReason('trial_limit_exceeded');
     }
-    if (isTrialActive) {
-      if (trialTotalRemaining <= 0) {
-        setStartTrialErrorReason('trial_limit_exceeded');
-        return;
-      }
-      scrollToReadingOptions();
-      return;
-    }
-    const result = await startTrial();
-    if (result.success) {
-      scrollToReadingOptions();
-    } else {
-      setStartTrialErrorReason(result.reason);
-    }
+    scrollToReadingOptions();
   };
 
   const handleTarotClose = () => {
@@ -1086,16 +1069,10 @@ export default function Home() {
                     ) : (
                       <>
                         <Link
-                          href="/register"
+                          href="/login"
                           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
                         >
-                          <span className="truncate">{t('nav.register')}</span>
-                        </Link>
-                        <Link
-                          href="/login"
-                          className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-white/10 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-white/20 transition-colors"
-                        >
-                          <span className="truncate">{t('nav.login')}</span>
+                          <span className="truncate">{isEn ? 'Continue' : '继续'}</span>
                         </Link>
                       </>
                     )}
@@ -1187,18 +1164,11 @@ export default function Home() {
                       ) : (
                         <>
                           <Link
-                            href="/register"
+                            href="/login"
                             onClick={closeMobileNav}
                             className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                           >
-                            {t('nav.register')}
-                          </Link>
-                          <Link
-                            href="/login"
-                            onClick={closeMobileNav}
-                            className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-white/10 text-white text-sm font-bold hover:bg-white/20 transition-colors"
-                          >
-                            {t('nav.login')}
+                            {isEn ? 'Continue' : '继续'}
                           </Link>
                         </>
                       )}
@@ -1243,7 +1213,7 @@ export default function Home() {
                             {t('hero.subtitle')}
                           </h2>
                         </div>
-                        {/* Hero CTA: 已登录 → Begin Reading；未登录无trial → Try Free for 72 Hours；active trial → Continue Free Trial */}
+                        {/* Hero CTA: visitors can start reading immediately; access checks happen when a reading is used. */}
                         <div className="flex flex-col items-center gap-1.5">
                           <button
                             type="button"
@@ -1253,23 +1223,19 @@ export default function Home() {
                           >
                             {isTrialLoading ? (
                               <span className="truncate">{isEn ? 'Starting...' : '正在开启...'}</span>
-                            ) : user ? (
-                              <span className="truncate">{t('hero.cta')}</span>
-                            ) : isTrialActive ? (
-                              <span className="truncate">{isEn ? 'Continue Free Trial' : '继续免费试用'}</span>
                             ) : (
-                              <span className="truncate">{isEn ? 'Try Free for 72 Hours' : '免费试用 72 小时'}</span>
+                              <span className="truncate">{isEn ? 'Start a Free Reading' : '开始免费解读'}</span>
                             )}
                           </button>
 
                           {/* 按钮下方小字 */}
                           {!user && !isTrialLoading && (
                             <p className="text-white/55 text-xs leading-tight">
-                              {isTrialActive
+                              {trialTotalRemaining > 0
                                 ? (isEn
-                                    ? `Your trial ends in ${trialHoursLeft} hour${trialHoursLeft !== 1 ? 's' : ''}`
-                                    : `免费试用还剩 ${trialHoursLeft} 小时`)
-                                : (isEn ? 'No login required' : '无需登录')}
+                                    ? `${trialTotalRemaining} free reading${trialTotalRemaining !== 1 ? 's' : ''} without sign-up`
+                                    : `免注册还可免费解读 ${trialTotalRemaining} 次`)
+                                : (isEn ? 'Create a free account for more daily readings' : '注册账号可获得更多每日免费次数')}
                             </p>
                           )}
 
@@ -1278,8 +1244,8 @@ export default function Home() {
                             <p className="text-red-400/90 text-xs leading-tight">
                               {startTrialErrorReason === 'trial_expired' || startTrialErrorReason === 'trial_limit_exceeded'
                                 ? (isEn
-                                    ? "You've used all free trial readings. Sign up to continue and save your readings."
-                                    : '您的 72 小时免费试用次数已用完。注册账号后可继续使用并保存解读记录。')
+                                    ? "You've used your 3 free readings. Create a free account to continue and save your readings."
+                                    : '您的 3 次免注册免费解读已用完。注册账号后可继续使用并保存解读记录。')
                                 : (isEn ? 'Unable to start your free trial. Please try again.' : '暂时无法开启免费试用，请稍后再试。')}
                             </p>
                           )}

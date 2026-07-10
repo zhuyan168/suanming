@@ -290,12 +290,12 @@ export default function RelationshipDev8Result() {
         // 数据不完整，清除并重新生成
         localStorage.removeItem(READING_KEY);
         setIsLoading(false);
-        generateReading(result);
+        window.setTimeout(() => generateReading(result), 250);
       }
     } else {
       // 如果没有缓存，自动生成解读
       setIsLoading(false);
-      generateReading(result);
+      window.setTimeout(() => generateReading(result), 250);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 只在组件挂载时执行一次
@@ -329,30 +329,63 @@ export default function RelationshipDev8Result() {
     }
   };
 
-  if (accessLoading || !allowed || isLoading) {
-    return (
-      <>
-        <Head>
-          <title>{pageText.loadingTitle}</title>
-        </Head>
-        <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-          <div className="text-white text-lg">{pageText.loadingData}</div>
+  const renderLoadingShell = () => (
+    <>
+      <Head>
+        <title>{pageText.loadingTitle}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+
+      <div className="dark">
+        <div className="font-display min-h-screen bg-[#191022] text-white pb-20">
+          <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-white/10 px-4 sm:px-8 md:px-16 lg:px-24 py-3 bg-[#191022]/80 backdrop-blur-sm">
+            <button className="flex items-center gap-2 text-white/50" disabled>
+              <span className="material-symbols-outlined">arrow_back</span>
+              <span className="text-sm font-medium">{texts.back}</span>
+            </button>
+            <h2 className="text-white text-lg font-bold leading-tight">{pageText.header}</h2>
+            <button className="flex items-center gap-2 text-white/50" disabled>
+              <span className="material-symbols-outlined">refresh</span>
+              <span className="text-sm font-medium hidden sm:inline">{pageText.reset}</span>
+            </button>
+          </header>
+
+          <main className="px-4 sm:px-8 md:px-16 lg:px-24 pt-4">
+            <div className="max-w-7xl mx-auto text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-primary mb-2">Reading Result</p>
+              <h1 className="text-3xl sm:text-4xl font-black leading-tight mb-2">{pageText.h1}</h1>
+              <p className="text-white/70 text-base max-w-2xl mx-auto">{pageText.subtitle}</p>
+            </div>
+
+            <div className="mx-auto mt-6 grid max-w-4xl grid-cols-4 gap-3 sm:gap-5 md:gap-8" aria-label={pageText.loadingData}>
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <div className="h-28 w-16 rounded-xl border border-white/10 bg-white/10 animate-pulse sm:h-48 sm:w-28 md:h-60 md:w-36" />
+                  <div className="h-3 w-14 rounded bg-white/10 animate-pulse sm:w-20" />
+                </div>
+              ))}
+            </div>
+
+            <div className="max-w-5xl mx-auto mt-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+              <div className="mb-5 h-5 w-40 rounded bg-white/10 animate-pulse" />
+              <div className="space-y-3">
+                <div className="h-4 w-full rounded bg-white/10 animate-pulse" />
+                <div className="h-4 w-11/12 rounded bg-white/10 animate-pulse" />
+                <div className="h-4 w-4/5 rounded bg-white/10 animate-pulse" />
+              </div>
+            </div>
+          </main>
         </div>
-      </>
-    );
+      </div>
+    </>
+  );
+
+  if (accessLoading || !allowed || isLoading) {
+    return renderLoadingShell();
   }
 
   if (!savedResult) {
-    return (
-      <>
-        <Head>
-          <title>{pageText.loadingTitle}</title>
-        </Head>
-        <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-          <div className="text-white text-lg">{pageText.loadingData}</div>
-        </div>
-      </>
-    );
+    return renderLoadingShell();
   }
 
   return (
@@ -541,6 +574,10 @@ export default function RelationshipDev8Result() {
                                         className={`w-full h-full object-contain ${
                                           card.orientation === 'reversed' ? 'rotate-180' : ''
                                         }`}
+                                        width={112}
+                                        height={176}
+                                        loading="lazy"
+                                        decoding="async"
                                         style={{ backgroundColor: 'white' }}
                                       />
                                     </div>

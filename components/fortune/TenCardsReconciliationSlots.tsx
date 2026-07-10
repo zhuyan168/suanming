@@ -100,6 +100,9 @@ export default function TenCardsReconciliationSlots({
                     src="/assets/card-back.png"
                     alt="Card Back"
                     className="w-full h-full object-cover"
+                    width={144}
+                    height={240}
+                    decoding="async"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -125,6 +128,8 @@ export default function TenCardsReconciliationSlots({
                     src={card.image}
                     alt={card.name}
                     className="w-full h-full object-contain"
+                    width={144}
+                    height={240}
                     style={{
                       backgroundColor: 'white',
                       imageRendering: 'crisp-edges',
@@ -132,6 +137,7 @@ export default function TenCardsReconciliationSlots({
                       transform: card.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                     }}
                     loading="eager"
+                    decoding="async"
                   />
                 </div>
               </div>

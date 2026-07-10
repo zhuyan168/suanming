@@ -254,7 +254,7 @@ export default function YesNoTarotResult() {
       return;
     }
 
-    fetchResult(savedQuestion, draw.card, draw.requestId);
+    window.setTimeout(() => fetchResult(savedQuestion, draw.card, draw.requestId), 150);
   }, [router]);
 
   const fetchResult = async (userQuestion: string, drawnCard: ShuffledTarotCard, requestId?: string) => {
@@ -336,7 +336,7 @@ export default function YesNoTarotResult() {
     router.push('/?tarot=true');
   };
 
-  if (!card || isLoading) {
+  if (!card) {
     return (
       <div className="dark">
         <Head>
@@ -369,6 +369,7 @@ export default function YesNoTarotResult() {
   const answerText = answer === 'YES' ? texts.yes : answer === 'NO' ? texts.no : answer === 'MAYBE' ? texts.maybe : texts.unknown;
   const localizedMeaning = card ? getLocalizedMeaning(card, card.orientation, router.locale) : '';
   const localizedKeywords = card ? getLocalizedKeywords(card, card.orientation, router.locale) : [];
+  const isResultPending = isLoading || !answer;
 
   return (
     <div className="dark">
@@ -436,6 +437,11 @@ export default function YesNoTarotResult() {
                       src={frontImage}
                       alt={card.name}
                       className={`w-full h-full object-contain ${card.orientation === 'reversed' ? 'rotate-180' : ''}`}
+                      width={224}
+                      height={320}
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                     />
                   </div>
                 </div>
@@ -473,9 +479,13 @@ export default function YesNoTarotResult() {
                         </span>
                         <div>
                           <p className="text-sm font-medium text-white/70 uppercase tracking-wider">{texts.answerLabel}</p>
-                          <p className={`text-4xl font-black ${answerColor}`}>
-                            {answerText}
-                          </p>
+                          {isResultPending ? (
+                            <div className="mt-2 h-10 w-32 rounded-lg bg-white/10 animate-pulse" />
+                          ) : (
+                            <p className={`text-4xl font-black ${answerColor}`}>
+                              {answerText}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -483,9 +493,18 @@ export default function YesNoTarotResult() {
                     {/* 解读 */}
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                       <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-3">{texts.interpretationLabel}</p>
-                      <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
-                        {interpretation}
-                      </p>
+                      {isResultPending ? (
+                        <div className="space-y-3" aria-label={texts.loading}>
+                          <div className="h-4 w-full rounded bg-white/10 animate-pulse" />
+                          <div className="h-4 w-11/12 rounded bg-white/10 animate-pulse" />
+                          <div className="h-4 w-4/5 rounded bg-white/10 animate-pulse" />
+                          <div className="h-4 w-2/3 rounded bg-white/10 animate-pulse" />
+                        </div>
+                      ) : (
+                        <p className="text-base leading-relaxed text-white/90 whitespace-pre-line">
+                          {interpretation}
+                        </p>
+                      )}
                     </div>
 
                     {/* 温馨提示 */}

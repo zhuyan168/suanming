@@ -3,7 +3,14 @@ import { supabaseService } from '../../../lib/supabaseServer';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TRIAL_COOKIE_NAME = 'guest_trial_session_id';
-const TRIAL_USAGE_LIMIT = 8;
+const TRIAL_USAGE_LIMIT = 3;
+const TRIAL_COOKIE_MAX_AGE = 315360000;
+
+function getLongLivedExpiry(): string {
+  const expiresAt = new Date();
+  expiresAt.setFullYear(expiresAt.getFullYear() + 10);
+  return expiresAt.toISOString();
+}
 
 type SuccessResponse = {
   success: true;
@@ -38,7 +45,7 @@ function setTrialCookie(res: NextApiResponse, sessionId: string) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
-    `${TRIAL_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+    `${TRIAL_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=${TRIAL_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
   );
 }
 
@@ -72,13 +79,6 @@ export default async function handler(
 
       if (existingSession) {
         setTrialCookie(res, existingSession.session_id);
-        if (new Date(existingSession.expires_at) <= new Date()) {
-          return res.status(403).json({
-            success: false,
-            error: 'Free trial has already ended',
-            reason: 'trial_expired',
-          });
-        }
 
         const { data: usageRows, error: usageError } = await supabaseService
           .from('guest_trial_usage')
@@ -107,17 +107,33 @@ export default async function handler(
           });
         }
 
+        const refreshedExpiresAt =
+          new Date(existingSession.expires_at) <= new Date()
+            ? getLongLivedExpiry()
+            : existingSession.expires_at;
+
+        if (refreshedExpiresAt !== existingSession.expires_at) {
+          supabaseService
+            .from('guest_trial_sessions')
+            .update({ expires_at: refreshedExpiresAt })
+            .eq('session_id', existingSession.session_id)
+            .then(({ error }) => {
+              if (error) console.error('[api/guest-trial/start] expiry refresh failed', error);
+            });
+        }
+
         return res.status(200).json({
           success: true,
           session_id: existingSession.session_id,
-          expires_at: existingSession.expires_at,
+          expires_at: refreshedExpiresAt,
         });
       }
     }
 
+    const expiresAt = getLongLivedExpiry();
     const { data, error } = await supabaseService
       .from('guest_trial_sessions')
-      .insert({})
+      .insert({ expires_at: expiresAt })
       .select('session_id, expires_at')
       .single();
 

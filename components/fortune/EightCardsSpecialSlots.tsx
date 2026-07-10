@@ -93,6 +93,9 @@ export default function EightCardsSpecialSlots({
                     src="/assets/card-back.png"
                     alt="Card Back"
                     className="w-full h-full object-cover"
+                    width={144}
+                    height={240}
+                    decoding="async"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -118,12 +121,15 @@ export default function EightCardsSpecialSlots({
                     className={`w-full h-full object-contain ${
                       card.orientation === 'reversed' ? 'rotate-180' : ''
                     }`}
+                    width={144}
+                    height={240}
                     style={{
                       backgroundColor: 'white',
                       imageRendering: 'crisp-edges',
                       WebkitFontSmoothing: 'antialiased',
                     }}
                     loading="eager"
+                    decoding="async"
                   />
                 </div>
               </div>

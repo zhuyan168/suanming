@@ -8,7 +8,7 @@ import React, {
 
 const STORAGE_KEY_SESSION_ID = 'guest_trial_session_id';
 const STORAGE_KEY_EXPIRES_AT = 'guest_trial_expires_at';
-const TRIAL_USAGE_LIMIT = 8;
+const TRIAL_USAGE_LIMIT = 3;
 
 type StartTrialErrorReason =
   | 'trial_expired'
@@ -142,10 +142,23 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
-  // 挂载时从 localStorage 恢复状态并校验
+  // Create the guest allowance automatically so visitors do not need to opt in.
   useEffect(() => {
-    refreshTrialStatus();
-  }, [refreshTrialStatus]);
+    let cancelled = false;
+
+    const syncTrial = async () => {
+      await refreshTrialStatus();
+      if (cancelled || typeof window === 'undefined') return;
+      if (!localStorage.getItem(STORAGE_KEY_SESSION_ID)) {
+        await startTrial();
+      }
+    };
+
+    syncTrial();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshTrialStatus, startTrial]);
 
   // 多标签页同步：监听 localStorage 变化
   useEffect(() => {

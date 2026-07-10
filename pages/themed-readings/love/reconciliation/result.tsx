@@ -192,7 +192,7 @@ export default function ReconciliationResultPage() {
       setIsLoading(false);
     } else {
       setIsLoading(false);
-      generateDeepReading(result);
+      window.setTimeout(() => generateDeepReading(result), 250);
     }
   }, [router]);
 
@@ -208,12 +208,62 @@ export default function ReconciliationResultPage() {
     }
   };
 
-  if (accessLoading || !allowed || isLoading || !savedResult) {
-    return (
-      <div className="min-h-screen bg-[#191022] flex items-center justify-center">
-        <div className="text-white/60 animate-pulse text-lg tracking-widest font-light">{pageText.loading}</div>
+  const renderLoadingShell = () => (
+    <div className="dark">
+      <Head>
+        <title>{pageText.title}</title>
+        <meta name="description" content={pageText.metaDesc} />
+      </Head>
+
+      <div className="font-display bg-[#191022] min-h-screen text-white pb-20">
+        <header className="sticky top-0 z-50 flex items-center justify-between border-b border-white/10 px-4 sm:px-8 py-3 bg-[#191022]/80 backdrop-blur-sm">
+          <button className="flex items-center gap-2 text-white/50" disabled>
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
+            <span className="text-sm font-medium">{texts.back}</span>
+          </button>
+          <h2 className="text-lg font-bold text-primary">FateAura</h2>
+          <button className="flex items-center gap-2 text-white/50" disabled>
+            <span className="material-symbols-outlined text-xl">refresh</span>
+            <span className="text-sm font-medium hidden sm:inline">{texts.btnDrawAgain}</span>
+          </button>
+        </header>
+
+        <main className="px-4 py-8 max-w-5xl mx-auto">
+          <section className="mb-12">
+            <div className="text-center mb-10">
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/80 mb-3 block">
+                {isEn ? 'Will We Get Back Together?' : '我们还会复合吗？'}
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-black mb-4">{pageText.h1}</h1>
+              <div className="h-1 w-20 bg-primary mx-auto rounded-full shadow-[0_0_15px_#7f13ec]" />
+            </div>
+
+            <div className="flex flex-col items-center gap-4 sm:gap-8" aria-label={pageText.loading}>
+              <div className="h-28 w-16 rounded-xl border border-primary/30 bg-white/10 animate-pulse sm:h-48 sm:w-28 md:h-60 md:w-36" />
+              {[0, 1, 2, 3, 4].map((row) => (
+                <div key={row} className={`flex items-center justify-center ${row % 2 === 0 ? 'gap-20 sm:gap-40 md:gap-64' : 'gap-6 sm:gap-12 md:gap-16'}`}>
+                  <div className="h-24 w-14 rounded-xl border border-white/10 bg-white/10 animate-pulse sm:h-40 sm:w-24 md:h-52 md:w-32" />
+                  <div className="h-24 w-14 rounded-xl border border-white/10 bg-white/10 animate-pulse sm:h-40 sm:w-24 md:h-52 md:w-32" />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8">
+            <div className="mb-5 h-5 w-44 rounded bg-white/10 animate-pulse" />
+            <div className="space-y-3">
+              <div className="h-4 w-full rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-11/12 rounded bg-white/10 animate-pulse" />
+              <div className="h-4 w-4/5 rounded bg-white/10 animate-pulse" />
+            </div>
+          </section>
+        </main>
       </div>
-    );
+    </div>
+  );
+
+  if (accessLoading || !allowed || isLoading || !savedResult) {
+    return renderLoadingShell();
   }
 
   return (
@@ -337,6 +387,10 @@ export default function ReconciliationResultPage() {
                                 src={card.image}
                                 alt={card.name}
                                 className="w-full h-full object-contain"
+                                width={112}
+                                height={176}
+                                loading="lazy"
+                                decoding="async"
                                 style={{
                                   backgroundColor: 'white',
                                   transform: card.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
@@ -409,6 +463,10 @@ export default function ReconciliationResultPage() {
                               src={guideCard.image}
                               alt={guideCard.name}
                               className="w-full h-full object-contain"
+                              width={112}
+                              height={176}
+                              loading="lazy"
+                              decoding="async"
                               style={{
                                 transform: guideCard.orientation === 'reversed' ? 'rotate(180deg)' : 'none',
                               }}

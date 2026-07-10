@@ -4,6 +4,7 @@ import { useTranslation } from 'next-i18next/pages';
 import { SpreadConfig } from '../../config/themedReadings';
 import PaywallBadge from './PaywallBadge';
 import { useGuestTrial } from '../../context/GuestTrialContext';
+import { useAccessPrompt } from '../../context/AccessPromptContext';
 
 interface SpreadCardProps {
   spread: SpreadConfig;
@@ -32,6 +33,7 @@ export default function SpreadCard({
   const { t } = useTranslation('common');
   const isZh = router.locale === 'zh';
   const { isActive: isTrialActive, startTrial } = useGuestTrial();
+  const { showAccessPrompt } = useAccessPrompt();
   const [isStartingTrial, setIsStartingTrial] = useState(false);
 
   const title = isZh ? spread.titleZh : (spread.titleEn || spread.titleZh);
@@ -83,20 +85,29 @@ export default function SpreadCard({
       if (!result.success) {
         const failureReason = 'reason' in result ? result.reason : 'unknown';
         if (failureReason === 'trial_expired' || failureReason === 'trial_limit_exceeded') {
-          alert(
-            isZh
-              ? '您的免登录试用已经结束。免费注册后可继续使用并保存占卜记录。'
-              : 'Your guest trial has ended. Sign up free to continue and save your readings.'
-          );
-          router.push('/register');
+          showAccessPrompt({
+            title: isZh ? '免费次数已用完' : 'Free readings used',
+            message: isZh
+              ? '您的 3 次免注册免费解读已用完。免费注册后可获得更多每日免费次数并保存占卜记录。'
+              : "You've used your 3 free readings. Create a free account to get more daily readings and save your results.",
+            primaryLabel: isZh ? '免费注册' : 'Create free account',
+            primaryHref: `/register?next=${encodeURIComponent(targetPath)}`,
+            secondaryLabel: isZh ? '稍后再说' : 'Maybe later',
+            icon: 'auto_awesome',
+          });
           return;
         }
 
-        alert(
-          isZh
-            ? '暂时无法开启免费试用，请检查网络后重试。'
-            : 'We could not start your free trial. Please check your connection and try again.'
-        );
+        showAccessPrompt({
+          title: isZh ? '暂时无法开始' : 'Unable to start',
+          message: isZh
+            ? '暂时无法开始免费解读，请检查网络后重试。'
+            : 'We could not start your free reading. Please check your connection and try again.',
+          primaryLabel: isZh ? '重试' : 'Try again',
+          onPrimary: () => void router.push(targetPath),
+          secondaryLabel: isZh ? '稍后再说' : 'Maybe later',
+          icon: 'refresh',
+        });
         return;
       }
     }

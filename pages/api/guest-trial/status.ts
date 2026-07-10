@@ -2,8 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabaseService } from '../../../lib/supabaseServer';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const TRIAL_USAGE_LIMIT = 8;
+const TRIAL_USAGE_LIMIT = 3;
 const TRIAL_COOKIE_NAME = 'guest_trial_session_id';
+const TRIAL_COOKIE_MAX_AGE = 315360000;
 
 type InvalidResponse =
   | { valid: false; reason: 'missing_session' }
@@ -36,7 +37,7 @@ function setTrialCookie(res: NextApiResponse, sessionId: string) {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
   res.setHeader(
     'Set-Cookie',
-    `${TRIAL_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`
+    `${TRIAL_COOKIE_NAME}=${encodeURIComponent(sessionId)}; Path=/; Max-Age=${TRIAL_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
   );
 }
 
