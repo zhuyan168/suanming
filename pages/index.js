@@ -973,10 +973,30 @@ export default function Home() {
   const handleHeroCtaClick = async () => {
     setStartTrialErrorReason(null);
     if (!user && trialTotalRemaining <= 0) {
-      setStartTrialErrorReason('trial_limit_exceeded');
+      router.push('/register');
+      return;
     }
     scrollToReadingOptions();
   };
+
+  const heroCtaLabel = (() => {
+    if (isTrialLoading) return isEn ? 'Loading...' : '加载中...';
+    if (user) return isEn ? 'Start Reading' : '开始解读';
+    if (trialTotalRemaining <= 0) return isEn ? 'Create Free Account' : '免费注册';
+    return isEn ? 'Start a Free Reading' : '开始免费解读';
+  })();
+
+  const heroHelperText = (() => {
+    if (user) return isEn ? 'Choose a spread below to begin.' : '请选择下方牌阵开始解读';
+    if (trialTotalRemaining > 0) {
+      return isEn
+        ? `${trialTotalRemaining} free reading${trialTotalRemaining !== 1 ? 's' : ''} without sign-up`
+        : `免注册还可免费解读 ${trialTotalRemaining} 次`;
+    }
+    return isEn
+      ? 'Create a free account for more daily readings and saved results'
+      : '注册账号可获得更多每日免费次数并保存结果';
+  })();
 
   const handleTarotClose = () => {
     setIsTarotOpen(false);
@@ -1072,7 +1092,7 @@ export default function Home() {
                           href="/login"
                           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
                         >
-                          <span className="truncate">{isEn ? 'Continue' : '继续'}</span>
+                          <span className="truncate">{isEn ? 'Sign in / Sign up' : '登录 / 注册'}</span>
                         </Link>
                       </>
                     )}
@@ -1168,7 +1188,7 @@ export default function Home() {
                             onClick={closeMobileNav}
                             className="flex w-full cursor-pointer items-center justify-center rounded-lg py-3 px-4 bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors"
                           >
-                            {isEn ? 'Continue' : '继续'}
+                            {isEn ? 'Sign in / Sign up' : '登录 / 注册'}
                           </Link>
                         </>
                       )}
@@ -1221,21 +1241,13 @@ export default function Home() {
                             disabled={isTrialLoading}
                             className="flex min-w-[220px] sm:min-w-[280px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-10 sm:px-14 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                           >
-                            {isTrialLoading ? (
-                              <span className="truncate">{isEn ? 'Starting...' : '正在开启...'}</span>
-                            ) : (
-                              <span className="truncate">{isEn ? 'Start a Free Reading' : '开始免费解读'}</span>
-                            )}
+                            <span className="truncate">{heroCtaLabel}</span>
                           </button>
 
                           {/* 按钮下方小字 */}
-                          {!user && !isTrialLoading && (
+                          {!isTrialLoading && (
                             <p className="text-white/55 text-xs leading-tight">
-                              {trialTotalRemaining > 0
-                                ? (isEn
-                                    ? `${trialTotalRemaining} free reading${trialTotalRemaining !== 1 ? 's' : ''} without sign-up`
-                                    : `免注册还可免费解读 ${trialTotalRemaining} 次`)
-                                : (isEn ? 'Create a free account for more daily readings' : '注册账号可获得更多每日免费次数')}
+                              {heroHelperText}
                             </p>
                           )}
 

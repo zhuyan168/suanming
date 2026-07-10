@@ -15,7 +15,7 @@ function toFriendlyError(msg: string, isEn: boolean): string {
   for (const [key, value] of Object.entries(callbackErrorMap)) {
     if (lower.includes(key)) return isEn ? value.en : value.zh
   }
-  return isEn ? 'Something went wrong while continuing. Please try again.' : '继续过程中出现问题，请重新尝试'
+  return isEn ? 'Something went wrong during account access. Please try again.' : '账号访问过程中出现问题，请重新尝试'
 }
 
 async function pollSession(maxAttempts = 5, intervalMs = 400): Promise<boolean> {
@@ -38,9 +38,9 @@ export default function AuthCallbackPage() {
   const router = useRouter()
   const isEn = router.locale === 'en'
   const text = isEn ? {
-    failedTitle: 'Continue Failed - FateAura',
-    failedHeading: 'Continue Failed',
-    returnLogin: 'Back to Continue',
+    failedTitle: 'Account Access Failed - FateAura',
+    failedHeading: 'Account Access Failed',
+    returnLogin: 'Back to Sign in / Sign up',
     loadingTitle: 'Continuing... - FateAura',
     loading: 'Completing your request. Please wait...',
     networkError: 'A network error occurred. Please try again.',
@@ -48,7 +48,7 @@ export default function AuthCallbackPage() {
   } : {
     failedTitle: '登录失败 - FateAura',
     failedHeading: '登录失败',
-    returnLogin: '返回继续',
+    returnLogin: '返回登录 / 注册',
     loadingTitle: '登录中… - FateAura',
     loading: '正在完成登录，请稍候…',
     networkError: '登录过程中出现网络异常，请重新尝试',

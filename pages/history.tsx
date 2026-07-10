@@ -228,13 +228,13 @@ function UnauthState() {
     <div className="flex flex-col items-center justify-center py-24 gap-4">
       <span className="material-symbols-outlined text-white/20 text-5xl">lock</span>
       <p className="text-white/50 text-sm">
-        {isEn ? 'Continue to view your tarot reading history.' : '请先继续登录后查看你的占卜记录'}
+        {isEn ? 'Sign in or create an account to view your tarot reading history.' : '请先登录或注册后查看你的占卜记录'}
       </p>
       <Link
         href="/login"
         className="rounded-lg bg-primary/20 border border-primary/30 text-primary text-sm font-medium px-5 py-2 hover:bg-primary/30 transition-colors"
       >
-        {isEn ? 'Continue' : '继续'}
+        {isEn ? 'Sign in / Sign up' : '登录 / 注册'}
       </Link>
     </div>
   )

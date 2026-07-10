@@ -54,40 +54,40 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
       {children}
 
       {prompt && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4 py-6">
+        <div className="fixed inset-0 z-[10000] isolate flex items-center justify-center px-4 py-6">
           <button
             type="button"
             aria-label="Close"
-            className="absolute inset-0 bg-black/65 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/85 backdrop-blur-md"
             onClick={closeAccessPrompt}
           />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-md overflow-hidden rounded-2xl border border-primary/30 bg-[#18162a] shadow-[0_24px_80px_rgba(0,0,0,0.45)]"
+            className="relative w-full max-w-[380px] overflow-hidden rounded-2xl border border-primary/40 bg-[#161025] shadow-[0_24px_90px_rgba(0,0,0,0.7)]"
           >
             <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-            <div className="p-6 sm:p-7">
+            <div className="px-5 py-6 sm:px-6">
               <button
                 type="button"
                 aria-label="Close"
                 onClick={closeAccessPrompt}
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+                className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
 
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/18 text-primary">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/20 text-primary">
                 <span className="material-symbols-outlined text-[32px]">
                   {prompt.icon ?? 'auto_awesome'}
                 </span>
               </div>
 
-              <h2 className="pr-8 text-2xl font-bold leading-tight text-white">
+              <h2 className="text-center text-2xl font-bold leading-tight text-white">
                 {prompt.title}
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-white/65">
+              <p className="mx-auto mt-3 max-w-[300px] text-center text-sm leading-6 text-white/70">
                 {prompt.message}
               </p>
 
@@ -95,14 +95,14 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
                 <button
                   type="button"
                   onClick={handlePrimaryClick}
-                  className="w-full rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary/85"
+                  className="h-11 w-full rounded-lg bg-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-primary/85"
                 >
                   {prompt.primaryLabel}
                 </button>
                 <button
                   type="button"
                   onClick={handleSecondaryClick}
-                  className="w-full rounded-lg bg-white/8 px-5 py-3 text-sm font-semibold text-white/70 transition-colors hover:bg-white/12 hover:text-white"
+                  className="h-11 w-full rounded-lg bg-white/10 px-5 text-sm font-semibold text-white/70 transition-colors hover:bg-white/20 hover:text-white"
                 >
                   {prompt.secondaryLabel ?? 'Not now'}
                 </button>

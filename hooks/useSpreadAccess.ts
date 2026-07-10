@@ -186,11 +186,11 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
 
     if (reason === 'not_logged_in') {
       showAccessPrompt({
-        title: isEn ? 'Continue to finish' : '继续完成解读',
+        title: isEn ? 'Sign in / Sign up to finish' : '登录 / 注册后完成解读',
         message: isEn
-          ? 'Continue with Google or email to finish this reading and keep your result.'
-          : '使用 Google 或邮箱继续，即可完成这次解读并保存结果。',
-        primaryLabel: isEn ? 'Continue' : '继续',
+          ? 'Use Google or email to finish this reading and keep your result.'
+          : '使用 Google 或邮箱登录/注册，即可完成这次解读并保存结果。',
+        primaryLabel: isEn ? 'Sign in / Sign up' : '登录 / 注册',
         primaryHref: authRedirectHref('/login'),
         secondaryLabel: isEn ? 'Maybe later' : '稍后再说',
         icon: 'login',

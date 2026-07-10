@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
     heading: 'Reset Password',
     subtitle: 'Enter your new password below.',
     successTitle: 'Password reset successfully.',
-    successSub: 'Redirecting to Continue...',
+    successSub: 'Redirecting to sign in / sign up...',
     labelPassword: 'New Password',
     placeholderPassword: 'At least 6 characters',
     labelConfirm: 'Confirm New Password',

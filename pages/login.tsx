@@ -66,25 +66,25 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
 
   const texts = isEn ? {
-    title: 'Continue - FateAura',
-    metaDesc: 'Continue to FateAura',
+    title: 'Sign in or Sign up - FateAura',
+    metaDesc: 'Sign in or create a FateAura account',
     back: 'Back to Home',
-    heading: 'Continue',
-    subtitle: 'Use Google or email to continue your reading.',
+    heading: 'Sign in / Sign up',
+    subtitle: 'Use Google or email. If you are new, we will create your account automatically.',
     privacyNote: 'Use an email you can access. Password reset links will be sent there if you ever need them.',
-    googleBtn: 'Continue with Google',
+    googleBtn: 'Use Google',
     googleLoading: 'Redirecting...',
     divider: 'or',
     labelEmail: 'Email',
     emailPlaceholder: 'your@email.com',
-    emailContinue: 'Continue with Email',
+    emailContinue: 'Use Email',
     labelPassword: 'Password',
     passwordPlaceholder: 'At least 6 characters',
-    passwordContinue: 'Continue',
+    passwordContinue: 'Sign in / Sign up',
     passwordHelp: "If this email already has an account, we'll sign you in. If not, we'll create one.",
     forgotPassword: 'Forgot password?',
     changeEmail: 'Use a different email',
-    submitting: 'Continuing...',
+    submitting: 'Processing...',
     successTitle: 'Done.',
     successSub: 'Returning to your reading...',
     validateEmail: 'Please enter your email.',
@@ -94,25 +94,25 @@ export default function LoginPage() {
     createdNotice: 'Account created. Returning to your reading...',
     signedInNotice: 'Signed in. Returning to your reading...',
   } : {
-    title: '继续 - FateAura',
-    metaDesc: '继续使用 FateAura',
+    title: '登录 / 注册 - FateAura',
+    metaDesc: '登录或创建 FateAura 账号',
     back: '返回首页',
-    heading: '继续',
-    subtitle: '使用 Google 或邮箱继续你的解读。',
+    heading: '登录 / 注册',
+    subtitle: '使用 Google 或邮箱。如果你是新用户，系统会自动创建账号。',
     privacyNote: '请填写你能收到邮件的邮箱，忘记密码时会用它找回账号。',
-    googleBtn: '使用 Google 继续',
+    googleBtn: '使用 Google',
     googleLoading: '正在跳转...',
     divider: '或',
     labelEmail: '邮箱',
     emailPlaceholder: 'your@email.com',
-    emailContinue: '使用邮箱继续',
+    emailContinue: '使用邮箱',
     labelPassword: '密码',
     passwordPlaceholder: '至少 6 个字符',
-    passwordContinue: '继续',
+    passwordContinue: '登录 / 注册',
     passwordHelp: '如果这个邮箱已有账号，我们会为你登录；如果还没有账号，我们会自动创建。',
     forgotPassword: '忘记密码？',
     changeEmail: '换一个邮箱',
-    submitting: '正在继续...',
+    submitting: '正在处理...',
     successTitle: '完成',
     successSub: '正在返回你的解读...',
     validateEmail: '请输入邮箱。',
@@ -253,12 +253,12 @@ export default function LoginPage() {
         <meta name="description" content={texts.metaDesc} />
       </Head>
 
-      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12 relative overflow-hidden">
+      <div className="min-h-screen bg-background flex items-start justify-center px-4 py-10 sm:py-14 relative overflow-hidden">
         <div className="absolute top-1/4 left-1/3 hidden h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px] pointer-events-none sm:block" />
         <div className="absolute bottom-1/4 right-1/4 hidden h-[400px] w-[400px] rounded-full bg-secondary/8 blur-[100px] pointer-events-none sm:block" />
 
-        <div className="relative z-10 w-full max-w-md">
-          <div className="mb-6">
+        <div className="relative z-10 w-full max-w-[430px]">
+          <div className="mb-5">
             <Link
               href="/"
               className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-white/70 transition-colors"
@@ -268,13 +268,13 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
-            <p className="mt-2 text-white/50 text-sm">{texts.subtitle}</p>
-            <p className="mt-2 text-white/40 text-xs leading-relaxed">{texts.privacyNote}</p>
-          </div>
+          <div className="rounded-2xl border border-white/10 bg-[#181226] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-7">
+            <div className="mb-6 text-center">
+              <h1 className="text-3xl font-bold text-white tracking-wide">{texts.heading}</h1>
+              <p className="mt-2 text-white/60 text-sm">{texts.subtitle}</p>
+              <p className="mx-auto mt-2 max-w-[320px] text-white/40 text-xs leading-relaxed">{texts.privacyNote}</p>
+            </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm p-8">
             {step === 'success' ? (
               <div className="text-center py-6 animate-fade-in">
                 <span className="material-symbols-outlined text-primary text-5xl mb-4 block">
@@ -386,7 +386,7 @@ export default function LoginPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder:text-white/25 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/40 transition-colors"
                       />
-                      <p className="mt-2 text-xs leading-relaxed text-white/35">{texts.passwordHelp}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-white/40">{texts.passwordHelp}</p>
                     </div>
 
                     {notice && (
