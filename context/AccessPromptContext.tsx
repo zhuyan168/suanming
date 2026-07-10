@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 interface AccessPromptOptions {
@@ -29,6 +29,12 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
     setPrompt(options);
   };
 
+  useEffect(() => {
+    const handleRouteChange = () => closeAccessPrompt();
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => router.events.off('routeChangeStart', handleRouteChange);
+  }, [router.events]);
+
   const handlePrimaryClick = () => {
     const currentPrompt = prompt;
     if (!currentPrompt) return;
@@ -54,18 +60,17 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
       {children}
 
       {prompt && (
-        <div className="fixed inset-0 z-[10000] isolate flex items-center justify-center px-4 py-6">
-          <button
-            type="button"
-            aria-label="Close"
-            className="absolute inset-0 bg-black/85 backdrop-blur-md"
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center px-4 py-6">
+          <div
+            role="presentation"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={closeAccessPrompt}
           />
 
           <div
             role="dialog"
             aria-modal="true"
-            className="relative w-full max-w-[380px] overflow-hidden rounded-2xl border border-primary/40 bg-[#161025] shadow-[0_24px_90px_rgba(0,0,0,0.7)]"
+            className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-primary/40 bg-[#161025] shadow-2xl"
           >
             <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
             <div className="px-5 py-6 sm:px-6">
@@ -87,7 +92,7 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
               <h2 className="text-center text-2xl font-bold leading-tight text-white">
                 {prompt.title}
               </h2>
-              <p className="mx-auto mt-3 max-w-[300px] text-center text-sm leading-6 text-white/70">
+              <p className="mx-auto mt-3 max-w-xs text-center text-sm leading-6 text-white/70">
                 {prompt.message}
               </p>
 

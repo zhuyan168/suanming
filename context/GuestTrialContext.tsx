@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
+import { useRouter } from 'next/router';
 
 const STORAGE_KEY_SESSION_ID = 'guest_trial_session_id';
 const STORAGE_KEY_EXPIRES_AT = 'guest_trial_expires_at';
@@ -58,6 +59,7 @@ function computeTimeLeft(expiresAt: string | null): {
 }
 
 export function GuestTrialProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [totalUsed, setTotalUsed] = useState(0);
@@ -171,6 +173,32 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, [refreshTrialStatus]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const refresh = () => {
+      if (document.visibilityState === 'hidden') return;
+      void refreshTrialStatus();
+    };
+    window.addEventListener('focus', refresh);
+    window.addEventListener('pageshow', refresh);
+    document.addEventListener('visibilitychange', refresh);
+
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('pageshow', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [refreshTrialStatus]);
+
+  useEffect(() => {
+    const refresh = () => {
+      void refreshTrialStatus();
+    };
+    router.events.on('routeChangeComplete', refresh);
+    return () => router.events.off('routeChangeComplete', refresh);
+  }, [router.events, refreshTrialStatus]);
 
   // 每分钟重新计算 isExpired，保持倒计时 UI 同步
   useEffect(() => {
