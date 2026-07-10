@@ -64,6 +64,13 @@ export default function AuthCallbackPage() {
       const nextPath =
         getSafeNextPath(router.query.next) ||
         (typeof window !== 'undefined' ? getSafeNextPath(sessionStorage.getItem('auth_redirect_next')) : '/')
+      const returnToNextPath = () => {
+        if (typeof window !== 'undefined') {
+          window.location.replace(nextPath)
+          return
+        }
+        void router.replace(nextPath)
+      }
 
       if (code) {
         try {
@@ -77,7 +84,7 @@ export default function AuthCallbackPage() {
           return
         }
         if (typeof window !== 'undefined') sessionStorage.removeItem('auth_redirect_next')
-        router.replace(nextPath)
+        returnToNextPath()
         return
       }
 
@@ -86,7 +93,7 @@ export default function AuthCallbackPage() {
       const hasSession = await pollSession()
       if (hasSession) {
         if (typeof window !== 'undefined') sessionStorage.removeItem('auth_redirect_next')
-        router.replace(nextPath)
+        returnToNextPath()
         return
       }
 

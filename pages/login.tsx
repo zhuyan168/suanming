@@ -135,6 +135,14 @@ export default function LoginPage() {
     return null
   }
 
+  function returnToNextPath() {
+    if (typeof window !== 'undefined') {
+      window.location.replace(nextPath)
+      return
+    }
+    void router.replace(nextPath)
+  }
+
   async function handleGoogleLogin() {
     setError('')
     setGoogleLoading(true)
@@ -196,7 +204,7 @@ export default function LoginPage() {
     if (!signInError) {
       setNotice(texts.signedInNotice)
       setStep('success')
-      router.replace(nextPath)
+      returnToNextPath()
       return
     }
 
@@ -236,7 +244,7 @@ export default function LoginPage() {
     if (data.session) {
       setNotice(texts.createdNotice)
       setStep('success')
-      router.replace(nextPath)
+      returnToNextPath()
       return
     }
 

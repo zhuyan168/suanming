@@ -45,7 +45,11 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (currentPrompt.primaryHref) {
-      router.push(currentPrompt.primaryHref);
+      if (typeof window !== 'undefined') {
+        window.location.assign(currentPrompt.primaryHref);
+        return;
+      }
+      void router.push(currentPrompt.primaryHref);
     }
   };
 
