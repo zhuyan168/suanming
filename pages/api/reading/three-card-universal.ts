@@ -17,7 +17,7 @@ export default async function handler(
   const { cards, question } = req.body;
 
   if (!cards || !Array.isArray(cards) || cards.length !== 3) {
-    return res.status(400).json({ error: 'Invalid cards data' });
+    return res.status(400).json({ error: 'Invalid cards data', code: 'INVALID_CARDS' });
   }
 
   const isEn = isEnglishRequest(req);
@@ -25,7 +25,7 @@ export default async function handler(
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     console.error('DEEPSEEK_API_KEY is not configured');
-    return res.status(500).json({ error: 'API key not configured' });
+    return res.status(500).json({ error: 'API key not configured', code: 'SERVER_CONFIG_ERROR' });
   }
 
   // 判断是否有用户问题
@@ -177,8 +177,23 @@ export default async function handler(
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to call DeepSeek API');
+      let providerMessage = 'Failed to call DeepSeek API';
+      try {
+        const error = await response.json();
+        providerMessage = error.message || error.error?.message || providerMessage;
+      } catch {
+        providerMessage = await response.text().catch(() => providerMessage);
+      }
+      console.error('[api/reading/three-card-universal] DeepSeek request failed', {
+        status: response.status,
+        message: providerMessage,
+      });
+      return res.status(502).json({
+        error: isEn
+          ? 'The AI service is temporarily unavailable. Please try again later.'
+          : 'AI 服务暂时不可用，请稍后重试',
+        code: 'AI_PROVIDER_ERROR',
+      });
     }
 
     const data = await response.json();
@@ -198,14 +213,22 @@ export default async function handler(
       return res.status(200).json(reading);
     } catch (parseError: unknown) {
       if (parseError instanceof AIJsonParseError) {
-        console.error('JSON parse error:', parseError.message);
+        console.error('[api/reading/three-card-universal] JSON parse error:', parseError.message);
       } else {
-        console.error('Unexpected parse error:', parseError);
+        console.error('[api/reading/three-card-universal] Unexpected parse error:', parseError);
       }
-      throw new Error('AI 返回的内容格式有误，请重试');
+      return res.status(502).json({
+        error: isEn
+          ? 'The AI returned an unreadable result. Please try again.'
+          : 'AI 返回的内容格式有误，请重试',
+        code: 'AI_JSON_PARSE_ERROR',
+      });
     }
   } catch (error: any) {
-    console.error('DeepSeek API Error:', error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    console.error('[api/reading/three-card-universal] unexpected error:', error);
+    return res.status(500).json({
+      error: error.message || 'Internal Server Error',
+      code: 'INTERNAL_ERROR',
+    });
   }
 }

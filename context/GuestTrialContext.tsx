@@ -89,6 +89,7 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
 
     try {
       const response = await fetch('/api/guest-trial/status', {
+        cache: 'no-store',
         headers: storedSessionId ? { 'x-guest-session-id': storedSessionId } : undefined,
       });
       const data = await response.json();
@@ -117,6 +118,7 @@ export function GuestTrialProvider({ children }: { children: React.ReactNode }) 
     try {
       const response = await fetch('/api/guest-trial/start', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
       });
       const data = await response.json();

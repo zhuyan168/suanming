@@ -53,6 +53,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SuccessResponse | ErrorResponse>
 ) {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed', reason: 'method_not_allowed' });
   }
@@ -100,6 +102,10 @@ export default async function handler(
         );
 
         if (totalUsed >= TRIAL_USAGE_LIMIT) {
+          console.info('[api/guest-trial/start] trial limit exceeded', {
+            session_id: existingSession.session_id,
+            total_used: totalUsed,
+          });
           return res.status(403).json({
             success: false,
             error: 'Free trial readings have already been used',

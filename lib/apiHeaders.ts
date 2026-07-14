@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { getSupabaseSession } from './supabaseSession';
 
 const GUEST_SESSION_STORAGE_KEY = 'guest_trial_session_id';
 const GUEST_SESSION_EXPIRES_KEY = 'guest_trial_expires_at';
@@ -15,6 +15,7 @@ async function ensureGuestSession(): Promise<string | null> {
   try {
     const response = await fetch('/api/guest-trial/start', {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await response.json();
@@ -40,7 +41,7 @@ export async function getAuthHeaders(baseHeaders?: Record<string, string>): Prom
   };
 
   try {
-    const { data } = await supabase.auth.getSession();
+    const { data } = await getSupabaseSession();
     const accessToken = data?.session?.access_token;
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`;
@@ -62,7 +63,7 @@ export async function getAuthHeaders(baseHeaders?: Record<string, string>): Prom
 
 export async function getClientCacheIdentity(): Promise<string> {
   try {
-    const { data } = await supabase.auth.getSession();
+    const { data } = await getSupabaseSession();
     const userId = data?.session?.user?.id;
     if (userId) {
       return `user_${userId}`;

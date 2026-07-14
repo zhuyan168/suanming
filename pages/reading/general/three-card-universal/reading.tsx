@@ -7,6 +7,8 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders } from '../../../../lib/apiHeaders';
 import { getThreeCardT } from '../../../../lib/threeCardI18n';
+import { useAccessPrompt } from '../../../../context/AccessPromptContext';
+import { trackClientErrorEvent } from '../../../../lib/clientErrorEvents';
 
 interface ShuffledTarotCard extends TarotCard {
   orientation: 'upright' | 'reversed';
@@ -28,7 +30,7 @@ interface ReadingResult {
   closing: string;
 }
 
-type ErrorType = 'incomplete' | 'load' | 'generate' | 'default' | null;
+type ErrorType = 'incomplete' | 'load' | 'generate' | 'ai_provider' | 'ai_parse' | 'default' | null;
 
 const QUESTION_STORAGE_KEY = 'general_three_card_question';
 const RESULT_STORAGE_KEY = 'general_three_card_draw_result';
@@ -37,6 +39,7 @@ export default function ThreeCardReadingPage() {
   const router = useRouter();
   const t = getThreeCardT(router.locale);
   const isZh = router.locale === 'zh';
+  const { showAccessPrompt } = useAccessPrompt();
 
   const { isFromHistory, goBack: goBackToHistory } = useHistoryBack();
   const [result, setResult] = useState<ThreeCardResult | null>(null);
@@ -97,7 +100,63 @@ export default function ThreeCardReadingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('generate');
+        const data = await response.json().catch(() => ({}));
+        const code = typeof data.code === 'string' ? data.code : 'UNKNOWN_ERROR';
+        const message = typeof data.error === 'string' ? data.error : t.reading.errorGenerate;
+
+        await trackClientErrorEvent({
+          source: 'three_card_universal_reading_api',
+          message: `${response.status} ${code}: ${message}`,
+          pagePath: router.asPath,
+          locale: router.locale ?? null,
+          browser: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+        });
+
+        if (
+          code === 'guest_trial_limit_exceeded' ||
+          code === 'feature_trial_limit_exceeded' ||
+          code === 'daily_limit'
+        ) {
+          showAccessPrompt({
+            title: isZh ? '免费次数已用完' : 'Free readings used',
+            message: isZh
+              ? '你的免费解读次数已用完。注册账号后即可获得更多每日免费次数，并保存解读结果。'
+              : "You've used your free readings. Create a free account to get more daily readings and save your results.",
+            primaryLabel: isZh ? '免费注册' : 'Create free account',
+            primaryHref: `/register?next=${encodeURIComponent(router.asPath)}`,
+            secondaryLabel: isZh ? '返回牌阵' : 'Back to spreads',
+            onSecondary: handleReturn,
+          });
+          return;
+        }
+
+        if (code === 'not_logged_in' || code === 'guest_trial_invalid' || code === 'guest_trial_expired') {
+          showAccessPrompt({
+            title: isZh ? '需要继续登录' : 'Continue to sign in',
+            message: isZh
+              ? '当前会话没有通过校验。登录或注册后，可以继续解读并保存结果。'
+              : 'Your session could not be verified. Sign in or create an account to continue and save your result.',
+            primaryLabel: isZh ? '登录 / 注册' : 'Sign in / Sign up',
+            primaryHref: `/register?next=${encodeURIComponent(router.asPath)}`,
+            secondaryLabel: isZh ? '返回牌阵' : 'Back to spreads',
+            onSecondary: handleReturn,
+          });
+          return;
+        }
+
+        if (code === 'AI_PROVIDER_ERROR') {
+          setErrorType('ai_provider');
+          setError(message);
+          return;
+        }
+
+        if (code === 'AI_JSON_PARSE_ERROR') {
+          setErrorType('ai_parse');
+          setError(message);
+          return;
+        }
+
+        throw new Error(message || 'generate');
       }
 
       const data = await response.json();

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
+import { getSupabaseSession } from '../../lib/supabaseSession';
 import { useGuestTrial } from '../../context/GuestTrialContext';
 
 export default function GuestTrialBanner() {
@@ -12,7 +13,7 @@ export default function GuestTrialBanner() {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    getSupabaseSession().then(({ data }) => {
       setIsLoggedIn(!!data.session?.user);
     });
 

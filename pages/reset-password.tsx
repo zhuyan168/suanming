@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
+import { getSupabaseSession } from '../lib/supabaseSession'
 
 const errorMapZh: Record<string, string> = {
   'New password should be different from the old password': '新密码不能与旧密码相同',
@@ -88,7 +89,7 @@ export default function ResetPasswordPage() {
       }
     })
 
-    supabase.auth.getSession().then(({ data }) => {
+    getSupabaseSession().then(({ data }) => {
       if (data.session) {
         setSessionReady(true)
       }

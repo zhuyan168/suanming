@@ -1,4 +1,6 @@
-import { getAuthHeaders } from './apiHeaders';
+import { getSupabaseSession } from './supabaseSession';
+
+const GUEST_SESSION_STORAGE_KEY = 'guest_trial_session_id';
 
 interface ClientErrorEventPayload {
   source: string;
@@ -26,7 +28,16 @@ export async function trackClientErrorEvent(payload: ClientErrorEventPayload): P
   try {
     if (shouldSkipDuplicate(payload)) return;
 
-    const headers = await getAuthHeaders();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const { data } = await getSupabaseSession();
+    const accessToken = data?.session?.access_token;
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    } else if (typeof window !== 'undefined') {
+      const guestSessionId = localStorage.getItem(GUEST_SESSION_STORAGE_KEY);
+      if (guestSessionId) headers['x-guest-session-id'] = guestSessionId;
+    }
+
     await fetch('/api/client-error-events', {
       method: 'POST',
       headers,

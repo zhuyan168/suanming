@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { supabase } from '../../lib/supabase'
+import { getSupabaseSession } from '../../lib/supabaseSession'
 
 const callbackErrorMap: Record<string, { zh: string; en: string }> = {
   'invalid request': { zh: '授权请求无效，请重新登录', en: 'The authorization request is invalid. Please sign in again.' },
@@ -20,7 +21,7 @@ function toFriendlyError(msg: string, isEn: boolean): string {
 
 async function pollSession(maxAttempts = 5, intervalMs = 400): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
-    const { data } = await supabase.auth.getSession()
+    const { data } = await getSupabaseSession()
     if (data.session) return true
     await new Promise((r) => setTimeout(r, intervalMs))
   }
