@@ -9,6 +9,7 @@ interface AccessPromptOptions {
   onPrimary?: () => void;
   secondaryLabel?: string;
   onSecondary?: () => void;
+  onClose?: () => void;
   icon?: string;
 }
 
@@ -23,7 +24,12 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [prompt, setPrompt] = useState<AccessPromptOptions | null>(null);
 
-  const closeAccessPrompt = () => setPrompt(null);
+  const closeAccessPrompt = (runOnClose = true) => {
+    setPrompt((currentPrompt) => {
+      if (runOnClose) currentPrompt?.onClose?.();
+      return null;
+    });
+  };
 
   const showAccessPrompt = (options: AccessPromptOptions) => {
     setPrompt(options);
@@ -39,7 +45,7 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
     const currentPrompt = prompt;
     if (!currentPrompt) return;
 
-    closeAccessPrompt();
+    closeAccessPrompt(false);
     if (currentPrompt.onPrimary) {
       currentPrompt.onPrimary();
       return;
@@ -55,7 +61,7 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
 
   const handleSecondaryClick = () => {
     const currentPrompt = prompt;
-    closeAccessPrompt();
+    closeAccessPrompt(false);
     currentPrompt?.onSecondary?.();
   };
 
@@ -68,7 +74,7 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
           <div
             role="presentation"
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={closeAccessPrompt}
+            onClick={() => closeAccessPrompt()}
           />
 
           <div
@@ -81,7 +87,7 @@ export function AccessPromptProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 aria-label="Close"
-                onClick={closeAccessPrompt}
+                onClick={() => closeAccessPrompt()}
                 className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20 hover:text-white"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>

@@ -115,6 +115,16 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
   // Tracks when the last access check completed; used by the visibility-change
   // handler to avoid hammering the server on rapid tab switches.
   const lastCheckedRef = useRef<number>(0);
+  const dismissedDenialPromptRef = useRef(false);
+
+  const getDeniedFallbackPath = () => (
+    redirectPath || (theme ? `/themed-readings/${theme}` : '/reading/general')
+  );
+
+  const dismissDeniedPrompt = () => {
+    dismissedDenialPromptRef.current = true;
+    router.replace(getDeniedFallbackPath());
+  };
 
   const handleDenied = (reason: SpreadAccessState['reason']) => {
     setState({
@@ -130,6 +140,10 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
     }
 
     if (!redirectOnDenied || !reason) {
+      return;
+    }
+
+    if (dismissedDenialPromptRef.current) {
       return;
     }
 
@@ -165,6 +179,8 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
         primaryLabel: isEn ? 'Create free account' : '免费注册',
         primaryHref: authRedirectHref('/register'),
         secondaryLabel: isEn ? 'Maybe later' : '稍后再说',
+        onSecondary: dismissDeniedPrompt,
+        onClose: dismissDeniedPrompt,
         icon: 'auto_awesome',
       });
       return;
@@ -179,6 +195,8 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
         primaryLabel: isEn ? 'View membership' : '查看会员',
         primaryHref: '/membership',
         secondaryLabel: isEn ? 'Not now' : '暂时不用',
+        onSecondary: dismissDeniedPrompt,
+        onClose: dismissDeniedPrompt,
         icon: 'workspace_premium',
       });
       return;
@@ -193,13 +211,14 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
         primaryLabel: isEn ? 'Sign in / Sign up' : '登录 / 注册',
         primaryHref: authRedirectHref('/login'),
         secondaryLabel: isEn ? 'Maybe later' : '稍后再说',
+        onSecondary: dismissDeniedPrompt,
+        onClose: dismissDeniedPrompt,
         icon: 'login',
       });
       return;
     }
 
-    const targetPath = redirectPath || (theme ? `/themed-readings/${theme}` : '/reading/general');
-    router.replace(targetPath);
+    router.replace(getDeniedFallbackPath());
   };
 
   const checkAccess = useCallback(async () => {
@@ -310,6 +329,7 @@ export function useSpreadAccess(options: UseSpreadAccessOptions): SpreadAccessSt
   }, [theme, spreadId, spreadKey, redirectPath, router, onDenied, redirectOnDenied, showAccessPrompt]);
 
   const retry = useCallback(async () => {
+    dismissedDenialPromptRef.current = false;
     setState((current) => ({ ...current, loading: true, reason: undefined }));
     await checkAccess();
   }, [checkAccess]);
