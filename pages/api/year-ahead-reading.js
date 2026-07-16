@@ -142,7 +142,7 @@ JSON 结构示例：
           },
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 6000,
         stream: false,
       }),
     });
@@ -166,6 +166,11 @@ JSON 结构示例：
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError);
       return res.status(500).json({ error: '解析运势数据失败' });
+    }
+
+    const complete = Array.isArray(fortuneData?.cards) && fortuneData.cards.length === 13;
+    if (!complete) {
+      return res.status(500).json({ error: 'AI 返回的年度解读不完整，请重试' });
     }
 
     await recordSuccessfulReading({

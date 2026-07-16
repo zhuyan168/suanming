@@ -7,7 +7,7 @@ import { TarotCard } from '../../../../components/fortune/CardItem';
 import { useHistoryBack } from '../../../../hooks/useHistoryBack';
 import { getAuthHeaders, getClientCacheIdentity } from '../../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../../hooks/useSpreadAccess';
-import { getLocalizedKeywords, getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
+import { getLocalizedMeaning } from '../../../../lib/tarotCardI18n';
 
 // 完整的78张塔罗牌数据 (用于数据验证和修复)
 const tarotCards: TarotCard[] = [
@@ -135,6 +135,74 @@ interface YearAheadResult {
   createdAt: number;
 }
 
+const normalizeYearAheadReading = (
+  raw: any,
+  drawnCards: Array<{ name?: string; orientation?: 'upright' | 'reversed' }>,
+  year: string
+): YearAheadResult['result'] | undefined => {
+  const source = raw?.reading_result ?? raw?.result ?? raw?.interpretation ?? raw;
+
+  if (Array.isArray(source?.cards) && source.cards.length === 13) {
+    return {
+      year: String(source.year || year),
+      summary: String(source.summary || source.overall || ''),
+      cards: source.cards.map((item: any, index: number) => ({
+        position: String(item?.position || (index === 12 ? '年度主题牌' : `${index + 1}月`)),
+        name: String(item?.name || drawnCards[index]?.name || ''),
+        orientation: item?.orientation === 'reversed' ? 'reversed' : 'upright',
+        meaning: String(item?.meaning || item?.reading || item?.interpretation || ''),
+      })),
+    };
+  }
+
+  // 兼容旧版年度运势结构：yearOverview + months。
+  if (source?.months && typeof source.months === 'object') {
+    const overview = Array.isArray(source.yearOverview)
+      ? source.yearOverview.join('\n')
+      : String(source.yearOverview || source.summary || '');
+    const monthlyCards: YearAheadResultCard[] = Array.from({ length: 12 }, (_, index) => {
+      const month = source.months[String(index + 1)] ?? source.months[index + 1] ?? {};
+      const parts = [
+        Array.isArray(month.keywords) && month.keywords.length ? `关键词：${month.keywords.join('、')}` : '',
+        month.advice || '',
+        month.risk ? `需要留意：${month.risk}` : '',
+        month.monthlyNote || '',
+      ].filter(Boolean);
+      return {
+        position: `${index + 1}月`,
+        name: String(drawnCards[index]?.name || ''),
+        orientation: drawnCards[index]?.orientation === 'reversed' ? 'reversed' : 'upright',
+        meaning: parts.join(' '),
+      };
+    });
+    const themeParts = [
+      overview,
+      Array.isArray(source.yearWarnings) && source.yearWarnings.length
+        ? `全年提醒：${source.yearWarnings.join('；')}`
+        : '',
+      Array.isArray(source.actionList) && source.actionList.length
+        ? `行动建议：${source.actionList.join('；')}`
+        : '',
+    ].filter(Boolean);
+
+    return {
+      year,
+      summary: overview,
+      cards: [
+        ...monthlyCards,
+        {
+          position: '年度主题牌',
+          name: String(drawnCards[12]?.name || ''),
+          orientation: drawnCards[12]?.orientation === 'reversed' ? 'reversed' : 'upright',
+          meaning: themeParts.join('\n'),
+        },
+      ],
+    };
+  }
+
+  return undefined;
+};
+
 // 显示用的卡片类型
 interface ShuffledTarotCard {
   id: number;
@@ -157,6 +225,7 @@ const loadYearAheadResult = (year: string, cacheIdentity: string): YearAheadResu
     const result = JSON.parse(stored) as YearAheadResult;
     // 验证数据完整性
     if (result.cards && result.cards.length === 13 && result.year) {
+      result.result = normalizeYearAheadReading(result.result, result.cards, year);
       return result;
     }
     return null;
@@ -185,10 +254,14 @@ const saveYearAheadResult = (data: YearAheadResult, cacheIdentity: string): void
 
 const buildYearAheadResultFromHistory = (
   record: any,
-  year: string
+  year: string,
+  fallbackCards: YearAheadResult['cards'] = []
 ): YearAheadResult | null => {
-  const cards = Array.isArray(record?.cards) ? record.cards : null;
+  const cards = Array.isArray(record?.cards) ? record.cards : fallbackCards;
   if (!cards || cards.length !== 13) return null;
+
+  const normalizedResult = normalizeYearAheadReading(record?.reading_result, cards, year);
+  if (!normalizedResult) return null;
 
   return {
     userId: null,
@@ -197,7 +270,7 @@ const buildYearAheadResultFromHistory = (
       ...card,
       orientation: card.orientation === 'reversed' ? 'reversed' : 'upright',
     })),
-    result: record?.reading_result,
+    result: normalizedResult,
     createdAt: record?.created_at ? new Date(record.created_at).getTime() : Date.now(),
   };
 };
@@ -376,7 +449,7 @@ export default function YearAheadResultPage() {
     setSavedResult(result);
 
     // 如果没有解析结果，调用API生成
-    if (!result.result) {
+    if (!result.result || !Array.isArray(result.result.cards) || result.result.cards.length !== 13) {
       generateFortune(result, cacheIdentity);
     } else {
       setIsLoading(false);
@@ -420,7 +493,7 @@ export default function YearAheadResultPage() {
       const data = await response.json();
 
       if (data.existing && data.existingRecord) {
-        const existingResult = buildYearAheadResultFromHistory(data.existingRecord, currentYear);
+        const existingResult = buildYearAheadResultFromHistory(data.existingRecord, currentYear, result.cards);
         if (existingResult) {
           saveYearAheadResult(existingResult, cacheIdentity);
           setSavedResult(existingResult);
@@ -429,9 +502,14 @@ export default function YearAheadResultPage() {
       }
       
       // 更新结果并保存到localStorage
+      const normalizedResult = normalizeYearAheadReading(data, result.cards, currentYear);
+      if (!normalizedResult) {
+        throw new Error(isEn ? 'The yearly reading is incomplete. Please try again.' : '年度解读数据不完整，请稍后重试');
+      }
+
       const updatedResult: YearAheadResult = {
         ...result,
-        result: data,
+        result: normalizedResult,
       };
 
       saveYearAheadResult(updatedResult, cacheIdentity);
@@ -582,7 +660,7 @@ export default function YearAheadResultPage() {
                 <div className="flex items-center justify-center py-20">
                   <MagicalLoading isEn={isEn} />
                 </div>
-              ) : savedResult.result ? (
+              ) : savedResult.result && Array.isArray(savedResult.result.cards) && savedResult.result.cards.length === 13 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -604,7 +682,6 @@ export default function YearAheadResultPage() {
                       const card = savedResult.cards[index];
                       const isYearTheme = index === 12; // 第13张是年度主题牌
                       const localizedMeaning = getLocalizedMeaning(card, card.orientation, router.locale);
-                      const localizedKeywords = getLocalizedKeywords(card, card.orientation, router.locale);
                       
                       return (
                         <motion.div
@@ -662,18 +739,8 @@ export default function YearAheadResultPage() {
                                 {card.name}
                               </h3>
                               
-                              <div className="flex flex-wrap gap-2 mb-3">
-                                {localizedKeywords.map((keyword, kidx) => (
-                                  <span
-                                    key={kidx}
-                                    className="px-2 py-1 text-xs rounded-md bg-white/10 text-white/60 border border-white/10"
-                                  >
-                                    {keyword}
-                                  </span>
-                                ))}
-                              </div>
                               {localizedMeaning && (
-                                <div className="mb-4 rounded-xl border border-white/10 bg-black/15 p-4">
+                                <div className="mb-4">
                                   <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
                                     {texts.cardMeaning}
                                   </p>

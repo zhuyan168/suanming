@@ -50,13 +50,15 @@ export default async function handler(
 - 禁止使用绝对化承诺："一定/注定/百分百/无法改变"等绝对化措辞
 - 语气口语化，便于手机阅读
 - 不过度恐吓或夸张承诺
+- 像面对面聊天一样使用短句和常用词。避免只写“价值呈现、资源调配、协调性、需求脱节、转化闭环、情感连接、核心定位”等抽象词；如需表达，必须马上换成具体、易懂的现实场景
+- 对仅凭牌面不能确认的内容，使用“可能、比较像、建议留意、可以核对一下”等表达，不把推测写成事实
 
 【六芒星牌阵的特点】
 这是一个深度分析牌阵，从6个维度（过去、现在、未来、内在、外在、行动）剖析问题，第7张牌为"指引牌"，对整体局势进行总结与提醒。
 
 【输出要求】
-- overall: 200-350字，串联7张牌的整体脉络
-- 每张牌的meaning: 120-200字
+- overall: 400-600字，串联至少2组牌面关系，讲清过去、现在、内在、外在、行动和未来怎样互相影响
+- 每张牌的meaning: 180-260字，说明当前位置含义、现实中可能怎样表现、对问题的影响和可观察或调整之处
 - reminder: 40-60字，一句温柔的结尾提示
   - 有问题：根据用户问题给出贴合的鼓励（如：感情问题→相信自己的节奏；工作问题→每一步都在累积经验）
   - 无问题：通用鼓励，强调真正改变来自自己的选择与行动
@@ -84,16 +86,18 @@ export default async function handler(
 6 ${positionMeanings[5]}：${cards[5].name}（${cards[5].orientation === 'upright' ? '正位' : '逆位'}）
 7 ${positionMeanings[6]}：${cards[6].name}（${cards[6].orientation === 'upright' ? '正位' : '逆位'}）
 
+这是会员付费深度解读，不是简短摘要。cards 数组必须严格包含 index 1 到 7 的全部七项，一张都不能省略。每张牌的正逆位必须与输入完全一致，不能自行改变或同时解释两种方向。内容要充实，但不要重复凑字数。
+
 【严格输出以下 JSON 格式】
 {
-  "overall": "整体解读，必须围绕用户问题，串联7张牌的递进关系（200-350字）",
+  "overall": "整体解读，先直接回应用户问题，再串联至少2组牌面关系（400-600字）",
   "cards": [
     {
       "index": 1,
       "position": "${positionMeanings[0]}",
       "cardName": "中文牌名",
       "orientation": "正位/逆位",
-      "meaning": "针对该问题，这张牌在这个牌位上的解读（120-200字）"
+      "meaning": "针对问题说明当前位置含义、现实表现、影响和可观察之处（180-260字）"
     },
     {
       "index": 2,
@@ -161,16 +165,18 @@ export default async function handler(
 6 ${positionMeanings[5]}：${cards[5].name}（${cards[5].orientation === 'upright' ? '正位' : '逆位'}）
 7 ${positionMeanings[6]}：${cards[6].name}（${cards[6].orientation === 'upright' ? '正位' : '逆位'}）
 
+这是会员付费深度解读，不是简短摘要。cards 数组必须严格包含 index 1 到 7 的全部七项，一张都不能省略。每张牌的正逆位必须与输入完全一致，不能自行改变或同时解释两种方向。内容要充实，但不要重复凑字数。
+
 【严格输出以下 JSON 格式】
 {
-  "overall": "整体解读，描述当下能量趋势与7张牌的整体关系（200-350字）",
+  "overall": "整体解读，串联至少2组牌面关系，描述整体状态怎样发展（400-600字）",
   "cards": [
     {
       "index": 1,
       "position": "${positionMeanings[0]}",
       "cardName": "中文牌名",
       "orientation": "正位/逆位",
-      "meaning": "这张牌在这个牌位上的通用解读（120-200字）"
+      "meaning": "说明当前位置含义、可能出现的现实表现、影响和可观察之处（180-260字）"
     },
     {
       "index": 2,
@@ -224,7 +230,11 @@ export default async function handler(
 - 不要在 JSON 外输出任何文本`;
 
   try {
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    let reading: any = null;
+
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const retryReminder = attempt === 0 ? '' : '\n\n上一次输出不完整。请重新生成，并确认 cards 严格包含 index 1 到 7 的全部七项，正逆位与输入完全一致。';
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -234,9 +244,10 @@ export default async function handler(
         model: 'deepseek-chat',
         messages: [
           { role: 'system', content: withAiOutputLanguage(systemPrompt, isEn) },
-          { role: 'user', content: withAiOutputLanguage(userPrompt, isEn) },
+          { role: 'user', content: withAiOutputLanguage(`${userPrompt}${retryReminder}`, isEn) },
         ],
         temperature: 0.7,
+        max_tokens: 7000,
         response_format: { type: 'json_object' }
       }),
     });
@@ -246,11 +257,27 @@ export default async function handler(
       throw new Error(error.message || 'Failed to call DeepSeek API');
     }
 
-    const data = await response.json();
-    const content = data.choices[0].message.content;
-    
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+
+      try {
+        const parsed: any = parseAIJson(content);
+        const complete = Array.isArray(parsed?.cards)
+          && parsed.cards.length === 7
+          && parsed.cards.every((item: any, index: number) => Number(item?.index) === index + 1);
+        if (complete) {
+          reading = parsed;
+          break;
+        }
+        console.error('Incomplete hexagram reading:', { attempt: attempt + 1, cardCount: parsed?.cards?.length ?? 0 });
+      } catch (parseError: unknown) {
+        console.error('Invalid hexagram JSON:', parseError);
+      }
+    }
+
+    if (!reading) throw new Error('AI 返回的牌阵解读不完整，请重试');
+
     try {
-      const reading = parseAIJson(content);
       await recordSuccessfulReading({
         accessStatus,
         spreadType: 'hexagram',
@@ -261,13 +288,9 @@ export default async function handler(
         resultPath: '/reading/general/hexagram/reading',
       });
       return res.status(200).json(reading);
-    } catch (parseError: unknown) {
-      if (parseError instanceof AIJsonParseError) {
-        console.error('JSON parse error:', parseError.message);
-      } else {
-        console.error('Unexpected parse error:', parseError);
-      }
-      throw new Error('AI 返回的内容格式有误，请重试');
+    } catch (recordError: unknown) {
+      console.error('Failed to record hexagram reading:', recordError);
+      throw recordError;
     }
   } catch (error: any) {
     console.error('DeepSeek API Error:', error);

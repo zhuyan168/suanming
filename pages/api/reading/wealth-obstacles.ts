@@ -45,6 +45,7 @@ async function handler(
 3）不要出现“一定/注定/必然/肯定会/百分百/无法改变”等绝对化词语。
 4）整体概况 250-300 字；每张牌解析 200-250 字。
 5）解读尽量像朋友在分析现实问题：结合日常场景、行为习惯、选择成本、风险提醒；少用塔罗术语（例如“能量、宇宙、灵性指引”等）。
+6）cards 数组必须严格包含 position 1 到 5 的全部五项，一张都不能省略；正逆位必须与输入完全一致。
 
 牌位1：你当前的财务状况；牌：${cards[0].name}（${cards[0].orientation === 'upright' ? '正位' : '逆位'}）
 牌位2：影响你财务的外在因素；牌：${cards[1].name}（${cards[1].orientation === 'upright' ? '正位' : '逆位'}）
@@ -109,6 +110,7 @@ async function handler(
           { role: 'user', content: withAiOutputLanguage(userPrompt, isEn) },
         ],
         temperature: 0.7,
+        max_tokens: 4000,
         response_format: { type: 'json_object' }
       }),
     });
@@ -121,6 +123,12 @@ async function handler(
 
     const data = await response.json();
     const content = parseAIJson(data.choices[0].message.content);
+    const complete = Array.isArray(content?.cards)
+      && content.cards.length === 5
+      && content.cards.every((item: any, index: number) => Number(item?.position) === index + 1);
+    if (!complete) {
+      throw new Error('AI 返回的牌阵解读不完整，请重试');
+    }
 
     await recordSuccessfulReading({
       accessStatus,

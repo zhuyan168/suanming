@@ -8,7 +8,7 @@ import { tarotImagesFlat } from '../../../utils/tarotimages';
 import { useHistoryBack } from '../../../hooks/useHistoryBack';
 import { getAuthHeaders, getClientCacheIdentity } from '../../../lib/apiHeaders';
 import { useSpreadAccess } from '../../../hooks/useSpreadAccess';
-import { getLocalizedKeywords, getLocalizedMeaning } from '../../../lib/tarotCardI18n';
+import { getLocalizedMeaning } from '../../../lib/tarotCardI18n';
 
 // 获取当前季节
 const getCurrentSeason = (): string => {
@@ -399,7 +399,6 @@ export default function SeasonalResult() {
     if (!card) return null;
 
     const localizedMeaning = getLocalizedMeaning(card, card.orientation, router.locale);
-    const localizedKeywords = getLocalizedKeywords(card, card.orientation, router.locale);
 
     return (
       <div className="space-y-3">
@@ -407,21 +406,11 @@ export default function SeasonalResult() {
           {card.name} ({getOrientationText(card.orientation)})
         </p>
         {localizedMeaning && (
-          <div className="rounded-xl border border-white/10 bg-black/15 p-4">
+          <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-white/45 mb-2">
               {texts.cardMeaning}
             </p>
             <p className="text-sm text-white/75 leading-relaxed">{localizedMeaning}</p>
-            <div className="flex flex-wrap gap-2 mt-3">
-              {localizedKeywords.map((keyword) => (
-                <span
-                  key={keyword}
-                  className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
           </div>
         )}
       </div>
@@ -562,17 +551,17 @@ export default function SeasonalResult() {
                 >
                   {/* 本季核心能量 */}
                   <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 sm:p-8 backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
                       <span className="material-symbols-outlined text-primary text-3xl mt-1">
                         auto_awesome
                       </span>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-white">
                           {texts.slotOverall}
                         </h3>
-                        {renderCardMeta(cards[4], true)}
                       </div>
                     </div>
+                    <div className="mb-4">{renderCardMeta(cards[4], true)}</div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
                       {reading.coreEnergy}
                     </p>
@@ -580,17 +569,17 @@ export default function SeasonalResult() {
 
                   {/* 行动 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
                       <span className="material-symbols-outlined text-yellow-500 text-3xl mt-1">
                         bolt
                       </span>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-white">
                           {texts.slotAction}
                         </h3>
-                        {renderCardMeta(cards[0])}
                       </div>
                     </div>
+                    <div className="mb-4">{renderCardMeta(cards[0])}</div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
                       {reading.action}
                     </p>
@@ -598,17 +587,17 @@ export default function SeasonalResult() {
 
                   {/* 情感与人际关系 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
                       <span className="material-symbols-outlined text-pink-500 text-3xl mt-1">
                         favorite
                       </span>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-white">
                           {texts.slotEmotion}
                         </h3>
-                        {renderCardMeta(cards[1])}
                       </div>
                     </div>
+                    <div className="mb-4">{renderCardMeta(cards[1])}</div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
                       {reading.emotion}
                     </p>
@@ -616,17 +605,17 @@ export default function SeasonalResult() {
 
                   {/* 思维与计划 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
                       <span className="material-symbols-outlined text-blue-500 text-3xl mt-1">
                         psychology
                       </span>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-white">
                           {texts.slotMind}
                         </h3>
-                        {renderCardMeta(cards[2])}
                       </div>
                     </div>
+                    <div className="mb-4">{renderCardMeta(cards[2])}</div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
                       {reading.mind}
                     </p>
@@ -634,17 +623,17 @@ export default function SeasonalResult() {
 
                   {/* 事业与财运 */}
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-4">
+                    <div className="flex items-start gap-3 mb-3">
                       <span className="material-symbols-outlined text-green-500 text-3xl mt-1">
                         account_balance_wallet
                       </span>
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">
+                        <h3 className="text-2xl font-bold text-white">
                           {texts.slotWealth}
                         </h3>
-                        {renderCardMeta(cards[3])}
                       </div>
                     </div>
+                    <div className="mb-4">{renderCardMeta(cards[3])}</div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">
                       {reading.material}
                     </p>

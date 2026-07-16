@@ -73,6 +73,7 @@ ${cardsInfo}
 - 严禁使用“注定、一定、绝对、肯定”等词。
 - 严禁出现“你觉得值得吗”、“快离开吧”、“坚持就是胜利”等任何引导性结论。
 - 减少感叹号的使用，语气要温和且客观。
+- cardDetails 必须严格包含上面 7 个牌位，一项都不能省略，顺序必须一致；牌名和正逆位必须与输入一致。
 - 仅输出 JSON。`;
 
   try {
@@ -89,6 +90,7 @@ ${cardsInfo}
           { role: 'user', content: withAiOutputLanguage(userPrompt, isEn) }
         ],
         temperature: 0.7,
+        max_tokens: 5000,
         response_format: { type: 'json_object' }
       })
     });
@@ -102,6 +104,9 @@ ${cardsInfo}
     
     // 解析并简单脱敏确定性词汇
     let result = parseAIJson<any>(content);
+    if (!Array.isArray(result?.cardDetails) || result.cardDetails.length !== 7) {
+      throw new Error('AI 返回的牌阵解读不完整，请重试');
+    }
     const soften = (text: string) => {
         if (!text) return text;
         return text
