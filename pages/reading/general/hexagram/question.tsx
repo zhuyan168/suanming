@@ -24,11 +24,13 @@ export default function HexagramQuestionPage() {
     metaDesc: isEn ? 'Enter your question and let the Hexagram Spread map the forces at play.' : '输入你的问题，让六芒星牌阵帮你梳理局势与方向',
     back: isEn ? 'Back' : '返回',
     spreadName: isEn ? 'Hexagram Spread' : '六芒星牌阵',
-    subtitle: isEn ? 'Enter your question (optional) and let the spread help you see the full picture.' : '可输入你的问题（可选），让牌阵帮你梳理局势与方向',
+    subtitle: isEn ? 'When a situation involves too many connected factors for a quick reading, this spread helps you examine it in greater depth.' : '一件事牵扯很多因素，简单看一下已经不够了？可以用这个牌阵深入梳理。',
     questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
     placeholder: isEn ? 'e.g. How is this situation likely to develop? / How should I approach this challenge?' : '例如：目前这个项目的发展局面如何？ / 我该如何应对当前的复杂状况？',
     aboutTitle: isEn ? 'About the Hexagram Spread' : '关于六芒星牌阵',
-    aboutDesc: isEn ? 'The Hexagram Spread uses 6 outer cards and 1 central Guide Card to explore a situation from multiple angles.' : '六芒星牌阵由外围6张牌和中心1张指引牌组成，能够从多个维度全面解读复杂局面。',
+    aboutDesc: isEn ? 'The seven cards trace the situation through its past, present, and possible future, then explore your inner state, outside influences, and possible actions. A final guidance card brings the whole picture together.' : '七张牌会从过去、现在和未来梳理事情的发展，再分别分析你的内心状态、外部环境和可以采取的行动，最后用一张指引牌把整个局势串联起来。',
+    valueDesc: isEn ? 'This spread is designed for one question influenced by several connected factors. Unlike a free three-card reading that gives a quick overview, it breaks down the background, inner thoughts, outside influences, and possible next steps so you can understand why the situation developed this way and where adjustment may begin.' : '它适合一个问题同时受到多种因素影响的情况。相比免费三张牌，它不只给你一个大致方向，而是把问题的前因后果、内在想法和外部影响逐层拆开，帮助你理解事情为什么会变成现在这样，以及接下来可以从哪里开始调整。',
+    choiceHint: isEn ? 'If you only need a quick overview, the Three-Card Universal Spread may be enough. If you are comparing two clear options, the Two Choices Spread will be a better fit.' : '如果你只是想快速看看大致情况，三张牌万能牌阵就够了；如果你面对的是两个明确选项，二选一牌阵会更合适。',
     pos1: isEn ? 'Past: root of the issue' : '过去：问题的根源',
     pos2: isEn ? 'Present: the true state of things' : '现在：问题的真实状态',
     pos3: isEn ? 'Future: how things may develop' : '未来：问题的发展趋势',
@@ -254,6 +256,8 @@ export default function HexagramQuestionPage() {
                 <p className="mt-4 text-primary/90">
                   {texts.guideCardNote}
                 </p>
+                <p className="mt-4 text-white/80">{texts.valueDesc}</p>
+                <p className="mt-3 text-white/55">{texts.choiceHint}</p>
               </div>
             </motion.div>
 

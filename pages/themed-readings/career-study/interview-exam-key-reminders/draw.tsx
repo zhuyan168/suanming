@@ -176,12 +176,15 @@ export default function InterviewExamDraw() {
     ? {
         loading: 'Loading...',
         pageTitle: 'What Should I Watch For in This Interview or Exam?',
-        metaDescription: 'See the key focus, what may be easy to miss, and what you can prepare in advance.',
+        metaDescription: 'Find your strengths, blind spots, and the most useful last-minute preparation for an interview or exam.',
         back: 'Back',
         reset: 'Reset',
         title: 'What Should I Watch For in This Interview or Exam?',
         descDrawn: 'Card draw complete. Continue to start the deeper reading.',
-        descStart: 'See the key focus, what may be easy to miss, and what you can prepare in advance. Draw 5 cards from the deck below.',
+        descStart: 'An interview or exam is coming up, but you are unsure what to focus on in the final stretch?',
+        detail: 'Five cards look at what currently makes you uncertain, the advantage you can use, the overall momentum, what may affect your performance, and what you can actively prepare next.',
+        value: 'It turns vague nerves into a short preparation checklist, so you know what to strengthen and what not to overlook before the day arrives.',
+        scope: 'This spread cannot predict an exact score, question, or hiring decision. Keep following official requirements and prepare your knowledge, examples, documents, timing, and rest in the real world.',
         drawnCount: 'Cards drawn:',
         startReading: 'Start Reading',
         note: '✨ See the focus, avoid blind spots, and prepare with clarity.',
@@ -190,12 +193,15 @@ export default function InterviewExamDraw() {
     : {
         loading: '加载中...',
         pageTitle: '这次面试或考试，我要注意什么？',
-        metaDescription: '看看重点在哪里、容易忽略什么，以及你可以提前准备的地方。',
+        metaDescription: '看看你的优势、盲点和最后阶段最值得准备的地方。',
         back: '返回',
         reset: '重置',
         title: '这次面试或考试，我要注意什么？',
         descDrawn: '抽牌已完成，点击下方按钮开始深度解读。',
-        descStart: '看看重点在哪里、容易忽略什么，以及你可以提前准备的地方。请从下方牌堆中抽取 5 张牌。',
+        descStart: '面试或考试快到了，心里没底，不知道最后阶段该重点补哪里？',
+        detail: '五张牌会看看你现在最不确定的地方、可以发挥的优势、事情目前的整体状态、可能影响你发挥的因素，以及接下来能够主动准备什么。',
+        value: '它会把模糊的紧张感整理成一份准备重点，让你知道该加强什么、临场前别漏掉什么。',
+        scope: '这个牌阵不能预测准确分数、具体题目或录取结果。请继续按照官方要求，认真准备知识、案例、材料、时间安排和休息。',
         drawnCount: '已抽牌：',
         startReading: '开始解读',
         note: '✨ 看清重点、避开盲区，提前做好准备',
@@ -348,6 +354,12 @@ export default function InterviewExamDraw() {
                 {hasDrawn ? text.descDrawn : text.descStart}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

@@ -238,7 +238,10 @@ export default function YearAheadFortune() {
     drawnTitle: (year: string) => isEn ? `${year} Yearly Fortune — Cards Drawn` : `${year}年度运势已抽取`,
     notDrawnTitle: isEn ? 'Draw Your Yearly Tarot Cards' : '抽取年度塔罗牌',
     drawnSubtitle: (year: string) => isEn ? `You've completed your ${year} yearly fortune draw. View your full monthly guidance below.` : `你已抽取${year}年的年度运势，点击下方按钮查看详细月度指引。`,
-    notDrawnSubtitle: isEn ? 'Breathe and center yourself, then choose 13 cards from the 78 below to reveal your year ahead.' : '静心感受，从下方78张牌中选择13张，揭示未来一年的运势。',
+    notDrawnSubtitle: isEn ? 'Want to see the rhythm of the year ahead before planning its important stages?' : '想提前看清未来一年的整体节奏，再安排重要阶段？',
+    introDetail: isEn ? 'Thirteen cards reveal the year\'s central theme first, then examine the focus, opportunities, and reminders for each of the twelve months.' : '十三张牌会先揭示年度核心主题，再逐月分析十二个月的重点、机会与提醒。',
+    introValue: isEn ? 'It does more than label the year as good or bad: it helps you notice which months may favor progress, adjustment, patience, or a fresh plan.' : '它不只是判断这一年“好不好”，而是帮助你看见哪些月份适合推进、调整、等待或重新规划。',
+    introScope: isEn ? 'Yearly fortune shows a possible route based on your current state, not fixed events for every month. Your choices and actions can still change what follows. One draw is available each year.' : '年度运势展示的是按照目前状态发展下去的一条可能路线，不代表每个月都会发生固定事件。你的选择和行动仍然会改变后续发展，每年只能抽取一次。',
     drawnCount: (n: number) => isEn ? `Cards drawn: ${n} / 13` : `已抽牌：${n} / 13`,
     viewReading: isEn ? 'View Reading' : '查看运势',
     oncePer: isEn ? '✨ You can draw one yearly reading per year. Come back next year!' : '✨ 每年只能抽取一次，明年再来吧',
@@ -494,6 +497,12 @@ export default function YearAheadFortune() {
                   {hasDrawnThisYear ? texts.drawnSubtitle(currentYear) : texts.notDrawnSubtitle}
                 </p>
               </div>
+
+              {!hasDrawnThisYear && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{texts.introDetail}</p><p className="mt-3">{texts.introValue}</p><p className="mt-3 text-white/55">{texts.introScope}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {showCards && !hasDrawnThisYear && (

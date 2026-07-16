@@ -21,21 +21,22 @@ export default function JiaoBeiPage() {
         pageTitle: 'Jiaobei Oracle - FateAura',
         backHome: 'Back Home',
         badge: 'Jiaobei Oracle',
-        heading: 'Ask with Jiaobei',
+        heading: 'Have One Specific Matter and Want to Ask Whether It Is Suitable?',
         intro1:
-          'Jiaobei, also known as moon block divination, is a traditional way to seek symbolic guidance.',
+          'Jiaobei is best for confirming one clear matter, such as whether now is a suitable time to act or whether a specific decision is appropriate.',
         intro2:
-          'Hold your question in mind, then cast the two blocks. Their paired positions reveal the answer.',
+          'Ask one matter at a time and make the question specific before casting the two moon blocks.',
         shengTitle: 'Sheng Jiao',
-        shengDesc: 'One flat and one round side: a positive sign.',
+        shengDesc: 'One flat and one round side: agreement, permission, or a suitable sign.',
         xiaoTitle: 'Xiao Jiao',
-        xiaoDesc: 'Two round sides: the answer is unclear.',
+        xiaoDesc: 'Two round sides: the question may be unclear or the timing is not yet settled. Refine it before asking again.',
         yinTitle: 'Yin Jiao',
-        yinDesc: 'Two flat sides: a negative or unsuitable sign.',
+        yinDesc: 'Two flat sides: disagreement, not recommended, or not suitable at this time.',
         questionLabel: 'Your question (optional)',
         questionPlaceholder:
-          'Hold your question in mind before casting, or enter it here for a more personal reading...',
-        questionHint: 'Enter a question to receive a personalized AI interpretation',
+          'For example: Is it suitable for me to accept this offer now? Is it appropriate to contact them this week?',
+        questionHint: 'Ask one specific matter that can be answered directly',
+        usageNote: 'Not suitable for open-ended questions such as “What will my future be like?” or for combining two questions at once. For health, legal, or financial decisions, rely on real information and qualified professional advice.',
         processing: 'The oracle is responding...',
         casting: 'Casting...',
         start: 'Cast Jiaobei',
@@ -45,18 +46,19 @@ export default function JiaoBeiPage() {
         pageTitle: '掷筊占卜 - FateAura',
         backHome: '返回首页',
         badge: '掷筊占卜',
-        heading: '掷筊 · 问神明',
-        intro1: '掷筊，又称问筊，是传统民俗中与神明沟通的方式。',
-        intro2: '人们在心中默念问题后，掷出两块圣杯，通过杯面朝向来判断神明的回应。',
+        heading: '心里有一件具体的事，想问问是否合适？',
+        intro1: '掷筊适合确认一件明确的事情，例如现在是否适合行动，或某个具体决定是否合适。',
+        intro2: '请一次只问一件事，并在掷出两块筊杯前，把问题想得具体、清楚一些。',
         shengTitle: '圣筊',
-        shengDesc: '一正一反，表示允准',
+        shengDesc: '一正一反，表示同意、可以或事情较为合适',
         xiaoTitle: '笑筊',
-        xiaoDesc: '两反，神明含笑未答',
+        xiaoDesc: '两反，表示问题还不够清楚，或目前时机未明；可以整理问题后再问',
         yinTitle: '阴筊',
-        yinDesc: '两正，表示否定或不宜',
+        yinDesc: '两正，表示不同意、不建议，或目前不适合进行',
         questionLabel: '你的问题（可选）',
-        questionPlaceholder: '在心中默念问题后开始掷筊，也可以在此输入问题获得更详细的解读...',
-        questionHint: '输入问题可获得 AI 个性化解读',
+        questionPlaceholder: '例如：我现在适合接受这个工作机会吗？这周主动联系 TA 合适吗？',
+        questionHint: '请一次只问一件可以直接回答的具体事情',
+        usageNote: '不适合询问“我的未来会怎样”这类开放式问题，也不要把两个问题放在一起。涉及健康、法律或财务等重要决定时，请以现实信息和专业意见为准。',
         processing: '神明正在回应...',
         casting: '掷筊中...',
         start: '开始掷筊',
@@ -230,6 +232,7 @@ export default function JiaoBeiPage() {
                         <span>{text.questionHint}</span>
                         <span>{question.length}/100</span>
                       </div>
+                      <p className="mt-4 text-xs leading-relaxed text-white/45">{text.usageNote}</p>
                     </div>
                   </div>
                 )}

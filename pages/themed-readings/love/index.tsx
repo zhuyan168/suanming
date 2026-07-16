@@ -28,8 +28,8 @@ export default function LoveThemePage() {
   }
 
   const orderedSpreads = [
-    ...themeConfig.spreads.filter((spread) => spread.id === 'reconciliation'),
-    ...themeConfig.spreads.filter((spread) => spread.id !== 'reconciliation'),
+    ...themeConfig.spreads.filter((spread) => spread.access === 'free'),
+    ...themeConfig.spreads.filter((spread) => spread.access !== 'free'),
   ];
 
   return (

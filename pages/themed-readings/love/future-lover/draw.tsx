@@ -174,14 +174,20 @@ export default function FutureLoverDraw() {
     ? {
         loading: 'Loading...',
         pageTitle: 'Where Is My Future Lover? - Draw Cards',
-        metaDescription: 'Explore how you may meet them and how this connection may come closer.',
+        metaDescription: 'No specific person in mind, but curious about your next relationship? Explore how this connection may enter your life.',
         back: 'Back',
         reset: 'Reset',
         completedTitle: 'Where Is My Future Lover? - Complete',
         drawTitle: 'Draw Six Tarot Cards',
         completedDescription: 'Your cards are ready. Continue to view the full reading.',
         drawDescription:
-          'Take a quiet moment, then choose 6 cards to explore how you may meet them and how this connection may come closer.',
+          'No specific person has appeared yet, but curious about how your next relationship may enter your life?',
+        detail:
+          'The six cards begin with your overall romantic energy, then explore what your future partner may be like, whether they may already be somewhere in your life, what could be blocking the connection, and how the relationship may naturally develop.',
+        value:
+          'The final card offers practical guidance on what you can adjust or do to become more open to a suitable connection.',
+        scope:
+          'This spread does not predict an exact name, place, or date. It helps you notice possible traits, signs of connection, and ways the relationship may come closer. If you already have a specific person in mind, “How Do They See Me?” will be a better fit.',
         drawnCount: 'Cards drawn:',
         viewReading: 'View Reading',
         completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
@@ -190,13 +196,16 @@ export default function FutureLoverDraw() {
     : {
         loading: '加载中...',
         pageTitle: '我未来的恋人在哪里？- 抽牌',
-        metaDescription: '看看你可能如何遇见 TA，以及这段缘分会以什么方式靠近。',
+        metaDescription: '还没有明确的对象，但想知道下一段缘分可能怎么靠近？看看未来对象与相遇路径。',
         back: '返回',
         reset: '重置',
         completedTitle: '我未来的恋人在哪里？- 已完成',
         drawTitle: '抽取六张塔罗牌',
         completedDescription: '你已完成抽牌，点击下方按钮查看详细解读。',
-        drawDescription: '静心感受，从下方78张牌中选择6张，探索你的未来恋人与相遇路径。',
+        drawDescription: '还没有遇到明确的对象，但想看看下一段缘分可能怎么出现？',
+        detail: '六张牌会从你的整体感情状态开始，看看未来对象可能是什么类型、是否已经出现在你的生活圈里、目前有什么因素阻碍你们靠近，以及这段关系可能的相处方式。',
+        value: '最后一张牌会给出行动和状态上的建议，帮助你知道可以主动调整什么，让自己更容易遇见一段适合的关系。',
+        scope: '这个牌阵不会告诉你对方的准确姓名、地点或出现日期，而是帮助你识别可能的特征、相遇信号和靠近方式。如果你已经有一个明确在意的人，“TA怎么看我”会更适合。',
         drawnCount: '已抽牌：',
         viewReading: '查看解读',
         completedNote: '✨ 已完成抽牌，可随时重新占卜',
@@ -416,6 +425,14 @@ export default function FutureLoverDraw() {
                     : text.drawDescription}
                 </p>
               </div>
+
+              {!hasDrawn && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{text.detail}</p>
+                  <p className="mt-3">{text.value}</p>
+                  <p className="mt-3 text-white/55">{text.scope}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {showCards && !hasDrawn && (

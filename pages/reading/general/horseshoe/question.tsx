@@ -24,16 +24,19 @@ export default function HorseshoeQuestionPage() {
     metaDesc: isEn ? 'Enter your question for a focused Horseshoe Spread reading.' : '输入你的问题，获得更精准的塔罗占卜解读',
     back: isEn ? 'Back' : '返回',
     spreadName: isEn ? 'Horseshoe Spread' : '马蹄铁牌阵',
-    subtitle: isEn ? 'Trace the journey of an unfolding situation and find the key turning point.' : '梳理事件的来龙去脉与发展轨迹，找到关键转折点',
+    subtitle: isEn ? 'Want to understand how a situation reached this point and where it may go next? This spread is designed for that journey.' : '想知道一件事为什么会走到现在，以及接下来可能怎么发展？可以选这个牌阵。',
     questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
     placeholder: isEn ? 'e.g. If nothing changes, how might this situation unfold?' : '例如：如果我什么都不改变，事情接下来可能会怎么发展？',
     aboutTitle: isEn ? 'About the Horseshoe Spread' : '关于马蹄铁牌阵',
     aboutPara1: isEn
-      ? 'The Horseshoe Spread is ideal for tracing an evolving situation.\nIt doesn\'t just give you a conclusion — it helps you see how things got here, what\'s truly driving the situation now, and where things may head if nothing changes.'
-      : '马蹄铁牌阵适合用来梳理一件正在发展的事情。\n它不会只给你一个结论，而是帮助你看清事情是如何一步步走到现在的、当前真正起作用的因素是什么，以及在不做改变的情况下，事情可能会朝哪个方向继续发展。',
+      ? 'The seven cards follow the development of the situation through past influences, the present state, hidden factors, the main obstacle, potential developments, practical guidance, and a possible outcome.'
+      : '七张牌会沿着事情的发展过程，依次分析过去的影响、现在的状态、还没注意到的因素、主要阻碍、潜在变化、行动建议和可能的结果。',
     aboutPara2: isEn
-      ? 'If the situation feels complicated or tangled and you can\'t quite pinpoint the issue,\nthe Horseshoe Spread can break it down and help you see where you truly stand.'
-      : '如果你感到局势复杂、线索交织，却又说不清问题出在哪里，\n马蹄铁牌阵可以帮你把过程拆解开来，让你更清楚自己正站在什么位置。',
+      ? 'Unlike a free three-card reading that gives a quick overview, this spread follows the situation from its background through its possible next stage. It helps reveal unseen influences, the obstacle that matters most, and what action may improve the direction.'
+      : '相比免费三张牌，它不只是简单告诉你目前怎么样，而是把一件事从起因、现状一直梳理到后续发展。你会看到真正影响走向的隐藏因素、需要跨过的障碍，以及现在采取什么行动更有帮助。',
+    choiceHint: isEn
+      ? 'Choose the Hexagram Spread when you want to examine inner thoughts and outside influences from several angles. Choose the Horseshoe Spread when you care more about how the situation has developed and where it may be heading.'
+      : '如果你更想分析自己的想法、外部环境等多个因素，六芒星牌阵更合适；如果你更关心事情一路怎么发展、接下来会走向哪里，马蹄铁牌阵更适合。',
     disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
   };
   const [question, setQuestion] = useState('');
@@ -232,6 +235,7 @@ export default function HorseshoeQuestionPage() {
                 <div className="text-white/70 text-sm leading-relaxed space-y-3">
                   <p style={{ whiteSpace: 'pre-line' }}>{texts.aboutPara1}</p>
                   <p style={{ whiteSpace: 'pre-line' }}>{texts.aboutPara2}</p>
+                  <p className="text-white/55">{texts.choiceHint}</p>
                 </div>
               </div>
             </motion.div>

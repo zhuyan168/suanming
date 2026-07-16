@@ -243,14 +243,20 @@ export default function WhatTheyThinkDraw() {
     ? {
         loading: 'Loading...',
         pageTitle: 'How Do They See Me? - Draw Cards',
-        metaDescription: 'Explore their thoughts, feelings, and possible short-term direction toward you.',
+        metaDescription: 'Compare what they say, think, feel, and do, then explore the short-term direction of your connection.',
         back: 'Back',
         reset: 'Reset',
         completedTitle: 'How Do They See Me? - Complete',
         drawTitle: 'Draw Six Tarot Cards',
         completedDescription: 'Your cards are ready. Continue to look deeper into their inner world.',
         drawDescription:
-          'Take a quiet moment, then choose 6 cards to explore how they see you and where their attitude may be heading.',
+          'Have someone specific in mind, but cannot tell what they really feel about you?',
+        detail:
+          'Six cards compare what they say to you with what they truly think and feel, then look at the actions they are likely to take, outside influences, and the connection’s short-term direction.',
+        value:
+          'This helps you spot whether their words, feelings, and behavior are aligned, so you can judge the relationship by more than a single message or moment.',
+        scope:
+          'This spread reflects the current dynamic; it cannot prove another person’s private thoughts or promise what they will do. If your main question is whether the two of you can build a relationship, “Will We Be Together?” offers a fuller comparison of both sides.',
         drawnCount: 'Cards drawn:',
         viewReading: 'View Reading',
         completedNote: '✨ Card draw complete. You can reset and draw again at any time.',
@@ -259,13 +265,16 @@ export default function WhatTheyThinkDraw() {
     : {
         loading: '加载中...',
         pageTitle: 'TA 是怎么看我的？- 抽牌',
-        metaDescription: '看看对方对你的真实想法、感受，以及短期内可能的态度变化。',
+        metaDescription: '对照 TA 说出口的话、真实想法和实际行动，看看这段互动短期内会怎么变化。',
         back: '返回',
         reset: '重置',
         completedTitle: 'TA 是怎么看我的？- 已完成',
         drawTitle: '抽取六张塔罗牌',
         completedDescription: '牌已经就位，现在，让我们一起看看 TA 的内心。',
-        drawDescription: '静心感受，从下方78张牌中选择6张，看看 TA 是怎么看你的，以及接下来态度可能怎么变化。',
+        drawDescription: '心里已经有一个明确的人，但拿不准 TA 对你到底是什么感觉？',
+        detail: '六张牌会把 TA 对你说出口的态度、内心真正的想法和更深层的感受放在一起看，再对照 TA 可能采取的行动、外界影响和这段关系的短期变化。',
+        value: '你可以借此看清 TA 的话、感受和行动是否一致，不必只因为一句话或一次互动就反复猜测。',
+        scope: '这个牌阵反映的是目前的互动状态，不能证明对方未说出口的隐私，也不能保证 TA 一定会采取某种行动。如果你更想知道双方有没有机会建立关系，“我们会在一起吗？”会看得更完整。',
         drawnCount: '已抽牌：',
         viewReading: '查看解读',
         completedNote: '✨ 已完成抽牌，可随时重新占卜',
@@ -488,6 +497,14 @@ export default function WhatTheyThinkDraw() {
                     : text.drawDescription}
                 </p>
               </div>
+
+              {!hasDrawn && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{text.detail}</p>
+                  <p className="mt-3">{text.value}</p>
+                  <p className="mt-3 text-white/55">{text.scope}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {showCards && !hasDrawn && (

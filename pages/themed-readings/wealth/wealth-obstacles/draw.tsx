@@ -147,8 +147,17 @@ export default function WealthObstaclesDraw() {
     titleStart: isEn ? 'What Is Blocking My Money Flow?' : '是什么挡住了我的财运？',
     descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
     descStart: isEn
-      ? 'Explore what practical factors, habits, or mindset may be affecting your income, opportunities, and financial improvement. Draw 5 cards from the deck below.'
-      : '看看哪些现实因素、习惯或心态正在影响你的收入、机会和财务改善。请从下方牌堆中抽取 5 张牌。',
+      ? 'Income or savings are not improving, but you cannot tell what is really holding you back?'
+      : '收入或存款一直难有改善，却说不清到底卡在哪里？',
+    detail: isEn
+      ? 'Five cards begin with your current financial baseline, then separate external conditions from your own attitude toward money, identify the main obstacle, and explore a practical direction for moving through it.'
+      : '五张牌会先看你当前的财务基础，再把外在现实和你对金钱的态度分开分析，找出最核心的阻碍，以及可以从哪里开始突破。',
+    value: isEn
+      ? 'Compared with the free snapshot, this spread goes deeper into why improvement has stalled and connects the obstacle with an adjustment you can actually consider.'
+      : '与免费的财务速览相比，这个牌阵会更深入地解释为什么改善停滞，并把核心阻碍和可以考虑的调整方向联系起来。',
+    scope: isEn
+      ? 'Not every money problem comes from mindset; income, debt, caregiving, health, contracts, and the economy can all matter. This reading is not financial, tax, legal, or investment advice—verify the numbers and seek qualified help when needed.'
+      : '金钱问题并不都来自心态，收入、债务、家庭责任、健康、合同和经济环境都可能产生影响。本解读不构成财务、税务、法律或投资建议，请核对真实数字，并在需要时咨询专业人士。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
     note: isEn ? 'Find what may be slowing your money flow and where improvement can begin.' : '✨ 找到影响财运流动的原因，看清改善可以从哪里开始',
@@ -289,6 +298,12 @@ export default function WealthObstaclesDraw() {
                 {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-12">

@@ -801,7 +801,9 @@ export default function MonthlyBasicFortune() {
     headingDrawn: "This Month's Reading Has Been Drawn",
     headingDraw: 'Draw Three Tarot Cards',
     subtitleDrawn: 'Your monthly reading is ready. Tap below to view your full interpretation.',
-    subtitleDraw: 'Take a quiet moment and choose three cards to reveal this month\'s guidance.',
+    subtitleDraw: 'Want a quick look at this month before deciding what needs more attention?',
+    detail: 'Three cards show the month\'s main theme, the obstacle or influence to watch, and the direction worth following next.',
+    scope: 'This free reading is a monthly overview rather than a detailed analysis of every life area. It reflects the month\'s likely pattern, not fixed events or exact dates.',
     drawHint: (n: number) => `💫 Draw three cards one at a time (${n}/3)`,
     viewResult: 'View Monthly Reading',
     monthlyHint: '✨ One reading per month — come back next month for a new one.',
@@ -814,7 +816,9 @@ export default function MonthlyBasicFortune() {
     headingDrawn: '本月运势已抽取',
     headingDraw: '抽取三张塔罗牌',
     subtitleDrawn: '你已抽取本月运势，点击下方按钮查看详细解析。',
-    subtitleDraw: '静心感受，从下方卡牌中选择三张，揭示你本月的运势指引。',
+    subtitleDraw: '想先快速看看这个月整体顺不顺，以及重点应该放在哪里？',
+    detail: '三张牌会分析本月的主要状态、需要注意的阻力或影响，以及接下来值得把握的方向。',
+    scope: '免费版提供的是月度整体速览，不会把每个生活领域分别展开。结果反映本月可能出现的模式，不代表固定事件或准确日期。',
     drawHint: (n: number) => `💫 请依次抽取三张卡牌（${n}/3）`,
     viewResult: '查看本月解析',
     monthlyHint: '✨ 每月只能抽取一次，下个月再来吧',
@@ -1193,6 +1197,12 @@ export default function MonthlyBasicFortune() {
                   {hasDrawnThisMonth ? texts.subtitleDrawn : texts.subtitleDraw}
                 </p>
               </div>
+
+              {!hasDrawnThisMonth && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{texts.detail}</p><p className="mt-3 text-white/55">{texts.scope}</p>
+                </div>
+              )}
 
               {/* 卡片选择区域 */}
               <AnimatePresence>

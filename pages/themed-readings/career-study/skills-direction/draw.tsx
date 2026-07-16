@@ -178,7 +178,7 @@ export default function SkillsDirectionDraw() {
     ? {
         loading: 'Loading...',
         pageTitle: 'Which Direction Fits Me Best?',
-        metaDescription: 'Explore your strengths, current energy, and potential path for work, study, or growth.',
+        metaDescription: 'Use your goals, strengths, potential, and available support to narrow your next direction.',
         back: 'Back',
         reset: 'Reset',
         titleComplete: 'Which Direction Fits Me Best? - Complete',
@@ -186,7 +186,10 @@ export default function SkillsDirectionDraw() {
         titleStart: 'Which Direction Fits Me Best?',
         descComplete: 'Your cards are ready. Continue to view the detailed reading.',
         descDrawn: 'The cards are in place. Continue to start the deeper reading.',
-        descStart: 'Explore your strengths, current energy, and potential path for work, study, or growth. Draw 5 cards from the deck below.',
+        descStart: 'Too many choices and unsure what to study, pursue, or do next?',
+        detail: 'Five cards begin with the kind of work or growth you truly want, then explore the direction that may fit, the strengths you can rely on, support available to you, and what still needs development.',
+        value: 'The goal is to help you narrow your options and identify a practical next area to explore, rather than giving you one fixed job title.',
+        scope: 'This spread cannot measure your abilities or guarantee career success. Use it as a starting point, then compare the result with real interests, experience, training requirements, and job opportunities.',
         drawnCount: 'Cards drawn:',
         viewReading: 'View Reading',
         startReading: 'Start Reading',
@@ -197,7 +200,7 @@ export default function SkillsDirectionDraw() {
     : {
         loading: '加载中...',
         pageTitle: '我适合往哪个方向发展？',
-        metaDescription: '看看你的优势、状态和潜力，找到更适合你的工作、学习或成长方向。',
+        metaDescription: '从真实期待、优势潜力和可用资源出发，帮你缩小下一步发展方向。',
         back: '返回',
         reset: '重置',
         titleComplete: '我适合往哪个方向发展？- 已完成',
@@ -205,7 +208,10 @@ export default function SkillsDirectionDraw() {
         titleStart: '我适合往哪个方向发展？',
         descComplete: '你已完成抽牌，点击下方按钮查看详细解读。',
         descDrawn: '卡牌已就位，点击下方按钮开始深度解读。',
-        descStart: '看看你的优势、状态和潜力，找到更适合你的工作、学习或成长方向。请从下方牌堆中抽取 5 张牌。',
+        descStart: '选择太多，不知道该学什么、做什么，或者下一步往哪里走？',
+        detail: '五张牌会先看看你真正想要的工作或成长状态，再分析适合靠近的方向、你已经具备的优势、可以利用的资源，以及目前最需要补强的地方。',
+        value: '它的作用是帮你缩小选择范围，找到值得进一步尝试的方向，而不是直接给你一个固定的职业名称。',
+        scope: '这个牌阵不能替代能力测评，也不能保证某条路一定成功。得到方向后，还要结合你的兴趣、经验、学习门槛和真实就业机会继续验证。',
         drawnCount: '已抽牌：',
         viewReading: '查看解读',
         startReading: '开始解读',
@@ -363,6 +369,12 @@ export default function SkillsDirectionDraw() {
                 {hasReading ? text.descComplete : (hasDrawn ? text.descDrawn : text.descStart)}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

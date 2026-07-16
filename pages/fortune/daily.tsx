@@ -791,7 +791,9 @@ export default function DailyFortune() {
     sectionLabel: 'DAILY FORTUNE',
     headingDraw: 'Draw Your Daily Card',
     headingResult: "Today's Reading",
-    subtitleDraw: 'Take a quiet moment and choose one card from below to reveal today\'s guidance.',
+    subtitleDraw: 'Want to know where your attention is most useful today?',
+    introDetail: 'One card gives a short look at today\'s overall state, with reminders for love, career, money, wellbeing, and action.',
+    introScope: 'Daily fortune is designed for planning today, not for answering a complex question. It can be drawn only once each day.',
     subtitleResult: 'May this reading bring you clarity and light for the day ahead.',
     drawHint: '💫 One draw per day — choose with intention.',
     errorFetch: 'Failed to get your reading. Please try again.',
@@ -814,7 +816,9 @@ export default function DailyFortune() {
     sectionLabel: '每日运势',
     headingDraw: '抽取今日塔罗牌',
     headingResult: '今日运势解读',
-    subtitleDraw: '静心感受，从下方卡牌中选择一张，揭示你今天的运势指引。',
+    subtitleDraw: '想知道今天应该把注意力放在哪里？',
+    introDetail: '一张牌会结合今天的整体状态，给出感情、事业、金钱、身心状态和行动上的简短提醒。',
+    introScope: '每日运势适合安排当天重点，不适合回答一个复杂问题。每天只能抽取一次。',
     subtitleResult: '愿这份指引为你的今日带来光明与力量。',
     drawHint: '💫 每天只能抽取一次，请用心选择',
     errorFetch: '获取运势失败',
@@ -1203,6 +1207,12 @@ export default function DailyFortune() {
                   {showCards && !hasDrawnToday ? texts.subtitleDraw : texts.subtitleResult}
                 </p>
               </div>
+
+              {showCards && !hasDrawnToday && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{texts.introDetail}</p><p className="mt-3 text-white/55">{texts.introScope}</p>
+                </div>
+              )}
 
               {/* 卡片选择区域 */}
               <AnimatePresence>

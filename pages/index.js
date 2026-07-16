@@ -808,7 +808,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
         <header className="mb-8 flex flex-col gap-3 text-center">
           <p className="text-base font-semibold uppercase tracking-[0.35em] text-primary mb-2">{isEn ? 'Yes/No Tarot' : '是否塔罗'}</p>
           <h2 className="text-3xl font-black leading-tight tracking-tight">
-            {isEn ? 'Ask Quietly, Draw Your Guidance' : '静心提问，抽取你的指引'}
+            {isEn ? 'Have a Clear Question and Want a Quick Yes or No?' : '有一个明确问题，想快速看看答案更偏向“是”还是“否”？'}
           </h2>
         </header>
 
@@ -817,16 +817,28 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
             <div className="flex flex-col gap-3">
               <p className="text-sm text-white/90 leading-relaxed">
-                <span className="font-semibold text-primary">{isEn ? 'Reading tip: ' : '占卜建议：'}</span>
+                <span className="font-semibold text-primary">{isEn ? 'Best for: ' : '适合这样问：'}</span>
                 {isEn
-                  ? 'For the clearest guidance, ask the same question only once. Repeating the same reading can make the answer feel less clear.'
-                  : '为获得最准确的指引，同一个问题建议只问一次。重复占卜可能会让能量混乱，影响结果的准确性。'}
+                  ? 'Ask one specific question that can be answered with Yes or No, such as “Should I accept this offer?” or “Is now a good time to contact them?”'
+                  : '请提出一个可以直接回答“是”或“否”的具体问题，例如：“我该接受这个 Offer 吗？”“现在适合联系 TA 吗？”'}
+              </p>
+              <p className="text-sm text-white/80 leading-relaxed">
+                <span className="font-semibold text-primary">{isEn ? 'What you will get: ' : '你会得到什么：'}</span>
+                {isEn
+                  ? 'One card shows whether the answer is currently closer to Yes or No, and explains the message behind it.'
+                  : '一张牌会快速判断按照目前的情况，答案更接近“是”还是“否”，并解释这个答案背后的提醒。'}
               </p>
               <p className="text-sm text-white/70 leading-relaxed">
-                <span className="font-semibold text-primary">{isEn ? 'Question tip: ' : '提问技巧：'}</span>
+                <span className="font-semibold text-primary">{isEn ? 'Not suitable for: ' : '不适合这样问：'}</span>
                 {isEn
-                  ? 'Enter a question that can be answered with Yes or No, such as: Should I accept this new job offer? Will this relationship move forward?'
-                  : '请输入可以用 Yes 或 No 回答的问题，例如：我应该接受这个新的工作机会吗？我和他/她的关系会有进一步发展吗？'}
+                  ? 'Open-ended or complex questions such as “What will my future be like?” or “What do they really think?” need a more detailed spread.'
+                  : '“我的未来会怎样？”“TA 到底怎么想？”这类开放式或需要多角度分析的问题，更适合使用详细牌阵。'}
+              </p>
+              <p className="text-sm text-white/60 leading-relaxed">
+                <span className="font-semibold text-primary">{isEn ? 'Please note: ' : '结果提示：'}</span>
+                {isEn
+                  ? 'The answer is based on how the situation looks right now, not a fixed outcome. Your choices and later actions can still change what happens.'
+                  : '答案是根据目前的情况得出的，并不是已经注定的结果。你的选择和后续行动仍然可能改变事情的发展。'}
               </p>
             </div>
           </div>
@@ -843,7 +855,7 @@ const TarotReadingModal = ({ isOpen, onRequestClose }) => {
               maxLength={160}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              placeholder={isEn ? 'Hold your question in mind, take three deep breaths, then begin your reading...' : '请在心中默念你的问题，深呼吸三次后开始抽牌。也可以在此输入问题获得更详细的解读。'}
+              placeholder={isEn ? 'For example: Should I accept this offer? Is now a good time to contact them?' : '例如：我该接受这个 Offer 吗？现在适合联系 TA 吗？'}
             ></textarea>
             <div className="mt-2 flex items-center justify-between text-xs text-white/50">
               <span>{isEn ? 'Up to 160 characters' : '最多 160 字'}</span>

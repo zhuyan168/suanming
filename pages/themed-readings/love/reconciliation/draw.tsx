@@ -186,14 +186,17 @@ export default function ReconciliationDraw() {
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
     pageTitle: isEn ? 'Will We Get Back Together? - Draw Cards' : '我们还会复合吗？- 抽牌',
-    metaDescription: isEn ? 'Explore whether there is still room to reconnect and what needs to be faced.' : '看看彼此之间还有没有靠近的空间，以及复合需要面对什么。',
+    metaDescription: isEn ? 'Explore why you separated, how both sides feel about reconnecting, and what must change before reconciliation.' : '看看你们为什么走散、双方对复合的真实态度，以及重新靠近前必须面对什么。',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
     titleComplete: isEn ? 'Cards Drawn' : '抽牌已完成',
     titleStart: isEn ? 'Will We Get Back Together?' : '我们还会复合吗？',
     descComplete: isEn ? 'Your cards are ready. Continue to view the deep reading.' : '卡牌已就位，点击下方按钮开始深度解读。',
-    descStart: isEn ? 'Take a quiet moment with the past and present of this relationship, then draw 10 cards to see whether reconnection is still possible.' : '请静心感受这段关系的过去与现状，从下方牌堆中抽取 10 张牌，看看是否还有重新靠近的可能。',
+    descStart: isEn ? 'Separated, but unsure whether to wait, reach out again, or begin letting go?' : '已经分开，却还在犹豫要不要等、要不要重新联系？',
+    detail: isEn ? 'Ten cards examine why the relationship drifted apart, your current emotional state, your ex’s position, and how both of you truly feel about reconnecting. They also reveal the biggest obstacle, possible support or turning points, and an important factor you may have missed.' : '十张牌会拆开这段关系为什么走散、你现在卡在哪里、前任目前的立场，以及双方对复合的真实感受，也会看到最大的阻碍、可能出现的帮助或转机，还有你尚未注意到的重要因素。',
+    value: isEn ? 'The reading ends with the choice you need to make and a central piece of guidance, so the focus is not only “Will they come back?” but also “Would reconnecting be healthy, and what would need to change?”' : '解读最后会回到你真正需要做出的选择和核心提醒，不只问“TA 会不会回来”，也会看“重新开始是否健康，以及哪些问题必须改变”。',
+    scope: isEn ? 'This spread cannot guarantee reconciliation or replace an honest conversation and changed behavior. If you have not been in a relationship and are still exploring whether a connection can develop, “Will We Be Together?” is the better fit.' : '这个牌阵不能保证一定复合，也不能代替真实沟通和实际改变。如果你们并没有正式交往过，只是在了解一段关系能否发展，“我们会在一起吗？”更适合。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
     note: isEn ? 'Explore whether there is still room to reconnect, and what needs to be faced.' : '✨ 看看彼此之间还有没有靠近的空间，以及复合需要面对什么。',
@@ -366,6 +369,14 @@ export default function ReconciliationDraw() {
                 {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p>
+                <p className="mt-3">{text.value}</p>
+                <p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

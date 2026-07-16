@@ -221,7 +221,10 @@ export default function MonthlyMemberFortune() {
     h1Drawn: 'This Month\'s Reading is Complete',
     h1NotDrawn: 'Draw Seven Tarot Cards',
     subtitleDrawn: 'You\'ve completed this month\'s deep reading. Tap below to view your full guidance.',
-    subtitleNotDrawn: 'Quiet your mind and choose seven cards from below for your complete monthly guidance.',
+    subtitleNotDrawn: 'Want to plan the whole month instead of seeing only the general theme?',
+    detail: 'Seven cards examine your overall state, career, love, money, relationships, the shift near month-end, and a practical next step.',
+    value: 'Compared with the free overview, this paid reading separates the major areas of life so you can see where to act, prepare, or slow down.',
+    scope: 'The reading shows likely monthly patterns rather than guaranteed events, exact income, or fixed relationship outcomes. Your real choices still shape the month.',
     progressHint: (n: number) => `💫 Draw seven cards one by one (${n}/7)`,
     viewResult: 'View Deep Reading',
     monthlyLimit: '✨ This month\'s reading is complete. Come back next month for a new one.',
@@ -230,11 +233,14 @@ export default function MonthlyMemberFortune() {
     pageTitle: '会员版月运 - FateAura',
     loading: '加载中...',
     backBtn: '返回月度运势',
-    sectionLabel: '会员尊享月度运势',
+    sectionLabel: '付费月度运势深度解析',
     h1Drawn: '本月运势已抽取',
     h1NotDrawn: '抽取七张塔罗牌',
     subtitleDrawn: '你已抽取本月深度运势，点击下方按钮查看详细解析。',
-    subtitleNotDrawn: '静心感受，从下方卡牌中选择七张，获取全方位的月度指引。',
+    subtitleNotDrawn: '想提前规划整个月，而不只是看一个大概？',
+    detail: '七张牌会分别分析整体状态、事业、感情、金钱、人际关系、月底变化和行动建议。',
+    value: '与免费速览相比，付费版会把主要生活领域拆开，让你看清哪些地方适合推进、准备或暂时放慢。',
+    scope: '解读展示的是本月可能出现的模式，不代表必然事件、准确收入或固定的感情结果。你的现实选择仍然会影响这个月。',
     progressHint: (n: number) => `💫 请依次抽取七张卡牌（${n}/7）`,
     viewResult: '查看深度解析',
     monthlyLimit: '✨ 每月只能抽取一次，下个月再来吧',
@@ -493,6 +499,12 @@ export default function MonthlyMemberFortune() {
                   {hasDrawnThisMonth ? texts.subtitleDrawn : texts.subtitleNotDrawn}
                 </p>
               </div>
+
+              {!hasDrawnThisMonth && (
+                <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{texts.detail}</p><p className="mt-3">{texts.value}</p><p className="mt-3 text-white/55">{texts.scope}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {showCards && !hasDrawnThisMonth && (

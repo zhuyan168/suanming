@@ -144,7 +144,10 @@ export default function CurrentWealthStatusDraw() {
         titleComplete: 'How Is My Money Luck Right Now? - Complete',
         titleStart: 'How Is My Money Luck Right Now?',
         descComplete: 'The cards are in place. Continue to start the deeper reading.',
-        descStart: 'Look at your current money situation, key influences, and possible near-term financial direction. Draw 3 cards from the deck below.',
+        descStart: 'Money has felt uncertain lately and you want a quick look at what may be going on?',
+        detail: 'Three cards give you a simple financial snapshot: your current relationship with money, the main practical or personal factor influencing it, and the near-term direction if the present pattern continues.',
+        value: 'It is best when you want a quick overview before deciding whether one part of your finances needs a closer look.',
+        scope: 'This spread cannot predict an exact income, windfall, investment return, or date. Check your real balances, bills, debts, contracts, and budget before making any financial decision.',
         drawnCount: 'Cards drawn:',
         startReading: 'Start Reading',
         note: '✨ Look at your money situation, influences, and near-term direction.',
@@ -158,7 +161,10 @@ export default function CurrentWealthStatusDraw() {
         titleComplete: '我现在的财运怎么样？- 已完成',
         titleStart: '我现在的财运怎么样？',
         descComplete: '卡牌已就位，点击下方按钮开始深度解读。',
-        descStart: '看看你当前的金钱状态、影响因素，以及近期可能的财务走向。请从下方牌堆中抽取 3 张牌。',
+        descStart: '最近总觉得钱不太顺，想先快速看看可能出了什么问题？',
+        detail: '三张牌会做一次简单的财务速览：看看你现在与金钱的关系、正在产生主要影响的现实或个人因素，以及按照目前模式继续下去的近期趋势。',
+        value: '它适合先看一个大概，帮助你判断自己的哪一部分财务状况值得进一步检查。',
+        scope: '这个牌阵不能预测准确收入、横财、投资回报或发生日期。做任何财务决定前，请先核对真实的余额、账单、债务、合同和预算。',
         drawnCount: '已抽牌：',
         startReading: '开始解读',
         note: '✨ 看看你的金钱状态、影响因素和近期走向',
@@ -304,6 +310,12 @@ export default function CurrentWealthStatusDraw() {
                 {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-12">

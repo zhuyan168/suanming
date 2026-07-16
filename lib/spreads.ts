@@ -49,7 +49,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     access: 'free',
     icon: '🔮',
     legacyId: 'three-card-universal',
-    description: '适合还在犹豫、想先弄清自己现状的问题',
+    description: '不知道该选哪个牌阵时，就从这个开始。感情、工作、生活都能问，适合快速了解大致情况，但不会展开太多细节。',
   },
   {
     key: 'sacred-triangle',
@@ -61,7 +61,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     isPaid: false,
     access: 'free',
     icon: '🔺',
-    description: '适合已经开始行动、需要判断下一步的问题',
+    description: '已经知道自己在烦什么，却不知道问题出在哪、下一步该怎么办？这个牌阵会帮你找到卡点和可以调整的方向。',
   },
   {
     key: 'two-choices',
@@ -73,7 +73,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     isPaid: false,
     access: 'free',
     icon: '🔀',
-    description: '当你在 A / B 之间犹豫时，帮你看清差异与更合适的选择',
+    description: '两个选择各有好坏，怎么想都拿不定主意？这个牌阵会把 A、B 两条路分开来看，比较你可能经历什么，以及各自会怎样发展。',
   },
   {
     key: 'hexagram',
@@ -86,7 +86,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     access: 'member',
     icon: '🔯',
     legacyId: 'six-pointed-star',
-    description: '适合复杂局面与多因素交织的问题，给出更全面的洞察',
+    description: '一件事牵扯太多因素，越想越乱？这个牌阵会同时分析前因后果、你的真实想法、外部影响和可采取的行动，帮你把复杂局面拆开看清楚。',
   },
   {
     key: 'horseshoe',
@@ -98,7 +98,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     isPaid: false,
     access: 'member',
     icon: '🧲',
-    description: '梳理事件的来龙去脉与发展轨迹，找到关键转折点',
+    description: '一件事已经发展了一段时间，你想知道它为什么走到现在、接下来还会怎么变化？这个牌阵会梳理过去、现状、隐藏因素、阻碍和可能的结果。',
   },
   {
     key: 'celtic-cross',
@@ -110,7 +110,7 @@ export const SPREAD_LIST: SpreadMeta[] = [
     isPaid: true,
     access: 'member',
     icon: '✝️',
-    description: '适合人生级课题与深度探索，提供更完整的全景解读',
+    description: '面对一件重要又复杂的事，想把所有关键因素一次看全？十张牌会从现状、阻碍、过去、优势、内外影响，一直分析到后续走向。',
   },
 
   // ==================== 爱情主题 ====================

@@ -645,7 +645,8 @@ const tarotCards = [
 ];
 
 // 工具函数：从旧 URL 中提取文件名作为 key
-const getCardKeyFromUrl = (url: string) => {
+const getCardKeyFromUrl = (url?: string | null) => {
+  if (typeof url !== 'string' || !url) return null;
   const match = url.match(/\/([^/]+)\.png$/);
   return match ? match[1] : null;
 };
@@ -1406,13 +1407,26 @@ export default function SeasonalFortune() {
                       ? `You have drawn your ${getCurrentSeason(true)} fortune. Click below to view your reading.`
                       : `你已抽取${getCurrentSeason()}运势，点击下方按钮查看详细解析。`
                     : isEn
-                      ? `Explore the energy of action, emotion, mind, career, and overall fortune for ${getCurrentSeason(true)}.`
-                      : `探索你在${getCurrentSeason()}这三个月的行动力、情感、思维、事业与整体运势走向。`}
+                      ? `Want to understand how the next three months may unfold and where to place your energy?`
+                      : `想提前看看未来三个月会经历怎样的变化，以及精力应该放在哪里？`}
                 </p>
                 
                 {/* 节气提示和重要提醒 */}
                 {!hasDrawn ? (
                   <>
+                    <div className="max-w-3xl mx-auto mt-6 p-5 rounded-xl bg-primary/5 border border-primary/20 text-left">
+                      <p className="text-white/75 text-sm leading-relaxed">
+                        {isEn
+                          ? `Five cards explore ${getCurrentSeason(true)} through action, emotion, mindset, career, and the quarter's overall theme, helping you plan the rhythm of the next three months.`
+                          : `五张牌会从行动力、情感、思维、事业和季度整体主题展开，帮助你安排${getCurrentSeason()}这三个月的节奏。`}
+                      </p>
+                      <p className="mt-3 text-white/50 text-sm leading-relaxed">
+                        {isEn
+                          ? 'Seasonal fortune shows broad stages and priorities within the quarter; it does not predict the exact date of an event.'
+                          : '四季运势看的是一个季度内的整体阶段和重点，不会预测某件事情发生的准确日期。'}
+                      </p>
+                    </div>
+
                     {/* 重要提醒 */}
                     <div className="max-w-3xl mx-auto mt-6 p-5 rounded-xl bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 border-2 border-red-500/30">
                       <div className="flex items-start gap-3">

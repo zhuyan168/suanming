@@ -23,13 +23,13 @@ export default function CelticCrossQuestionPage() {
     metaDesc: isEn ? 'Enter your question and begin your Celtic Cross Spread deep reading.' : '输入你的问题，开启凯尔特十字牌阵的深度解读',
     back: isEn ? 'Back' : '返回',
     spreadName: isEn ? 'Celtic Cross Spread' : '凯尔特十字牌阵',
-    subtitle: isEn ? 'Ideal for mapping the full picture of a situation: present, obstacles, past, resources, near future, and your inner hopes and fears.' : '适合用来梳理一件事的全局：现状、阻碍、过去、资源、近期走向，以及你内在的期待与担忧。',
+    subtitle: isEn ? 'Is this situation too important and complex for a quick reading? The Celtic Cross helps you examine the complete picture.' : '这件事对你很重要，简单分析已经不够了？可以用凯尔特十字看完整局面。',
     questionLabel: isEn ? 'Your Question (Optional)' : '你的问题（可选）',
     placeholder: isEn ? 'e.g. What is my position and direction in this relationship? / What obstacles am I facing in my career right now?' : '例如：我在这段关系中的位置与未来走向是什么？ / 我目前的职业发展遇到了哪些阻碍？',
     aboutTitle: isEn ? 'About the Celtic Cross Spread' : '关于凯尔特十字牌阵',
-    aboutPara1: isEn ? 'The Celtic Cross is a classic deep-dive spread, ideal for fully exploring a complex or important situation.' : '凯尔特十字是一种经典的深度牌阵，适合用来全面梳理一件复杂或重要的事情。',
-    aboutPara2: isEn ? 'The spread unfolds layer by layer — from the present situation, obstacles, past, advantages, and near-term developments, to your inner hopes and fears — helping you see the full picture and your place within it.' : '牌阵将从现状、阻碍、过去、优势、近期发展，到你内在的期待与担忧，逐层展开，帮助你看清事情的整体脉络，以及自己在其中所处的位置。',
-    aboutNote: isEn ? '✨ If you\'re facing a difficult decision or a question that requires long-term reflection, the Celtic Cross is the right choice.' : '✨ 如果你正面对一个难以取舍、需要长期思考的问题，凯尔特十字会更适合你。',
+    aboutPara1: isEn ? 'The ten cards begin with the present situation and its main obstacle, then explore past influences, your available strengths, near-term developments, possible responses, the outside environment, and your deeper hopes and fears before bringing everything together into a possible direction.' : '十张牌会从事情的现状和主要阻碍开始，继续分析过去的影响、你拥有的优势、近期发展、可以采取的应对方式、外部环境，以及你内心真正的期待和担忧，最后整理出整个问题可能的发展走向。',
+    aboutPara2: isEn ? 'This is the most comprehensive general spread available. It looks beyond the situation itself to include your attitude, resources, concerns, and outside influences, helping you understand how the different parts connect and what actions may be worth considering.' : '这是通用牌阵中最完整的一种。它不只是分析事情本身，还会把你在这件事里的态度、资源、担忧和外部影响一起考虑，帮助你看见问题之间的联系，并得到更完整的行动参考。',
+    aboutNote: isEn ? 'A simple question does not need ten cards. Choose the Three-Card Universal Spread for a quick overview, the Hexagram Spread for several interacting factors, or the Horseshoe Spread for how a situation may develop over time. Choose the Celtic Cross when the issue is important, layered, and requires the fullest possible view.' : '如果问题比较简单，不需要使用十张牌。想快速了解情况，可以选择三张牌万能牌阵；想拆解多个影响因素，可以选择六芒星；想沿着时间看后续发展，可以选择马蹄铁；只有当问题重要、复杂，而且你想看完整全局时，才更适合凯尔特十字。',
     disclaimer: isEn ? '✨ Tarot is a tool for reflection, not a fixed prediction. Let this reading support your clarity, but always trust your own judgment and choices.' : '占卜仅呈现你当下的能量趋势，但真正能带来改变的，是你的选择与行动。',
   };
   const [question, setQuestion] = useState('');

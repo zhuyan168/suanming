@@ -175,8 +175,11 @@ export default function OfferDecisionDraw() {
   const text = isEn ? {
     title: 'Should I Take This Offer?',
     pageTitle: 'Should I Take This Offer? - FateAura',
-    description: 'Look at whether this opportunity fits you, and what growth, pressure, or cost may come with it.',
-    intro: 'Look at whether this opportunity fits you, and what growth, pressure, or cost may come with it. Draw 6 cards from the deck below.',
+    description: 'Assess an offer’s fit, growth, team dynamics, hidden costs, and possible alternatives.',
+    intro: 'Have an offer in hand, but cannot tell whether it is truly worth taking?',
+    detail: 'Six cards review how well the opportunity fits you, the growth it may offer, the people and collaboration style involved, what the employer or environment expects, and the risks or costs you should not ignore.',
+    value: 'The final card also looks beyond this offer, helping you consider whether it is your only option or whether other possibilities deserve time.',
+    scope: 'This spread cannot verify salary, contract terms, company stability, or legal risks. Before deciding, check the written offer, compensation, workload, location, probation terms, and any alternatives with real information.',
     completed: 'Cards drawn. Continue to review your spread.',
     back: 'Back',
     reset: 'Reset',
@@ -188,8 +191,11 @@ export default function OfferDecisionDraw() {
   } : {
     title: '这个 Offer 我该接吗？',
     pageTitle: '这个 Offer 我该接吗？',
-    description: '看看这个机会适不适合你，以及接受之后可能带来的成长、压力和代价。',
-    intro: '看看这个机会适不适合你，以及接受之后可能带来的成长、压力和代价。请从下方牌堆中抽取 6 张牌。',
+    description: '评估 Offer 的契合度、成长空间、团队环境、隐藏代价和其他可能。',
+    intro: 'Offer 已经摆在面前，却拿不准它到底值不值得接？',
+    detail: '六张牌会评估这个机会与你的契合程度、接受后的成长空间、需要面对的团队与协作方式、对方对你的真实期待，以及不能忽略的风险和代价。',
+    value: '最后还会把视线放到这个 Offer 之外，帮你判断它是不是唯一选择，还是值得再给其他机会一点时间。',
+    scope: '这个牌阵不能核实薪资、合同条款、公司稳定性或法律风险。决定前，请务必确认书面 Offer、薪酬、工作量、地点、试用期和其他真实选项。',
     completed: '抽牌已完成，请查看你的牌阵。',
     back: '返回',
     reset: '重置',
@@ -343,6 +349,12 @@ export default function OfferDecisionDraw() {
                 {hasDrawn ? text.completed : text.intro}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

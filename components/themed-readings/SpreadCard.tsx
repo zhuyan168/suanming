@@ -38,6 +38,8 @@ export default function SpreadCard({
 
   const title = isZh ? spread.titleZh : (spread.titleEn || spread.titleZh);
   const desc  = isZh ? spread.descZh  : (spread.descEn  || spread.descZh);
+  const tags = isZh ? spread.tagsZh : spread.tagsEn;
+  const dimensions = isZh ? spread.dimensionsZh : spread.dimensionsEn;
 
   const spreadAccess = spread.access ?? 'free';
   // Guest visitors can try member spreads during the trial, so only show the
@@ -158,10 +160,37 @@ export default function SpreadCard({
         </h3>
       </div>
 
+      {tags && tags.length > 0 && (
+        <div className="flex flex-wrap gap-2" aria-label={isZh ? '牌阵特点' : 'Reading features'}>
+          {tags.map((tag) => (
+            <span
+              key={tag.label}
+              className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary"
+            >
+              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
+                {tag.icon}
+              </span>
+              {tag.label}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* 描述 */}
       <p className="text-white/60 text-sm leading-relaxed flex-1">
         {desc}
       </p>
+
+      {dimensions && dimensions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/75">
+          {dimensions.map((dimension, index) => (
+            <span key={dimension} className="inline-flex items-center gap-2">
+              {index > 0 && <span className="text-primary/60" aria-hidden="true">·</span>}
+              <span>{dimension}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* 底部信息 */}
       <div className="flex items-center justify-end pt-4 border-t border-white/10">

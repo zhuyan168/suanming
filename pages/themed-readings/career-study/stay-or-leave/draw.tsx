@@ -183,13 +183,16 @@ export default function StayOrLeaveDraw() {
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
     pageTitle: isEn ? 'Should I Stay or Leave This Job? - Draw Cards | FateAura' : '这份工作，我该留下还是离开？- FateAura',
-    metaDescription: isEn ? 'Explore the meaning, exhaustion, turning points, and what to consider before leaving.' : '看看继续留下的意义、消耗、转机，以及离开前需要想清楚的事。',
+    metaDescription: isEn ? 'Review your workplace reality, relationships, growth space, and likely trend before deciding whether to stay or leave.' : '从职场现状、人际关系、成长空间和未来趋势判断这份工作是否还值得留下。',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
     title: isEn ? 'Should I Stay or Leave This Job?' : '这份工作，我该留下还是离开？',
     descComplete: isEn ? 'Cards drawn. Continue to view the deep reading.' : '抽牌已完成，点击下方按钮开始深度解读。',
-    descStart: isEn ? 'Explore the meaning, exhaustion, turning points, and what to consider before leaving. Draw 7 cards from the deck below.' : '看看继续留下的意义、消耗、转机，以及离开前需要想清楚的事。请从下方牌堆中抽取 7 张牌。',
+    descStart: isEn ? 'This job is draining you, but leaving feels risky and you are afraid of regretting it?' : '这份工作越来越消耗，但离开又有风险，你也怕以后后悔？',
+    detail: isEn ? 'Seven cards review your current work situation, your strengths and weaknesses in the role, how managers and coworkers may experience working with you, your remaining growth space, and the job’s likely direction.' : '七张牌会梳理你现在的工作状态、在这份岗位上的优势和短板、领导与同事对你的看法、还剩多少成长空间，以及这份工作的未来趋势。',
+    value: isEn ? 'This helps you separate a temporary difficult period from a role that may no longer support you, and see what evidence you still need before making a move.' : '它会帮你区分：现在只是暂时难熬，还是这份工作确实已经不再支持你，并看清做决定前还需要确认什么。',
+    scope: isEn ? 'This spread does not compare the concrete outcome of staying versus resigning, and it should not replace financial planning or a job search. Before leaving, review savings, benefits, notice requirements, health, family needs, and realistic alternatives.' : '这个牌阵不会精确比较“留下”和“辞职”两条路的结果，也不能替代财务规划和求职准备。离开前，请确认存款、福利、离职要求、身心状态、家庭责任和真实的新机会。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
     note: isEn ? 'See what staying costs, what leaving asks, and what choice fits you now.' : '✨ 看清留下的消耗、离开的代价，以及当下更适合你的选择',
@@ -345,6 +348,12 @@ export default function StayOrLeaveDraw() {
                 {hasDrawn ? text.descComplete : text.descStart}
               </p>
             </div>
+
+            {!hasDrawn && (
+              <div className="mb-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                <p>{text.detail}</p><p className="mt-3">{text.value}</p><p className="mt-3 text-white/55">{text.scope}</p>
+              </div>
+            )}
 
             {!hasDrawn && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>

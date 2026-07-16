@@ -260,14 +260,17 @@ export default function RelationshipDev8Draw() {
   const text = {
     loading: isEn ? 'Loading...' : '加载中...',
     pageTitle: isEn ? 'Will We Be Together? - Draw Cards' : '我们会在一起吗？- 抽牌',
-    metaDescription: isEn ? 'Look at the current state, obstacles, and possible next direction of this connection.' : '看看这段关系现在的状态、阻碍，以及接下来可能怎么发展。',
+    metaDescription: isEn ? 'Compare both sides of an unclear connection and explore where the relationship may be heading.' : '对照暧昧或拉扯中的双方状态，看看这段关系接下来可能怎么发展。',
     back: isEn ? 'Back' : '返回',
     reset: isEn ? 'Reset' : '重置',
     resetConfirm: isEn ? 'Are you sure you want to start over? Your current cards will be cleared.' : '确定要重新开始吗？当前结果将被清空。',
     completedTitle: isEn ? 'Will We Be Together? - Complete' : '我们会在一起吗？- 已完成',
     drawTitle: isEn ? 'Will We Be Together?' : '我们会在一起吗？',
     completedDescription: isEn ? 'Your cards are ready. Now let us look at where this connection may be going.' : '牌已经就位，现在，让我们看看这段关系接下来可能怎么走。',
-    drawDescription: isEn ? 'Take a quiet moment, then choose 8 cards to look at the current state, obstacles, and possible next direction of this connection.' : '静心感受，从下方78张牌中选择8张，看看这段关系现在的状态、阻碍，以及接下来可能怎么发展。',
+    drawDescription: isEn ? 'Talking, dating, or stuck in an unclear connection and wondering if it can become a relationship?' : '你们正在接触、暧昧或拉扯，想知道有没有机会真正走到一起？',
+    detail: isEn ? 'Eight cards compare the real you and the real them with how you see each other, then trace the connection through its past, present, and likely direction.' : '八张牌会对照真实的你和真实的 TA，以及你们眼中的彼此，再从过去、当下和未来走向梳理这段关系。',
+    value: isEn ? 'The final card focuses on your next step, helping you see what you can actually do instead of only waiting for an outcome.' : '最后一张牌会落到你的下一步，让你不只是等一个结果，也能看见自己现在可以怎么做。',
+    scope: isEn ? 'This spread shows the direction of the relationship if the current dynamic continues; it does not guarantee that you will become a couple. If the relationship has already ended and your question is about reconnecting, choose “Will We Get Back Together?” instead.' : '这个牌阵看的是按照目前互动继续下去，关系可能往哪里走，并不保证你们一定会成为恋人。如果你们已经正式分开，想问的是复合，请选择“我们还会复合吗？”。',
     drawnCount: isEn ? 'Cards drawn:' : '已抽牌：',
     startReading: isEn ? 'Start Reading' : '开始解读',
     viewReading: isEn ? 'View Reading' : '查看解读',
@@ -488,6 +491,14 @@ export default function RelationshipDev8Draw() {
                     : text.drawDescription}
                 </p>
               </div>
+
+              {!hasDrawn && (
+                <div className="mb-6 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6 text-white/75 leading-relaxed">
+                  <p>{text.detail}</p>
+                  <p className="mt-3">{text.value}</p>
+                  <p className="mt-3 text-white/55">{text.scope}</p>
+                </div>
+              )}
 
               <AnimatePresence>
                 {showCards && !hasDrawn && (

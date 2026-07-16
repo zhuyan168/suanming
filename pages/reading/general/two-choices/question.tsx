@@ -180,10 +180,20 @@ export default function TwoChoicesQuestionPage() {
               <h1 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight mb-6">
                 {t.question.h1}
               </h1>
-              <p className="text-white/70 text-lg">
+              <p className="mx-auto max-w-2xl text-white/70 text-base leading-relaxed">
                 {t.question.tagline}
               </p>
             </motion.div>
+
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-left"
+            >
+              <p className="text-sm leading-relaxed text-white/80">{t.question.detail}</p>
+              <p className="mt-3 text-sm leading-relaxed text-white/55">{t.question.scope}</p>
+            </motion.section>
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
